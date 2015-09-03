@@ -8,8 +8,8 @@ Installation
 ------------
 
 You don't.  At least, not yet.  The plan is to make it installable via
-Python's package manager (`pip`) at first, and then move onto more
-end-user-friendly tools like `apt`, `rpm`, and `emerge`.
+Python's package manager (``pip``) at first, and then move onto more
+end-user-friendly tools like ``apt``, ``rpm``, and ``emerge``.
 
 
 How Does it Work?
