@@ -1,3 +1,4 @@
+import importlib
 import os
 
 
@@ -17,9 +18,9 @@ class Report(object):
 
     @staticmethod
     def get_formatter(name):
-
-        if name == "ping":
-            from .ping import PingReport
-            return PingReport
-
-        raise NotImplemented()
+        return getattr(
+            importlib.import_module(
+                ".{}".format(name),
+                package="ripe.atlas.tools.reports"),
+            "{}Report".format(name.capitalize())
+        )
