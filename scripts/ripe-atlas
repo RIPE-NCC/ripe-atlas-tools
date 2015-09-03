@@ -1,3 +1,32 @@
 #!/usr/bin/env python
 
-print("There's nothing to see here yet.")
+import sys
+import os
+
+
+def main():
+
+    caller = os.path.basename(__file__)
+
+    arguments = sys.argv
+    if caller in ("aping", "atraceroute", "adig", "assl", "antp", "ahttp"):
+        arguments.insert(1, "create")
+    if caller == "aping":
+        arguments.insert(2, "--type=ping")
+
+    verb = arguments.pop(1)
+
+    try:
+
+        __import__(
+            "ripe.atlas.tools.commands." + verb,
+            globals(),
+            locals(),
+            [verb]
+        ).Command(arguments[2:]).run()
+
+    except ImportError as e:
+        print("No such command.")
+
+if __name__ == '__main__':
+    sys.exit(main())

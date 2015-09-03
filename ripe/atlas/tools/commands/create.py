@@ -1,26 +1,14 @@
 import json
-import urllib2
 import traceback
-from optparse import make_option
 
-from . import AtlasCommand
+from .base import Command as BaseCommand
 
 
-class Command(AtlasCommand):
+class Command(BaseCommand):
 
     help = "Create a new RIPE Atlas UDM."
     url_path = "/api/v1/measurement/?key=%s"
     post_data = {}
-    options = [
-        make_option(
-            "-f", "--file", type="string", dest="key_file",
-            help="File containing api key."
-        ),
-        make_option(
-            "-p", "--post_file", type="string", dest="post_data_file",
-            help="File containing post data."
-        ),
-    ]
 
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -37,8 +25,7 @@ class Command(AtlasCommand):
         """
         key = self.get_api_key()
         if not key:
-            print "You have to specify a valid API key."
-            self.safe_options = False
+            print("You have to specify a valid API key.")
             return
         self.url = "%s%s" % (self.server, self.url_path % key)
 
@@ -50,11 +37,11 @@ class Command(AtlasCommand):
                 return False
         else:
             try:
-                file_descriptor = open(self.parser_options.key_file, "r")
+                file_descriptor = open(self.parser_options.key_file)
                 key = file_descriptor.read().strip()
             except:
-                print traceback.format_exc()
-                print "Error while reading given API key file."
+                print(traceback.format_exc())
+                print("Error while reading given API key file.")
                 return False
 
         return key

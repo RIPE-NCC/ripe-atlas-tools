@@ -25,11 +25,12 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
         maintainer="The RIPE Atlas team",
         maintainer_email="atlas@ripe.net",
         install_requires=[
+            "ujson",
+            "ripe.atlas.cousteau",
             "ripe.atlas.sagan"
         ],
         tests_require=["nose"],
         extras_require={
-            "fast": ["ujson"],
             "doc": ["sphinx"]
         },
         test_suite="nose.collector",
@@ -40,11 +41,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
             "Operating System :: POSIX",
             "Operating System :: Unix",
             "Programming Language :: Python",
-            "Programming Language :: Python :: 2.6",
             "Programming Language :: Python :: 2.7",
-            "Programming Language :: Python :: 3.1",
-            "Programming Language :: Python :: 3.2",
-            "Programming Language :: Python :: 3.3",
             "Topic :: Internet :: WWW/HTTP",
         ],
     )
