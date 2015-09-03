@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 
-import sys
 import os
+import re
+import sys
 
 
 def main():
 
     caller = os.path.basename(__file__)
 
-    arguments = sys.argv
-    if caller in ("aping", "atraceroute", "adig", "assl", "antp", "ahttp"):
-        arguments.insert(1, "create")
-    if caller == "aping":
-        arguments.insert(2, "--type=ping")
+    args = []
+    kwargs = {}
 
-    verb = arguments.pop(1)
+    shortcut = re.match('^a(ping|traceroute|dig|ssl|ntp|http)$', caller)
+
+    if shortcut:
+        verb = "create"
+        kwargs["type"] = shortcut.group(1)
+    else:
+        verb = sys.argv.pop(1)
 
     try:
 
@@ -23,7 +27,7 @@ def main():
             globals(),
             locals(),
             [verb]
-        ).Command(arguments[2:]).run()
+        ).Command(*args, **kwargs).run()
 
     except ImportError as e:
         print("No such command.")
