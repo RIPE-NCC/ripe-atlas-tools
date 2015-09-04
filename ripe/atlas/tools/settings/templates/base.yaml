@@ -1,0 +1,44 @@
+#
+# This is the config file for the ripe-atlas command.  It follows the YAML
+# formatting standard found here: http://yaml.org/ -- but the layout should be
+# rather intuitive.
+#
+# Lines that start with "#" (like this one) are considered comments and
+# are ignored by the parser.  Beyond that, the configuration data is laid out
+# in a hierarchical fashion
+#
+#   section_name:
+#     variable_name: "some-value"
+#     some_other_variable_name: 123
+#     a_subsection:
+#       something: "something else"
+#
+# Where possible, we've commented this file to help you out, but you can also
+# use the ripe-atlas script to modify it for you.  Simply type:
+#
+#   $ ripe-atlas configure
+#
+# And the help text that appears will walk you through it.
+#
+# One good thing to put in here is your API key.  This makes it easy to
+# generate measurements quickly.  Defining your API key looks like this:
+#
+#   authorisation:
+#     create: "YOUR-API-KEY"
+#
+# Leaving this file empty won't hurt, but it will mean that you'll have to
+# use the --auth=YOUR-API-KEY flag every time you try to create a
+# measurement.
+#
+# What follows is a complete break down of all possible options, set initially
+# to their defaults.  If you wish to change a default, simply change the value
+# to whatever you like and save this file.
+#
+
+############################################################################
+
+# Authorisation
+{authorisation}
+
+# Measurement Creation
+{create}

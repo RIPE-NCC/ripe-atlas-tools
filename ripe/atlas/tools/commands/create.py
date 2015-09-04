@@ -1,5 +1,6 @@
 import json
 import traceback
+import urllib2
 
 from .base import Command as BaseCommand
 

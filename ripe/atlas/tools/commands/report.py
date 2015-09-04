@@ -15,10 +15,6 @@ class Command(BaseCommand):
         "latest": "/api/v2/measurements/{}/latest.json",
     }
 
-    def __init__(self, *args, **kwargs):
-
-        BaseCommand.__init__(self)
-
     def add_arguments(self):
         self.parser.add_argument(
             "measurement_id",

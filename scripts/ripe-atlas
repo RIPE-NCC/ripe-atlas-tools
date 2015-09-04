@@ -4,6 +4,9 @@ import os
 import re
 import sys
 
+from ripe.atlas.tools.exceptions import RipeAtlasToolsException
+from ripe.atlas.tools.commands import get_available_commands
+
 
 def main():
 
@@ -15,22 +18,32 @@ def main():
     shortcut = re.match('^a(ping|traceroute|dig|ssl|ntp|http)$', caller)
 
     if shortcut:
-        verb = "create"
+        command = "create"
         kwargs["type"] = shortcut.group(1)
     else:
-        verb = sys.argv.pop(1)
+        available_commands = get_available_commands()
+        if len(sys.argv) < 2:
+            raise RipeAtlasToolsException(
+                "Usage: ripe-atlas <{}> [arguments]".format(
+                    "|".join(available_commands)
+                )
+            )
+        command = sys.argv.pop(1)
 
     try:
 
         __import__(
-            "ripe.atlas.tools.commands." + verb,
+            "ripe.atlas.tools.commands." + command,
             globals(),
             locals(),
-            [verb]
+            [command]
         ).Command(*args, **kwargs).run()
 
-    except ImportError as e:
-        print("No such command.")
+    except ImportError:
+        raise RipeAtlasToolsException("No such command.")
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except RipeAtlasToolsException as e:
+        e.write()
