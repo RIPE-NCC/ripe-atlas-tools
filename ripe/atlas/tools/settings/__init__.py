@@ -19,18 +19,28 @@ class Configuration(object):
             "create": "",
         },
         "specification": {
+            "af": 6,
             "description": "",
             "source": {
-                "area": "WW",
-                "probes": 50,
+                "type": "area",
+                "value": "WW",
+                "requested": 50,
             },
             "is_oneoff": True,
             "types": {
-                "packets": 3,
-                "size": 48
+                "ping": {
+                    "packets": 3,
+                    "size": 48
+                },
+                "traceroute": {
+                    "protocol": "ICMP"
+                }
             }
         },
-        "version": 0,
+        "ripe-ncc": {
+            "endpoint": "https://atlas.ripe.net",
+            "version": 0,
+        }
     }
 
     def get(self):
@@ -56,11 +66,11 @@ class Configuration(object):
 
         authorisation = re.compile("^authorisation:$", re.MULTILINE)
         specification = re.compile("^specification:$", re.MULTILINE)
-        version = re.compile("^version:", re.MULTILINE)
+        ripe = re.compile("^ripe-ncc:$", re.MULTILINE)
 
         with open(template) as t:
-            payload = version.sub(
-                "\n# Don't mess with this, or Bad Things may happen\nversion:",
+            payload = ripe.sub(
+                "\n# Don't mess with these, or Bad Things may happen\nripe-ncc:",
                 authorisation.sub(
                     "# Authorisation\nauthorisation:",
                     specification.sub(
