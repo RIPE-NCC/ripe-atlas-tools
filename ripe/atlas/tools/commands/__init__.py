@@ -1,5 +1,5 @@
 import os
-import re
+import pkgutil
 
 
 def get_available_commands():
@@ -10,18 +10,9 @@ def get_available_commands():
     any files there, we add them to the list here.
     """
 
-    exclude = re.compile("^(__init__|base).pyc?$")
-    files = os.listdir(os.path.dirname(__file__))
+    paths = [os.path.dirname(__file__)]
+    if "HOME" in os.environ:
+        paths += [os.path.join(
+            os.environ["HOME"], ".config", "ripe-atlas-tools", "commands")]
 
-    # Standard modules
-    r = [re.sub("\.pyc?$", "", _) for _ in files if not exclude.match(_)]
-
-    if not "HOME" in os.environ:
-        return r
-
-    plugins = os.path.join(
-        os.environ["HOME"], ".config", "ripe-atlas-tools", "commands")
-    if os.path.exists(plugins):
-        r += [re.sub("\.pyc?$", "", _) for _ in plugins if not exclude.match(_)]
-
-    return r
+    return [package_name for _, package_name, _ in pkgutil.iter_modules(paths)]
