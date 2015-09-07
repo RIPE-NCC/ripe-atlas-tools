@@ -16,7 +16,7 @@
 # Where possible, we've commented this file to help you out, but you can also
 # use the ripe-atlas script to modify it for you.  Simply type:
 #
-#   $ ripe-atlas configure
+#   $ ripe-atlas configure --help
 #
 # And the help text that appears will walk you through it.
 #
