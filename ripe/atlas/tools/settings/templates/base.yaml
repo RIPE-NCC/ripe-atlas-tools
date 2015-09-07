@@ -37,8 +37,5 @@
 
 ############################################################################
 
-# Authorisation
-{authorisation}
+{payload}
 
-# Measurement Creation
-{create}

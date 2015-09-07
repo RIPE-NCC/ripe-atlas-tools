@@ -1,6 +1,7 @@
+import functools
 import os
-import yaml
 
+from ..exceptions import RipeAtlasToolsException
 from ..settings import Configuration, conf
 from .base import Command as BaseCommand
 
@@ -34,9 +35,13 @@ class Command(BaseCommand):
 
     def run(self):
 
-        if self.arguments.init or self.arguments.editor or self.arguments.set:
+        if not self.arguments.init:
+            if not self.arguments.editor:
+                if not self.arguments.set:
+                    raise RipeAtlasToolsException(
+                        "Run this with --help for more information")
 
-            self._create_if_necessary()
+        self._create_if_necessary()
 
         if self.arguments.editor:
             os.system("{} {}".format(self.EDITOR, Configuration.USER_RC))
@@ -46,7 +51,33 @@ class Command(BaseCommand):
                 "Configuration file writen to {}".format(Configuration.USER_RC))
 
         if self.arguments.set:
-            print(self.arguments.set)
+            if "=" not in self.arguments.set:
+                raise RipeAtlasToolsException(
+                    "Invalid format. Execute with --help for more information.")
+            path, value = self.arguments.set.split("=")
+            self.set(path.split("."), value)
+
+    def set(self, path, value):
+
+        try:
+            required_type = type(self._get_from_dict(conf, path))
+        except KeyError:
+            raise RipeAtlasToolsException(
+                'Invalid configuration key: "{}"'.format(".".join(path)))
+
+        if value.isdigit():
+            value = int(value)
+
+        if not isinstance(value, required_type):
+            raise RipeAtlasToolsException(
+                'Invalid configuration value: "{}".  You must supply a {} for this key'.format(
+                    value,
+                    required_type.__name__
+                ))
+
+        self._set_in_dict(conf, path, value)
+
+        Configuration.write(conf)
 
     @staticmethod
     def _create_if_necessary():
@@ -55,17 +86,30 @@ class Command(BaseCommand):
             return
 
         os.makedirs(Configuration.USER_CONFIG_DIR)
-        template = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "settings",
-            "templates",
-            "base.yaml"
-        )
-        with open(Configuration.USER_RC, "w") as rc:
-            with open(template) as t:
-                rc.write(t.read().format(
-                    authorisation=yaml.dump(
-                        conf["authorisation"], default_flow_style=False),
-                    create=yaml.dump(conf["create"], default_flow_style=False)
-                ))
+
+        Configuration.write(conf)
+
+    @staticmethod
+    def _get_from_dict(data, path):
+        return functools.reduce(lambda d, k: d[k], path, data)
+
+    @classmethod
+    def _set_in_dict(cls, data, path, value):
+        cls._get_from_dict(data, path[:-1])[path[-1]] = value
+
+    @staticmethod
+    def cast_value(value):
+
+        # Booleans are a pain in the ass to cast
+        if value.lower() == "true":
+            return True
+        if value.lower() == "false":
+            return False
+
+        try:
+            return int(value)
+        except ValueError:
+            try:
+                return float(value)
+            except ValueError:
+                return str(value)
