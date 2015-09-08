@@ -13,21 +13,6 @@ from .base import Command as BaseCommand
 
 class ArgumentType(object):
 
-    @staticmethod
-    def country_code(string):
-        if not re.match(r"^[a-zA-Z][a-zA-Z]$", string):
-            raise argparse.ArgumentTypeError(
-                "Countries must be defined with a two-letter ISO code")
-        return string.upper()
-
-
-class Command(BaseCommand):
-
-    DESCRIPTION = "Create a measurement and optionally wait for the results"
-    URLS = {
-        "create": "/api/v2/measurements.json"
-    }
-
     CREATION_CLASSES = {
         "ping": Ping,
         "traceroute": Traceroute,
@@ -36,14 +21,42 @@ class Command(BaseCommand):
         "ntp": Ntp
     }
 
+    @staticmethod
+    def country_code(string):
+        if not re.match(r"^[a-zA-Z][a-zA-Z]$", string):
+            raise argparse.ArgumentTypeError(
+                "Countries must be defined with a two-letter ISO code")
+        return string.upper()
+
+    @staticmethod
+    def probe_listing(string):
+        for probe_id in string.split(","):
+            if not probe_id.isdigit():
+                raise argparse.ArgumentTypeError(
+                    "The probe ids supplied were not in the correct format."
+                    "Note that you must specify them as a list of "
+                    "comma-separated integers without spaces.  Example: "
+                    "--from-probes=1,2,34,157,10006"
+                )
+        return string
+
+    @classmethod
+    def creation_class(cls, string):
+        return cls.CREATION_CLASSES[string]
+
+
+class Command(BaseCommand):
+
+    DESCRIPTION = "Create a measurement and optionally wait for the results"
+
     def add_arguments(self):
 
         # Required
 
         self.parser.add_argument(
             "type",
-            type=str,
-            choices=self.CREATION_CLASSES.keys(),
+            type=ArgumentType.creation_class,
+            choices=ArgumentType.CREATION_CLASSES.keys(),
             help="The type of measurement you want to create"
         )
 
@@ -59,6 +72,7 @@ class Command(BaseCommand):
             "--af",
             type=int,
             default=conf["specification"]["af"],
+            choices=(4, 6),
             help="The address family, either 4 or 6"
         )
         self.parser.add_argument(
@@ -91,7 +105,33 @@ class Command(BaseCommand):
             "--from-country",
             type=ArgumentType.country_code,
             help="The two-letter ISO code for the country from which you'd "
-                 "like to select your probes."
+                 "like to select your probes. Example: --from-country=GR"
+        )
+        origins.add_argument(
+            "--from-prefix",
+            type=str,
+            help="The prefix from which you'd like to select your probes. "
+                 "Example: --from-prefix=82.92.0.0/14"
+        )
+        origins.add_argument(
+            "--from-asn",
+            type=int,
+            help="The ASN from which you'd like to select your probes. "
+                 "Example: --from-asn=3265"
+        )
+        origins.add_argument(
+            "--from-probes",
+            type=str,
+            help="A comma-separated list of probe-ids you want to use in your"
+                 "measurement. Example: --from-probes=1,2,34,157,10006"
+        )
+        origins.add_argument(
+            "--from-measurement",
+            type=ArgumentType.probe_listing,
+            help="A measurement id which you want to use as the basis for probe"
+                 "selection in your new measurement.  This is a handy way to"
+                 "re-create a measurement under conditions similar to another"
+                 "measurement. Example: --from-measurement=1000192"
         )
 
         # Type-specific
@@ -122,12 +162,6 @@ class Command(BaseCommand):
             )
 
     def run(self):
-        """
-        Main function that collects all users information from stdin, and
-        creates a new UDM.
-        """
-
-        klass = self.CREATION_CLASSES[self.arguments.type]
 
         source = self._get_source()
         target = self.clean_target()
@@ -135,7 +169,7 @@ class Command(BaseCommand):
         (is_success, response) = AtlasCreateRequest(
             server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
             key=self.arguments.auth,
-            measurements=[klass(
+            measurements=[self.arguments.type(
                 af=self.arguments.af,
                 target=target,
                 description=self.arguments.description,
