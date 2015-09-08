@@ -3,6 +3,7 @@ import json
 from ripe.atlas.cousteau import AtlasRequest
 from ripe.atlas.sagan import Result, ResultError
 
+from ..exceptions import RipeAtlasToolsException
 from ..reports import Report
 from .base import Command as BaseCommand
 
@@ -28,6 +29,10 @@ class Command(BaseCommand):
 
         detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
         latest = AtlasRequest(url_path=self.URLS["latest"].format(pk)).get()[1]
+
+        if not latest:
+            raise RipeAtlasToolsException(
+                "There aren't any results available for that measurement")
 
         formatter = Report.get_formatter(detail["type"]["name"])
 
