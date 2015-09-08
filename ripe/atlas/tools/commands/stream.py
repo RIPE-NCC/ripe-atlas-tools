@@ -41,7 +41,7 @@ class Command(BaseCommand):
         stream.bind_stream("result", self.on_result_response)
         try:
             stream.start_stream(stream_type="result", msm=pk)
-            stream.timeout(seconds=5)
+            stream.timeout(seconds=None)
         except KeyboardInterrupt:
             self.ok("Disconnecting from the stream")
             stream.disconnect()
