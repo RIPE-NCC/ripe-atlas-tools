@@ -1,10 +1,8 @@
 from __future__ import print_function, absolute_import
-import json
 
-from ripe.atlas.cousteau import AtlasRequest, AtlasStream
-from ripe.atlas.sagan import Result, ResultError
+from ripe.atlas.cousteau import AtlasRequest
 
-from ..reports import Report
+from ..streaming import Stream
 from .base import Command as BaseCommand
 
 
@@ -33,19 +31,7 @@ class Command(BaseCommand):
 
         detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
 
-        self.formatter = Report.get_formatter(detail["type"]["name"])
-
-        stream = AtlasStream()
-        stream.connect()
-
-        stream.bind_stream("result", self.on_result_response)
         try:
-            stream.start_stream(stream_type="result", msm=pk)
-            stream.timeout(seconds=None)
+            Stream.stream(detail["type"]["name"], pk)
         except KeyboardInterrupt:
             self.ok("Disconnecting from the stream")
-            stream.disconnect()
-
-
-    def on_result_response(self, result, *args):
-        print(self.formatter.format(Result.get(result)), end="")
