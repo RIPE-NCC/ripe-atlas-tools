@@ -34,7 +34,6 @@ class ArgumentType(object):
         return string
 
 
-
 class Command(BaseCommand):
 
     DESCRIPTION = "Create a measurement and optionally wait for the results"
@@ -213,7 +212,7 @@ class Command(BaseCommand):
             if not self.arguments.no_report:
                 self.ok("Connecting to stream...")
                 try:
-                    Stream.stream(self.arguments.type, 1040115)
+                    Stream.stream(self.arguments.type, pk)
                 except KeyboardInterrupt:
                     self.ok("Disconnecting from stream")
 
