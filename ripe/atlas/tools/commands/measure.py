@@ -8,18 +8,11 @@ from ripe.atlas.cousteau import (
 
 from ..exceptions import RipeAtlasToolsException
 from ..settings import conf
+from ..streaming import Stream
 from .base import Command as BaseCommand
 
 
 class ArgumentType(object):
-
-    CREATION_CLASSES = {
-        "ping": Ping,
-        "traceroute": Traceroute,
-        "dns": Dns,
-        "ssl": Sslcert,
-        "ntp": Ntp
-    }
 
     @staticmethod
     def country_code(string):
@@ -40,14 +33,19 @@ class ArgumentType(object):
                 )
         return string
 
-    @classmethod
-    def creation_class(cls, string):
-        return cls.CREATION_CLASSES[string]
 
 
 class Command(BaseCommand):
 
     DESCRIPTION = "Create a measurement and optionally wait for the results"
+
+    CREATION_CLASSES = {
+        "ping": Ping,
+        "traceroute": Traceroute,
+        "dns": Dns,
+        "ssl": Sslcert,
+        "ntp": Ntp
+    }
 
     def add_arguments(self):
 
@@ -55,8 +53,8 @@ class Command(BaseCommand):
 
         self.parser.add_argument(
             "type",
-            type=ArgumentType.creation_class,
-            choices=ArgumentType.CREATION_CLASSES.keys(),
+            type=str,
+            choices=self.CREATION_CLASSES.keys(),
             help="The type of measurement you want to create"
         )
 
@@ -92,6 +90,18 @@ class Command(BaseCommand):
             default=conf["specification"]["source"]["requested"],
             help="The number of probes you want to use"
         )
+        self.parser.add_argument(
+            "--no-report",
+            action="store_true",
+            help="Don't wait for a response from the measurement, just return "
+                 "the URL at which you can later get information about the "
+                 "measurement"
+        )
+        self.parser.add_argument(
+            "--interval",
+            type=int,
+            help="The number of seconds between attempted measurements"
+        )
 
         origins = self.parser.add_mutually_exclusive_group()
         origins.add_argument(
@@ -104,30 +114,35 @@ class Command(BaseCommand):
         origins.add_argument(
             "--from-country",
             type=ArgumentType.country_code,
+            metavar="COUNTRY",
             help="The two-letter ISO code for the country from which you'd "
                  "like to select your probes. Example: --from-country=GR"
         )
         origins.add_argument(
             "--from-prefix",
             type=str,
+            metavar="PREFIX",
             help="The prefix from which you'd like to select your probes. "
                  "Example: --from-prefix=82.92.0.0/14"
         )
         origins.add_argument(
             "--from-asn",
             type=int,
+            metavar="ASN",
             help="The ASN from which you'd like to select your probes. "
                  "Example: --from-asn=3265"
         )
         origins.add_argument(
             "--from-probes",
             type=str,
+            metavar="PROBES",
             help="A comma-separated list of probe-ids you want to use in your"
                  "measurement. Example: --from-probes=1,2,34,157,10006"
         )
         origins.add_argument(
             "--from-measurement",
             type=ArgumentType.probe_listing,
+            metavar="MEASUREMENT_ID",
             help="A measurement id which you want to use as the basis for probe"
                  "selection in your new measurement.  This is a handy way to"
                  "re-create a measurement under conditions similar to another"
@@ -163,13 +178,15 @@ class Command(BaseCommand):
 
     def run(self):
 
+        creation_class = self.CREATION_CLASSES[self.arguments.type]
+
         source = self._get_source()
         target = self.clean_target()
 
         (is_success, response) = AtlasCreateRequest(
             server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
             key=self.arguments.auth,
-            measurements=[self.arguments.type(
+            measurements=[creation_class(
                 af=self.arguments.af,
                 target=target,
                 description=self.arguments.description,
@@ -184,13 +201,21 @@ class Command(BaseCommand):
         ).create()
 
         if is_success:
+            pk = response["measurements"][0]
             self.ok(
                 "Looking good!  Your measurement was created and details about "
                 "it can be found here:\n\n  {}/measurements/{}/".format(
                     conf["ripe-ncc"]["endpoint"],
-                    response["measurements"][0]
+                    pk
                 )
             )
+
+            if not self.arguments.no_report:
+                self.ok("Connecting to stream...")
+                try:
+                    Stream.stream(self.arguments.type, 1040115)
+                except KeyboardInterrupt:
+                    self.ok("Disconnecting from stream")
 
     def clean_target(self):
 
