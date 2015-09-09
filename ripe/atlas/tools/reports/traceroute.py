@@ -19,7 +19,7 @@ class TracerouteReport(Report):
             r += "{:>3} {:15} {}ms\n".format(
                 hop.index,
                 name,
-                "ms  ".join(["{:6}".format(rtt) for rtt in rtts])
+                "ms  ".join(["{:8}".format(rtt) for rtt in rtts])
             )
 
-        return r
+        return "\nProbe #{}\n{}".format(result.probe_id, r)
