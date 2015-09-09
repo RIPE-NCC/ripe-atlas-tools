@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function
+
 import importlib
 import os
 
@@ -14,7 +16,7 @@ class Report(object):
             os.path.dirname(__file__), "templates", template)
 
         with open(template) as f:
-            print(f.read().format(**kwargs))
+            print(f.read().format(**kwargs), end="")
 
     @staticmethod
     def get_formatter(name):

@@ -2,5 +2,4 @@
 RIPE Atlas Report for Measurement #{measurement_id}
 ===================================================
 {description}
-
 {payload}
