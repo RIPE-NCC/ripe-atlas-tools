@@ -22,7 +22,7 @@ class Stream(object):
         stream.bind_stream("result", on_result_response)
         try:
             stream.start_stream(stream_type="result", msm=pk)
-            stream.timeout(seconds=None)
+            stream.timeout()
         except KeyboardInterrupt, e:
             stream.disconnect()
             raise e

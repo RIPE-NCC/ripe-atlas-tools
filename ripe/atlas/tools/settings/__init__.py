@@ -1,3 +1,4 @@
+import collections
 import os
 import re
 import yaml
@@ -26,14 +27,20 @@ class Configuration(object):
                 "value": "WW",
                 "requested": 50,
             },
-            "is_oneoff": True,
+            "times": {
+                "one-off": True,
+                "interval": None,
+                "start": None,
+                "stop": None,
+            },
             "types": {
                 "ping": {
                     "packets": 3,
                     "size": 48
                 },
                 "traceroute": {
-                    "protocol": "ICMP"
+                    "protocol": "ICMP",
+                    "timeout": 4000
                 }
             }
         },
@@ -49,8 +56,22 @@ class Configuration(object):
             with open(self.USER_RC) as y:
                 custom = yaml.load(y)
                 if custom:
-                    r.update(custom)
+                    r = self.deep_update(r, custom)
         return r
+
+    @classmethod
+    def deep_update(cls, d, u):
+        """
+        Updates a dictionary with another dictionary, only it goes deep.
+        Stolen from http://stackoverflow.com/questions/3232943/
+        """
+        for k, v in u.iteritems():
+            if isinstance(v, collections.Mapping):
+                r = cls.deep_update(d.get(k, {}), v)
+                d[k] = r
+            else:
+                d[k] = u[k]
+        return d
 
     @staticmethod
     def write(config):

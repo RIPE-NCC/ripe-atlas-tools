@@ -1,6 +1,7 @@
 from __future__ import print_function, absolute_import
 
 import argparse
+import json
 import re
 
 from ripe.atlas.cousteau import (
@@ -84,22 +85,20 @@ class Command(BaseCommand):
             help="The target, either a domain name or IP address"
         )
         self.parser.add_argument(
-            "--probes",
-            type=int,
-            default=conf["specification"]["source"]["requested"],
-            help="The number of probes you want to use"
-        )
-        self.parser.add_argument(
             "--no-report",
             action="store_true",
             help="Don't wait for a response from the measurement, just return "
                  "the URL at which you can later get information about the "
                  "measurement"
         )
+
         self.parser.add_argument(
             "--interval",
             type=int,
-            help="The number of seconds between attempted measurements"
+            help="Rather than run this measurement as a one-off (the default), "
+                 "create this measurement as a recurring one, with an interval "
+                 "of n seconds between attempted measurements. This option "
+                 "implies --no-report"
         )
 
         origins = self.parser.add_mutually_exclusive_group()
@@ -147,74 +146,75 @@ class Command(BaseCommand):
                  "re-create a measurement under conditions similar to another"
                  "measurement. Example: --from-measurement=1000192"
         )
+        self.parser.add_argument(
+            "--probes",
+            type=int,
+            default=conf["specification"]["source"]["requested"],
+            help="The number of probes you want to use"
+        )
 
         # Type-specific
 
-        # We do an early parse here so we can know the measurement type
-        arguments = self.parser.parse_args()
+        ping_or_trace = self.parser.add_argument_group(
+            "Ping and Traceroute Measurements")
+        ping_or_trace.add_argument(
+            "--packets",
+            type=int,
+            default=conf["specification"]["types"]["ping"]["packets"],
+            help="The number of packets sent"
+        )
+        ping_or_trace.add_argument(
+            "--size",
+            type=int,
+            default=conf["specification"]["types"]["ping"]["size"],
+            help="The size of packets sent"
+        )
 
-        if arguments.type == "ping":
-            self.parser.add_argument(
-                "--packets",
-                type=int,
-                default=conf["specification"]["types"]["ping"]["packets"],
-                help="The number of packets per result"
-            )
-            self.parser.add_argument(
-                "--size",
-                type=int,
-                default=conf["specification"]["types"]["ping"]["size"],
-                help="The size of packets sent"
-            )
-        elif arguments.type == "traceroute":
-            self.parser.add_argument(
-                "--protocol",
-                type=str,
-                default=conf["specification"]["types"]["traceroute"]["protocol"],
-                choices=("ICMP", "UDP", "TCP"),
-                help="A free-form description"
-            )
+        traceroute = self.parser.add_argument_group(
+            "Traceroute Only Measurements")
+        traceroute.add_argument(
+            "--protocol",
+            type=str,
+            default=conf["specification"]["types"]["traceroute"]["protocol"],
+            choices=("ICMP", "UDP", "TCP"),
+            help="The traceroute protocol used"
+        )
+        traceroute.add_argument(
+            "--timeout",
+            type=int,
+            default=conf["specification"]["types"]["traceroute"]["timeout"],
+            help="The timeout per-packet"
+        )
 
     def run(self):
 
         creation_class = self.CREATION_CLASSES[self.arguments.type]
 
-        source = self._get_source()
-        target = self.clean_target()
-
         (is_success, response) = AtlasCreateRequest(
             server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
             key=self.arguments.auth,
-            measurements=[creation_class(
-                af=self.arguments.af,
-                target=target,
-                description=self.arguments.description,
-                packets=self.arguments.packets,
-                size=self.arguments.size
-            )],
-            sources=[AtlasSource(
-                type=source["type"],
-                value=source["value"],
-                requested=source["requested"]
-            )]
+            measurements=[creation_class(**self._get_measurement_kwargs())],
+            sources=[AtlasSource(**self._get_source_kwargs())],
         ).create()
 
-        if is_success:
-            pk = response["measurements"][0]
-            self.ok(
-                "Looking good!  Your measurement was created and details about "
-                "it can be found here:\n\n  {}/measurements/{}/".format(
-                    conf["ripe-ncc"]["endpoint"],
-                    pk
-                )
-            )
+        if not is_success:
+            self._handle_api_error(response)  # Raises an exception
 
-            if not self.arguments.no_report:
-                self.ok("Connecting to stream...")
-                try:
-                    Stream.stream(self.arguments.type, pk)
-                except KeyboardInterrupt:
-                    self.ok("Disconnecting from stream")
+        pk = response["measurements"][0]
+        self.ok(
+            "Looking good!  Your measurement was created and details about "
+            "it can be found here:\n\n  {}/measurements/{}/".format(
+                conf["ripe-ncc"]["endpoint"],
+                pk
+            )
+        )
+
+        if not self.arguments.no_report:
+            self.ok("Connecting to stream...")
+            try:
+                Stream.stream(self.arguments.type, pk)
+            except KeyboardInterrupt:
+                self.ok("Disconnecting from stream")
 
     def clean_target(self):
 
@@ -236,7 +236,46 @@ class Command(BaseCommand):
 
         return self.arguments.target
 
-    def _get_source(self):
+    def _get_measurement_kwargs(self):
+
+        target = self.clean_target()
+
+        spec = conf["specification"]  # Shorter names are easier to read
+        r = {
+            "af": spec["af"],
+            "description": spec["description"],
+        }
+
+        if self.arguments.af:
+            r["af"] = self.arguments.af
+        if self.arguments.description:
+            r["description"] = self.arguments.description
+
+        r["is_oneoff"] = True
+        if self.arguments.interval or spec["times"]["interval"]:
+            r["is_oneoff"] = False
+            r["interval"] = self.arguments.interval
+            self.arguments.no_report = True
+        elif not spec["times"]["one-off"]:
+            raise RipeAtlasToolsException(
+                "Your configuration file appears to be setup to not create "
+                "one-offs, but also offers no interval value.  Without one of "
+                "these, we cannot create a measurement."
+            )
+
+        if target:
+            r["target"] = target
+
+        if self.arguments.type in ("ping", "traceroute"):
+            r["packets"] = self.arguments.packets
+            r["size"] = self.arguments.size
+            if self.arguments.type == "traceroute":
+                r["protocol"] = self.arguments.protocol
+                r["timeout"] = self.arguments.timeout
+
+        return r
+
+    def _get_source_kwargs(self):
 
         r = conf["specification"]["source"]
         if self.arguments.from_country:
@@ -245,5 +284,40 @@ class Command(BaseCommand):
         elif self.arguments.from_area:
             r["type"] = "area"
             r["value"] = self.arguments.from_area
+        elif self.arguments.from_prefix:
+            r["type"] = "prefix"
+            r["value"] = self.arguments.from_prefix
+        elif self.arguments.from_asn:
+            r["type"] = "asn"
+            r["value"] = self.arguments.from_asn
+        elif self.arguments.from_probes:
+            r["type"] = "probes"
+            r["value"] = self.arguments.from_probes
+        elif self.arguments.from_measurement:
+            r["type"] = "msm"
+            r["value"] = self.arguments.from_measurement
 
         return r
+
+    @staticmethod
+    def _handle_api_error(response):
+
+        if "HTTP_MSG" in response:
+
+            message = "There was a problem communicating with the RIPE Atlas " \
+                      "infrastructure.  The message given was:\n\n  {}".format(
+                      response["HTTP_MSG"])
+
+            try:
+                message += "\n  " + json.loads(
+                    response["ADDITIONAL_MSG"])["error"]["message"]
+            except Exception:
+                pass  # Too many things can go wrong here and we don't care
+
+            raise RipeAtlasToolsException(message)
+
+        raise RipeAtlasToolsException(
+            "There was a problem found in the attempt to create your "
+            "measurement.  Please send the command you tried to execute "
+            "to atlas@ripe.net and we'll try to address it."
+        )
