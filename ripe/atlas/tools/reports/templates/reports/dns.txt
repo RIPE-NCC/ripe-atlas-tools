@@ -1,0 +1,17 @@
+
+Probe #{probe}
+===============================================================================
+; <<>> DiG 9.10.2-P2 <<>> google.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 24538
+;; flags: {flags}; QUERY: 1, ANSWER: {answer_count}, AUTHORITY: {authority_count}, ADDITIONAL: {additional_count}
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096{question}{answers}{authorities}{additionals}
+
+;; Query time: {response_time} msec
+;; SERVER: 192.168.178.1#53(192.168.178.1)
+;; WHEN: {created}
+;; MSG SIZE  rcvd: {response_size}
+

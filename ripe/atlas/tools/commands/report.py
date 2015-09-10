@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import json
 
 from ripe.atlas.cousteau import AtlasRequest
@@ -34,19 +36,19 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
 
-        formatter = Report.get_formatter(detail["type"]["name"])
+        formatter_instance = Report.get_formatter(detail["type"]["name"])()
 
         payload = ""
         for result in latest:
             result = Result.get(result)
             try:
-                payload += formatter.format(result)
+                payload += formatter_instance.format(result)
             except ResultError:
                 payload += json.dumps(result) + "\n"
 
-        formatter.render(
+        print(formatter_instance.render(
             "reports/base.txt",
             measurement_id=self.arguments.measurement_id,
             description=detail.get("description") or "",
             payload=payload
-        )
+        ), end="")
