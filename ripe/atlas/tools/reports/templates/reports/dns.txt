@@ -1,7 +1,7 @@
 
 Probe #{probe}
 ===============================================================================
-; <<>> DiG 9.10.2-P2 <<>> google.com
+; <<>> RIPE Atlas Tools <<>> {question_name}
 ;; global options: +cmd
 ;; Got answer:
 ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 24538
@@ -11,7 +11,7 @@ Probe #{probe}
 ; EDNS: version: 0, flags:; udp: 4096{question}{answers}{authorities}{additionals}
 
 ;; Query time: {response_time} msec
-;; SERVER: 192.168.178.1#53(192.168.178.1)
+;; SERVER: {destination_address}#53({destination_address})
 ;; WHEN: {created}
 ;; MSG SIZE  rcvd: {response_size}
 
