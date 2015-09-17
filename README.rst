@@ -19,26 +19,28 @@ Note that there are lots of dependencies that will automatically be drawn in and
 installed at the moment, but we're going to try to scale that down.  Currently
 only three packages are required, but they each have a lot of dependencies:
 
-* ripe.atlas.cousteau
-    * python-dateutil
-    * socketIO-client
-        * websocket-client
-            * backports.ssl-match-hostname
-* ripe.atlas.sagan *(as above, installed manually from GitHub:master for now)*
-    * IPy
-    * python-dateutil
-    * pytz
-    * pyOpenSSL
-        * cryptography
-            * idna
-            * pyasn1
-            * setuptools
-            * enum34
-            * ipaddress
-            * cffi>=0.8
-                * pycparser
-* tzlocal
-    * pytz
+::
+
+    ripe.atlas.cousteau
+        python-dateutil
+        socketIO-client
+            websocket-client
+                backports.ssl-match-hostname
+    ripe.atlas.sagan
+        IPy
+        python-dateutil
+        pytz
+        pyOpenSSL
+            cryptography
+                idna
+                pyasn1
+                setuptools
+                enum34
+                ipaddress
+                cffi>=0.8
+                    pycparser
+    tzlocal
+        pytz
 
 In the future, we're going to make it easier to install though, with an eye on
 integrating with end-user-friendly tools like ``apt``, ``rpm``, and ``emerge``.
