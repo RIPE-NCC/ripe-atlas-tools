@@ -18,12 +18,18 @@ class DnsReport(Report):
                 "=" * 79,
             )
 
-        flags = []
+        header_flags = []
         for flag in ("aa", "ad", "cd", "qr", "ra", "rd",):
             if getattr(response.abuf.header, flag):
-                flags.append(flag)
-        import json
-        print(json.dumps(result.raw_data, separators=(",", ":")))
+                header_flags.append(flag)
+
+        edns = ""
+        if response.abuf.edns0:
+            edns = ";; OPT PSEUDOSECTION:\n; EDNS: version: {}, flags:; udp: {}".format(
+                response.abuf.edns0.version,
+                response.abuf.edns0.udp_size
+            )
+
         return self.render(
 
             "reports/dns.txt",
@@ -31,7 +37,8 @@ class DnsReport(Report):
             probe=result.probe_id,
 
             question_name=response.abuf.questions[0].name,
-            flags=" ".join(flags),
+            header_flags=" ".join(header_flags),
+            edns=edns,
 
             question_count=len(response.abuf.questions),
             answer_count=len(response.abuf.answers),
