@@ -37,6 +37,9 @@ class DnsReport(Report):
             probe=result.probe_id,
 
             question_name=response.abuf.questions[0].name,
+            header_opcode=response.abuf.header.opcode,
+            header_return_code=response.abuf.header.return_code,
+            header_id=response.abuf.header.id,
             header_flags=" ".join(header_flags),
             edns=edns,
 

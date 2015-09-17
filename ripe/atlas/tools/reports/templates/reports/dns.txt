@@ -4,7 +4,7 @@ Probe #{probe}
 ; <<>> RIPE Atlas Tools <<>> {question_name}
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 24538
+;; ->>HEADER<<- opcode: {header_opcode}, status: {header_return_code}, id: {header_id}
 ;; flags: {header_flags}; QUERY: 1, ANSWER: {answer_count}, AUTHORITY: {authority_count}, ADDITIONAL: {additional_count}
 
 {edns}{question}{answers}{authorities}{additionals}
