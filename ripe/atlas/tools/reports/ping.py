@@ -5,8 +5,8 @@ from .base import Report
 
 class PingReport(Report):
 
-    @staticmethod
-    def format(result, probes=None):
+    @classmethod
+    def format(cls, result, probes=None):
 
         packets = result.packets
 

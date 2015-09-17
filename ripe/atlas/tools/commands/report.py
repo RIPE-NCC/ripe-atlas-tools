@@ -63,9 +63,13 @@ class Command(BaseCommand):
             except ResultError:
                 payload += json.dumps(result) + "\n"
 
+        description = detail["description"] or ""
+        if description:
+            description = "\n{}\n\n".format(description)
+
         print(formatter_instance.render(
             "reports/base.txt",
             measurement_id=self.arguments.measurement_id,
-            description=detail.get("description") or "",
+            description=description,
             payload=payload
         ), end="")

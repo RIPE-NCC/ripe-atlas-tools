@@ -3,8 +3,8 @@ from .base import Report
 
 class TracerouteReport(Report):
 
-    @staticmethod
-    def format(result, probes=None):
+    @classmethod
+    def format(cls, result, probes=None):
 
         r = ""
 
@@ -22,4 +22,4 @@ class TracerouteReport(Report):
                 "ms  ".join(["{:8}".format(rtt) for rtt in rtts])
             )
 
-        return "\nProbe #{}\n{}".format(result.probe_id, r)
+        return "\nProbe #{}\n\n{}".format(result.probe_id, r)

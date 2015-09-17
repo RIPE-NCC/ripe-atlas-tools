@@ -39,6 +39,8 @@ class Configuration(object):
                     "size": 48
                 },
                 "traceroute": {
+                    "packets": 3,
+                    "size": 48,
                     "protocol": "ICMP",
                     "timeout": 4000
                 },
