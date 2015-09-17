@@ -1,7 +1,7 @@
 ripe-atlas
 ==========
 
-The Official command-line client for RIPE Atlas.
+The official command-line client for RIPE Atlas.
 
 
 Installation
@@ -16,29 +16,29 @@ must point to this git repo for anything to work:
     $ pip install git+github.com:RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
 
 Note that there are lots of dependencies that will automatically be drawn in and
-installed at the moment, but we're going to try to scale that down:
+installed at the moment, but we're going to try to scale that down.  Currently
+only three packages are required, but they each have a lot of dependencies:
 
-* backports.ssl-match-hostname
-* cffi
-* cryptography
-* enum34
-* idna
-* ipaddress
-* IPy
-* pyasn1
-* pycparser
-* pyOpenSSL
-* python-dateutil
-* pytz
-* requests
 * ripe.atlas.cousteau
-* ripe.atlas.sagan (as above, installed manually from GitHub:master for now)
-* ripe.atlas.tools
-* setuptools
-* six
-* socketIO-client
-* ujson
-* websocket-client
+    * python-dateutil
+    * socketIO-client
+        * websocket-client
+            * backports.ssl-match-hostname
+* ripe.atlas.sagan *(as above, installed manually from GitHub:master for now)*
+    * IPy
+    * python-dateutil
+    * pytz
+    * pyOpenSSL
+        * cryptography
+            * idna
+            * pyasn1
+            * setuptools
+            * enum34
+            * ipaddress
+            * cffi>=0.8
+                * pycparser
+* tzlocal
+    * pytz
 
 In the future, we're going to make it easier to install though, with an eye on
 integrating with end-user-friendly tools like ``apt``, ``rpm``, and ``emerge``.
@@ -56,6 +56,8 @@ measurement with limited options from the command line:
     $ ripe-atlas measure ping --packets 7 --size 42 --target example.com
     $ ripe-atlas measure traceroute --target example.com
     $ ripe-atlas measure traceroute --packets 2 --target example.com
+    $ ripe-atlas measure dns --query-argument example.com
+    $ ripe-atlas measure dns --use-probe-resolver --query-type AAAA --query-argument example.com
 
 This will create a one-off measurement and then wait for the results to roll in,
 formatting them as they do.
