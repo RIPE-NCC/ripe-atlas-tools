@@ -1,16 +1,13 @@
 
-Probe #{probe}
-===============================================================================
-; <<>> RIPE Atlas Tools <<>> {question_name}
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: {header_opcode}, status: {header_return_code}, id: {header_id}
-;; flags: {header_flags}; QUERY: 1, ANSWER: {answer_count}, AUTHORITY: {authority_count}, ADDITIONAL: {additional_count}
+- {response_id} -
 
+  ; <<>> RIPE Atlas Tools <<>> {question_name}
+  ;; global options: +cmd
+  ;; Got answer:
+  ;; ->>HEADER<<- opcode: {header_opcode}, status: {header_return_code}, id: {header_id}
+  ;; flags: {header_flags}; QUERY: 1, ANSWER: {answer_count}, AUTHORITY: {authority_count}, ADDITIONAL: {additional_count}
 {edns}{question}{answers}{authorities}{additionals}
-
-;; Query time: {response_time} msec
-;; SERVER: {destination_address}#53({destination_address})
-;; WHEN: {created}
-;; MSG SIZE  rcvd: {response_size}
-
+  ;; Query time: {response_time} msec
+  ;; SERVER: {destination_address}#53({destination_address})
+  ;; WHEN: {created}
+  ;; MSG SIZE  rcvd: {response_size}

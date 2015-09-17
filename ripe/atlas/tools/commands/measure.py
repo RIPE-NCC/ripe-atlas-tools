@@ -1,38 +1,15 @@
 from __future__ import print_function, absolute_import
 
-import argparse
 import json
-import re
 
 from ripe.atlas.cousteau import (
     Ping, Traceroute, Dns, Sslcert, Ntp, AtlasSource, AtlasCreateRequest)
 
 from ..exceptions import RipeAtlasToolsException
+from ..helpers.validators import ArgumentType
 from ..settings import conf
 from ..streaming import Stream
 from .base import Command as BaseCommand
-
-
-class ArgumentType(object):
-
-    @staticmethod
-    def country_code(string):
-        if not re.match(r"^[a-zA-Z][a-zA-Z]$", string):
-            raise argparse.ArgumentTypeError(
-                "Countries must be defined with a two-letter ISO code")
-        return string.upper()
-
-    @staticmethod
-    def probe_listing(string):
-        for probe_id in string.split(","):
-            if not probe_id.isdigit():
-                raise argparse.ArgumentTypeError(
-                    "The probe ids supplied were not in the correct format."
-                    "Note that you must specify them as a list of "
-                    "comma-separated integers without spaces.  Example: "
-                    "--from-probes=1,2,34,157,10006"
-                )
-        return string
 
 
 class Command(BaseCommand):
@@ -139,7 +116,7 @@ class Command(BaseCommand):
         )
         origins.add_argument(
             "--from-measurement",
-            type=ArgumentType.probe_listing,
+            type=ArgumentType.comma_separated_integers,
             metavar="MEASUREMENT_ID",
             help="A measurement id which you want to use as the basis for probe"
                  "selection in your new measurement.  This is a handy way to"

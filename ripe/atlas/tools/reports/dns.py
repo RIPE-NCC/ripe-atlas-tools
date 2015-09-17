@@ -6,17 +6,27 @@ class DnsReport(Report):
 
     TIME_FORMAT = "%a %b %d %H:%M:%S %Z %Y"
 
-    def format(self, result):
+    @classmethod
+    def format(cls, result, probes=None):
 
-        # We're not currently handling multiple responses because it's hard
-        response = result.responses[0]
         created = result.created.astimezone(get_localzone())
+        probe_id = result.probe_id
+
+        # Ignore some results if specific probes were explicitly selected
+        if probes and probe_id not in probes:
+            return ""
+
+        r = "\n\nProbe #{}\n{}\n".format(probe_id, "=" * 79)
+        for response in result.responses:
+            r += cls.get_formatted_response(probe_id, created, response)
+
+        return r
+
+    @classmethod
+    def get_formatted_response(cls, probe_id, created, response):
 
         if not response.abuf:
-            return "\nProbe #{}\n{}\nNo abuf found\n\n".format(
-                result.probe_id,
-                "=" * 79,
-            )
+            return "\n- {} -\n\n  No abuf found.".format(response.response_id)
 
         header_flags = []
         for flag in ("aa", "ad", "cd", "qr", "ra", "rd",):
@@ -25,16 +35,17 @@ class DnsReport(Report):
 
         edns = ""
         if response.abuf.edns0:
-            edns = ";; OPT PSEUDOSECTION:\n; EDNS: version: {}, flags:; udp: {}".format(
+            edns = "\n  ;; OPT PSEUDOSECTION:\n  ; EDNS: version: {}, flags:; udp: {}\n".format(
                 response.abuf.edns0.version,
                 response.abuf.edns0.udp_size
             )
 
-        return self.render(
+        return cls.render(
 
             "reports/dns.txt",
 
-            probe=result.probe_id,
+            response_id=response.response_id,
+            probe=probe_id,
 
             question_name=response.abuf.questions[0].name,
             header_opcode=response.abuf.header.opcode,
@@ -48,18 +59,18 @@ class DnsReport(Report):
             authority_count=len(response.abuf.authorities),
             additional_count=len(response.abuf.additionals),
 
-            question=self.get_section(
+            question=cls.get_section(
                 "question", response.abuf.questions),
-            answers=self.get_section(
+            answers=cls.get_section(
                 "answer", response.abuf.answers),
-            authorities=self.get_section(
+            authorities=cls.get_section(
                 "authority", response.abuf.authorities),
-            additionals=self.get_section(
+            additionals=cls.get_section(
                 "additional", response.abuf.additionals),
 
             response_time=response.response_time,
             response_size=response.response_size,
-            created=created.strftime(self.TIME_FORMAT),
+            created=created.strftime(cls.TIME_FORMAT),
             destination_address=response.destination_address,
 
         )
@@ -70,5 +81,5 @@ class DnsReport(Report):
         if not data:
             return ""
 
-        return "\n\n;; {} SECTION:\n".format(
-            header.upper()) + "\n".join([str(_) for _ in data]) + "\n"
+        return "\n  ;; {} SECTION:\n".format(
+            header.upper()) + "\n".join(["  {}".format(_) for _ in data]) + "\n"

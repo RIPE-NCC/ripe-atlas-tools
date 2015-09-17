@@ -4,7 +4,7 @@ from .base import Report
 class TracerouteReport(Report):
 
     @staticmethod
-    def format(result):
+    def format(result, probes=None):
 
         r = ""
 

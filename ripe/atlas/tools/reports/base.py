@@ -24,3 +24,7 @@ class Report(object):
                 package="ripe.atlas.tools.reports"),
             "{}Report".format(name.capitalize())
         )
+
+    @classmethod
+    def format(cls, result, probes=None):
+        raise NotImplementedError()

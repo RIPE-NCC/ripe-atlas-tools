@@ -6,6 +6,7 @@ from ripe.atlas.cousteau import AtlasRequest
 from ripe.atlas.sagan import Result, ResultError
 
 from ..exceptions import RipeAtlasToolsException
+from ..helpers.validators import ArgumentType
 from ..reports import Report
 from .base import Command as BaseCommand
 
@@ -24,13 +25,29 @@ class Command(BaseCommand):
             type=int,
             help="The measurement id you want reported"
         )
+        self.parser.add_argument(
+            "--probes",
+            type=ArgumentType.comma_separated_integers,
+            help="A comma-separated list of probe ids you want to see "
+                 "exclusively"
+        )
+
+    def get_probes(self):
+        if self.arguments.probes:
+            return [int(i) for i in self.arguments.probes.split(",")]
+        return []
 
     def run(self):
 
         pk = self.arguments.measurement_id
+        probes = self.get_probes()
+
+        latest_url = self.URLS["latest"].format(pk)
+        if self.arguments.probes:
+            latest_url += "?probes={}".format(self.arguments.probes)
 
         detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
-        latest = AtlasRequest(url_path=self.URLS["latest"].format(pk)).get()[1]
+        latest = AtlasRequest(url_path=latest_url).get()[1]
 
         if not latest:
             raise RipeAtlasToolsException(
@@ -42,7 +59,7 @@ class Command(BaseCommand):
         for result in latest:
             result = Result.get(result)
             try:
-                payload += formatter_instance.format(result)
+                payload += formatter_instance.format(result, probes=probes)
             except ResultError:
                 payload += json.dumps(result) + "\n"
 
