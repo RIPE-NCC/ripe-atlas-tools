@@ -41,6 +41,14 @@ class Configuration(object):
                 "traceroute": {
                     "protocol": "ICMP",
                     "timeout": 4000
+                },
+                "dns": {
+                    "query-class": "IN",
+                    "query-type": "A",
+                    "query-argument": None,
+                    "use-probe-resolver": False,
+                    "protocol": "UDP",
+                    "udp-payload-size": 512
                 }
             }
         },

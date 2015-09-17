@@ -26,7 +26,7 @@ class DnsReport(Report):
     def get_formatted_response(cls, probe_id, created, response):
 
         if not response.abuf:
-            return "\n- {} -\n\n  No abuf found.".format(response.response_id)
+            return "\n- {} -\n\n  No abuf found.\n".format(response.response_id)
 
         header_flags = []
         for flag in ("aa", "ad", "cd", "qr", "ra", "rd",):

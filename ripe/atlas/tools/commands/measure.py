@@ -4,6 +4,7 @@ import json
 
 from ripe.atlas.cousteau import (
     Ping, Traceroute, Dns, Sslcert, Ntp, AtlasSource, AtlasCreateRequest)
+from ripe.atlas.sagan.dns import Message
 
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
@@ -135,32 +136,61 @@ class Command(BaseCommand):
         ping_or_trace = self.parser.add_argument_group(
             "Ping and Traceroute Measurements")
         ping_or_trace.add_argument(
-            "--packets",
-            type=int,
-            default=conf["specification"]["types"]["ping"]["packets"],
-            help="The number of packets sent"
+            "--packets", type=int, help="The number of packets sent"
         )
         ping_or_trace.add_argument(
-            "--size",
-            type=int,
-            default=conf["specification"]["types"]["ping"]["size"],
-            help="The size of packets sent"
+            "--size", type=int, help="The size of packets sent"
+        )
+
+        trace_or_dns = self.parser.add_argument_group(
+            "Traceroute or DNS Measurements")
+        trace_or_dns.add_argument(
+            "--protocol",
+            type=str,
+            choices=("ICMP", "UDP", "TCP"),
+            help="The protocol used.  For DNS measurements, this is limited to "
+                 "UDP and TCP, but traceroutes may use ICMP as well"
         )
 
         traceroute = self.parser.add_argument_group(
-            "Traceroute Only Measurements")
-        traceroute.add_argument(
-            "--protocol",
-            type=str,
-            default=conf["specification"]["types"]["traceroute"]["protocol"],
-            choices=("ICMP", "UDP", "TCP"),
-            help="The traceroute protocol used"
-        )
+            "Traceroute Measurements")
         traceroute.add_argument(
             "--timeout",
             type=int,
             default=conf["specification"]["types"]["traceroute"]["timeout"],
             help="The timeout per-packet"
+        )
+
+        dns = self.parser.add_argument_group("DNS Measurements")
+        dns.add_argument(
+            "--query-class",
+            type=str,
+            choices=("IN", "CHAOS"),
+            default=conf["specification"]["types"]["dns"]["query-class"],
+        )
+        dns.add_argument(
+            "--query-type",
+            type=str,
+            choices=Message.ANSWER_CLASSES.keys() + ["ANY"],  # The only ones we can parse
+            default=conf["specification"]["types"]["dns"]["query-type"],
+        )
+        dns.add_argument(
+            "--query-argument",
+            type=str,
+            default=conf["specification"]["types"]["dns"]["query-argument"],
+        )
+        dns.add_argument(
+            "--use-probe-resolver",
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["use-probe-resolver"],
+            help="Use the probe's list of local resolvers instead of "
+                 "specifying a target to use as the resolver.  Note that this "
+                 "may not be used with --target"
+        )
+        dns.add_argument(
+            "--udp-payload-size",
+            type=int,
+            default=conf["specification"]["types"]["dns"]["udp-payload-size"],
         )
 
     def run(self):
@@ -197,7 +227,7 @@ class Command(BaseCommand):
 
         # DNS measurements are a special case for targets
         if self.arguments.type == "dns":
-            if self.arguments.use_probes_resolver:
+            if self.arguments.use_probe_resolver:
                 if self.arguments.target:
                     raise RipeAtlasToolsException(
                         "You may not specify a target for a DNS measurement "
@@ -212,6 +242,43 @@ class Command(BaseCommand):
             )
 
         return self.arguments.target
+
+    def clean_protocol(self):
+
+        spec = conf["specification"]["types"]
+
+        # DNS measurements only allow udp/tcp
+        if self.arguments.type == "dns":
+            if not self.arguments.protocol:
+                self.arguments.protocol = spec["dns"]["protocol"]
+            if self.arguments.protocol not in ("UDP", "TCP"):
+                raise RipeAtlasToolsException(
+                    "DNS measurements may only choose a protocol of UDP or TCP"
+                )
+
+        # Traceroute allows icmp/udp/tcp
+        elif self.arguments.type == "traceroute":
+            if not self.arguments.protocol:
+                self.arguments.protocol = spec["traceroute"]["protocol"]
+            if self.arguments.protocol not in ("ICMP", "UDP", "TCP"):
+                raise RipeAtlasToolsException(
+                    "Traceroute measurements may only choose a protocol of "
+                    "ICMP, UDP or TCP"
+                )
+
+        return self.arguments.protocol
+
+    def clean_shared_option(self, kind, argument):
+        """
+        Some options, like --protocol, are shared across types, and the defaults
+        for those types can differ.  This is where we set these options to their
+        appropriate default value.
+        """
+        r = getattr(self.arguments, argument)
+        if not getattr(self.arguments, argument):
+            r = conf["specification"]["types"][kind][argument.replace("_", "-")]
+            setattr(self.arguments, argument, r)
+        return r
 
     def _get_measurement_kwargs(self):
 
@@ -237,18 +304,35 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(
                 "Your configuration file appears to be setup to not create "
                 "one-offs, but also offers no interval value.  Without one of "
-                "these, we cannot create a measurement."
+                "these, a measurement cannot be created."
             )
 
         if target:
             r["target"] = target
 
-        if self.arguments.type in ("ping", "traceroute"):
-            r["packets"] = self.arguments.packets
-            r["size"] = self.arguments.size
-            if self.arguments.type == "traceroute":
-                r["protocol"] = self.arguments.protocol
-                r["timeout"] = self.arguments.timeout
+        if self.arguments.type == "ping":
+            r["packets"] = self.clean_shared_option("ping", "packets")
+            r["size"] = self.clean_shared_option("ping", "size")
+
+        elif self.arguments.type == "traceroute":
+            r["packets"] = self.clean_shared_option("traceroute", "packets")
+            r["size"] = self.clean_shared_option("traceroute", "size")
+            r["protocol"] = self.clean_protocol()
+            r["timeout"] = self.arguments.timeout
+
+        elif self.arguments.type == "dns":
+            for opt in ("class", "type", "argument"):
+                if not getattr(self.arguments, "query_{}".format(opt)):
+                    raise RipeAtlasToolsException(
+                        "DNS measurements require a query type, class, and "
+                        "argument"
+                    )
+            r["protocol"] = self.clean_protocol()
+            r["query_class"] = self.arguments.query_class
+            r["query_type"] = self.arguments.query_type
+            r["query_argument"] = self.arguments.query_argument
+            r["use_probe_resolver"] = self.arguments.use_probe_resolver
+            r["udp_payload_size"] = self.arguments.udp_payload_size
 
         return r
 
