@@ -4,6 +4,40 @@ ripe-atlas-tools
 The official command-line client for RIPE Atlas.
 
 
+Disclaimer
+----------
+
+All of this is super-beta.  If it breaks, you get to keep all the shiny pieces.
+
+
+Quickstart
+----------
+
+This is a very fast break down of everything you need to start using Ripe Atlas
+on the command line.  Viewing public data is quick & easy, while creation is a
+little more complicated, since you need to setup your authorisation key.
+
+Viewing Public Data
+:::::::::::::::::::
+
+1. Install the toolkit as below.
+2. View help with: ``ripe-atlas --help``
+3. View a basic report for a public measurement ``ripe-atlas report <measurement_id>``
+4. View the live stream for a measurement ``ripe-atlas stream <measurement_id>``
+
+Creating a Measurement
+::::::::::::::::::::::
+
+1. Log into [RIPE Atlas](https://atlas.ripe.net/).  If you don't have an
+   account, you can create one there for free.
+2. Visit the [API Keys](https://atlas.ripe.net/keys/) page and create a new key
+   with the permission ``Create a new user defined measurement``
+3. Install the toolkit as below.
+4. Configure the toolkit to use your key with ``ripe-atlas configure --set authorisation.create=MY_API_KEY``
+5. View the help for measurement creation with ``ripe-atlas measure --help``
+5. Create a measurement with ``ripe-atlas measure ping --target example.com``
+
+
 Installation
 ------------
 
@@ -18,7 +52,7 @@ your own:
 
 .. code:: bash
 
-    $ pip install git+github.com:RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
+    $ pip install -e git+github.com:RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
 
 Note that there are lots of dependencies that will automatically be drawn in and
 installed at the moment, but we're going to try to scale that down.  Currently
