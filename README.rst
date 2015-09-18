@@ -1,5 +1,5 @@
-ripe-atlas
-==========
+ripe-atlas-tools
+================
 
 The official command-line client for RIPE Atlas.
 
