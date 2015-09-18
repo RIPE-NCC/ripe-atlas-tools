@@ -9,7 +9,7 @@ from ripe.atlas.sagan.dns import Message
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
 from ..settings import conf
-from ..streaming import Stream
+from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
 
 
@@ -208,20 +208,22 @@ class Command(BaseCommand):
             self._handle_api_error(response)  # Raises an exception
 
         pk = response["measurements"][0]
+        url = "{}/measurements/{}/".format(conf["ripe-ncc"]["endpoint"], pk)
         self.ok(
             "Looking good!  Your measurement was created and details about "
-            "it can be found here:\n\n  {}/measurements/{}/".format(
-                conf["ripe-ncc"]["endpoint"],
-                pk
-            )
+            "it can be found here:\n\n  {}".format(url)
         )
 
         if not self.arguments.no_report:
             self.ok("Connecting to stream...")
             try:
-                Stream.stream(self.arguments.type, pk)
-            except KeyboardInterrupt:
-                self.ok("Disconnecting from stream")
+                Stream(capture_limit=self.arguments.probes).stream(
+                    self.arguments.type, pk)
+            except (KeyboardInterrupt, CaptureLimitExceeded):
+                pass  # User said stop, so we fall through to the finally block.
+            finally:
+                self.ok("Disconnecting from stream\n\nYou can find details "
+                        "about this measurement here:\n\n  {}".format(url))
 
     def clean_target(self):
 
@@ -339,6 +341,7 @@ class Command(BaseCommand):
     def _get_source_kwargs(self):
 
         r = conf["specification"]["source"]
+        r["requested"] = self.arguments.probes
         if self.arguments.from_country:
             r["type"] = "country"
             r["value"] = self.arguments.from_country

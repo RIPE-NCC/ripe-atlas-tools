@@ -2,7 +2,7 @@ from __future__ import print_function, absolute_import
 
 from ripe.atlas.cousteau import AtlasRequest
 
-from ..streaming import Stream
+from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
 
 
@@ -24,6 +24,11 @@ class Command(BaseCommand):
             type=int,
             help="The measurement id you want streamed"
         )
+        self.parser.add_argument(
+            "--limit",
+            type=int,
+            help="The maximum number of results you want to stream"
+        )
 
     def run(self):
 
@@ -32,6 +37,7 @@ class Command(BaseCommand):
         detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
 
         try:
-            Stream.stream(detail["type"]["name"], pk)
-        except KeyboardInterrupt:
+            Stream(capture_limit=self.arguments.limit).stream(
+                detail["type"]["name"], pk)
+        except (KeyboardInterrupt, CaptureLimitExceeded):
             self.ok("Disconnecting from the stream")
