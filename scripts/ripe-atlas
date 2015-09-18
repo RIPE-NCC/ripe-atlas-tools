@@ -5,6 +5,7 @@ import pkgutil
 import re
 import sys
 
+from ripe.atlas.tools import commands
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 
 
@@ -24,16 +25,8 @@ class RipeAtlas(object):
         we find any files there, we add them to the list here.
         """
 
-        paths = [
-            os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "ripe",
-                "atlas",
-                "tools",
-                "commands"
-            )
-        ]
+        paths = [os.path.dirname(commands.__file__)]
+
         if "HOME" in os.environ:
             paths += [os.path.join(
                 os.environ["HOME"], ".config", "ripe-atlas-tools", "commands")]
