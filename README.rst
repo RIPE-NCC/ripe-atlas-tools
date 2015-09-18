@@ -12,7 +12,6 @@ must point to this git repo for anything to work:
 
 .. code:: bash
 
-    $ pip install git+github.com:RIPE-NCC/ripe.atlas.sagan.git#egg=ripe.atlas.sagan
     $ pip install git+github.com:RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
 
 Note that there are lots of dependencies that will automatically be drawn in and
