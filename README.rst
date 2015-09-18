@@ -28,15 +28,17 @@ Viewing Public Data
 Creating a Measurement
 ::::::::::::::::::::::
 
-1. Log into [RIPE Atlas](https://atlas.ripe.net/).  If you don't have an
+1. Log into `RIPE Atlas`_.  If you don't have an
    account, you can create one there for free.
-2. Visit the [API Keys](https://atlas.ripe.net/keys/) page and create a new key
+2. Visit the `API Keys`_ page and create a new key
    with the permission ``Create a new user defined measurement``
 3. Install the toolkit as below.
 4. Configure the toolkit to use your key with ``ripe-atlas configure --set authorisation.create=MY_API_KEY``
 5. View the help for measurement creation with ``ripe-atlas measure --help``
 5. Create a measurement with ``ripe-atlas measure ping --target example.com``
 
+.. _`RIPE Atlas`: https://atlas.ripe.net/
+.. _`API Keys`: https://atlas.ripe.net/keys/
 
 Installation
 ------------
