@@ -7,8 +7,14 @@ The official command-line client for RIPE Atlas.
 Installation
 ------------
 
-Currently, only Python's package manager (``pip``) is supported, and even that
-must point to this git repo for anything to work:
+Currently, only Python's package manager (``pip``) is supported:
+
+.. code:: bash
+
+    $ pip install ripe.atlas.tools
+
+Or if you want to live on the edge and perhaps try submitting a pull request of
+your own:
 
 .. code:: bash
 
@@ -40,6 +46,7 @@ only three packages are required, but they each have a lot of dependencies:
                     pycparser
     tzlocal
         pytz
+    pyyaml
 
 In the future, we're going to make it easier to install though, with an eye on
 integrating with end-user-friendly tools like ``apt``, ``rpm``, and ``emerge``.

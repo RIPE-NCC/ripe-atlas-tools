@@ -28,6 +28,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
             "ripe.atlas.cousteau>=0.9.1",
             "ripe.atlas.sagan>=1.1.0",
             "tzlocal",
+            "pyyaml",
         ],
         tests_require=["nose"],
         extras_require={
