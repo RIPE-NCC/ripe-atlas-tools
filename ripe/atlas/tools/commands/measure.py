@@ -208,10 +208,10 @@ class Command(BaseCommand):
             self._handle_api_error(response)  # Raises an exception
 
         pk = response["measurements"][0]
-        url = "{}/measurements/{}/".format(conf["ripe-ncc"]["endpoint"], pk)
+        url = "{0}/measurements/{1}/".format(conf["ripe-ncc"]["endpoint"], pk)
         self.ok(
             "Looking good!  Your measurement was created and details about "
-            "it can be found here:\n\n  {}".format(url)
+            "it can be found here:\n\n  {0}".format(url)
         )
 
         if not self.arguments.no_report:
@@ -223,7 +223,7 @@ class Command(BaseCommand):
                 pass  # User said stop, so we fall through to the finally block.
             finally:
                 self.ok("Disconnecting from stream\n\nYou can find details "
-                        "about this measurement here:\n\n  {}".format(url))
+                        "about this measurement here:\n\n  {0}".format(url))
 
     def clean_target(self):
 
@@ -324,7 +324,7 @@ class Command(BaseCommand):
 
         elif self.arguments.type == "dns":
             for opt in ("class", "type", "argument"):
-                if not getattr(self.arguments, "query_{}".format(opt)):
+                if not getattr(self.arguments, "query_{0}".format(opt)):
                     raise RipeAtlasToolsException(
                         "DNS measurements require a query type, class, and "
                         "argument"
@@ -369,7 +369,7 @@ class Command(BaseCommand):
         if "HTTP_MSG" in response:
 
             message = "There was a problem communicating with the RIPE Atlas " \
-                      "infrastructure.  The message given was:\n\n  {}".format(
+                      "infrastructure.  The message given was:\n\n  {0}".format(
                       response["HTTP_MSG"])
 
             try:

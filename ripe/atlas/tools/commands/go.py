@@ -5,7 +5,7 @@ from .base import Command as BaseCommand
 class Command(BaseCommand):
 
     DESCRIPTION = "Visit the web page for a specific measurement"
-    URL = "https://atlas.ripe.net/measurements/{}/"
+    URL = "https://atlas.ripe.net/measurements/{0}/"
 
     def add_arguments(self):
         self.parser.add_argument(
@@ -19,5 +19,5 @@ class Command(BaseCommand):
         if not webbrowser.open(url):
             self.ok(
                 "It looks like your system doesn't have a web browser "
-                "available.  You'll have to go there manually: {}".format(url)
+                "available.  You'll have to go there manually: {0}".format(url)
             )

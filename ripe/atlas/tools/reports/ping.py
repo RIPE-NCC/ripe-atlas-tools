@@ -13,7 +13,7 @@ class PingReport(Report):
         if not packets:
             return json.dumps(result.raw_data) + "\n"
 
-        return "{} bytes from probe #{:<5} {:15} to {} ({}): ttl={} times:{}\n".format(
+        return "{0} bytes from probe #{1:<5} {2:15} to {3} ({4}): ttl={5} times:{6}\n".format(
             result.packet_size,
             result.probe_id,
             packets[0].source_address,

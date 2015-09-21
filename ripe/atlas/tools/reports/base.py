@@ -20,9 +20,9 @@ class Report(object):
     def get_formatter(name):
         return getattr(
             importlib.import_module(
-                ".{}".format(name),
+                ".{0}".format(name),
                 package="ripe.atlas.tools.reports"),
-            "{}Report".format(name.capitalize())
+            "{0}Report".format(name.capitalize())
         )
 
     @classmethod

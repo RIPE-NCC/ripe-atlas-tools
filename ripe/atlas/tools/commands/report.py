@@ -15,8 +15,8 @@ class Command(BaseCommand):
 
     DESCRIPTION = "Report the results of a measurement"
     URLS = {
-        "detail": "/api/v2/measurements/{}.json",
-        "latest": "/api/v2/measurements/{}/latest.json",
+        "detail": "/api/v2/measurements/{0}.json",
+        "latest": "/api/v2/measurements/{0}/latest.json",
     }
 
     def add_arguments(self):
@@ -44,7 +44,7 @@ class Command(BaseCommand):
 
         latest_url = self.URLS["latest"].format(pk)
         if self.arguments.probes:
-            latest_url += "?probes={}".format(self.arguments.probes)
+            latest_url += "?probes={0}".format(self.arguments.probes)
 
         detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
         latest = AtlasRequest(url_path=latest_url).get()[1]
@@ -65,7 +65,7 @@ class Command(BaseCommand):
 
         description = detail["description"] or ""
         if description:
-            description = "\n{}\n\n".format(description)
+            description = "\n{0}\n\n".format(description)
 
         print(formatter_instance.render(
             "reports/base.txt",

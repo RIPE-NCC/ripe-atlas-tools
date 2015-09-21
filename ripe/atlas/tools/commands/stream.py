@@ -10,8 +10,7 @@ class Command(BaseCommand):
 
     DESCRIPTION = "Report the results of a measurement"
     URLS = {
-        "detail": "/api/v2/measurements/{}.json",
-        "latest": "/api/v2/measurements/{}/latest.json",
+        "detail": "/api/v2/measurements/{0}.json",
     }
 
     def __init__(self, *args, **kwargs):
