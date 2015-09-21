@@ -36,21 +36,41 @@ class Configuration(object):
             "types": {
                 "ping": {
                     "packets": 3,
+                    "packet-interval": 1000,
                     "size": 48
                 },
                 "traceroute": {
                     "packets": 3,
                     "size": 48,
                     "protocol": "ICMP",
+                    "dontfrag": False,
+                    "paris": 0,
+                    "firsthop": 1,
+                    "maxhops": 255,
+                    "port": 80,
+                    "destination-option-size": None,
+                    "hop-by-hop-option-size": None,
+                    "timeout": 4000
+                },
+                "ssl": {
+                    "port": 443
+                },
+                "ntp": {
+                    "packets": 3,
                     "timeout": 4000
                 },
                 "dns": {
+                    "cd": False,
+                    "do": False,
+                    "protocol": "UDP",
                     "query-class": "IN",
                     "query-type": "A",
                     "query-argument": None,
+                    "use-nsid": False,
                     "use-probe-resolver": False,
-                    "protocol": "UDP",
-                    "udp-payload-size": 512
+                    "udp-payload-size": 512,
+                    "recursion-desired": True,
+                    "retry": 0
                 }
             }
         },

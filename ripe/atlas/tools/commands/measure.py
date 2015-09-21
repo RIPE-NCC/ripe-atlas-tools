@@ -152,6 +152,14 @@ class Command(BaseCommand):
                  "UDP and TCP, but traceroutes may use ICMP as well"
         )
 
+        ping = self.parser.add_argument_group(
+            "Ping Measurements")
+        ping.add_argument(
+            "--packet-interval",
+            type=int,
+            default=conf["specification"]["types"]["ping"]["packet-interval"],
+        )
+
         traceroute = self.parser.add_argument_group(
             "Traceroute Measurements")
         traceroute.add_argument(
@@ -160,24 +168,88 @@ class Command(BaseCommand):
             default=conf["specification"]["types"]["traceroute"]["timeout"],
             help="The timeout per-packet"
         )
+        traceroute.add_argument(
+            "--dontfrag",
+            type=bool,
+            default=conf["specification"]["types"]["traceroute"]["dontfrag"],
+            help="Don't Fragment the packet"
+        )
+        traceroute.add_argument(
+            "--paris",
+            type=int,
+            default=conf["specification"]["types"]["traceroute"]["paris"],
+            help="Use Paris. Value must be between 0 and 64."
+                 "If 0, a standard traceroute will be performed"
+        )
+        traceroute.add_argument(
+            "--firsthop",
+            type=int,
+            default=conf["specification"]["types"]["traceroute"]["firsthop"],
+            help="Value must be between 1 and 255"
+        )
+        traceroute.add_argument(
+            "--maxhops",
+            type=int,
+            default=conf["specification"]["types"]["traceroute"]["maxhops"],
+            help="Value must be between 1 and 255"
+        )
+        traceroute.add_argument(
+            "--port",
+            type=int,
+            default=conf["specification"]["types"]["traceroute"]["port"],
+            help="Destination port, valid for TCP only"
+        )
+        traceroute.add_argument(
+            "--destination-option-size",
+            type=int,
+            default=conf["specification"]["types"]["traceroute"]["destination-option-size"],
+            help="IPv6 destination option header"
+        )
+        traceroute.add_argument(
+            "--hop-by-hop-option-size",
+            type=int,
+            default=conf["specification"]["types"]["traceroute"]["hop-by-hop-option-size"],
+            help=" IPv6 hop by hop option header"
+        )
 
         dns = self.parser.add_argument_group("DNS Measurements")
+        dns.add_argument(
+            "--cd",
+            type=bool,
+            default=conf["specification"]["types"]["dns"]["cd"],
+            help="Set the DNSSEC Checking Disabled flag (RFC4035)"
+        )
+        dns.add_argument(
+            "--do",
+            type=bool,
+            default=conf["specification"]["types"]["dns"]["do"],
+            help="Set the DNSSEC OK flag (RFC3225)"
+        )
         dns.add_argument(
             "--query-class",
             type=str,
             choices=("IN", "CHAOS"),
             default=conf["specification"]["types"]["dns"]["query-class"],
+            help='Must be either "IN" or "CHAOS"'
         )
         dns.add_argument(
             "--query-type",
             type=str,
             choices=Message.ANSWER_CLASSES.keys() + ["ANY"],  # The only ones we can parse
             default=conf["specification"]["types"]["dns"]["query-type"],
+            help="Varies with the query_class"
         )
         dns.add_argument(
             "--query-argument",
             type=str,
             default=conf["specification"]["types"]["dns"]["query-argument"],
+            help="The DNS label to query"
+        )
+        dns.add_argument(
+            "--use-nsid",
+            type=bool,
+            default=conf["specification"]["types"]["dns"]["use-nsid"],
+            help="Include an EDNS name server ID request with the query"
         )
         dns.add_argument(
             "--use-probe-resolver",
@@ -191,6 +263,19 @@ class Command(BaseCommand):
             "--udp-payload-size",
             type=int,
             default=conf["specification"]["types"]["dns"]["udp-payload-size"],
+            help="May be any integer between 512 and 4096 inclusive"
+        )
+        dns.add_argument(
+            "--recursion-desired",
+            type=bool,
+            default=conf["specification"]["types"]["dns"]["recursion-desired"],
+            help="Set the Recursion Desired flag"
+        )
+        dns.add_argument(
+            "--retry",
+            type=int,
+            default=conf["specification"]["types"]["dns"]["retry"],
+            help="Number of times to retry"
         )
 
     def run(self):
@@ -299,8 +384,8 @@ class Command(BaseCommand):
 
         r["is_oneoff"] = True
         if self.arguments.interval or spec["times"]["interval"]:
-            r["is_oneoff"] = False
             r["interval"] = self.arguments.interval
+            r["is_oneoff"] = False
             self.arguments.no_report = True
         elif not spec["times"]["one-off"]:
             raise RipeAtlasToolsException(
@@ -314,12 +399,20 @@ class Command(BaseCommand):
 
         if self.arguments.type == "ping":
             r["packets"] = self.clean_shared_option("ping", "packets")
+            r["packet_interval"] = self.arguments.packet_interval
             r["size"] = self.clean_shared_option("ping", "size")
 
         elif self.arguments.type == "traceroute":
+            r["destination_option_size"] = self.arguments.destination_option_size
+            r["dontfrag"] = self.arguments.dontfrag
+            r["firsthop"] = self.arguments.firsthop
+            r["hop_by_hop_option_size"] = self.arguments.hop_by_hop_option_size
+            r["maxhops"] = self.arguments.maxhops
             r["packets"] = self.clean_shared_option("traceroute", "packets")
-            r["size"] = self.clean_shared_option("traceroute", "size")
+            r["paris"] = self.arguments.paris
+            r["port"] = self.arguments.port
             r["protocol"] = self.clean_protocol()
+            r["size"] = self.clean_shared_option("traceroute", "size")
             r["timeout"] = self.arguments.timeout
 
         elif self.arguments.type == "dns":
@@ -329,12 +422,18 @@ class Command(BaseCommand):
                         "DNS measurements require a query type, class, and "
                         "argument"
                     )
+            r["cd"] = self.arguments.cd
+            r["do"] = self.arguments.do
             r["protocol"] = self.clean_protocol()
+            r["query_argument"] = self.arguments.query_argument
             r["query_class"] = self.arguments.query_class
             r["query_type"] = self.arguments.query_type
-            r["query_argument"] = self.arguments.query_argument
-            r["use_probe_resolver"] = self.arguments.use_probe_resolver
+            r["recursion_desired"] = self.argiuments.recursion_desired
+            r["retry"] = self.arguments.retry
+            r["use_NSID"] = self.arguments.use_nsid
             r["udp_payload_size"] = self.arguments.udp_payload_size
+            r["use_probe_resolver"] = self.arguments.use_probe_resolver
+
 
         return r
 
