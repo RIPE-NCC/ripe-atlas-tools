@@ -54,7 +54,7 @@ your own:
 
 .. code:: bash
 
-    $ pip install -e git+github.com:RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
+    $ pip install https://github.com/RIPE-NCC/ripe-atlas-tools/zipball/master
 
 Note that there are lots of dependencies that will automatically be drawn in and
 installed at the moment, but we're going to try to scale that down.  Currently
