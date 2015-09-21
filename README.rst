@@ -64,6 +64,7 @@ only three packages are required, but they each have a lot of dependencies:
 
     ripe.atlas.cousteau
         python-dateutil
+        requests
         socketIO-client
             websocket-client
                 backports.ssl-match-hostname
