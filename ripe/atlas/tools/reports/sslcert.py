@@ -9,22 +9,21 @@ class SslcertReport(Report):
 
     @classmethod
     def format(cls, result, probes=None):
-        res = "\n"
-        for cert in result.certificates:
-            res += "Certificate:\n"
-            res += "    Issuer: C={c}, O={o}, CN={cn}\n".format(
-                c=cert.issuer_c,
-                o=cert.issuer_o,
-                cn=cert.issuer_cn)
-            res += "    Validity\n"
-            res += "        Not Before: {nb}\n".format(
-              nb=cert.valid_from)
-            res += "        Not After : {na}\n".format(
-              na=cert.valid_until)
-            res += "    Subject: C={c}, O={o}, CN={cn}\n".format(
-                c=cert.subject_c,
-                o=cert.subject_o,
-                cn=cert.subject_cn)
+        r = ""
+        for certificate in result.certificates:
+            r += cls.get_formatted_response(certificate)
+        return "\nProbe #{0}\n{1}\n".format(result.probe_id, r)
 
-        return res
- 
+    @classmethod
+    def get_formatted_response(cls, certificate):
+        return cls.render(
+            "reports/sslcert.txt",
+            issuer_c=certificate.issuer_c,
+            issuer_o=certificate.issuer_o,
+            issuer_cn=certificate.issuer_cn,
+            not_before=certificate.valid_from,
+            not_after=certificate.valid_until,
+            subject_c=certificate.subject_c,
+            subject_o=certificate.subject_o,
+            subject_cn=certificate.subject_cn
+        )

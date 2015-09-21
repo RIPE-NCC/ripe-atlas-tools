@@ -1,0 +1,6 @@
+  Certificate:
+    Issuer: C={issuer_c}, O={issuer_o}, CN={issuer_cn}
+    Validity
+        Not Before: {not_before}
+        Not After : {not_after}
+    Subject: C={subject_c}, O={subject_o}, CN={subject_cn}
