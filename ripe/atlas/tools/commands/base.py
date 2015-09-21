@@ -46,5 +46,6 @@ class Command(object):
         pass
 
     def ok(self, message):
-        sys.stdout.write("\n{}{}{}\n\n".format(
-            self.COLOURS["green"], message, self.COLOURS["reset"]))
+        if sys.stdout.isatty():
+            message = self.COLOURS["green"] + message + self.COLOURS["reset"]
+        sys.stdout.write("\n{0}\n\n".format(message))
