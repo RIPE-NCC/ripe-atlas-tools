@@ -22,4 +22,4 @@ class TracerouteReport(Report):
                 "ms  ".join(["{:8}".format(rtt) for rtt in rtts])
             )
 
-        return "\nProbe #{}\n\n{}".format(result.probe_id, r)
+        return "\nProbe #{0}\n\n{1}".format(result.probe_id, r)
