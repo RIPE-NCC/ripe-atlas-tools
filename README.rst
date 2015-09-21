@@ -35,7 +35,7 @@ Creating a Measurement
 3. Install the toolkit as below.
 4. Configure the toolkit to use your key with ``ripe-atlas configure --set authorisation.create=MY_API_KEY``
 5. View the help for measurement creation with ``ripe-atlas measure --help``
-5. Create a measurement with ``ripe-atlas measure ping --target example.com``
+6. Create a measurement with ``ripe-atlas measure ping --target example.com``
 
 .. _`RIPE Atlas`: https://atlas.ripe.net/
 .. _`API Keys`: https://atlas.ripe.net/keys/
@@ -54,7 +54,7 @@ your own:
 
 .. code:: bash
 
-    $ pip install -e git+github.com:RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
+    $ pip install -e git+https://github.com/RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
 
 Note that there are lots of dependencies that will automatically be drawn in and
 installed at the moment, but we're going to try to scale that down.  Currently
