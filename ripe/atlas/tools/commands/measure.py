@@ -371,9 +371,10 @@ class Command(BaseCommand):
 
         if "HTTP_MSG" in response:
 
-            message = "There was a problem communicating with the RIPE Atlas " \
-                      "infrastructure.  The message given was:\n\n  {0}".format(
-                      response["HTTP_MSG"])
+            message = (
+                "There was a problem communicating with the RIPE Atlas "
+                "infrastructure.  The message given was:\n\n  {0}"
+            ).format(response["HTTP_MSG"])
 
             try:
                 message += "\n  " + json.loads(
