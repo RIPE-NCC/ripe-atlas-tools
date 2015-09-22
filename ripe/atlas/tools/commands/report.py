@@ -7,11 +7,13 @@ from ripe.atlas.sagan import Result, ResultError
 
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
-from ..reports import Report
+from ..renderers import Renderer
 from .base import Command as BaseCommand
 
 
 class Command(BaseCommand):
+
+    NAME = "report"
 
     DESCRIPTION = "Report the results of a measurement"
     URLS = {
@@ -23,6 +25,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=int,
+            nargs="?",
             help="The measurement id you want reported"
         )
         self.parser.add_argument(
@@ -30,6 +33,12 @@ class Command(BaseCommand):
             type=ArgumentType.comma_separated_integers,
             help="A comma-separated list of probe ids you want to see "
                  "exclusively"
+        )
+        self.parser.add_argument(
+            "--renderer",
+            choices=Renderer.get_available(),
+            help="The renderer you want to use. If this isn't defined, an "
+                 "appropriate renderer will be selected."
         )
 
     def get_probes(self):
@@ -53,7 +62,8 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
 
-        formatter_instance = Report.get_formatter(detail["type"]["name"])()
+        formatter_instance = Renderer.get_renderer(
+            self.arguments.renderer, detail["type"]["name"])()
 
         payload = ""
         for result in latest:

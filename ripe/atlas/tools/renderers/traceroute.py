@@ -1,7 +1,9 @@
-from .base import Report
+from .base import Renderer as BaseRenderer
 
 
-class TracerouteReport(Report):
+class Renderer(BaseRenderer):
+
+    RENDERS = [BaseRenderer.TYPE_TRACEROUTE]
 
     @classmethod
     def format(cls, result, probes=None):

@@ -1,11 +1,13 @@
-from .base import Report
+from .base import Renderer as BaseRenderer
 import OpenSSL
 
-class SslcertReport(Report):
+class Renderer(BaseRenderer):
     """
     Somehow, we need to figure out how to make an SSL result look like the the
     output from `openssl x509 -in w00t -noout -text`.
     """
+
+    RENDERS = [BaseRenderer.TYPE_TLS]
 
     @classmethod
     def format(cls, result, probes=None):

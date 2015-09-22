@@ -8,6 +8,8 @@ from .base import Command as BaseCommand
 
 class Command(BaseCommand):
 
+    NAME = "configure"
+
     EDITOR = os.environ.get("EDITOR", "/usr/bin/vim")
     DESCRIPTION = "An easy way to configure this tool.  Alternatively, you " \
                   "can always just create/edit {0}".format(Configuration.USER_RC)

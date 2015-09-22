@@ -15,6 +15,8 @@ from .base import Command as BaseCommand
 
 class Command(BaseCommand):
 
+    NAME = "measure"
+
     DESCRIPTION = "Create a measurement and optionally wait for the results"
 
     CREATION_CLASSES = {
@@ -32,6 +34,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "type",
             type=str,
+            nargs="?",
             choices=self.CREATION_CLASSES.keys(),
             help="The type of measurement you want to create"
         )
@@ -368,9 +371,10 @@ class Command(BaseCommand):
 
         if "HTTP_MSG" in response:
 
-            message = "There was a problem communicating with the RIPE Atlas " \
-                      "infrastructure.  The message given was:\n\n  {0}".format(
-                      response["HTTP_MSG"])
+            message = (
+                "There was a problem communicating with the RIPE Atlas "
+                "infrastructure.  The message given was:\n\n  {0}"
+            ).format(response["HTTP_MSG"])
 
             try:
                 message += "\n  " + json.loads(
