@@ -62,22 +62,24 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
 
-        formatter_instance = Renderer.get_renderer(
+        renderer = Renderer.get_renderer(
             self.arguments.renderer, detail["type"]["name"])()
 
-        payload = ""
+        payload = renderer.on_start()
         for result in latest:
             result = Result.get(result)
             try:
-                payload += formatter_instance.format(result, probes=probes)
+                payload += renderer.on_result(result, probes=probes)
             except ResultError:
                 payload += json.dumps(result) + "\n"
+
+        payload += renderer.on_finish()
 
         description = detail["description"] or ""
         if description:
             description = "\n{0}\n\n".format(description)
 
-        print(formatter_instance.render(
+        print(renderer.render(
             "reports/base.txt",
             measurement_id=self.arguments.measurement_id,
             description=description,

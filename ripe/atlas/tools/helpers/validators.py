@@ -23,5 +23,3 @@ class ArgumentType(object):
                     "integers without spaces.  Example: 1,2,34,157,10006"
                 )
         return string
-
-

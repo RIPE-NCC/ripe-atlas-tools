@@ -16,7 +16,6 @@ class Renderer(BaseRenderer):
         BaseRenderer.TYPE_NTP
     ]
 
-    @classmethod
-    def format(cls, result, probes=None):
+    def on_result(self, result, probes=None):
         if not probes or result.probe_id in probes:
             return json.dumps(result.raw_data, separators=(",", ":")) + "\n"

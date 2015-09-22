@@ -9,11 +9,10 @@ class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_TLS]
 
-    @classmethod
-    def format(cls, result, probes=None):
+    def on_result(self, result, probes=None):
         r = ""
         for certificate in result.certificates:
-            r += cls.get_formatted_response(certificate)
+            r += self.get_formatted_response(certificate)
         return "\nProbe #{0}\n{1}\n".format(result.probe_id, r)
 
     @classmethod

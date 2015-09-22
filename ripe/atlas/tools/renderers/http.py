@@ -5,6 +5,5 @@ class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_HTTP]
 
-    @classmethod
-    def format(cls, result, probes=None):
+    def on_result(self, result, probes=None):
         print("Not ready yet\n")

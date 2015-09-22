@@ -7,8 +7,7 @@ class Renderer(BaseRenderer):
     RENDERS = [BaseRenderer.TYPE_DNS]
     TIME_FORMAT = "%a %b %d %H:%M:%S %Z %Y"
 
-    @classmethod
-    def format(cls, result, probes=None):
+    def on_result(self, result, probes=None):
 
         created = result.created.astimezone(get_localzone())
         probe_id = result.probe_id
@@ -19,7 +18,7 @@ class Renderer(BaseRenderer):
 
         r = "\n\nProbe #{0}\n{1}\n".format(probe_id, "=" * 79)
         for response in result.responses:
-            r += cls.get_formatted_response(probe_id, created, response)
+            r += self.get_formatted_response(probe_id, created, response)
 
         return r
 
