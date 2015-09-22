@@ -1,9 +1,10 @@
 from tzlocal import get_localzone
-from .base import Report
+from .base import Renderer as BaseRenderer
 
 
-class DnsReport(Report):
+class Renderer(BaseRenderer):
 
+    RENDERS = [BaseRenderer.TYPE_DNS]
     TIME_FORMAT = "%a %b %d %H:%M:%S %Z %Y"
 
     @classmethod
@@ -44,7 +45,9 @@ class DnsReport(Report):
 
             "reports/dns.txt",
 
-            response_id=response.response_id,
+            # Older measurements don't have a response_id
+            response_id=response.response_id or 1,
+
             probe=probe_id,
 
             question_name=response.abuf.questions[0].name,

@@ -5,7 +5,7 @@ import sys
 from ripe.atlas.cousteau import AtlasStream
 from ripe.atlas.sagan import Result
 
-from .reports import Report
+from .renderers import Renderer
 
 
 class CaptureLimitExceeded(Exception):
@@ -20,7 +20,7 @@ class Stream(object):
 
     def stream(self, kind, pk):
 
-        formatter = Report.get_formatter(kind)
+        formatter = Renderer.get_renderer(kind=kind)
 
         def on_result_response(result, *args):
             sys.stdout.write(formatter.format(Result.get(result)))
