@@ -29,6 +29,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
             "ripe.atlas.sagan>=1.1.1",
             "tzlocal",
             "pyyaml",
+            "pyOpenSSL>=0.13"
         ],
         tests_require=["nose"],
         extras_require={
