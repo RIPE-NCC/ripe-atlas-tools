@@ -13,6 +13,8 @@ from .base import Command as BaseCommand
 
 class Command(BaseCommand):
 
+    NAME = "report"
+
     DESCRIPTION = "Report the results of a measurement"
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
@@ -23,6 +25,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=int,
+            nargs="?",
             help="The measurement id you want reported"
         )
         self.parser.add_argument(
