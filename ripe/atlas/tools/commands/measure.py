@@ -15,6 +15,8 @@ from .base import Command as BaseCommand
 
 class Command(BaseCommand):
 
+    NAME = "measure"
+
     DESCRIPTION = "Create a measurement and optionally wait for the results"
 
     CREATION_CLASSES = {
@@ -32,6 +34,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "type",
             type=str,
+            nargs="?",
             choices=self.CREATION_CLASSES.keys(),
             help="The type of measurement you want to create"
         )

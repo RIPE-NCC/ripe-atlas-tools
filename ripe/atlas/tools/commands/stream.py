@@ -13,6 +13,8 @@ class Command(BaseCommand):
         "detail": "/api/v2/measurements/{0}.json",
     }
 
+    NAME = "stream"
+
     def __init__(self, *args, **kwargs):
         BaseCommand.__init__(self, *args, **kwargs)
         self.formatter = None
@@ -21,6 +23,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=int,
+            nargs='?',
             help="The measurement id you want streamed"
         )
         self.parser.add_argument(
