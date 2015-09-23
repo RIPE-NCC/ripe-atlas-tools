@@ -65,6 +65,10 @@ class Renderer(object):
                     r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
                 except ImportError:
                     raise RipeAtlasToolsException(error_message)
+
+        if kind:
+            cls._test_renderer_accepts_kind(r,kind)
+
         return r
 
     @staticmethod
