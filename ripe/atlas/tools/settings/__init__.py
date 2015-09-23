@@ -48,7 +48,7 @@ class Configuration(object):
                     "query-class": "IN",
                     "query-type": "A",
                     "query-argument": None,
-                    "use-probe-resolver": False,
+                    "use-probe-resolver": True,
                     "protocol": "UDP",
                     "udp-payload-size": 512
                 }

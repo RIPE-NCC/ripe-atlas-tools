@@ -8,6 +8,7 @@ from ripe.atlas.sagan.dns import Message
 
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
+from ..renderers import Renderer
 from ..settings import conf
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
@@ -39,6 +40,15 @@ class Command(BaseCommand):
             help="The type of measurement you want to create"
         )
 
+        # Optional
+
+        self.parser.add_argument(
+            "--renderer",
+            choices=Renderer.get_available(),
+            help="The renderer you want to use. If this isn't defined, an "
+                 "appropriate renderer will be selected."
+        )
+
         # Standard for all types
 
         self.parser.add_argument(
@@ -63,7 +73,9 @@ class Command(BaseCommand):
         self.parser.add_argument(  # Most types
             "--target",
             type=str,
-            help="The target, either a domain name or IP address"
+            help="The target, either a domain name or IP address.  If creating"
+                 "a DNS measurement, the absence of this option will imply"
+                 "that you wish to use the probe's resolver."
         )
         self.parser.add_argument(
             "--no-report",
@@ -170,25 +182,23 @@ class Command(BaseCommand):
             type=str,
             choices=("IN", "CHAOS"),
             default=conf["specification"]["types"]["dns"]["query-class"],
+            help='The query class.  The default is "{}"'.format(
+                conf["specification"]["types"]["dns"]["query-class"]
+            )
         )
         dns.add_argument(
             "--query-type",
             type=str,
             choices=Message.ANSWER_CLASSES.keys() + ["ANY"],  # The only ones we can parse
             default=conf["specification"]["types"]["dns"]["query-type"],
+            help='The query type.  The default is "{}"'.format(
+                conf["specification"]["types"]["dns"]["query-type"]
+            )
         )
         dns.add_argument(
             "--query-argument",
             type=str,
             default=conf["specification"]["types"]["dns"]["query-argument"],
-        )
-        dns.add_argument(
-            "--use-probe-resolver",
-            action="store_true",
-            default=conf["specification"]["types"]["dns"]["use-probe-resolver"],
-            help="Use the probe's list of local resolvers instead of "
-                 "specifying a target to use as the resolver.  Note that this "
-                 "may not be used with --target"
         )
         dns.add_argument(
             "--udp-payload-size",
@@ -221,7 +231,7 @@ class Command(BaseCommand):
             self.ok("Connecting to stream...")
             try:
                 Stream(capture_limit=self.arguments.probes).stream(
-                    self.arguments.type, pk)
+                    self.arguments.renderer, self.arguments.type, pk)
             except (KeyboardInterrupt, CaptureLimitExceeded):
                 pass  # User said stop, so we fall through to the finally block.
             finally:
@@ -232,13 +242,7 @@ class Command(BaseCommand):
 
         # DNS measurements are a special case for targets
         if self.arguments.type == "dns":
-            if self.arguments.use_probe_resolver:
-                if self.arguments.target:
-                    raise RipeAtlasToolsException(
-                        "You may not specify a target for a DNS measurement "
-                        "that uses the probe's resolver"
-                    )
-                return None
+            return self.arguments.target
 
         # All other measurement types require it
         if not self.arguments.target:
@@ -336,7 +340,7 @@ class Command(BaseCommand):
             r["query_class"] = self.arguments.query_class
             r["query_type"] = self.arguments.query_type
             r["query_argument"] = self.arguments.query_argument
-            r["use_probe_resolver"] = self.arguments.use_probe_resolver
+            r["use_probe_resolver"] = not bool(target)
             r["udp_payload_size"] = self.arguments.udp_payload_size
 
         return r
