@@ -78,7 +78,7 @@ class Renderer(object):
     def _test_renderer_accepts_kind(renderer, kind):
         if kind not in renderer.RENDERS:
             raise RipeAtlasToolsException(
-                'The rederer selected does not appear to support measurements'
+                'The renderer selected does not appear to support measurements'
                 'of type "{0}"'.format(kind)
             )
 
