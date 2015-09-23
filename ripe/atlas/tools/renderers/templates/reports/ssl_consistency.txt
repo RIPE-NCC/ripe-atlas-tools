@@ -1,0 +1,6 @@
+Certificate:
+  Issuer: C={issuer_c}, O={issuer_o}, CN={issuer_cn}
+  Subject: C={subject_c}, O={subject_o}, CN={subject_cn}
+  SHA256 Fingerprint={sha256fp}
+
+  Seen by {seenby} probe{s}
