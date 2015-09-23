@@ -58,7 +58,7 @@ your own:
 
 Note that there are lots of dependencies that will automatically be drawn in and
 installed at the moment, but we're going to try to scale that down.  Currently
-only three packages are required, but they each have a lot of dependencies:
+only the following packages are required, but they each have a lot of dependencies:
 
 ::
 
@@ -84,6 +84,7 @@ only three packages are required, but they each have a lot of dependencies:
     tzlocal
         pytz
     pyyaml
+    pyOpenSSL>=0.13
 
 In the future, we're going to make it easier to install though, with an eye on
 integrating with end-user-friendly tools like ``apt``, ``rpm``, and ``emerge``.
