@@ -117,7 +117,8 @@ code from GitHub, then Gentoo will have everything ready for you.
 Apple OSX
 .........
 
-TBD
+Get a free copy of Xcode from the app store, and from there you should be good
+to go.
 
 Ready
 :::::
