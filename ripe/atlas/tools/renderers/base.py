@@ -53,7 +53,7 @@ class Renderer(object):
     @classmethod
     def get_renderer(cls, name=None, kind=None):
 
-        error_message = 'The renderer you selected, "{0}" could not be found.'.format(name)
+        error_message = 'The renderer you selected, "{}" could not be found.'.format(name)
 
         try:  # User-defined, user-supplied
             r = cls.import_renderer("renderers", name)
@@ -79,7 +79,7 @@ class Renderer(object):
         if kind not in renderer.RENDERS:
             raise RipeAtlasToolsException(
                 'The renderer selected does not appear to support measurements'
-                'of type "{0}"'.format(kind)
+                'of type "{}"'.format(kind)
             )
 
     def on_start(self):
