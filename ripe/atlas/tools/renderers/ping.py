@@ -1,4 +1,5 @@
 from .base import Renderer as BaseRenderer
+from .base import Result
 
 
 class Renderer(BaseRenderer):
@@ -12,7 +13,8 @@ class Renderer(BaseRenderer):
         if not packets:
             return "No packets found"
 
-        return "{0} bytes from probe #{1:<5} {2:15} to {3} ({4}): ttl={5} times:{6}\n".format(
+        line = "{} bytes from probe #{:<5} {:15} to {} ({}): ttl={} times:{}\n"
+        return Result(line.format(
             result.packet_size,
             result.probe_id,
             packets[0].source_address,
@@ -20,4 +22,4 @@ class Renderer(BaseRenderer):
             result.destination_address,
             packets[0].ttl,
             " ".join(["{:8}".format(str(_.rtt) + ",") for _ in packets])
-        )
+        ), result.probe_id)

@@ -17,9 +17,6 @@ class Renderer(object):
 
     RENDERS = ()
 
-    # def __init__(self, parser):
-    #     self.parser = parser
-
     @staticmethod
     def get_available():
 
@@ -67,7 +64,7 @@ class Renderer(object):
                     raise RipeAtlasToolsException(error_message)
 
         if kind:
-            cls._test_renderer_accepts_kind(r,kind)
+            cls._test_renderer_accepts_kind(r, kind)
 
         return r
 
@@ -107,3 +104,14 @@ class Renderer(object):
         return a string, even if that string is "".
         """
         return ""
+
+
+class Result(str):
+    """
+    A string-like object that we can use to render results, but that contains
+    enough information to be used by the aggregators if need be.
+    """
+    def __new__(cls, value, probe_id):
+        obj = str.__new__(cls, value)
+        obj.probe_id = probe_id
+        return obj

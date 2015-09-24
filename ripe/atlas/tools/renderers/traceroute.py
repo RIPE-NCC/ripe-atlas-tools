@@ -1,4 +1,5 @@
 from .base import Renderer as BaseRenderer
+from .base import Result
 
 
 class Renderer(BaseRenderer):
@@ -23,4 +24,7 @@ class Renderer(BaseRenderer):
                 "ms  ".join(["{0:8}".format(rtt) for rtt in rtts])
             )
 
-        return "\nProbe #{0}\n\n{1}".format(result.probe_id, r)
+        return Result(
+            "\nProbe #{0}\n\n{1}".format(result.probe_id, r),
+            result.probe_id
+        )

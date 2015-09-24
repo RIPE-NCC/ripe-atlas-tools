@@ -1,10 +1,9 @@
 from __future__ import print_function
 
-import json
-
 from ripe.atlas.cousteau import AtlasRequest
-from ripe.atlas.sagan import Result, ResultError
 
+from ..aggregators.country import CountryAggregator
+from ..aggregators.simple import SimpleAggregator
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
@@ -19,6 +18,10 @@ class Command(BaseCommand):
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
         "latest": "/api/v2/measurements/{0}/latest.json",
+    }
+    AGGREGATORS = {
+        "simple": SimpleAggregator,
+        "country": CountryAggregator,
     }
 
     def add_arguments(self):
@@ -40,6 +43,14 @@ class Command(BaseCommand):
             help="The renderer you want to use. If this isn't defined, an "
                  "appropriate renderer will be selected."
         )
+        self.parser.add_argument(
+            "--aggregate-by",
+            choices=self.AGGREGATORS.keys(),
+            default="simple",
+            help="Tell the rendering engine to aggregate the results by the "
+                 "selected option.  Note that if you opt for aggregation, no "
+                 "output will be generated until all results are received."
+        )
 
     def get_probes(self):
         if self.arguments.probes:
@@ -60,21 +71,11 @@ class Command(BaseCommand):
         if self.arguments.probes:
             latest_url += "?probes={0}".format(self.arguments.probes)
 
-        latest = AtlasRequest(url_path=latest_url).get()[1]
+        results = AtlasRequest(url_path=latest_url).get()[1]
 
-        if not latest:
+        if not results:
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
-
-        payload = renderer.on_start()
-        for result in latest:
-            result = Result.get(result)
-            try:
-                payload += renderer.on_result(result, probes=probes)
-            except ResultError:
-                payload += json.dumps(result) + "\n"
-
-        payload += renderer.on_finish()
 
         description = detail["description"] or ""
         if description:
@@ -84,5 +85,10 @@ class Command(BaseCommand):
             "reports/base.txt",
             measurement_id=self.arguments.measurement_id,
             description=description,
-            payload=payload
+            payload=self._get_payload(renderer, results, probes)
         ), end="")
+
+    def _get_payload(self, renderer, results, probes):
+        aggregator = self.arguments.aggregate_by
+        return self.AGGREGATORS[aggregator](renderer).aggregate(
+            results, probes)
