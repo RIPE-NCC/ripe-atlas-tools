@@ -49,21 +49,22 @@ class Command(BaseCommand):
     def run(self):
 
         pk = self.arguments.measurement_id
+        detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
+
+        renderer = Renderer.get_renderer(
+            self.arguments.renderer, detail["type"]["name"])()
+
         probes = self.get_probes()
 
         latest_url = self.URLS["latest"].format(pk)
         if self.arguments.probes:
             latest_url += "?probes={0}".format(self.arguments.probes)
 
-        detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
         latest = AtlasRequest(url_path=latest_url).get()[1]
 
         if not latest:
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
-
-        renderer = Renderer.get_renderer(
-            self.arguments.renderer, detail["type"]["name"])()
 
         payload = renderer.on_start()
         for result in latest:
