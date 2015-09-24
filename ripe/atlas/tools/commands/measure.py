@@ -433,7 +433,7 @@ class Command(BaseCommand):
             r["query_argument"] = self.arguments.query_argument
             r["query_class"] = self.arguments.query_class
             r["query_type"] = self.arguments.query_type
-            r["recursion_desired"] = self.argiuments.recursion_desired
+            r["recursion_desired"] = self.arguments.recursion_desired
             r["retry"] = self.arguments.retry
             r["use_NSID"] = self.arguments.use_nsid
             r["udp_payload_size"] = self.arguments.udp_payload_size
