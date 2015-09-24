@@ -1,13 +1,13 @@
 from tzlocal import get_localzone
-from .base import Report
+from .base import Renderer as BaseRenderer
 
 
-class DnsReport(Report):
+class Renderer(BaseRenderer):
 
+    RENDERS = [BaseRenderer.TYPE_DNS]
     TIME_FORMAT = "%a %b %d %H:%M:%S %Z %Y"
 
-    @classmethod
-    def format(cls, result, probes=None):
+    def on_result(self, result, probes=None):
 
         created = result.created.astimezone(get_localzone())
         probe_id = result.probe_id
@@ -16,9 +16,9 @@ class DnsReport(Report):
         if probes and probe_id not in probes:
             return ""
 
-        r = "\n\nProbe #{}\n{}\n".format(probe_id, "=" * 79)
+        r = "\n\nProbe #{0}\n{1}\n".format(probe_id, "=" * 79)
         for response in result.responses:
-            r += cls.get_formatted_response(probe_id, created, response)
+            r += self.get_formatted_response(probe_id, created, response)
 
         return r
 
@@ -26,7 +26,7 @@ class DnsReport(Report):
     def get_formatted_response(cls, probe_id, created, response):
 
         if not response.abuf:
-            return "\n- {} -\n\n  No abuf found.\n".format(response.response_id)
+            return "\n- {0} -\n\n  No abuf found.\n".format(response.response_id)
 
         header_flags = []
         for flag in ("aa", "ad", "cd", "qr", "ra", "rd",):
@@ -35,7 +35,7 @@ class DnsReport(Report):
 
         edns = ""
         if response.abuf.edns0:
-            edns = "\n  ;; OPT PSEUDOSECTION:\n  ; EDNS: version: {}, flags:; udp: {}\n".format(
+            edns = "\n  ;; OPT PSEUDOSECTION:\n  ; EDNS: version: {0}, flags:; udp: {1}\n".format(
                 response.abuf.edns0.version,
                 response.abuf.edns0.udp_size
             )
@@ -44,7 +44,9 @@ class DnsReport(Report):
 
             "reports/dns.txt",
 
-            response_id=response.response_id,
+            # Older measurements don't have a response_id
+            response_id=response.response_id or 1,
+
             probe=probe_id,
 
             question_name=response.abuf.questions[0].name,
@@ -81,5 +83,7 @@ class DnsReport(Report):
         if not data:
             return ""
 
-        return "\n  ;; {} SECTION:\n".format(
-            header.upper()) + "\n".join(["  {}".format(_) for _ in data]) + "\n"
+        return "\n  ;; {0} SECTION:\n{1}\n".format(
+            header.upper(),
+            "\n".join(["  {0}".format(_) for _ in data])
+        )

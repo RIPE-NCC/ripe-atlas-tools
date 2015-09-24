@@ -8,12 +8,15 @@ from ripe.atlas.sagan.dns import Message
 
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
+from ..renderers import Renderer
 from ..settings import conf
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
 
 
 class Command(BaseCommand):
+
+    NAME = "measure"
 
     DESCRIPTION = "Create a measurement and optionally wait for the results"
 
@@ -32,8 +35,18 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "type",
             type=str,
+            nargs="?",
             choices=self.CREATION_CLASSES.keys(),
             help="The type of measurement you want to create"
+        )
+
+        # Optional
+
+        self.parser.add_argument(
+            "--renderer",
+            choices=Renderer.get_available(),
+            help="The renderer you want to use. If this isn't defined, an "
+                 "appropriate renderer will be selected."
         )
 
         # Standard for all types
@@ -60,7 +73,9 @@ class Command(BaseCommand):
         self.parser.add_argument(  # Most types
             "--target",
             type=str,
-            help="The target, either a domain name or IP address"
+            help="The target, either a domain name or IP address.  If creating"
+                 "a DNS measurement, the absence of this option will imply"
+                 "that you wish to use the probe's resolver."
         )
         self.parser.add_argument(
             "--no-report",
@@ -230,14 +245,18 @@ class Command(BaseCommand):
             type=str,
             choices=("IN", "CHAOS"),
             default=conf["specification"]["types"]["dns"]["query-class"],
-            help='Must be either "IN" or "CHAOS"'
+            help='The query class.  The default is "{}"'.format(
+                conf["specification"]["types"]["dns"]["query-class"]
+            )
         )
         dns.add_argument(
             "--query-type",
             type=str,
             choices=Message.ANSWER_CLASSES.keys() + ["ANY"],  # The only ones we can parse
             default=conf["specification"]["types"]["dns"]["query-type"],
-            help="Varies with the query_class"
+            help='The query type.  The default is "{}"'.format(
+                conf["specification"]["types"]["dns"]["query-type"]
+            )
         )
         dns.add_argument(
             "--query-argument",
@@ -250,14 +269,6 @@ class Command(BaseCommand):
             type=bool,
             default=conf["specification"]["types"]["dns"]["use-nsid"],
             help="Include an EDNS name server ID request with the query"
-        )
-        dns.add_argument(
-            "--use-probe-resolver",
-            action="store_true",
-            default=conf["specification"]["types"]["dns"]["use-probe-resolver"],
-            help="Use the probe's list of local resolvers instead of "
-                 "specifying a target to use as the resolver.  Note that this "
-                 "may not be used with --target"
         )
         dns.add_argument(
             "--udp-payload-size",
@@ -293,34 +304,28 @@ class Command(BaseCommand):
             self._handle_api_error(response)  # Raises an exception
 
         pk = response["measurements"][0]
-        url = "{}/measurements/{}/".format(conf["ripe-ncc"]["endpoint"], pk)
+        url = "{0}/measurements/{1}/".format(conf["ripe-ncc"]["endpoint"], pk)
         self.ok(
             "Looking good!  Your measurement was created and details about "
-            "it can be found here:\n\n  {}".format(url)
+            "it can be found here:\n\n  {0}".format(url)
         )
 
         if not self.arguments.no_report:
             self.ok("Connecting to stream...")
             try:
                 Stream(capture_limit=self.arguments.probes).stream(
-                    self.arguments.type, pk)
+                    self.arguments.renderer, self.arguments.type, pk)
             except (KeyboardInterrupt, CaptureLimitExceeded):
                 pass  # User said stop, so we fall through to the finally block.
             finally:
                 self.ok("Disconnecting from stream\n\nYou can find details "
-                        "about this measurement here:\n\n  {}".format(url))
+                        "about this measurement here:\n\n  {0}".format(url))
 
     def clean_target(self):
 
         # DNS measurements are a special case for targets
         if self.arguments.type == "dns":
-            if self.arguments.use_probe_resolver:
-                if self.arguments.target:
-                    raise RipeAtlasToolsException(
-                        "You may not specify a target for a DNS measurement "
-                        "that uses the probe's resolver"
-                    )
-                return None
+            return self.arguments.target
 
         # All other measurement types require it
         if not self.arguments.target:
@@ -417,7 +422,7 @@ class Command(BaseCommand):
 
         elif self.arguments.type == "dns":
             for opt in ("class", "type", "argument"):
-                if not getattr(self.arguments, "query_{}".format(opt)):
+                if not getattr(self.arguments, "query_{0}".format(opt)):
                     raise RipeAtlasToolsException(
                         "DNS measurements require a query type, class, and "
                         "argument"
@@ -467,9 +472,10 @@ class Command(BaseCommand):
 
         if "HTTP_MSG" in response:
 
-            message = "There was a problem communicating with the RIPE Atlas " \
-                      "infrastructure.  The message given was:\n\n  {}".format(
-                      response["HTTP_MSG"])
+            message = (
+                "There was a problem communicating with the RIPE Atlas "
+                "infrastructure.  The message given was:\n\n  {0}"
+            ).format(response["HTTP_MSG"])
 
             try:
                 message += "\n  " + json.loads(

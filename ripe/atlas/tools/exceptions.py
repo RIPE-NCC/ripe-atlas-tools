@@ -7,4 +7,7 @@ class RipeAtlasToolsException(Exception):
     RESET = "\033[0m"
 
     def write(self):
-        sys.stderr.write("\n" + self.RED + str(self) + self.RESET + "\n\n")
+        r = str(self)
+        if sys.stderr.isatty():
+            r = self.RED + r + self.RESET
+        sys.stderr.write("\n{0}\n\n".format(r))

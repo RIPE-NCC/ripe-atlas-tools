@@ -20,7 +20,7 @@ class Configuration(object):
             "create": "",
         },
         "specification": {
-            "af": 6,
+            "af": 4,
             "description": "",
             "source": {
                 "type": "area",

@@ -1,28 +1,34 @@
 from __future__ import print_function
 
-import json
-
 from ripe.atlas.cousteau import AtlasRequest
-from ripe.atlas.sagan import Result, ResultError
 
+from ..aggregators.country import CountryAggregator
+from ..aggregators.simple import SimpleAggregator
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
-from ..reports import Report
+from ..renderers import Renderer
 from .base import Command as BaseCommand
 
 
 class Command(BaseCommand):
 
+    NAME = "report"
+
     DESCRIPTION = "Report the results of a measurement"
     URLS = {
-        "detail": "/api/v2/measurements/{}.json",
-        "latest": "/api/v2/measurements/{}/latest.json",
+        "detail": "/api/v2/measurements/{0}.json",
+        "latest": "/api/v2/measurements/{0}/latest.json",
+    }
+    AGGREGATORS = {
+        "simple": SimpleAggregator,
+        "country": CountryAggregator,
     }
 
     def add_arguments(self):
         self.parser.add_argument(
             "measurement_id",
             type=int,
+            nargs="?",
             help="The measurement id you want reported"
         )
         self.parser.add_argument(
@@ -30,6 +36,20 @@ class Command(BaseCommand):
             type=ArgumentType.comma_separated_integers,
             help="A comma-separated list of probe ids you want to see "
                  "exclusively"
+        )
+        self.parser.add_argument(
+            "--renderer",
+            choices=Renderer.get_available(),
+            help="The renderer you want to use. If this isn't defined, an "
+                 "appropriate renderer will be selected."
+        )
+        self.parser.add_argument(
+            "--aggregate-by",
+            choices=self.AGGREGATORS.keys(),
+            default="simple",
+            help="Tell the rendering engine to aggregate the results by the "
+                 "selected option.  Note that if you opt for aggregation, no "
+                 "output will be generated until all results are received."
         )
 
     def get_probes(self):
@@ -40,36 +60,35 @@ class Command(BaseCommand):
     def run(self):
 
         pk = self.arguments.measurement_id
+        detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
+
+        renderer = Renderer.get_renderer(
+            self.arguments.renderer, detail["type"]["name"])()
+
         probes = self.get_probes()
 
         latest_url = self.URLS["latest"].format(pk)
         if self.arguments.probes:
-            latest_url += "?probes={}".format(self.arguments.probes)
+            latest_url += "?probes={0}".format(self.arguments.probes)
 
-        detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
-        latest = AtlasRequest(url_path=latest_url).get()[1]
+        results = AtlasRequest(url_path=latest_url).get()[1]
 
-        if not latest:
+        if not results:
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
 
-        formatter_instance = Report.get_formatter(detail["type"]["name"])()
-
-        payload = ""
-        for result in latest:
-            result = Result.get(result)
-            try:
-                payload += formatter_instance.format(result, probes=probes)
-            except ResultError:
-                payload += json.dumps(result) + "\n"
-
         description = detail["description"] or ""
         if description:
-            description = "\n{}\n\n".format(description)
+            description = "\n{0}\n\n".format(description)
 
-        print(formatter_instance.render(
+        print(renderer.render(
             "reports/base.txt",
             measurement_id=self.arguments.measurement_id,
             description=description,
-            payload=payload
+            payload=self._get_payload(renderer, results, probes)
         ), end="")
+
+    def _get_payload(self, renderer, results, probes):
+        aggregator = self.arguments.aggregate_by
+        return self.AGGREGATORS[aggregator](renderer).aggregate(
+            results, probes)

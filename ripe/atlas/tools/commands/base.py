@@ -4,6 +4,8 @@ import sys
 
 class Command(object):
 
+    NAME = ""
+
     DESCRIPTION = ""  # Define this in the subclass
 
     COLOURS = {
@@ -21,7 +23,7 @@ class Command(object):
 
     def __init__(self, *args, **kwargs):
 
-        self.parser = argparse.ArgumentParser(description=self.DESCRIPTION)
+        self.parser = argparse.ArgumentParser(description=self.DESCRIPTION, prog="ripe-atlas {0}".format(self.NAME))
 
         self.add_arguments()
 
@@ -46,5 +48,6 @@ class Command(object):
         pass
 
     def ok(self, message):
-        sys.stdout.write("\n{}{}{}\n\n".format(
-            self.COLOURS["green"], message, self.COLOURS["reset"]))
+        if sys.stdout.isatty():
+            message = self.COLOURS["green"] + message + self.COLOURS["reset"]
+        sys.stdout.write("\n{0}\n\n".format(message))

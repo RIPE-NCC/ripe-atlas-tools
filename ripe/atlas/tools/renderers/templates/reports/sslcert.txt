@@ -1,0 +1,15 @@
+  Certificate:
+    Data:
+        Version: {version}
+	Serial Number: {serial_number}
+    Signature Algorithm: {signature_algorithm}
+        Issuer: C={issuer_c}, O={issuer_o}, CN={issuer_cn}
+        Validity
+            Not Before: {not_before}
+            Not After : {not_after}
+        Subject: C={subject_c}, O={subject_o}, CN={subject_cn}
+	Subject Public Key Info:
+	    Public Key Algorithm: {pkey_type}
+	        Public-Key: ({pkey_bits} bit)
+    SHA1 Fingerprint={sha1fp}
+    SHA256 Fingerprint={sha256fp}
