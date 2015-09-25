@@ -27,7 +27,12 @@ class Command(object):
 
         self.add_arguments()
 
-        self.arguments = self.parser.parse_args()
+    def init_args(self, parser_args=None):
+        """Initializes all parse arguments and makes them available to class"""
+        if parser_args is None:
+            self.arguments = self.parser.parse_args()
+        else:
+            self.arguments = self.parser.parse_args(parser_args)
 
     def run(self):
         raise NotImplemented()
