@@ -39,17 +39,17 @@ class Command(BaseCommand):
         prefix = self.parser.add_argument_group("Preifx")
         prefix.add_argument(
             "--prefix",
-            type=int,
+            type=str,
             help="Prefix"
         )
         prefix.add_argument(
             "--prefixv4",
-            type=int,
+            type=str,
             help="Prefixv4"
         )
         prefix.add_argument(
             "--prefixv6",
-            type=int,
+            type=str,
             help="Prefixv6"
         )
 
@@ -86,11 +86,18 @@ class Command(BaseCommand):
             type=str,
             help="Additional fields"
         )
+        self.parser.add_argument(
+            "--all",
+            action='store_true',
+            help="Fetch *ALL* probes. That will give you a loooong list."
+        )
 
     def run(self):
         header = False
         filters = self.build_request_args()
 
+        print(self.arguments)
+        print(filters)
         probes = ProbeRequest(**filters)
         for probe in probes:
             if not header:
@@ -105,11 +112,19 @@ class Command(BaseCommand):
         Builds the request arguments from parser arguments and returns a dict
         that can be used with ATLAS API.
         """
+        if self.arguments.all:
+            return {}
+
         return self._clean()
 
     def _clean(self):
         """Cleans all arguments and checks for sanity."""
         args = {}
+
+        set_args = [k for k, v in vars(self.arguments).items() if v]
+        if not set_args:
+            error_msg = "You should specify at least one argument. Try -h option for usuage."
+            raise RipeAtlasToolsException(error_msg)
 
         if any([self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]):
             args.update(self._clean_asn())
@@ -176,7 +191,7 @@ class Command(BaseCommand):
         """Make sure location argument are sane."""
         lat, lng = self.location2degrees()
         if self.arguments.radius:
-            location_args = {"center": "{0},{1}".format(lat, lng), "distance": self.arguments.__radius}
+            location_args = {"center": "{0},{1}".format(lat, lng), "distance": self.arguments.radius}
         else:
             location_args = {"latitude": lat, "longitude": lng}
 
@@ -186,7 +201,7 @@ class Command(BaseCommand):
         """Fetches degrees based on the given location."""
         error_log = (
             "Following error occured while trying to fetch lat/lon"
-            "for location <{0]>:\n{1}"
+            "for location <{0}>:\n{1}"
         )
         goole_api_url = "http://maps.googleapis.com/maps/api/geocode/json"
         try:
@@ -199,7 +214,7 @@ class Command(BaseCommand):
             requests.HTTPError,
             requests.Timeout,
         ) as e:
-            error_log.format(self.arguments.location, e)
+            error_log = error_log.format(self.arguments.location, e)
             raise RipeAtlasToolsException(error_log)
 
         result = result.json()
@@ -208,6 +223,7 @@ class Command(BaseCommand):
             lat = result["results"][0]["geometry"]["location"]["lat"]
             lng = result["results"][0]["geometry"]["location"]["lng"]
         except (KeyError, IndexError) as e:
+            print(e)
             error = error_log.format(self.arguments.location, e)
             raise RipeAtlasToolsException(error)
 
@@ -216,12 +232,12 @@ class Command(BaseCommand):
     def _clean_point(self):
         """Make sure point argument are sane."""
         try:
-            lat, lng = self.arguments.points.split(",")
+            lat, lng = self.arguments.point.split(",")
         except ValueError:
             raise RipeAtlasToolsException("Point argument should be in <lat,lng> format.")
 
         if self.arguments.radius:
-            point_args = {"center": "{0},{1}".format(lat, lng), "distance": self.arguments.__radius}
+            point_args = {"center": "{0},{1}".format(lat, lng), "distance": self.arguments.radius}
         else:
             point_args = {"latitude": lat, "longitude": lng}
 
