@@ -2,7 +2,10 @@ from __future__ import print_function
 
 from ripe.atlas.cousteau import AtlasRequest
 
-from ..aggregators.country import CountryAggregator
+from ..aggregators.probesattributes import CountryAggregator
+from ..aggregators.probesattributes import ASN4Aggregator
+from ..aggregators.probesattributes import ASN6Aggregator
+from ..aggregators.avg_rtt import AvgRTTAggregator
 from ..aggregators.simple import SimpleAggregator
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
@@ -22,6 +25,9 @@ class Command(BaseCommand):
     AGGREGATORS = {
         "simple": SimpleAggregator,
         "country": CountryAggregator,
+        "asn4": ASN4Aggregator,
+        "asn6": ASN6Aggregator,
+        "avg_rtt": AvgRTTAggregator
     }
 
     def add_arguments(self):
@@ -49,6 +55,11 @@ class Command(BaseCommand):
             help="Tell the rendering engine to aggregate the results by the "
                  "selected option.  Note that if you opt for aggregation, no "
                  "output will be generated until all results are received."
+        )
+        self.parser.add_argument(
+            "--aggregate-by-opt",
+            action="append",
+            help="Aggregation specific options."
         )
 
     def get_probes(self):
@@ -89,5 +100,7 @@ class Command(BaseCommand):
 
     def _get_payload(self, renderer, results, probes):
         aggregator = self.arguments.aggregate_by
-        return self.AGGREGATORS[aggregator](renderer).aggregate(
-            results, probes)
+        return self.AGGREGATORS[aggregator](
+            renderer,
+            options=self.arguments.aggregate_by_opt).aggregate(
+                results, probes)
