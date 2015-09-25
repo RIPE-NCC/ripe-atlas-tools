@@ -4,6 +4,12 @@ from setuptools import setup
 __version__ = None
 exec(open("ripe/atlas/tools/version.py").read())
 
+tests_require = [
+    "nose",
+    "coverage",
+    "mock",
+]
+
 # Allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
@@ -30,7 +36,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
             "tzlocal",
             "pyyaml",
         ],
-        tests_require=["nose"],
+        tests_require=tests_require,
         extras_require={
             "doc": ["sphinx"]
         },
