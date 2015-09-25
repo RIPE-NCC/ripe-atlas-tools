@@ -24,7 +24,6 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=int,
-            nargs='?',
             help="The measurement id you want streamed"
         )
         self.parser.add_argument(

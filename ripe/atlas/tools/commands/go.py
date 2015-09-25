@@ -12,7 +12,6 @@ class Command(BaseCommand):
     def add_arguments(self):
         self.parser.add_argument(
             "measurement_id",
-            nargs="?",
             type=int,
             help="The measurement id you want reported"
         )

@@ -35,7 +35,6 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "type",
             type=str,
-            nargs="?",
             choices=self.CREATION_CLASSES.keys(),
             help="The type of measurement you want to create"
         )
