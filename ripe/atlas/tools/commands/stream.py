@@ -8,16 +8,12 @@ from .base import Command as BaseCommand
 
 class Command(BaseCommand):
 
+    NAME = "stream"
+
     DESCRIPTION = "Report the results of a measurement"
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
     }
-
-    NAME = "stream"
-
-    def __init__(self, *args, **kwargs):
-        BaseCommand.__init__(self, *args, **kwargs)
-        self.formatter = None
 
     def add_arguments(self):
         self.parser.add_argument(
