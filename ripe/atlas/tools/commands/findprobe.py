@@ -224,7 +224,7 @@ class Command(BaseCommand):
             error = error_log.format(self.arguments.location, e)
             raise RipeAtlasToolsException(error)
 
-        return lat, lng
+        return str(lat), str(lng)
 
     def _clean_point(self):
         """Make sure point argument are sane."""
