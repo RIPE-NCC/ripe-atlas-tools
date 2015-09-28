@@ -3,6 +3,7 @@ from ripe.atlas.cousteau import ProbeRequest
 
 THRESHOLD = 80 #%
 
+
 class Renderer(BaseRenderer):
     RENDERS = [BaseRenderer.TYPE_TLS]
 
@@ -24,7 +25,7 @@ class Renderer(BaseRenderer):
                 "probes": []
               }
             self.uniqcerts[cert_id]["cert"] = certificate
-            self.uniqcerts[cert_id]["cnt"]+=1;
+            self.uniqcerts[cert_id]["cnt"] += 1
             self.uniqcerts[cert_id]["probes"].append(probe_id)
         return ""
 
@@ -55,7 +56,7 @@ class Renderer(BaseRenderer):
                 s += "  Below the threshold ({0}%)\n".format(THRESHOLD)
                 s += "  Probes that saw it: \n"
 
-                probes_ids = ",".join(map(str,self.uniqcerts[cert_id]["probes"]))
+                probes_ids = ",".join(map(str, self.uniqcerts[cert_id]["probes"]))
                 probes = ProbeRequest(id__in=probes_ids)
 
                 for probe in probes:
