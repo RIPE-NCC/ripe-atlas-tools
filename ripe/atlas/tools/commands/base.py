@@ -5,9 +5,7 @@ import sys
 class Command(object):
 
     NAME = ""
-
     DESCRIPTION = ""  # Define this in the subclass
-
     COLOURS = {
         "light-blue": "\033[1;34m",
         "light-green": "\033[1;32m",
@@ -23,12 +21,19 @@ class Command(object):
 
     def __init__(self, *args, **kwargs):
 
-        self.parser = argparse.ArgumentParser(description=self.DESCRIPTION, prog="ripe-atlas {0}".format(self.NAME))
+        self.arguments = None
+        self.parser = argparse.ArgumentParser(
+            description=self.DESCRIPTION,
+            prog="ripe-atlas {0}".format(self.NAME)
+        )
 
         self.add_arguments()
 
     def init_args(self, parser_args=None):
-        """Initializes all parse arguments and makes them available to class"""
+        """
+        Initialises all parse arguments and makes them available to class.
+        """
+
         if parser_args is None:
             self.arguments = self.parser.parse_args()
         else:
