@@ -96,8 +96,6 @@ class Command(BaseCommand):
         header = False
         filters = self.build_request_args()
 
-        print(self.arguments)
-        print(filters)
         probes = ProbeRequest(**filters)
         for probe in probes:
             if not header:
@@ -223,7 +221,6 @@ class Command(BaseCommand):
             lat = result["results"][0]["geometry"]["location"]["lat"]
             lng = result["results"][0]["geometry"]["location"]["lng"]
         except (KeyError, IndexError) as e:
-            print(e)
             error = error_log.format(self.arguments.location, e)
             raise RipeAtlasToolsException(error)
 
