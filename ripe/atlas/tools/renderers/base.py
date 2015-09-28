@@ -17,6 +17,9 @@ class Renderer(object):
 
     RENDERS = ()
 
+    # Must match the aggregator's REQUIRES
+    AGGREGATES = ()
+
     @staticmethod
     def get_available():
 

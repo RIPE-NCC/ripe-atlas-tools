@@ -5,6 +5,7 @@ from .base import Result
 class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_PING]
+    AGGREGATES = ["ttl", "rtt_average"]
 
     def on_result(self, result, probes=None):
 

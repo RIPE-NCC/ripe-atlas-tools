@@ -47,6 +47,11 @@ class Command(BaseCommand):
             help="The renderer you want to use. If this isn't defined, an "
                  "appropriate renderer will be selected."
         )
+        self.parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Do not create the measurement, only show its definition."
+        )
 
         # Standard for all types
 
@@ -291,6 +296,15 @@ class Command(BaseCommand):
     def run(self):
 
         creation_class = self.CREATION_CLASSES[self.arguments.type]
+
+        if self.arguments.dry_run:
+            print("Definitions:")
+            for param, val in self._get_measurement_kwargs().iteritems():
+                print("  {}: {}".format(param,val))
+            print("Sources:")
+            for param, val in self._get_source_kwargs().iteritems():
+                print("  {}: {}".format(param,val))
+            return
 
         (is_success, response) = AtlasCreateRequest(
             server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
