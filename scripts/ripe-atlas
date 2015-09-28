@@ -60,12 +60,14 @@ class RipeAtlas(object):
 
         try:
 
-            __import__(
+            cmd = __import__(
                 "ripe.atlas.tools.commands." + self.command,
                 globals(),
                 locals(),
                 [self.command]
-            ).Command(*self.args, **self.kwargs).run()
+            ).Command(*self.args, **self.kwargs)
+            cmd.init_args()
+            cmd.run()
 
         except ImportError:
 
