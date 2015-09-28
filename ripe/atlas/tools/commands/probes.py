@@ -91,12 +91,23 @@ class Command(BaseCommand):
             action='store_true',
             help="Fetch *ALL* probes. That will give you a loooong list."
         )
+        self.parser.add_argument(
+            "--ids-only",
+            action='store_true',
+            help="Show only a list of comma-separated IDs"
+        )
 
     def run(self):
         header = False
         filters = self.build_request_args()
 
         probes = ProbeRequest(**filters)
+
+        if self.arguments.ids_only:
+            for probe in probes:
+                sys.stdout.write("{},".format(probe["id"]))
+            return
+
         for probe in probes:
             if not header:
                 message = "{0:<5}|{1:<6}|{2:<6}|{3:<2}|{4:<10}".format("ID", "ASNv4", "ASNv6", "CC", "Status")
