@@ -137,3 +137,20 @@ class TestFindProbe(unittest.TestCase):
         """User passed country code arg together with radius"""
         self.cmd.init_args(["--country-code", "GR", "--radius", "4"])
         self.assertEquals(self.cmd.build_request_args(), {"country_code": "GR"})
+
+    def test_sane_args1(self):
+        """User passed several arguments."""
+        self.cmd.init_args(["--point", "1,2", "--radius", "4", "--asnv4", "3333", "--prefix", "193.0.0.0/21"])
+        self.assertEquals(self.cmd.build_request_args(), {'asn_v4': 3333, 'prefix': '193.0.0.0/21', 'center': '1,2', 'distance': 4})
+
+    def test_sane_args2(self):
+        """User passed several arguments."""
+        self.cmd.init_args(["--location", "Amsterdam", "--asn", "3333", "--prefixv4", "193.0.0.0/21"])
+        with mock.patch('ripe.atlas.tools.commands.findprobe.Command.location2degrees') as mock_get:
+            mock_get.return_value = (1, 2)
+            self.assertEquals(self.cmd.build_request_args(), {'asn': 3333, 'prefix_v4': '193.0.0.0/21', 'latitude': '1', 'longitude': '2'})
+
+    def test_sane_args3(self):
+        """User passed several arguments."""
+        self.cmd.init_args(["--point", "1,2", "--asnv6", "3333", "--prefixv6", "2001:67c:2e8::/48"])
+        self.assertEquals(self.cmd.build_request_args(), {'asn_v6': 3333, 'prefix_v6': '2001:67c:2e8::/48', 'latitude': '1', 'longitude': '2'})
