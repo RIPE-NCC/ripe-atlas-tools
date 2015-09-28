@@ -47,9 +47,10 @@ class RipeAtlas(object):
             self.kwargs["type"] = shortcut.group(1)
         else:
             if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+                print(set(available_commands) - {"shibboleet"})
                 raise RipeAtlasToolsException(
                     "Usage: ripe-atlas <{}> [arguments]".format(
-                        "|".join(available_commands)
+                        "|".join(set(available_commands) - {"shibboleet"})
                     )
                 )
             self.command = sys.argv.pop(1)
