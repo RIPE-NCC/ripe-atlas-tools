@@ -1,7 +1,7 @@
 import json
 import urllib2
 
-from ..ipcache import ip_cache
+from ..ipdetails import IP
 from .base import Renderer as BaseRenderer
 from .base import Result
 
@@ -21,7 +21,7 @@ class Renderer(BaseRenderer):
         
     @staticmethod
     def _get_asns_for_output(asns,radius):
-        asns_with_padding = [""]*radius + asns
+        asns_with_padding = [""] * radius + asns
         asns_with_padding = asns_with_padding[-radius:]
         return " ".join(["{:>8}".format("AS{}".format(asn) if asn else "") for asn in asns_with_padding])
 
@@ -42,14 +42,14 @@ class Renderer(BaseRenderer):
         asns = []
 
         # starting from the last hop's IP, get up to <RADIUS> ASNs
-        for ip in ip_hops[::-1]:
-            asinfo = ip_cache.get_details(ip)
-            if asinfo["ASN"] and not asinfo["ASN"] in asns:
-                asns.append(asinfo["ASN"])
+        for address in reversed(ip_hops):
+            ip = IP(address)
+            if ip.asn and not ip.asn in asns:
+                asns.append(ip.asn)
             if len(asns) == self.RADIUS:
                 break
 
-        as_path = self._get_asns_for_output(asns[::-1], self.RADIUS)
+        as_path = self._get_asns_for_output(list(reversed(asns)), self.RADIUS)
 
         if not as_path in self.paths:
             self.paths[as_path] = {}
