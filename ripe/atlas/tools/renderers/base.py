@@ -23,9 +23,9 @@ class Renderer(object):
         paths = [os.path.dirname(__file__)]
         if "HOME" in os.environ:
             path = os.path.join(
-                os.environ["HOME"], ".config", "ripe-atlas-tools", "renderers")
+                os.environ["HOME"], ".config", "ripe-atlas-tools")
             sys.path.append(path)
-            paths += [path]
+            paths += [os.path.join(path, "renderers")]
 
         r = [package_name for _, package_name, _ in pkgutil.iter_modules(paths)]
         r.remove("base")
@@ -50,7 +50,8 @@ class Renderer(object):
     @classmethod
     def get_renderer(cls, name=None, kind=None):
 
-        error_message = 'The renderer you selected, "{}" could not be found.'.format(name)
+        error_message = 'The renderer you selected, "{}" could not be ' \
+                        'found.'.format(name)
 
         try:  # User-defined, user-supplied
             r = cls.import_renderer("renderers", name)
@@ -58,10 +59,9 @@ class Renderer(object):
             try:  # User-defined, officially-supported
                 r = cls.import_renderer("ripe.atlas.tools.renderers", name)
             except ImportError:
-                try:  # Type-determined, officially-supported
-                    r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
-                except ImportError:
+                if name:
                     raise RipeAtlasToolsException(error_message)
+                r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
 
         if kind:
             cls._test_renderer_accepts_kind(r, kind)
@@ -79,7 +79,7 @@ class Renderer(object):
     def _test_renderer_accepts_kind(renderer, kind):
         if kind not in renderer.RENDERS:
             raise RipeAtlasToolsException(
-                'The renderer selected does not appear to support measurements'
+                'The renderer selected does not appear to support measurements '
                 'of type "{}"'.format(kind)
             )
 
