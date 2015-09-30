@@ -10,7 +10,7 @@ from .base import Command as BaseCommand
 
 class Command(BaseCommand):
 
-    NAME = "findprobe"
+    NAME = "probes"
 
     DESCRIPTION = "Find probes fullfiling specific criteria based on given filters."
 
