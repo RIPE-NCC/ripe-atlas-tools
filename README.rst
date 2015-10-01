@@ -145,9 +145,13 @@ your own:
 .. code:: bash
 
     # From within a virtualenv
+    $ pip install -e git+https://github.com/RIPE-NCC/ripe.atlas.sagan.git#egg=ripe.atlas.sagan
+    $ pip install -e git+https://github.com/RIPE-NCC/ripe-atlas-cousteau.git#egg=ripe.atlas.cousteau
     $ pip install -e git+https://github.com/RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
 
     # In your user's local environment
+    $ pip install --user -e git+https://github.com/RIPE-NCC/ripe.atlas.sagan.git#egg=ripe.atlas.sagan
+    $ pip install --user -e git+https://github.com/RIPE-NCC/ripe-atlas-cousteau.git#egg=ripe.atlas.cousteau
     $ pip install --user -e git+https://github.com/RIPE-NCC/ripe-atlas-tools.git#egg=ripe.atlas.tools
 
 Note that there are lots of dependencies that will automatically be drawn in and
