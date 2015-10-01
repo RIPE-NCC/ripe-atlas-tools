@@ -14,7 +14,8 @@ class Command(BaseCommand):
 
     NAME = "report"
 
-    DESCRIPTION = "Report the results of a measurement"
+    DESCRIPTION = "Report the results of a measurement.\n\nExample:\n" \
+                  "  ripe-atlas report 1001 --probes 157,10006\n"
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
         "latest": "/api/v2/measurements/{0}/latest.json",
