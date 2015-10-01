@@ -14,7 +14,11 @@ class CountryAggregator(BaseAggregator):
         sagans = []
         for result in results:
             try:
-                result = Result.get(result)
+                result = Result.get(
+                    result,
+                    on_error=Result.ACTION_IGNORE,
+                    on_malformation=Result.ACTION_IGNORE
+                )
                 if not probes or result.probe_id in probes:
                     sagans.append(result)
             except ResultError:
@@ -29,8 +33,14 @@ class CountryAggregator(BaseAggregator):
         db = {}
         for result in sagans:
             line = self.renderer.on_result(result, probes=probes)
-            db.setdefault(probes[line.probe_id].country_code, []).append(
-                line)
+            try:
+                db.setdefault(probes[line.probe_id].country_code, []).append(
+                    line
+                )
+            except KeyError:
+                # For the very rare case that the results may have a probe in
+                # there that's not yet available in the API.
+                pass
 
         # Print everything out
         r = ""
