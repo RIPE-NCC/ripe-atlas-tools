@@ -24,7 +24,11 @@ class Stream(object):
         sys.stdout.write(renderer.on_start())
 
         def on_result_response(result, *args):
-            sys.stdout.write(renderer.on_result(Result.get(result)))
+            sys.stdout.write(renderer.on_result(Result.get(
+                result,
+                on_error=Result.ACTION_IGNORE,
+                on_malformation=Result.ACTION_IGNORE
+            )))
             self.captured += 1
             if self.capture_limit and self.captured >= self.capture_limit:
                 raise CaptureLimitExceeded()
