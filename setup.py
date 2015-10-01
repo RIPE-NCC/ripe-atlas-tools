@@ -32,7 +32,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
         maintainer_email="atlas@ripe.net",
         install_requires=[
             "ripe.atlas.cousteau>=0.9.2",
-            "ripe.atlas.sagan>=1.1.1",
+            "ripe.atlas.sagan>=1.1.3",
             "tzlocal",
             "pyyaml",
             "pyOpenSSL>=0.13",
