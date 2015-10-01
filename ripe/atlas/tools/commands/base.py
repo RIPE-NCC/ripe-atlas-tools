@@ -1,28 +1,27 @@
 import argparse
 import sys
 
+from ..helpers.colours import Colour
+
+
+class RipeHelpFormatter(argparse.RawTextHelpFormatter):
+
+    def _format_usage(self, *args):
+        r = argparse.RawTextHelpFormatter._format_usage(
+            self, *args).capitalize()
+        return "\n\n{}\n".format(r)
+
 
 class Command(object):
 
     NAME = ""
     DESCRIPTION = ""  # Define this in the subclass
-    COLOURS = {
-        "light-blue": "\033[1;34m",
-        "light-green": "\033[1;32m",
-        "light-cyan": "\033[1;36m",
-        "light-red": "\033[1;31m",
-        "yellow": "\033[1;33m",
-        "green": "\033[0;32m",
-        "cyan": "\033[0;36m",
-        "brown": "\033[0;33m",
-        "pink": "\033[1;35m",
-        "reset": "\033[0m"
-    }
 
     def __init__(self, *args, **kwargs):
 
         self.arguments = None
         self.parser = argparse.ArgumentParser(
+            formatter_class=RipeHelpFormatter,
             description=self.DESCRIPTION,
             prog="ripe-atlas {0}".format(self.NAME)
         )
@@ -59,5 +58,5 @@ class Command(object):
 
     def ok(self, message):
         if sys.stdout.isatty():
-            message = self.COLOURS["green"] + message + self.COLOURS["reset"]
+            message = Colour.green + message + Colour.reset
         sys.stdout.write("\n{0}\n\n".format(message))
