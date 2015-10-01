@@ -14,9 +14,12 @@ class CaptureLimitExceeded(Exception):
 
 class Stream(object):
 
-    def __init__(self, capture_limit=None):
+    def __init__(self, capture_limit=None, timeout=None):
+
         self.captured = 0
         self.capture_limit = capture_limit
+
+        self.timeout = timeout
 
     def stream(self, renderer_name, kind, pk):
 
@@ -39,7 +42,7 @@ class Stream(object):
         stream.bind_stream("result", on_result_response)
         try:
             stream.start_stream(stream_type="result", msm=pk)
-            stream.timeout()
+            stream.timeout(self.timeout)
         except (KeyboardInterrupt, CaptureLimitExceeded), e:
             stream.disconnect()
             sys.stdout.write(renderer.on_finish())

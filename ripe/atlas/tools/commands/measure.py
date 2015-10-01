@@ -312,8 +312,10 @@ class Command(BaseCommand):
         if not self.arguments.no_report:
             self.ok("Connecting to stream...")
             try:
-                Stream(capture_limit=self.arguments.probes).stream(
-                    self.arguments.renderer, self.arguments.type, pk)
+                Stream(
+                    capture_limit=self.arguments.probes,
+                    timeout=300  # 5min
+                ).stream(self.arguments.renderer, self.arguments.type, pk)
             except (KeyboardInterrupt, CaptureLimitExceeded):
                 pass  # User said stop, so we fall through to the finally block.
             finally:
