@@ -11,9 +11,10 @@ class Status(object):
         3: "Never Connected"
     }
 
-    def __init__(self, pk):
-        self.id = pk
-        self.name = self.NAMES[pk]
+    def __init__(self, **kwargs):
+        self.id = kwargs.get("id")
+        self.name = kwargs.get("name")
+        self.since = kwargs.get("since")
 
 
 class Probe(object):
@@ -36,8 +37,8 @@ class Probe(object):
         self.address_v6 = kwargs.get("address_v6")
         self.prefix_v4 = kwargs.get("prefix_v4")
         self.prefix_v6 = kwargs.get("prefix_v6")
-        self.geometry = (kwargs["latitude"], kwargs["longitude"])
-        self.status = Status(kwargs["status"])
+        self.geometry = kwargs.get("geometry")
+        self.status = Status(**kwargs["status"])
 
     def __str__(self):
         return "Probe #{}".format(self.id)
