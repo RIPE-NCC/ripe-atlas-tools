@@ -12,7 +12,11 @@ class SimpleAggregator(BaseAggregator):
         r = self.renderer.on_start()
 
         for result in results:
-            result = Result.get(result)
+            result = Result.get(
+                result,
+                on_error=Result.ACTION_IGNORE,
+                on_malformation=Result.ACTION_IGNORE
+            )
             try:
                 r += self.renderer.on_result(result, probes=probes)
             except ResultError:
