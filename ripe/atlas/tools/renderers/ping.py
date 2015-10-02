@@ -11,7 +11,7 @@ class Renderer(BaseRenderer):
         packets = result.packets
 
         if not packets:
-            return "No packets found"
+            return "No packets found\n"
 
         # Because the origin value is more reliable as "from" in v4 and as
         # "packet.source_address" in v6.
