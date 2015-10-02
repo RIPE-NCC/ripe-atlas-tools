@@ -99,11 +99,18 @@ class Command(BaseCommand):
         probes = ProbeRequest(**filters)
         for probe in probes:
             if not header:
-                message = "{0:<5}|{1:<6}|{2:<6}|{3:<2}|{4:<10}".format("ID", "ASNv4", "ASNv6", "CC", "Status")
-                sys.stdout.write("{0}\n".format(message))
+                message = "{:<5}|{:<6}|{:<6}|{:<2}|{:<10}".format(
+                    "ID", "ASNv4", "ASNv6", "CC", "Status")
+                sys.stdout.write("{}\n".format(message))
                 header = True
-            message = "{0:<5}|{1:<6}|{2:<6}|{3:^2}|{4:<}".format(probe["id"], probe["asn_v4"], probe["asn_v6"], probe["country_code"], probe["status_name"])
-            sys.stdout.write("{0}\n".format(message))
+            message = "{:<5}|{:<6}|{:<6}|{:^2}|{:<}".format(
+                probe["id"],
+                probe["asn_v4"],
+                probe["asn_v6"],
+                probe["country_code"],
+                probe["status_name"]
+            )
+            sys.stdout.write("{}\n".format(message))
 
     def build_request_args(self):
         """
@@ -121,8 +128,10 @@ class Command(BaseCommand):
 
         set_args = [k for k, v in vars(self.arguments).items() if v]
         if not set_args:
-            error_msg = "You should specify at least one argument. Try -h option for usuage."
-            raise RipeAtlasToolsException(error_msg)
+            raise RipeAtlasToolsException(
+                "You should specify at least one argument. Try -h option for "
+                "usuage."
+            )
 
         if any([self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]):
             args.update(self._clean_asn())
