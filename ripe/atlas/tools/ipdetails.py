@@ -6,6 +6,8 @@ from cache import cache
 
 class IP(object):
 
+    RIPESTAT_URL = "https://stat.ripe.net/data/prefix-overview/data.json?resource={ip}"
+
     def __init__(self, address):
         self.ip_object = IPy.IP(address)
 
@@ -16,9 +18,9 @@ class IP(object):
 
         details = self._get_details()
         if details:
-          self.asn = details["ASN"]
-          self.holder = details["Holder"]
-          self.prefix = details["Prefix"]
+            self.asn = details["ASN"]
+            self.holder = details["Holder"]
+            self.prefix = details["Prefix"]
 
     def __str__(self):
         return "IP {}, ASN {}, Holder {}".format(
@@ -33,7 +35,7 @@ class IP(object):
 
         if self.ip_object.iptype() in ['RESERVED', 'UNSPECIFIED', 'LOOPBACK',
                                        'UNASSIGNED', 'DOCUMENTATION', 'ULA',
-                                       'LINKLOCAL']:
+                                       'LINKLOCAL', 'PRIVATE']:
             return details
 
         found = False
@@ -48,7 +50,7 @@ class IP(object):
                     break
 
         if not found:
-            URL = "https://stat.ripe.net/data/prefix-overview/data.json?resource={}".format(self.address)
+            URL = IP.RIPESTAT_URL.format(ip=self.address)
 
             res = json.loads(urllib2.urlopen(URL).read())
 
