@@ -1,0 +1,3 @@
+How to run tests
+Make sure you have nose installed and run from the main directory:
+    nosetests tests
