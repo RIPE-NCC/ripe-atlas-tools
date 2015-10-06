@@ -1,10 +1,11 @@
 from __future__ import print_function, absolute_import
 import requests
-import sys
 
 from ripe.atlas.cousteau import ProbeRequest
+from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
 
 from ..exceptions import RipeAtlasToolsException
+from ..renderers.probes import Renderer
 from .base import Command as BaseCommand
 
 
@@ -31,11 +32,7 @@ class Command(BaseCommand):
             type=int,
             help="ASNv6"
         )
-        asn.add_argument(
-            "--max-per-as",
-            type=int,
-            help="Maximum number of probes per ASN"
-        )
+
         prefix = self.parser.add_argument_group("Preifx")
         prefix.add_argument(
             "--prefix",
@@ -61,7 +58,7 @@ class Command(BaseCommand):
             help="The location"
         )
         geo_location.add_argument(
-            "--point",
+            "--center",
             type=str,
             help="location as <lat>,<lon>-string, ie '48.45,9.16'"
         )
@@ -82,35 +79,78 @@ class Command(BaseCommand):
             help="Limit"
         )
         self.parser.add_argument(
-            "--fields",
+            "--additional-fields",
             type=str,
             help="Additional fields"
+        )
+        self.parser.add_argument(
+            "--aggregate-by",
+            type=str,
+            choices=['asn_v4', 'asn_v6', 'country_code', 'prefix_v4', 'prefix_v6'],
+            action="append",
+            help="Aggregate list of probes based on all specified aggregations."
         )
         self.parser.add_argument(
             "--all",
             action='store_true',
             help="Fetch *ALL* probes. That will give you a loooong list."
         )
+        self.parser.add_argument(
+            "--max-per-aggregation",
+            type=int,
+            help="Maximum number of probes per aggregated bucket."
+        )
+        self.parser.add_argument(
+            "--ids-only",
+            action='store_true',
+            help="Print only IDs of probes. Usefull to pipe it to another command."
+        )
 
     def run(self):
-        header = False
-        filters = self.build_request_args()
 
-        probes = ProbeRequest(**filters)
-        for probe in probes:
-            if not header:
-                message = "{:<5}|{:<6}|{:<6}|{:<2}|{:<10}".format(
-                    "ID", "ASNv4", "ASNv6", "CC", "Status")
-                sys.stdout.write("{}\n".format(message))
-                header = True
-            message = "{:<5}|{:<6}|{:<6}|{:^2}|{:<}".format(
-                probe["id"],
-                probe["asn_v4"],
-                probe["asn_v6"],
-                probe["country_code"],
-                probe["status_name"]
-            )
-            sys.stdout.write("{}\n".format(message))
+        render_args = self._clean_render_args()
+        self.renderer = Renderer(**render_args)
+
+        filters = self.build_request_args()
+        probes_request = ProbeRequest(return_objects=True, **filters)
+        probes = list(probes_request)
+
+        self.renderer.on_start()
+
+        if self.arguments.aggregate_by:
+
+            aggregators = self.get_aggregators()
+            buckets = aggregate(probes, aggregators)
+            self.renderer.render_aggregation(buckets)
+        else:
+
+            self.renderer.on_table_title()
+            for index, probe in enumerate(probes):
+                self.renderer.on_result(probe)
+                if self.arguments.limit and index >= self.arguments.limit - 1:
+                    break
+
+        self.renderer.on_finish(probes_request.total_count)
+
+    def _clean_render_args(self):
+        args = {"max_per_aggr": self.arguments.max_per_aggregation}
+
+        if self.arguments.additional_fields:
+            args.update(self._clean_additional_fields())
+        if self.arguments.ids_only:
+            args.update(self._clean_ids_only())
+
+        return args
+
+    def _clean_ids_only(self):
+        """Prepare renderer options when ids-only flag is used."""
+        return {"mute": True, "fields": ["id"]}
+
+    def _clean_additional_fields(self):
+        """Parse and store additional fields."""
+        additional_fields = self.arguments.additional_fields.split(",")
+
+        return {"additional_fields": additional_fields}
 
     def build_request_args(self):
         """
@@ -120,9 +160,9 @@ class Command(BaseCommand):
         if self.arguments.all:
             return {}
 
-        return self._clean()
+        return self._clean_request_args()
 
-    def _clean(self):
+    def _clean_request_args(self):
         """Cleans all arguments and checks for sanity."""
         args = {}
 
@@ -142,8 +182,8 @@ class Command(BaseCommand):
         if self.arguments.location:
             args.update(self._clean_location())
 
-        if self.arguments.point:
-            args.update(self._clean_point())
+        if self.arguments.center:
+            args.update(self._clean_center())
 
         if self.arguments.country_code:
             args.update(self._clean_country_code())
@@ -198,7 +238,7 @@ class Command(BaseCommand):
         """Make sure location argument are sane."""
         lat, lng = self.location2degrees()
         if self.arguments.radius:
-            location_args = {"center": "{0},{1}".format(lat, lng), "distance": self.arguments.radius}
+            location_args = {"radius": "{0},{1}:{2}".format(lat, lng, self.arguments.radius)}
         else:
             location_args = {"latitude": lat, "longitude": lng}
 
@@ -235,22 +275,28 @@ class Command(BaseCommand):
 
         return str(lat), str(lng)
 
-    def _clean_point(self):
-        """Make sure point argument are sane."""
+    def _clean_center(self):
+        """Make sure center argument are sane."""
         try:
-            lat, lng = self.arguments.point.split(",")
+            lat, lng = self.arguments.center.split(",")
         except ValueError:
             raise RipeAtlasToolsException("Point argument should be in <lat,lng> format.")
 
         if self.arguments.radius:
-            point_args = {"center": "{0},{1}".format(lat, lng), "distance": self.arguments.radius}
+            center_args = {"radius": "{0},{1}:{2}".format(lat, lng, self.arguments.radius)}
         else:
-            point_args = {"latitude": lat, "longitude": lng}
+            center_args = {"latitude": lat, "longitude": lng}
 
-        return point_args
+        return center_args
 
     def _clean_country_code(self):
         """Make sure country_code argument are sane."""
         country_code_args = {"country_code": self.arguments.country_code}
 
         return country_code_args
+
+    def get_aggregators(self):
+        aggregation_keys = []
+        for aggr_key in self.arguments.aggregate_by:
+            aggregation_keys.append(ValueKeyAggregator(key=aggr_key))
+        return aggregation_keys
