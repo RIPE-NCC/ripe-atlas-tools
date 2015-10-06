@@ -80,7 +80,7 @@ class TestProbesCommand(unittest.TestCase):
                     {"geometry": {"location": {"lat": 1, "lng": 2}}}]}
                 self.cmd.init_args(["--location", "blaaaa"])
                 self.assertEquals(self.cmd.build_request_args(), {
-                    "latitude": 1, "longitude": 2})
+                    "latitude": '1', "longitude": '2'})
 
     def test_location_arg_with_radius(self):
         """User passed location arg"""
@@ -89,7 +89,7 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch('requests.Response.json') as mock_json:
                 mock_json.return_value = {"results": [{"geometry": {"location": {"lat": 1, "lng": 2}}}]}
                 self.cmd.init_args(["--location", "blaaaa", "--radius", "4"])
-                self.assertEquals(self.cmd.build_request_args(), {"center": "1,2", "distance": 4})
+                self.assertEquals(self.cmd.build_request_args(), {"radius": "1,2:4"})
 
     def test_asn_args(self):
         """User passed asn arg together with asnv4 or asnv6"""
@@ -116,21 +116,21 @@ class TestProbesCommand(unittest.TestCase):
         self.cmd.init_args(["--all"])
         self.assertEquals(self.cmd.build_request_args(), {})
 
-    def test_point_arg_wrong_value(self):
-        """User passed point arg with wrong value"""
+    def test_center_arg_wrong_value(self):
+        """User passed center arg with wrong value"""
         with self.assertRaises(RipeAtlasToolsException):
-            self.cmd.init_args(["--point", "blaaaa"])
+            self.cmd.init_args(["--center", "blaaaa"])
             self.cmd.run()
 
-    def test_point_arg(self):
-        """User passed point arg"""
-        self.cmd.init_args(["--point", "1,2"])
+    def test_center_arg(self):
+        """User passed center arg"""
+        self.cmd.init_args(["--center", "1,2"])
         self.assertEquals(self.cmd.build_request_args(), {"latitude": "1", "longitude": "2"})
 
-    def test_point_arg_with_radius(self):
-        """User passed point and radius arg"""
-        self.cmd.init_args(["--point", "1,2", "--radius", "4"])
-        self.assertEquals(self.cmd.build_request_args(), {"center": "1,2", "distance": 4})
+    def test_center_arg_with_radius(self):
+        """User passed center and radius arg"""
+        self.cmd.init_args(["--center", "1,2", "--radius", "4"])
+        self.assertEquals(self.cmd.build_request_args(), {"radius": "1,2:4"})
 
     def test_country_arg(self):
         """User passed country code arg"""
@@ -144,8 +144,8 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_sane_args1(self):
         """User passed several arguments (1)"""
-        self.cmd.init_args(["--point", "1,2", "--radius", "4", "--asnv4", "3333", "--prefix", "193.0.0.0/21"])
-        self.assertEquals(self.cmd.build_request_args(), {'asn_v4': 3333, 'prefix': '193.0.0.0/21', 'center': '1,2', 'distance': 4})
+        self.cmd.init_args(["--center", "1,2", "--radius", "4", "--asnv4", "3333", "--prefix", "193.0.0.0/21"])
+        self.assertEquals(self.cmd.build_request_args(), {'asn_v4': 3333, 'prefix': '193.0.0.0/21', 'radius': '1,2:4'})
 
     def test_sane_args2(self):
         """User passed several arguments (2)"""
@@ -163,7 +163,7 @@ class TestProbesCommand(unittest.TestCase):
         """User passed several arguments (3)"""
 
         self.cmd.init_args([
-            "--point", "1,2",
+            "--center", "1,2",
             "--asnv6", "3333",
             "--prefixv6", "2001:67c:2e8::/48"
         ])
