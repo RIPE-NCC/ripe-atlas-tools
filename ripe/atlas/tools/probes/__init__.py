@@ -1,20 +1,7 @@
 from ..cache import cache
 
 from ripe.atlas.cousteau import ProbeRequest
-
-
-class Status(object):
-
-    NAMES = {
-        1: "Connected",
-        2: "Disconnected",
-        3: "Never Connected"
-    }
-
-    def __init__(self, **kwargs):
-        self.id = kwargs.get("id")
-        self.name = kwargs.get("name")
-        self.since = kwargs.get("since")
+from ripe.atlas.cousteau import Probe as CProbe
 
 
 class Probe(object):
@@ -24,27 +11,9 @@ class Probe(object):
 
     EXPIRE_TIME = 60 * 60 * 24 * 30
 
-    def __init__(self, **kwargs):
+    def __init__(self, id, meta_data=None):
 
-        self.id = kwargs.get("id")
-        self.is_anchor = kwargs.get("is_anchor")
-        self.country_code = kwargs.get("country_code")
-        self.description = kwargs.get("description")
-        self.is_public = kwargs.get("is_public")
-        self.asn_v4 = kwargs.get("asn_v4")
-        self.asn_v6 = kwargs.get("asn_v6")
-        self.address_v4 = kwargs.get("address_v4")
-        self.address_v6 = kwargs.get("address_v6")
-        self.prefix_v4 = kwargs.get("prefix_v4")
-        self.prefix_v6 = kwargs.get("prefix_v6")
-        self.geometry = kwargs.get("geometry")
-        self.status = Status(**kwargs["status"])
-
-    def __str__(self):
-        return "Probe #{}".format(self.id)
-
-    def __repr__(self):
-        return str(self)
+        return CProbe(id, meta_data)
 
     @classmethod
     def get(cls, pk):
@@ -56,10 +25,12 @@ class Probe(object):
         """
         r = cache.get("probe:{}".format(pk))
         if not r:
-            return cls.get_from_api([pk])[0]
+            probe = CProbe(id=pk)
+            cache.set("probe:{}".format(probe.id), probe, cls.EXPIRE_TIME)
+            return probe
 
     @classmethod
-    def get_from_api(cls, ids):
+    def get_many(cls, ids):
         """
         Given a list of ids, attempt to get probe objects out of the local
         cache.  Probes that cannot be found will be fetched from the API and
@@ -78,7 +49,7 @@ class Probe(object):
 
         if fetch_ids:
             kwargs = {"id__in": ",".join(fetch_ids)}
-            for probe in [cls(**p) for p in ProbeRequest(**kwargs)]:
+            for probe in [p for p in ProbeRequest(return_objects=True, **kwargs)]:
                 cache.set("probe:{}".format(probe.id), probe, cls.EXPIRE_TIME)
                 r.append(probe)
 
