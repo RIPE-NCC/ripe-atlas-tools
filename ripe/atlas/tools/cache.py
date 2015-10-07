@@ -14,7 +14,7 @@ class LocalCache(object):
 
     def __init__(self):
         self._now = datetime.datetime.now()
-        self._db = dbm.open(self._get_db_path(), "c")
+        self._db = dbm.open(self._get_or_create_db_path(), "c")
 
     def __contains__(self, key):
         return key in self._db
@@ -73,11 +73,19 @@ class LocalCache(object):
             self.get(key)
 
     @staticmethod
-    def _get_db_path():
+    def _get_or_create_db_path():
+
+        db_path = os.path.join("/", "tmp", "cache.db")
         if "HOME" in os.environ:
-            return os.path.join(
+            db_path = os.path.join(
                 os.environ["HOME"], ".config", "ripe-atlas-tools", "cache.db")
-        return os.path.join("/", "tmp", "cache.db")
+
+        try:
+            os.makedirs(os.path.dirname(db_path))
+        except OSError:
+            pass  # Better to ask forgiveness than permission
+
+        return db_path
 
 cache = LocalCache()
 
