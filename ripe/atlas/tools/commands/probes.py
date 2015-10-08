@@ -108,13 +108,17 @@ class Command(BaseCommand):
 
     def run(self):
 
-        render_args = self._clean_render_args()
-        self.renderer = Renderer(**render_args)
-
         filters = self.build_request_args()
         probes_request = ProbeRequest(return_objects=True, **filters)
         probes = list(probes_request)
 
+        if self.arguments.ids_only:
+            ids = self.render_ids_only(probes)
+            print(ids)
+            return
+
+        render_args = self._clean_render_args()
+        self.renderer = Renderer(**render_args)
         self.renderer.on_start()
 
         if self.arguments.aggregate_by:
@@ -132,19 +136,23 @@ class Command(BaseCommand):
 
         self.renderer.on_finish(probes_request.total_count)
 
+    def render_ids_only(self, probes):
+        """If user has specified ids-only arg print only ids and exit"""
+        probe_ids = []
+        for index, probe in enumerate(probes):
+            probe_ids.append(str(probe.id))
+            if self.arguments.limit and index >= self.arguments.limit - 1:
+                break
+
+        return ",".join(probe_ids)
+
     def _clean_render_args(self):
         args = {"max_per_aggr": self.arguments.max_per_aggregation}
 
         if self.arguments.additional_fields:
             args.update(self._clean_additional_fields())
-        if self.arguments.ids_only:
-            args.update(self._clean_ids_only())
 
         return args
-
-    def _clean_ids_only(self):
-        """Prepare renderer options when ids-only flag is used."""
-        return {"mute": True, "fields": ["id"]}
 
     def _clean_additional_fields(self):
         """Parse and store additional fields."""

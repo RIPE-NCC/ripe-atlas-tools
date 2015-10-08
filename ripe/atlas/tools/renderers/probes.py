@@ -7,12 +7,11 @@ class Renderer(BaseRenderer):
 
     RENDERS = []
 
-    def __init__(self, fields=[], additional_fields=[], mute=False, max_per_aggr=None):
+    def __init__(self, fields=[], additional_fields=[], max_per_aggr=None):
         self.blob = ""
         self.additional_fields = additional_fields
         self.probe_template = ""
         self.header_message = ""
-        self.mute = mute
         self.fields = []
         self.max_per_aggr = max_per_aggr
         self.custom_format_flag = False
@@ -81,17 +80,14 @@ class Renderer(BaseRenderer):
                     break
 
     def on_start(self, indent=""):
-        if not self.mute:
-            self.blob += "We have found the following probes with the given criteria:\n"
+        self.blob += "We have found the following probes with the given criteria:\n"
 
     def on_table_title(self, indent=""):
         """Renders the header of the table"""
-        if not self.mute:
-            self.blob += "{0}{1}\n".format(indent, self.header_message)
+        self.blob += "{0}{1}\n".format(indent, self.header_message)
 
     def on_aggregation_title(self, bucket, indent=""):
-        if not self.mute:
-            self.blob += "{0}\n".format(indent + bucket)
+        self.blob += "{0}\n".format(indent + bucket)
 
     def on_result(self, result, probes=None, indent=""):
         fields = []
@@ -103,6 +99,5 @@ class Renderer(BaseRenderer):
         self.blob += "{0}{1}\n".format(indent, message)
 
     def on_finish(self, total_count):
-        if not self.mute:
-            self.blob += "Total probes found: {0}\n".format(total_count)
+        self.blob += "Total probes found: {0}\n".format(total_count)
         sys.stdout.write(self.blob)
