@@ -1,9 +1,3 @@
-class Aggregator(object):
-
-    def __init__(self, renderer):
-        self.renderer = renderer
-
-
 class ValueKeyAggregator(object):
     """Aggregator based on tha actual value of the key/attribute"""
     def __init__(self, key):
