@@ -18,8 +18,8 @@ class Command(BaseCommand):
     DESCRIPTION = "Report the results of a measurement.\n\nExample:\n" \
                   "  ripe-atlas report 1001 --probes 157,10006\n"
     URLS = {
-        "detail": "/api/v2/measurements/{0}.json",
-        "latest": "/api/v2/measurements/{0}/latest.json",
+        "detail": "/api/v2/measurements/{}.json",
+        "latest": "/api/v2/measurements/{}/latest.json",
     }
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],
@@ -155,10 +155,10 @@ class Command(BaseCommand):
         if isinstance(aggregation_data, dict):
 
             for k, v in aggregation_data.items():
-                self.payload = "{0}{1}{2}\n".format(self.payload, indent, k)
+                self.payload = "{}{}{}\n".format(self.payload, indent, k)
                 self.multi_level_render(v, indent=indent + " ")
 
         elif isinstance(aggregation_data, list):
 
             for index, data in enumerate(aggregation_data):
-                self.payload = "{0}{1} {2}".format(self.payload, indent, self.renderer.on_result(data))
+                self.payload = "{}{} {}".format(self.payload, indent, self.renderer.on_result(data))
