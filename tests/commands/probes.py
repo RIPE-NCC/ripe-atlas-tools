@@ -1,9 +1,42 @@
+import sys
 import mock
 import unittest
 import requests
+try:
+    from cStringIO import StringIO
+except:
+    # python 3
+    from io import StringIO
 
 from ripe.atlas.tools.commands.probes import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
+from ripe.atlas.cousteau import Probe
+from ripe.atlas.tools.aggregators import ValueKeyAggregator
+
+
+class FakeGen(object):
+    def __init__(self,):
+        self.probes = [
+            Probe(id=1, meta_data={"country_code": "GR", "asn_v4": 3333, "prefix_v4": "193.0/22"}),
+            Probe(id=2, meta_data={"country_code": "DE", "asn_v4": 3333, "prefix_v4": "193.0/22"}),
+            Probe(id=3, meta_data={"country_code": "DE", "asn_v4": 3332, "prefix_v4": "193.0/22"}),
+            Probe(id=4, meta_data={"country_code": "NL", "asn_v4": 3333, "prefix_v4": "193.0/22"}),
+            Probe(id=5, meta_data={"country_code": "GR", "asn_v4": 3333, "prefix_v4": "193.0/22"}),
+        ]
+        self.total_count = 4
+
+    def __iter__(self):
+        return self
+
+    # Python 3 compatibility
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        if not self.probes:
+            raise StopIteration()
+        else:
+            return self.probes.pop(0)
 
 
 class TestProbesCommand(unittest.TestCase):
@@ -173,3 +206,181 @@ class TestProbesCommand(unittest.TestCase):
             'latitude': '1',
             'longitude': '2'
         })
+
+    def test_render_ids_only(self):
+        """User passed ids_only arg, testing rendiring"""
+        self.cmd.init_args([
+            "--ids-only", "--country-code", "GR"
+        ])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        with mock.patch('ripe.atlas.tools.commands.probes.ProbeRequest') as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            self.assertEquals(mystdout.getvalue(), "1,2,3,4,5")
+
+        sys.stdout = old_stdout
+
+    def test_render_ids_only_with_limit(self):
+        """User passed ids_only arg together with limit, testing rendering"""
+        self.cmd.init_args([
+            "--ids-only", "--country-code", "GR", "--limit", "2"
+        ])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        with mock.patch('ripe.atlas.tools.commands.probes.ProbeRequest') as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            self.assertEquals(mystdout.getvalue(), "1,2")
+
+        sys.stdout = old_stdout
+
+    def test_render_ids_only_with_aggr(self):
+        """User passed ids_only arg together with aggrement, testing rendiring"""
+        self.cmd.init_args([
+            "--ids-only", "--aggregate-by", "country_code"
+        ])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        with mock.patch('ripe.atlas.tools.commands.probes.ProbeRequest') as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            self.assertEquals(mystdout.getvalue(), "1,2,3,4,5")
+
+        sys.stdout = old_stdout
+
+    def test_get_aggregators(self):
+        """User passed --aggregate-by args"""
+        self.cmd.init_args([
+            "--aggregate-by", "asn_v4", "--aggregate-by", "country_code", "--aggregate-by", "prefix_v4"
+        ])
+        expected_output = [
+            ValueKeyAggregator(key="asn_v4"),
+            ValueKeyAggregator(key="country_code"),
+            ValueKeyAggregator(key="prefix_v4")
+        ]
+        output = self.cmd.get_aggregators()
+        for index, v in enumerate(output):
+            self.assertTrue(isinstance(v, ValueKeyAggregator))
+            self.assertEquals(v.aggregation_keys, expected_output[index].aggregation_keys)
+
+    def test_render_without_aggregation(self):
+        """Tests rendering of results without aggregation"""
+        self.cmd.init_args(["--limit", "4"])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        with mock.patch('ripe.atlas.tools.commands.probes.ProbeRequest') as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            expected_output = (
+                "We have found the following probes with the given criteria:\n"
+                "ID   |ASNv4 |ASNv6 |CC|Status    |\n"
+                "1    |3333  |None  |GR|None|\n"
+                "2    |3333  |None  |DE|None|\n"
+                "3    |3332  |None  |DE|None|\n"
+                "4    |3333  |None  |NL|None|\n"
+                "Total probes found: 4\n"
+            )
+            self.assertEquals(mystdout.getvalue(), expected_output)
+
+        sys.stdout = old_stdout
+
+    def test_render_without_aggregation_with_limit(self):
+        """Tests rendering of results without aggregation but with limit"""
+        self.cmd.init_args([
+            "--country-code", "GR", "--limit", "2"
+        ])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        with mock.patch('ripe.atlas.tools.commands.probes.ProbeRequest') as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            expected_output = (
+                "We have found the following probes with the given criteria:\n"
+                "ID   |ASNv4 |ASNv6 |CC|Status    |\n"
+                "1    |3333  |None  |GR|None|\n"
+                "2    |3333  |None  |DE|None|\n"
+                "Total probes found: 4\n"
+            )
+            self.assertEquals(mystdout.getvalue(), expected_output)
+
+        sys.stdout = old_stdout
+
+    def test_render_with_aggregation(self):
+        """Tests rendering of results with aggregation"""
+        self.cmd.init_args([
+            "--country-code", "GR", "--aggregate-by", "country_code",
+            "--aggregate-by", "asn_v4", "--aggregate-by", "prefix_v4"
+        ])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        with mock.patch('ripe.atlas.tools.commands.probes.ProbeRequest') as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            expected_output = (
+                "We have found the following probes with the given criteria:\n"
+                "COUNTRY_CODE: NL\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    4    |3333  |None  |NL|None|\n"
+                "COUNTRY_CODE: GR\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    1    |3333  |None  |GR|None|\n    5    |3333  |None  |GR|None|\n"
+                "COUNTRY_CODE: DE\n ASN_V4: 3332\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    3    |3332  |None  |DE|None|\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    2    |3333  |None  |DE|None|\n"
+                "Total probes found: 4\n"
+            )
+            self.assertEquals(mystdout.getvalue(), expected_output)
+
+        sys.stdout = old_stdout
+
+    def test_render_with_aggregation_with_limit(self):
+        """Tests rendering of results with aggregation with limit"""
+        self.cmd.init_args([
+            "--country-code", "GR", "--aggregate-by", "country_code",
+            "--aggregate-by", "asn_v4", "--aggregate-by", "prefix_v4",
+            "--limit", "1"
+        ])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        with mock.patch('ripe.atlas.tools.commands.probes.ProbeRequest') as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            expected_output = (
+                "We have found the following probes with the given criteria:\n"
+                "COUNTRY_CODE: GR\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    1    |3333  |None  |GR|None|\n"
+                "Total probes found: 4\n"
+            )
+            self.assertEquals(mystdout.getvalue(), expected_output)
+
+        sys.stdout = old_stdout
+
+    def test_render_with_aggregation_with_max_per_aggr(self):
+        """Tests rendering of results with aggregation with max per aggr option"""
+        self.cmd.init_args([
+            "--country-code", "GR", "--aggregate-by", "country_code",
+            "--aggregate-by", "asn_v4", "--aggregate-by", "prefix_v4",
+            "--max-per-aggregation", "1"
+        ])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        with mock.patch('ripe.atlas.tools.commands.probes.ProbeRequest') as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            expected_output = (
+                "We have found the following probes with the given criteria:\n"
+                "COUNTRY_CODE: NL\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    4    |3333  |None  |NL|None|\n"
+                "COUNTRY_CODE: GR\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    1    |3333  |None  |GR|None|\n"
+                "COUNTRY_CODE: DE\n ASN_V4: 3332\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    3    |3332  |None  |DE|None|\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    2    |3333  |None  |DE|None|\n"
+                "Total probes found: 4\n"
+            )
+            self.assertEquals(mystdout.getvalue(), expected_output)
+
+        sys.stdout = old_stdout
+
+    def test_render_args(self):
+        """User passed max_per_aggr and additional fields args"""
+        self.cmd.init_args(["--max-per-aggregation", "3", "--additional-fields", "blaaaa, grrrrr"])
+        self.assertEquals(self.cmd._clean_render_args(), {"max_per_aggr": 3, "additional_fields": ["blaaaa", "grrrrr"]})

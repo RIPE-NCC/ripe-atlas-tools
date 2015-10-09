@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+import sys
 import requests
 
 from ripe.atlas.cousteau import ProbeRequest
@@ -112,9 +113,12 @@ class Command(BaseCommand):
         probes_request = ProbeRequest(return_objects=True, **filters)
         probes = list(probes_request)
 
+        if self.arguments.limit:
+            probes = probes[:self.arguments.limit]
+
         if self.arguments.ids_only:
-            ids = self.render_ids_only(probes)
-            print(ids)
+            ids = self.produce_ids_only(probes)
+            sys.stdout.write(ids)
             return
 
         render_args = self._clean_render_args()
@@ -131,12 +135,10 @@ class Command(BaseCommand):
             self.renderer.on_table_title()
             for index, probe in enumerate(probes):
                 self.renderer.on_result(probe)
-                if self.arguments.limit and index >= self.arguments.limit - 1:
-                    break
 
         self.renderer.on_finish(probes_request.total_count)
 
-    def render_ids_only(self, probes):
+    def produce_ids_only(self, probes):
         """If user has specified ids-only arg print only ids and exit"""
         probe_ids = []
         for index, probe in enumerate(probes):
@@ -156,7 +158,7 @@ class Command(BaseCommand):
 
     def _clean_additional_fields(self):
         """Parse and store additional fields."""
-        additional_fields = self.arguments.additional_fields.split(",")
+        additional_fields = [x.strip() for x in self.arguments.additional_fields.split(",")]
 
         return {"additional_fields": additional_fields}
 
