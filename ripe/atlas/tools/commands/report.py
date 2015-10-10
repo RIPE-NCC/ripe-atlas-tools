@@ -97,6 +97,8 @@ class Command(BaseCommand):
 
         self.multi_level_render(enhanced_results)
 
+        self.payload += "\n" + self.renderer.on_finish()
+
         print(self.renderer.render(
             "reports/base.txt",
             measurement_id=self.arguments.measurement_id,
@@ -161,4 +163,6 @@ class Command(BaseCommand):
         elif isinstance(aggregation_data, list):
 
             for index, data in enumerate(aggregation_data):
-                self.payload = "{}{} {}".format(self.payload, indent, self.renderer.on_result(data))
+                res = self.renderer.on_result(data)
+                if res:
+                    self.payload = "{}{} {}".format(self.payload, indent, self.renderer.on_result(data))
