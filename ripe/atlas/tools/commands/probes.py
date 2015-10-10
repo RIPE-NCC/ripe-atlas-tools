@@ -34,7 +34,7 @@ class Command(BaseCommand):
             help="ASNv6"
         )
 
-        prefix = self.parser.add_argument_group("Preifx")
+        prefix = self.parser.add_argument_group("Prefix")
         prefix.add_argument(
             "--prefix",
             type=str,
