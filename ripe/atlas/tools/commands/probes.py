@@ -14,9 +14,10 @@ class Command(BaseCommand):
 
     NAME = "probes"
 
-    DESCRIPTION = "Find probes fullfiling specific criteria based on given filters."
+    DESCRIPTION = "Fetches and prints probes fullfiling specified criteria based on given filters."
 
     def add_arguments(self):
+        """Adds all commands line argumentes for this command."""
         asn = self.parser.add_argument_group("ASN")
         asn.add_argument(
             "--asn",
@@ -56,40 +57,40 @@ class Command(BaseCommand):
         geo_location.add_argument(
             "--location",
             type=str,
-            help="The location"
+            help="The location of probes as a string i.e. 'Amsterdam'"
         )
         geo_location.add_argument(
             "--center",
             type=str,
-            help="location as <lat>,<lon>-string, ie '48.45,9.16'"
+            help="location as <lat>,<lon>-string, i.e. '48.45,9.16'"
         )
         geo_location.add_argument(
             "--country-code",
             type=str,
-            help="The country code"
+            help="The country code of probes."
         )
         area.add_argument(
             "--radius",
             type=int,
-            help="Radius"
+            help="Radius in km from specified center/point."
         )
 
         self.parser.add_argument(
             "--limit",
             type=int,
-            help="Limit"
+            help="Return limited amount of probes"
         )
         self.parser.add_argument(
             "--additional-fields",
             type=str,
-            help="Additional fields"
+            help="Print additional probe fields. Specify field names as given from the API as a comma separated string."
         )
         self.parser.add_argument(
             "--aggregate-by",
             type=str,
             choices=['asn_v4', 'asn_v6', 'country_code', 'prefix_v4', 'prefix_v6'],
             action="append",
-            help="Aggregate list of probes based on all specified aggregations."
+            help="Aggregate list of probes based on all specified aggregations. Multiple aggragations supported."
         )
         self.parser.add_argument(
             "--all",
@@ -108,7 +109,7 @@ class Command(BaseCommand):
         )
 
     def run(self):
-
+        """Main function that will run on the command"""
         filters = self.build_request_args()
         probes_request = ProbeRequest(return_objects=True, **filters)
         probes = list(probes_request)
@@ -139,7 +140,7 @@ class Command(BaseCommand):
         self.renderer.on_finish(probes_request.total_count)
 
     def produce_ids_only(self, probes):
-        """If user has specified ids-only arg print only ids and exit"""
+        """If user has specified ids-only arg print only ids and exit."""
         probe_ids = []
         for index, probe in enumerate(probes):
             probe_ids.append(str(probe.id))
@@ -149,6 +150,7 @@ class Command(BaseCommand):
         return ",".join(probe_ids)
 
     def _clean_render_args(self):
+        """Clean arguments that will be used by renderer and return the kwargs structure for it"""
         args = {"max_per_aggr": self.arguments.max_per_aggregation}
 
         if self.arguments.additional_fields:
@@ -157,7 +159,7 @@ class Command(BaseCommand):
         return args
 
     def _clean_additional_fields(self):
-        """Parse and store additional fields."""
+        """Parse and store additional fields argument."""
         additional_fields = [x.strip() for x in self.arguments.additional_fields.split(",")]
 
         return {"additional_fields": additional_fields}
@@ -173,7 +175,7 @@ class Command(BaseCommand):
         return self._clean_request_args()
 
     def _clean_request_args(self):
-        """Cleans all arguments and checks for sanity."""
+        """Cleans all arguments for the API request and checks for sanity."""
         args = {}
 
         set_args = [k for k, v in vars(self.arguments).items() if v]
@@ -306,6 +308,7 @@ class Command(BaseCommand):
         return country_code_args
 
     def get_aggregators(self):
+        """Builds and returns the key aggregators that will be used in the aggregation."""
         aggregation_keys = []
         for aggr_key in self.arguments.aggregate_by:
             aggregation_keys.append(ValueKeyAggregator(key=aggr_key))
