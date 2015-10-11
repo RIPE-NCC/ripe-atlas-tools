@@ -87,6 +87,8 @@ class Command(BaseCommand):
         if description:
             description = "\n{0}\n\n".format(description)
 
+        self.payload += "\n" + self.renderer.on_start()
+
         sagans = self.create_enhanced_sagans(results)
 
         if self.arguments.aggregate_by:
