@@ -277,7 +277,7 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = FakeGen()
             self.cmd.run()
             expected_output = (
-                "We have found the following probes with the given criteria:\n"
+                "We found the following probes with the given criteria:\n"
                 "ID   |ASNv4 |ASNv6 |CC|Status    |\n"
                 "1    |3333  |None  |GR|None|\n"
                 "2    |3333  |None  |DE|None|\n"
@@ -301,7 +301,7 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = FakeGen()
             self.cmd.run()
             expected_output = (
-                "We have found the following probes with the given criteria:\n"
+                "We found the following probes with the given criteria:\n"
                 "ID   |ASNv4 |ASNv6 |CC|Status    |\n"
                 "1    |3333  |None  |GR|None|\n"
                 "2    |3333  |None  |DE|None|\n"
@@ -324,7 +324,7 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = FakeGen()
             self.cmd.run()
             expected_output = (
-                "We have found the following probes with the given criteria:\n"
+                "We found the following probes with the given criteria:\n"
                 "COUNTRY_CODE: NL\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    4    |3333  |None  |NL|None|\n"
                 "COUNTRY_CODE: GR\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    1    |3333  |None  |GR|None|\n    5    |3333  |None  |GR|None|\n"
                 "COUNTRY_CODE: DE\n ASN_V4: 3332\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    3    |3332  |None  |DE|None|\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    2    |3333  |None  |DE|None|\n"
@@ -348,7 +348,7 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = FakeGen()
             self.cmd.run()
             expected_output = (
-                "We have found the following probes with the given criteria:\n"
+                "We found the following probes with the given criteria:\n"
                 "COUNTRY_CODE: GR\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    1    |3333  |None  |GR|None|\n"
                 "Total probes found: 4\n"
             )
@@ -370,7 +370,7 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = FakeGen()
             self.cmd.run()
             expected_output = (
-                "We have found the following probes with the given criteria:\n"
+                "We found the following probes with the given criteria:\n"
                 "COUNTRY_CODE: NL\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    4    |3333  |None  |NL|None|\n"
                 "COUNTRY_CODE: GR\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    1    |3333  |None  |GR|None|\n"
                 "COUNTRY_CODE: DE\n ASN_V4: 3332\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    3    |3332  |None  |DE|None|\n ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n    ID   |ASNv4 |ASNv6 |CC|Status    |\n    2    |3333  |None  |DE|None|\n"
