@@ -91,6 +91,8 @@ class Command(BaseCommand):
         if description:
             description = "\n{0}\n\n".format(description)
 
+        self.payload += "\n" + self.renderer.on_start()
+
         sagans = self.create_enhanced_sagans(results)
 
         if self.arguments.aggregate_by:
@@ -100,6 +102,8 @@ class Command(BaseCommand):
             enhanced_results = sagans
 
         self.multi_level_render(enhanced_results)
+
+        self.payload += "\n" + self.renderer.on_finish()
 
         print(self.renderer.render(
             "reports/base.txt",
@@ -168,4 +172,6 @@ class Command(BaseCommand):
         elif isinstance(aggregation_data, list):
 
             for index, data in enumerate(aggregation_data):
-                self.payload = "{}{} {}".format(self.payload, indent, self.renderer.on_result(data))
+                res = self.renderer.on_result(data)
+                if res:
+                    self.payload = "{}{} {}".format(self.payload, indent, res)
