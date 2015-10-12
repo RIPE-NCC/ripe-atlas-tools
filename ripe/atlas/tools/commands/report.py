@@ -167,4 +167,4 @@ class Command(BaseCommand):
             for index, data in enumerate(aggregation_data):
                 res = self.renderer.on_result(data)
                 if res:
-                    self.payload = "{}{} {}".format(self.payload, indent, self.renderer.on_result(data))
+                    self.payload = "{}{} {}".format(self.payload, indent, res)
