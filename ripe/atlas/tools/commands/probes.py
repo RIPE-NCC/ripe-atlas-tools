@@ -14,9 +14,13 @@ class Command(BaseCommand):
 
     NAME = "probes"
 
-    DESCRIPTION = "Find probes fullfiling specific criteria based on given filters."
+    DESCRIPTION = (
+        "Fetches and prints probes fullfiling specified criteria based on "
+        "given filters."
+    )
 
     def add_arguments(self):
+        """Adds all commands line argumentes for this command."""
         asn = self.parser.add_argument_group("ASN")
         asn.add_argument(
             "--asn",
@@ -34,7 +38,7 @@ class Command(BaseCommand):
             help="ASNv6"
         )
 
-        prefix = self.parser.add_argument_group("Preifx")
+        prefix = self.parser.add_argument_group("Prefix")
         prefix.add_argument(
             "--prefix",
             type=str,
@@ -56,40 +60,50 @@ class Command(BaseCommand):
         geo_location.add_argument(
             "--location",
             type=str,
-            help="The location"
+            help="The location of probes as a string i.e. 'Amsterdam'"
         )
         geo_location.add_argument(
             "--center",
             type=str,
-            help="location as <lat>,<lon>-string, ie '48.45,9.16'"
+            help="location as <lat>,<lon>-string, i.e. '48.45,9.16'"
         )
         geo_location.add_argument(
             "--country-code",
             type=str,
-            help="The country code"
+            help="The country code of probes."
         )
         area.add_argument(
             "--radius",
             type=int,
-            help="Radius"
+            help="Radius in km from specified center/point."
         )
 
         self.parser.add_argument(
             "--limit",
             type=int,
-            help="Limit"
+            help="Return limited amount of probes"
         )
         self.parser.add_argument(
             "--additional-fields",
             type=str,
-            help="Additional fields"
+            help=(
+                "Print additional probe fields. Specify field names as given "
+                "from the API as a comma separated string."
+            )
         )
         self.parser.add_argument(
             "--aggregate-by",
             type=str,
-            choices=['asn_v4', 'asn_v6', 'country_code', 'prefix_v4', 'prefix_v6'],
+            choices=[
+                'country_code',
+                'asn_v4', 'asn_v6',
+                'prefix_v4', 'prefix_v6'
+            ],
             action="append",
-            help="Aggregate list of probes based on all specified aggregations."
+            help=(
+                "Aggregate list of probes based on all specified aggregations."
+                " Multiple aggregations supported."
+            )
         )
         self.parser.add_argument(
             "--all",
@@ -104,11 +118,13 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--ids-only",
             action='store_true',
-            help="Print only IDs of probes. Usefull to pipe it to another command."
+            help=(
+                "Print only IDs of probes. Usefull to pipe it to another "
+                "command."
+            )
         )
 
     def run(self):
-
         filters = self.build_request_args()
         probes_request = ProbeRequest(return_objects=True, **filters)
         probes = list(probes_request)
@@ -139,7 +155,7 @@ class Command(BaseCommand):
         self.renderer.on_finish(probes_request.total_count)
 
     def produce_ids_only(self, probes):
-        """If user has specified ids-only arg print only ids and exit"""
+        """If user has specified ids-only arg print only ids and exit."""
         probe_ids = []
         for index, probe in enumerate(probes):
             probe_ids.append(str(probe.id))
@@ -149,6 +165,10 @@ class Command(BaseCommand):
         return ",".join(probe_ids)
 
     def _clean_render_args(self):
+        """
+        Clean arguments that will be used by renderer and return the kwargs
+        structure for it.
+        """
         args = {"max_per_aggr": self.arguments.max_per_aggregation}
 
         if self.arguments.additional_fields:
@@ -157,8 +177,10 @@ class Command(BaseCommand):
         return args
 
     def _clean_additional_fields(self):
-        """Parse and store additional fields."""
-        additional_fields = [x.strip() for x in self.arguments.additional_fields.split(",")]
+        """Parse and store additional fields argument."""
+        additional_fields = [
+            x.strip() for x in self.arguments.additional_fields.split(",")
+        ]
 
         return {"additional_fields": additional_fields}
 
@@ -173,7 +195,7 @@ class Command(BaseCommand):
         return self._clean_request_args()
 
     def _clean_request_args(self):
-        """Cleans all arguments and checks for sanity."""
+        """Cleans all arguments for the API request and checks for sanity."""
         args = {}
 
         set_args = [k for k, v in vars(self.arguments).items() if v]
@@ -183,10 +205,16 @@ class Command(BaseCommand):
                 "usuage."
             )
 
-        if any([self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]):
+        if any(
+            [self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]
+        ):
             args.update(self._clean_asn())
 
-        if any([self.arguments.prefix, self.arguments.prefixv4, self.arguments.prefixv6]):
+        if any([
+            self.arguments.prefix,
+            self.arguments.prefixv4,
+            self.arguments.prefixv6
+        ]):
             args.update(self._clean_prefix())
 
         if self.arguments.location:
@@ -207,9 +235,11 @@ class Command(BaseCommand):
         asnv6 = self.arguments.asnv6
 
         if asn and (asnv4 or asnv6):
-            raise RipeAtlasToolsException(
-                "Specifying argument --asn together with --asnv4/--asnv6 doesn't make sense"
+            exc_log = (
+                "Specifying argument --asn together with --asnv4/--asnv6 "
+                "doesn't make sense"
             )
+            raise RipeAtlasToolsException(exc_log)
         if asn:
             return {"asn": asn}
 
@@ -229,9 +259,11 @@ class Command(BaseCommand):
         prefixv6 = self.arguments.prefixv6
 
         if prefix and (prefixv4 or prefixv6):
-            raise RipeAtlasToolsException(
-                "Specifying argument --prefix together with --prefixv4/--prefixv6 doesn't make sense"
+            exc_log = (
+                "Specifying argument --prefix together with "
+                "--prefixv4/--prefixv6 doesn't make sense"
             )
+            raise RipeAtlasToolsException(exc_log)
         if prefix:
             return {"prefix": prefix}
 
@@ -248,7 +280,9 @@ class Command(BaseCommand):
         """Make sure location argument are sane."""
         lat, lng = self.location2degrees()
         if self.arguments.radius:
-            location_args = {"radius": "{0},{1}:{2}".format(lat, lng, self.arguments.radius)}
+            location_args = {
+                "radius": "{0},{1}:{2}".format(lat, lng, self.arguments.radius)
+            }
         else:
             location_args = {"latitude": lat, "longitude": lng}
 
@@ -290,10 +324,14 @@ class Command(BaseCommand):
         try:
             lat, lng = self.arguments.center.split(",")
         except ValueError:
-            raise RipeAtlasToolsException("Point argument should be in <lat,lng> format.")
+            raise RipeAtlasToolsException(
+                "Point argument should be in <lat,lng> format."
+            )
 
         if self.arguments.radius:
-            center_args = {"radius": "{0},{1}:{2}".format(lat, lng, self.arguments.radius)}
+            center_args = {
+                "radius": "{0},{1}:{2}".format(lat, lng, self.arguments.radius)
+            }
         else:
             center_args = {"latitude": lat, "longitude": lng}
 
@@ -306,6 +344,10 @@ class Command(BaseCommand):
         return country_code_args
 
     def get_aggregators(self):
+        """
+        Builds and returns the key aggregators that will be used in
+        the aggregation.
+        """
         aggregation_keys = []
         for aggr_key in self.arguments.aggregate_by:
             aggregation_keys.append(ValueKeyAggregator(key=aggr_key))

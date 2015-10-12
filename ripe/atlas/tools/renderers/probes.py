@@ -1,6 +1,5 @@
 import sys
 from .base import Renderer as BaseRenderer
-#  from ..helpers.colours import Colour
 
 
 class Renderer(BaseRenderer):
@@ -62,7 +61,9 @@ class Renderer(BaseRenderer):
             self.probe_template += "{:<}|"
 
     def render_aggregation(self, aggregation_data, indent=""):
-        """Traverses through aggregation data and print them indented"""
+        """
+        Recursively traverses through aggregation data and print them indented.
+        """
 
         if isinstance(aggregation_data, dict):
 
@@ -80,13 +81,14 @@ class Renderer(BaseRenderer):
                     break
 
     def on_start(self, indent=""):
-        self.blob += "We have found the following probes with the given criteria:\n"
+        self.blob += "We found the following probes with the given criteria:\n"
 
     def on_table_title(self, indent=""):
         """Renders the header of the table"""
         self.blob += "{0}{1}\n".format(indent, self.header_message)
 
     def on_aggregation_title(self, bucket, indent=""):
+        """Renders the title of each aggregation bucket."""
         self.blob += "{0}\n".format(indent + bucket)
 
     def on_result(self, result, probes=None, indent=""):
