@@ -119,10 +119,7 @@ class Command(BaseCommand):
         return aggregation_keys
 
     def create_enhanced_sagans(self, results):
-        """
-        Create Sagan Result objects and add additonal Porbe attribute to each
-        one of them
-         """
+        """Create Sagan Result objects and add additonal Probe attribute to each one of them."""
         # Sagans
         sagans = []
         for result in results:
