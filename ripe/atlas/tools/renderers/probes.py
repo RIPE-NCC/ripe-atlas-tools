@@ -1,6 +1,5 @@
 import sys
 from .base import Renderer as BaseRenderer
-#  from ..helpers.colours import Colour
 
 
 class Renderer(BaseRenderer):
