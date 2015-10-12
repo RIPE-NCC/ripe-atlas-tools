@@ -62,7 +62,9 @@ class Renderer(BaseRenderer):
             self.probe_template += "{:<}|"
 
     def render_aggregation(self, aggregation_data, indent=""):
-        """Recursively traverses through aggregation data and print them indented."""
+        """
+        Recursively traverses through aggregation data and print them indented.
+        """
 
         if isinstance(aggregation_data, dict):
 
@@ -80,7 +82,7 @@ class Renderer(BaseRenderer):
                     break
 
     def on_start(self, indent=""):
-        self.blob += "We have found the following probes with the given criteria:\n"
+        self.blob += "We found the following probes with the given criteria:\n"
 
     def on_table_title(self, indent=""):
         """Renders the header of the table"""

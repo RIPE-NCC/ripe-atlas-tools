@@ -23,7 +23,11 @@ class Command(BaseCommand):
     }
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],
-        "rtt-median": ["rtt_median", RangeKeyAggregator, [10, 20, 30, 40, 50, 100, 200, 300]],
+        "rtt-median": [
+            "rtt_median",
+            RangeKeyAggregator,
+            [10, 20, 30, 40, 50, 100, 200, 300]
+        ],
         "status": ["probe.status", ValueKeyAggregator],
         "asn_v4": ["probe.asn_v4", ValueKeyAggregator],
         "asn_v6": ["probe.asn_v6", ValueKeyAggregator],
@@ -108,18 +112,24 @@ class Command(BaseCommand):
         """Return aggregators list based on user input"""
         aggregation_keys = []
         for aggr_key in self.arguments.aggregate_by:
+            # Get class and aggregator key
+            aggregation_class = self.AGGREGATORS[aggr_key][1]
+            key = self.AGGREGATORS[aggr_key][0]
             if aggr_key == "rtt":
-                # Get class, aggregator key and range for the aggregation
+                # Get range for the aggregation
+                key_range = self.AGGREGATORS[aggr_key][2]
                 aggregation_keys.append(
-                    self.AGGREGATORS[aggr_key][1](key=self.AGGREGATORS[aggr_key][0], ranges=self.AGGREGATORS[aggr_key][2])
+                    aggregation_class(key=key, ranges=key_range)
                 )
             else:
-                # Get class, aggregator key
-                aggregation_keys.append(self.AGGREGATORS[aggr_key][1](key=self.AGGREGATORS[aggr_key][0]))
+                aggregation_keys.append(aggregation_class(key=key))
         return aggregation_keys
 
     def create_enhanced_sagans(self, results):
-        """Create Sagan Result objects and add additonal Probe attribute to each one of them."""
+        """
+        Create Sagan Result objects and add additonal an Probe attribute to
+        each one of them.
+        """
         # Sagans
         sagans = []
         for result in results:
