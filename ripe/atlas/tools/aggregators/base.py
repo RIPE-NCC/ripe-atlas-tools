@@ -49,7 +49,7 @@ class RangeKeyAggregator(ValueKeyAggregator):
 def aggregate(entities, aggregators):
     """
     This is doing the len(aggregators) level aggregation of the entities.
-    Caution: being recursive is a bit hard to readi/understand, if you change
+    Caution: being recursive is a bit hard to read/understand, if you change
     something make sure you run tests.
     """
     if not aggregators:
