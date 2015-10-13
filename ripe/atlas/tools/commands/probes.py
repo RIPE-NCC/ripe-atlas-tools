@@ -19,8 +19,12 @@ class Command(BaseCommand):
         "given filters."
     )
 
+    def __init__(self, *args, **kwargs):
+        BaseCommand.__init__(self, *args, **kwargs)
+        self.renderer = None
+
     def add_arguments(self):
-        """Adds all commands line argumentes for this command."""
+        """Adds all commands line arguments for this command."""
         asn = self.parser.add_argument_group("ASN")
         asn.add_argument(
             "--asn",
@@ -119,7 +123,7 @@ class Command(BaseCommand):
             "--ids-only",
             action='store_true',
             help=(
-                "Print only IDs of probes. Usefull to pipe it to another "
+                "Print only IDs of probes. Useful to pipe it to another "
                 "command."
             )
         )
@@ -142,17 +146,16 @@ class Command(BaseCommand):
         self.renderer.on_start()
 
         if self.arguments.aggregate_by:
-
             aggregators = self.get_aggregators()
             buckets = aggregate(probes, aggregators)
             self.renderer.render_aggregation(buckets)
         else:
-
             self.renderer.on_table_title()
             for index, probe in enumerate(probes):
                 self.renderer.on_result(probe)
 
-        self.renderer.on_finish(probes_request.total_count)
+        self.renderer.total_count = probes_request.total_count
+        self.renderer.on_finish()
 
     def produce_ids_only(self, probes):
         """If user has specified ids-only arg print only ids and exit."""
@@ -201,9 +204,7 @@ class Command(BaseCommand):
         set_args = [k for k, v in vars(self.arguments).items() if v]
         if not set_args:
             raise RipeAtlasToolsException(
-                "You should specify at least one argument. Try -h option for "
-                "usuage."
-            )
+                "You must specify at least one argument. Try --help for usage.")
 
         if any(
             [self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]
