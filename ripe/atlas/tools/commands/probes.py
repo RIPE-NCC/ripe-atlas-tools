@@ -146,10 +146,13 @@ class Command(BaseCommand):
         self.renderer.on_start()
 
         if self.arguments.aggregate_by:
+
             aggregators = self.get_aggregators()
             buckets = aggregate(probes, aggregators)
             self.renderer.render_aggregation(buckets)
+
         else:
+
             self.renderer.on_table_title()
             for index, probe in enumerate(probes):
                 self.renderer.on_result(probe)

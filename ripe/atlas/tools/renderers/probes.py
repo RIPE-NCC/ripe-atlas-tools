@@ -33,7 +33,7 @@ class Renderer(BaseRenderer):
 
         if not self.custom_format_flag:
             header_fields = ["ID", "ASNv4", "ASNv6", "CC", "Status"]
-            header_template = "{:<5} {:<6} {:<6} {:<2} {:<10}"
+            header_template = "{:<5} {:<6} {:<6} {:<2} {:<12}"
         else:
             for field in self.fields:
                 header_fields.append(field.upper())
@@ -54,7 +54,7 @@ class Renderer(BaseRenderer):
 
         if not self.custom_format_flag:
             self.fields = ["id", "asn_v4", "asn_v6", "country_code", "status"]
-            self.probe_template = "{:<5} {:<6} {:<6} {:^2} {:<}"
+            self.probe_template = "{:<5} {:<6} {:<6} {:^2} {:<12}"
         else:
             for field in self.fields:
                 self.probe_template += " {:<}"
