@@ -6,14 +6,16 @@ class Renderer(BaseRenderer):
 
     RENDERS = []
 
-    def __init__(self, fields=[], additional_fields=[], max_per_aggr=None):
+    def __init__(self, fields=None, additional_fields=None, max_per_aggr=None):
+
         self.blob = ""
-        self.additional_fields = additional_fields
+        self.additional_fields = additional_fields or []
         self.probe_template = ""
         self.header_message = ""
         self.fields = []
         self.max_per_aggr = max_per_aggr
         self.custom_format_flag = False
+        self.total_count = 0
 
         if fields:
             self.custom_format_flag = True
@@ -31,14 +33,14 @@ class Renderer(BaseRenderer):
 
         if not self.custom_format_flag:
             header_fields = ["ID", "ASNv4", "ASNv6", "CC", "Status"]
-            header_template = "{:<5}|{:<6}|{:<6}|{:<2}|{:<10}|"
+            header_template = "{:<5} {:<6} {:<6} {:<2} {:<12}"
         else:
             for field in self.fields:
                 header_fields.append(field.upper())
-                header_template += "{:<}|"
+                header_template += " {:<}"
 
         for field in self.additional_fields:
-            header_template += "{:<}|"
+            header_template += " {:<}"
             header_fields.append(field)
 
         self.header_message = header_template.format(*header_fields)
@@ -52,13 +54,13 @@ class Renderer(BaseRenderer):
 
         if not self.custom_format_flag:
             self.fields = ["id", "asn_v4", "asn_v6", "country_code", "status"]
-            self.probe_template = "{:<5}|{:<6}|{:<6}|{:^2}|{:<}|"
+            self.probe_template = "{:<5} {:<6} {:<6} {:^2} {:<12}"
         else:
             for field in self.fields:
-                self.probe_template += "{:<}|"
+                self.probe_template += " {:<}"
 
         for fields in self.additional_fields:
-            self.probe_template += "{:<}|"
+            self.probe_template += " {:<}"
 
     def render_aggregation(self, aggregation_data, indent=""):
         """
@@ -85,21 +87,21 @@ class Renderer(BaseRenderer):
 
     def on_table_title(self, indent=""):
         """Renders the header of the table"""
-        self.blob += "{0}{1}\n".format(indent, self.header_message)
+        self.blob += "{}{}\n".format(indent, self.header_message)
 
     def on_aggregation_title(self, bucket, indent=""):
         """Renders the title of each aggregation bucket."""
-        self.blob += "{0}\n".format(indent + bucket)
+        self.blob += "{}\n".format(indent + bucket)
 
     def on_result(self, result, probes=None, indent=""):
         fields = []
 
         for field in self.fields:
-            fields.append(getattr(result, field, "Undefined"))
+            fields.append(getattr(result, field, ""))
 
         message = self.probe_template.format(*fields)
-        self.blob += "{0}{1}\n".format(indent, message)
+        self.blob += "{}{}\n".format(indent, message)
 
-    def on_finish(self, total_count):
-        self.blob += "Total probes found: {0}\n".format(total_count)
+    def on_finish(self):
+        self.blob += "Total probes found: {}\n".format(self.total_count)
         sys.stdout.write(self.blob)

@@ -11,10 +11,6 @@ class Probe(object):
 
     EXPIRE_TIME = 60 * 60 * 24 * 30
 
-    def __init__(self, id, meta_data=None):
-
-        return CProbe(id, meta_data)
-
     @classmethod
     def get(cls, pk):
         """
