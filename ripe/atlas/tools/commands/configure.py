@@ -72,10 +72,9 @@ class Command(BaseCommand):
 
         if not isinstance(value, required_type):
             raise RipeAtlasToolsException(
-                'Invalid configuration value: "{0}".  You must supply a {1} for this key'.format(
-                    value,
-                    required_type.__name__
-                ))
+                'Invalid configuration value: "{0}".  You must supply a '
+                '{1} for this key'.format(value, required_type.__name__)
+            )
 
         self._set_in_dict(conf, path, value)
 
@@ -87,7 +86,10 @@ class Command(BaseCommand):
         if os.path.exists(Configuration.USER_RC):
             return
 
-        os.makedirs(Configuration.USER_CONFIG_DIR)
+        try:
+            os.makedirs(Configuration.USER_CONFIG_DIR)
+        except OSError:
+            pass  # The directory doesn't need to be created
 
         Configuration.write(conf)
 

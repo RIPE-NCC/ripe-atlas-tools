@@ -1,5 +1,10 @@
 from __future__ import print_function
 
+try:
+    from urllib.parse import urlencode  # Python3
+except ImportError:
+    from urllib import urlencode  # Python2
+
 from ripe.atlas.cousteau import AtlasRequest
 from ripe.atlas.sagan import Result
 
@@ -20,6 +25,7 @@ class Command(BaseCommand):
     URLS = {
         "detail": "/api/v2/measurements/{}.json",
         "latest": "/api/v2/measurements/{}/latest.json",
+        "results": "/api/v2/measurements/{}/results.json",
     }
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],
@@ -67,11 +73,37 @@ class Command(BaseCommand):
                  "selected option.  Note that if you opt for aggregation, no "
                  "output will be generated until all results are received."
         )
+        self.parser.add_argument(
+            "--start-time",
+            type=ArgumentType.datetime,
+            help="The start time of the report."
+        )
+        self.parser.add_argument(
+            "--stop-time",
+            type=ArgumentType.datetime,
+            help="The stop time of the report."
+        )
 
-    def get_probes(self):
+    def _get_latest_url(self):
+
+        r = self.URLS["latest"]
+        if self.arguments.start_time or self.arguments.stop_time:
+            r = self.URLS["results"]
+
+        r = r.format(self.arguments.measurement_id)
+
+        query_arguments = {}
         if self.arguments.probes:
-            return [int(i) for i in self.arguments.probes.split(",")]
-        return []
+            query_arguments["probes"] = ",".join(self.arguments.probes)
+        if self.arguments.start_time:
+            query_arguments["start"] = self.arguments.start_time.timestamp
+        if self.arguments.stop_time:
+            query_arguments["stop"] = self.arguments.stop_time.timestamp
+
+        if query_arguments:
+            return "{}?{}".format(r, urlencode(query_arguments, doseq=True))
+
+        return r
 
     def run(self):
 
@@ -82,11 +114,7 @@ class Command(BaseCommand):
         self.renderer = Renderer.get_renderer(
             self.arguments.renderer, detail["type"]["name"])()
 
-        latest_url = self.URLS["latest"].format(pk)
-        if self.arguments.probes:
-            latest_url += "?probes={0}".format(self.arguments.probes)
-
-        results = AtlasRequest(url_path=latest_url).get()[1]
+        results = AtlasRequest(url_path=self._get_latest_url()).get()[1]
 
         if not results:
             raise RipeAtlasToolsException(
@@ -94,7 +122,7 @@ class Command(BaseCommand):
 
         description = detail["description"] or ""
         if description:
-            description = "\n{0}\n\n".format(description)
+            description = "\n{}\n\n".format(description)
 
         self.payload += "\n" + self.renderer.on_start()
 
@@ -136,10 +164,10 @@ class Command(BaseCommand):
 
     def create_enhanced_sagans(self, results):
         """
-        Create Sagan Result objects and add additonal an Probe attribute to
+        Create Sagan Result objects and add additional an Probe attribute to
         each one of them.
         """
-        # Sagans
+
         sagans = []
         for result in results:
             sagans.append(
@@ -151,15 +179,15 @@ class Command(BaseCommand):
             )
 
         # Probes
-        probes = self.get_probes()
+        probes = self.arguments.probes
         if not probes:
             probes = set([r.probe_id for r in sagans])
-        probe_objects = Probe.get_many(probes)
+
         probes_dict = {}
-        for probe in probe_objects:
+        for probe in Probe.get_many(probes):
             probes_dict[probe.id] = probe
 
-        # Populate probe attrs to sagans
+        # Attache a probe attribute to each sagan
         for sagan in sagans:
             sagan.probe = probes_dict[sagan.probe_id]
 
