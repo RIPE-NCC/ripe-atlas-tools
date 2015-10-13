@@ -149,6 +149,22 @@ class Command(BaseCommand):
             default=conf["specification"]["source"]["requested"],
             help="The number of probes you want to use"
         )
+        self.parser.add_argument(
+            "--include-tag",
+            type=str,
+            action="append",
+            metavar="TAG",
+            help="Include only probes that are marked with these tags. " \
+                 "Example: --include-tag=system-ipv6-works"
+        )
+        self.parser.add_argument(
+            "--exclude-tag",
+            type=str,
+            action="append",
+            metavar="TAG",
+            help="Exclude probes that are marked with these tags. " \
+                 "Example: --exclude-tag=NAT"
+        )
 
         # Type-specific
 
@@ -479,6 +495,11 @@ class Command(BaseCommand):
         elif self.arguments.from_measurement:
             r["type"] = "msm"
             r["value"] = self.arguments.from_measurement
+
+        if self.arguments.include_tag or self.arguments.exclude_tag:
+            r["tags"] = {}
+            r["tags"]["include"] = self.arguments.include_tag or []
+            r["tags"]["exclude"] = self.arguments.exclude_tag or []
 
         return r
 
