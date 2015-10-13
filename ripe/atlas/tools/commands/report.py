@@ -35,6 +35,11 @@ class Command(BaseCommand):
         "prefix_v6": ["probe.prefix_v6", ValueKeyAggregator],
     }
 
+    def __init__(self, *args, **kwargs):
+        BaseCommand.__init__(self, *args, **kwargs)
+        self.payload = ""
+        self.renderer = None
+
     def add_arguments(self):
         self.parser.add_argument(
             "measurement_id",
