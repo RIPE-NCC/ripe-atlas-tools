@@ -5,18 +5,23 @@ class ValueKeyAggregator(object):
         self.key_prefix = self.aggregation_keys[-1].upper()
 
     def get_key_value(self, entity):
-        """Returns the value of the key/attribute the aggregation will use to bucketize probes/results"""
+        """
+        Returns the value of the key/attribute the aggregation will use to
+        bucketize probes/results
+        """
         attribute = entity
         for key in self.aggregation_keys:
             attribute = getattr(attribute, key)
         return attribute
 
     def get_bucket(self, entity):
-        """Returns the bucket the specific entity belongs to based on the give key/attribute"""
+        """
+        Returns the bucket the specific entity belongs to based on the give
+        key/attribute
+        """
         return "{0}: {1}".format(self.key_prefix, self.get_key_value(entity))
 
     def insert2bucket(self, buckets, bucket, entity):
-        """docstring for insert2bucket"""
         if bucket in buckets:
             buckets[bucket].append(entity)
         else:
@@ -24,24 +29,36 @@ class ValueKeyAggregator(object):
 
 
 class RangeKeyAggregator(ValueKeyAggregator):
-    """Aggregator based on where the position of the value of the key/attribute is in the given range"""
+    """
+    Aggregator based on where the position of the value of the key/attribute is
+    in the given range
+    """
+
     def __init__(self, key, ranges):
         ValueKeyAggregator.__init__(self, key)
         self.aggregation_ranges = sorted(ranges, reverse=True)
 
     def get_bucket(self, entity):
-        """Returns the bucket the specific entity belongs to based on the give key/attribute"""
-        bucket = None
+        """
+        Returns the bucket the specific entity belongs to based on the give
+        key/attribute
+        """
+
+        bucket = "{0}: < {1}".format(
+            self.key_prefix, self.aggregation_ranges[-1])
+
         key_value = self.get_key_value(entity)
         for index, krange in enumerate(self.aggregation_ranges):
             if key_value > krange:
                 if index == 0:
                     bucket = "{0}: > {1}".format(self.key_prefix, krange)
                 else:
-                    bucket = "{0}: {1}-{2}".format(self.key_prefix, krange, self.aggregation_ranges[index - 1])
+                    bucket = "{0}: {1}-{2}".format(
+                        self.key_prefix,
+                        krange,
+                        self.aggregation_ranges[index - 1]
+                    )
                 break
-        else:
-            bucket = "{0}: < {1}".format(self.key_prefix, self.aggregation_ranges[-1])
 
         return bucket
 
