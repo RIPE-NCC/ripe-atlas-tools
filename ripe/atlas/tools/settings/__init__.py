@@ -19,6 +19,18 @@ class Configuration(object):
             "fetch": "",
             "create": "",
         },
+        "smart-tags": {
+            "af": {
+                "6": {
+                    "include": ["system-ipv6-works"],
+                    "exclude": []
+                },
+                "4": {
+                    "include": ["system-ipv4-works"],
+                    "exclude": []
+                }
+            }
+        },
         "specification": {
             "af": 4,
             "description": "",
@@ -116,6 +128,7 @@ class Configuration(object):
             os.path.dirname(__file__), "templates", "base.yaml")
 
         authorisation = re.compile("^authorisation:$", re.MULTILINE)
+        smart_tags = re.compile("^smart-tags:$", re.MULTILINE)
         specification = re.compile("^specification:$", re.MULTILINE)
         ripe = re.compile("^ripe-ncc:$", re.MULTILINE)
 
@@ -126,8 +139,11 @@ class Configuration(object):
                     "# Authorisation\nauthorisation:",
                     specification.sub(
                         "\n# Measurement Creation\nspecification:",
-                        t.read().format(
-                            payload=yaml.dump(config, default_flow_style=False)
+                        smart_tags.sub(
+                            "\n# Tags added to probes selection\nsmart-tags:",
+                            t.read().format(
+                                payload=yaml.dump(config, default_flow_style=False)
+                            )
                         )
                     )
                 )

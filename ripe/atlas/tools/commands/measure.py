@@ -468,7 +468,7 @@ class Command(BaseCommand):
             r["retry"] = self.arguments.retry
             r["use_NSID"] = self.arguments.use_nsid
             r["udp_payload_size"] = self.arguments.udp_payload_size
-            r["use_probe_resolver"] = self.arguments.use_probe_resolver
+            r["use_probe_resolver"] = not target
 
 
         return r
@@ -500,6 +500,15 @@ class Command(BaseCommand):
             r["tags"] = {}
             r["tags"]["include"] = self.arguments.include_tag or []
             r["tags"]["exclude"] = self.arguments.exclude_tag or []
+        else:
+            smart_tags = conf["smart-tags"]
+            try:
+                r["tags"] = smart_tags[self.arguments.type][str(self.arguments.af)]
+            except KeyError:
+                try:
+                    r["tags"] = smart_tags["af"][str(self.arguments.af)]
+                except KeyError:
+                    pass
 
         return r
 
