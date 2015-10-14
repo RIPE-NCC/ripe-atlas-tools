@@ -1,7 +1,7 @@
 from __future__ import print_function, absolute_import
 
 import argparse
-import arrow
+from dateutil import parser
 import re
 
 
@@ -28,7 +28,7 @@ class ArgumentType(object):
     @staticmethod
     def datetime(string):
         try:
-            return arrow.get(string)
+            return parser.parse(string)
         except:
             raise argparse.ArgumentTypeError(
                 "Times must be specified in ISO 8601 format.  For example: "

@@ -5,11 +5,13 @@ try:
 except ImportError:
     from urllib import urlencode  # Python2
 
-from ripe.atlas.cousteau import AtlasRequest
+from ripe.atlas.cousteau import (
+    AtlasRequest, AtlasLatestRequest, AtlasResultsRequest)
 from ripe.atlas.sagan import Result
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
+from ..helpers.colours import colourise
 from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
 from .base import Command as BaseCommand
@@ -84,26 +86,19 @@ class Command(BaseCommand):
             help="The stop time of the report."
         )
 
-    def _get_latest_url(self):
+    def _get_request(self):
 
-        r = self.URLS["latest"]
-        if self.arguments.start_time or self.arguments.stop_time:
-            r = self.URLS["results"]
-
-        r = r.format(self.arguments.measurement_id)
-
-        query_arguments = {}
+        kwargs = {"msm_id": self.arguments.measurement_id}
         if self.arguments.probes:
-            query_arguments["probes"] = ",".join(self.arguments.probes)
+            kwargs["probe_ids"] = ",".join([str(_) for _ in self.arguments.probes])
         if self.arguments.start_time:
-            query_arguments["start"] = self.arguments.start_time.timestamp
+            kwargs["start"] = self.arguments.start_time
         if self.arguments.stop_time:
-            query_arguments["stop"] = self.arguments.stop_time.timestamp
+            kwargs["stop"] = self.arguments.stop_time
 
-        if query_arguments:
-            return "{}?{}".format(r, urlencode(query_arguments, doseq=True))
-
-        return r
+        if "start" in kwargs or "stop" in kwargs:
+            return AtlasResultsRequest(**kwargs)
+        return AtlasLatestRequest(**kwargs)
 
     def run(self):
 
@@ -118,7 +113,7 @@ class Command(BaseCommand):
         self.renderer = Renderer.get_renderer(
             self.arguments.renderer, detail["type"]["name"])()
 
-        results = AtlasRequest(url_path=self._get_latest_url()).get()[1]
+        results = self._get_request().get()[1]
 
         if not results:
             raise RipeAtlasToolsException(
@@ -198,12 +193,16 @@ class Command(BaseCommand):
         return sagans
 
     def multi_level_render(self, aggregation_data, indent=""):
-        """Traverses through aggregation data and print them indented"""
+        """Traverses through aggregation data and prints them indented"""
 
         if isinstance(aggregation_data, dict):
 
             for k, v in aggregation_data.items():
-                self.payload = "{}{}{}\n".format(self.payload, indent, k)
+                self.payload = "{}{}\n{}\n".format(
+                    self.payload,
+                    indent,
+                    colourise(colourise(k, "blue"), "bold")
+                )
                 self.multi_level_render(v, indent=indent + " ")
 
         elif isinstance(aggregation_data, list):
