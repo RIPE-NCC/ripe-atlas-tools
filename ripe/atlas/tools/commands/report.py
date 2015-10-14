@@ -1,12 +1,9 @@
 from __future__ import print_function
 
-try:
-    from urllib.parse import urlencode  # Python3
-except ImportError:
-    from urllib import urlencode  # Python2
-
 from ripe.atlas.cousteau import (
-    AtlasRequest, AtlasLatestRequest, AtlasResultsRequest)
+    AtlasRequest, AtlasLatestRequest, AtlasResultsRequest,
+    Measurement, APIResponseError
+)
 from ripe.atlas.sagan import Result
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
@@ -24,8 +21,6 @@ class Command(BaseCommand):
 
     DESCRIPTION = "Report the results of a measurement.\n\nExample:\n" \
                   "  ripe-atlas report 1001 --probes 157,10006\n"
-
-    DETAIL_URL = "/api/v2/measurements/{}.json"
 
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],
@@ -101,15 +96,14 @@ class Command(BaseCommand):
     def run(self):
 
         self.payload = ""
-        pk = self.arguments.measurement_id
-        measurement_exists, detail = AtlasRequest(
-            url_path=self.DETAIL_URL.format(pk)).get()
 
-        if not measurement_exists:
-            raise RipeAtlasToolsException("That measurement id does not exist")
+        try:
+            measurement = Measurement(id=self.arguments.measurement_id)
+        except APIResponseError:
+            raise RipeAtlasToolsException("That measurement does not exist")
 
         self.renderer = Renderer.get_renderer(
-            self.arguments.renderer, detail["type"]["name"])()
+            self.arguments.renderer, measurement.type.lower())()
 
         results = self._get_request().get()[1]
 
@@ -117,7 +111,7 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
 
-        description = detail["description"] or ""
+        description = measurement.description or ""
         if description:
             description = "\n{}\n\n".format(description)
 
