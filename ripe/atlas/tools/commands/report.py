@@ -50,7 +50,7 @@ class Command(BaseCommand):
             "--probes",
             type=ArgumentType.comma_separated_integers,
             help="A comma-separated list of probe ids you want to see "
-                 "exclusively"
+                 "exclusively."
         )
         self.parser.add_argument(
             "--renderer",
