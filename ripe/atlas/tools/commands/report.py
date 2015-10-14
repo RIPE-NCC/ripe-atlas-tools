@@ -24,11 +24,9 @@ class Command(BaseCommand):
 
     DESCRIPTION = "Report the results of a measurement.\n\nExample:\n" \
                   "  ripe-atlas report 1001 --probes 157,10006\n"
-    URLS = {
-        "detail": "/api/v2/measurements/{}.json",
-        "latest": "/api/v2/measurements/{}/latest.json",
-        "results": "/api/v2/measurements/{}/results.json",
-    }
+
+    DETAIL_URL = "/api/v2/measurements/{}.json"
+
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],
         "rtt-median": [
@@ -105,7 +103,7 @@ class Command(BaseCommand):
         self.payload = ""
         pk = self.arguments.measurement_id
         measurement_exists, detail = AtlasRequest(
-            url_path=self.URLS["detail"].format(pk)).get()
+            url_path=self.DETAIL_URL.format(pk)).get()
 
         if not measurement_exists:
             raise RipeAtlasToolsException("That measurement id does not exist")
