@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from ..helpers.colours import Colour
+from ..helpers.colours import colourise
 
 
 class RipeHelpFormatter(argparse.RawTextHelpFormatter):
@@ -23,14 +23,14 @@ class Command(object):
         self.parser = argparse.ArgumentParser(
             formatter_class=RipeHelpFormatter,
             description=self.DESCRIPTION,
-            prog="ripe-atlas {0}".format(self.NAME)
+            prog="ripe-atlas {}".format(self.NAME)
         )
 
         self.add_arguments()
 
     def init_args(self, parser_args=None):
         """
-        Initialises all parse arguments and makes them available to class.
+        Initialises all parse arguments and makes them available to the class.
         """
 
         if parser_args is None:
@@ -57,6 +57,4 @@ class Command(object):
         pass
 
     def ok(self, message):
-        if sys.stdout.isatty():
-            message = Colour.green + message + Colour.reset
-        sys.stdout.write("\n{0}\n\n".format(message))
+        sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
