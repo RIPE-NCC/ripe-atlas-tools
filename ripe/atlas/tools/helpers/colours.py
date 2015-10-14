@@ -1,13 +1,50 @@
+import sys
+
+
 class Colour(object):
 
-    light_blue = "\033[1;34m"
-    light_green = "\033[1;32m"
-    light_cyan = "\033[1;36m"
-    light_red = "\033[1;31m"
-    yellow = "\033[1;33m"
-    green = "\033[0;32m"
-    cyan = "\033[0;36m"
-    brown = "\033[0;33m"
-    pink = "\033[1;35m"
+    @classmethod
+    def _colourise(cls, t, c):
+        return "{}[{}m{}{}[0m".format(chr(0x1b), c, t, chr(0x1b))
 
-    reset = "\033[0m"
+    @classmethod
+    def black(cls, t):
+        return cls._colourise(t, 30)
+
+    @classmethod
+    def red(cls, t):
+        return cls._colourise(t, 31)
+
+    @classmethod
+    def green(cls, t):
+        return cls._colourise(t, 32)
+
+    @classmethod
+    def yellow(cls, t):
+        return cls._colourise(t, 33)
+
+    @classmethod
+    def blue(cls, t):
+        return cls._colourise(t, 34)
+
+    @classmethod
+    def mangenta(cls, t):
+        return cls._colourise(t, 35)
+
+    @classmethod
+    def cyan(cls, t):
+        return cls._colourise(t, 36)
+
+    @classmethod
+    def white(cls,t):
+        return cls._colourise(t, 37)
+
+    @classmethod
+    def bold(cls, t):
+        return cls._colourise(t, 1)
+
+
+def colourise(text, colour):
+    if sys.stdout.isatty():
+        return getattr(Colour, colour)(text)
+    return text

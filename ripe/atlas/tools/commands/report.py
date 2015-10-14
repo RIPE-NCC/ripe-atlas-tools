@@ -109,7 +109,11 @@ class Command(BaseCommand):
 
         self.payload = ""
         pk = self.arguments.measurement_id
-        detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
+        measurement_exists, detail = AtlasRequest(
+            url_path=self.URLS["detail"].format(pk)).get()
+
+        if not measurement_exists:
+            raise RipeAtlasToolsException("That measurement id does not exist")
 
         self.renderer = Renderer.get_renderer(
             self.arguments.renderer, detail["type"]["name"])()

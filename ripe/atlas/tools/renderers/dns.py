@@ -1,7 +1,5 @@
-import sys
-
 from tzlocal import get_localzone
-from ..helpers.colours import Colour
+from ..helpers.colours import colourise
 from .base import Renderer as BaseRenderer
 
 
@@ -24,8 +22,7 @@ class Renderer(BaseRenderer):
             for response in result.responses:
                 r += self.get_formatted_response(probe_id, created, response)
         else:
-            r += "\n  {}{}{}\n".format(
-                Colour.light_red, "No responses found.", Colour.reset)
+            r += "\n  {}\n".format(colourise("No response found", "red"))
 
         return r
 
@@ -53,7 +50,7 @@ class Renderer(BaseRenderer):
         if response.abuf.questions:
             question = response.abuf.questions[0].name
 
-        return cls.colourise(response, cls.render(
+        return cls._colourise_by_response(response, cls.render(
 
             "reports/dns.txt",
 
@@ -102,10 +99,6 @@ class Renderer(BaseRenderer):
         )
 
     @staticmethod
-    def colourise(response, output):
-
-        if not sys.stdout.isatty():
-            return output
-
-        colour = Colour.light_red if response.is_error else Colour.green
-        return "{}{}{}".format(colour, output, Colour.reset)
+    def _colourise_by_response(response, output):
+        colour = "red" if response.is_error else "green"
+        return colourise(output, colour)
