@@ -1,0 +1,104 @@
+from __future__ import print_function
+
+from ripe.atlas.sagan import Result, ResultParseError
+
+from ..probes import Probe
+from ..renderers import Renderer
+
+
+class SaganSet(object):
+    """
+    We need something that doesn't take up a lot of memory while it's being
+    constructed, but that will also spread out into a handy string when we need
+    it to.
+    """
+
+    def __init__(self, iterable=None, probes=()):
+        self._probes = probes
+        self._iterable = iterable
+
+    def __iter__(self):
+
+        sagans = []
+
+        for line in self._iterable:
+            if not line.strip():
+                break
+            try:
+                sagan = Result.get(
+                    line,
+                    on_error=Result.ACTION_IGNORE,
+                    on_warning=Result.ACTION_IGNORE
+                )
+                if not self._probes or sagan.probe_id in self._probes:
+                    sagans.append(sagan)
+                if len(sagans) > 100:
+                    for sagan in self._attach_probes(sagans):
+                        yield sagan
+                    sagans = []
+            except ResultParseError:
+                pass  # Probably garbage in the file
+
+        for sagan in self._attach_probes(sagans):
+            yield sagan
+
+    def __next__(self):
+        return iter(self).next()
+
+    def next(self):
+        return self.__next__()
+
+    @staticmethod
+    def _attach_probes(sagans):
+        probes = dict(
+            [(p.id, p) for p in Probe.get_many(s.probe_id for s in sagans)]
+        )
+        for sagan in sagans:
+            sagan.probe = probes[sagan.probe_id]
+            yield sagan
+
+
+class Rendering(object):
+
+    def __init__(self, renderer=None, header="", footer="", payload=()):
+
+        self.preferred_renderer = renderer
+        self.header = header + "\n" if header else ""
+        self.footer = footer + "\n" if footer else ""
+        self.payload = payload
+
+        self.renderer = None  # Defined automagically in _get_rendered_results()
+
+    def render(self):
+        print(self.header)
+        self._smart_render(self.payload)
+        print(self.footer)
+
+    def _get_rendered_results(self, data):
+
+        for sagan in data:
+
+            # Guess the renderer using Sagan's .type property
+            if not self.renderer:
+                self.renderer = Renderer.get_renderer(
+                    self.preferred_renderer,
+                    sagan.type
+                )()
+
+            yield self.renderer.on_result(sagan)
+
+    def _smart_render(self, data, indent=""):
+        """
+        Traverses the aggregation data and prints everything nicely indented.
+        """
+
+        if isinstance(data, (list, SaganSet)):
+
+            for line in self._get_rendered_results(data):
+                print(indent + line, end="")
+
+        elif isinstance(data, dict):
+
+            for k, v in data.items():
+                print("{}{}".format(indent, k))
+                self._smart_render(v, indent=indent + " ")

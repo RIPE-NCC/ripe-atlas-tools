@@ -83,27 +83,12 @@ class Renderer(object):
                 'of type "{}"'.format(kind)
             )
 
-    def on_start(self):
-        """
-        This is called before any results are parsed and should always return a
-        string, even if that string is "".
-        """
-        return ""
-
-    def on_result(self, result, probes=None):
+    def on_result(self, result):
         """
         This must be defined in the subclass, and must return a string, even if
         that string is "".
         """
         raise NotImplementedError()
-
-    def on_finish(self):
-        """
-        This is called after a report is finished looping over the available
-        results, or when a stream is stopped (for whatever reason).  It should
-        return a string, even if that string is "".
-        """
-        return ""
 
 
 class Result(str):
