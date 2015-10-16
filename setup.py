@@ -33,7 +33,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
         install_requires=[
             "requests>=2.7.0",
             "ripe.atlas.cousteau>=0.10.1",
-            "ripe.atlas.sagan>=1.1.3",
+            "ripe.atlas.sagan>=1.1.4",
             "tzlocal",
             "pyyaml",
             "pyOpenSSL>=0.13",
