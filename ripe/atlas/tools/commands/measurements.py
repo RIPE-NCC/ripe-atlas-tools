@@ -1,18 +1,18 @@
 from __future__ import print_function, absolute_import
-import sys
-import requests
+
+import itertools
 
 from ripe.atlas.cousteau import MeasurementRequest
-from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
 
-from ..exceptions import RipeAtlasToolsException
-from ..renderers.probes import Renderer
 from .base import Command as BaseCommand
+from ..helpers.colours import colourise
+from ..helpers.validators import ArgumentType
 
 
 class Command(BaseCommand):
 
-    NAME = "probes"
+    NAME = "measurements"
+    MAX_RESULTS = 50
 
     DESCRIPTION = (
         "Fetches and prints measurements fulfilling specified criteria based "
@@ -41,23 +41,66 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--type",
             type=str,
-            choices=("ping", "traceroute", "dns", "ssl", "ntp", "http"),
+            choices=("ping", "traceroute", "dns", "sslcert", "ntp", "http"),
             help="The measurement type"
+        )
+        self.parser.add_argument(
+            "--started-before",
+            type=ArgumentType.datetime,
+            help=""
+        )
+        self.parser.add_argument(
+            "--started-after",
+            type=ArgumentType.datetime,
+            help=""
         )
 
     def run(self):
 
         filters = {"return_objects": True}
         if self.arguments.status:
-            filters["status"] = 1
+            filters["status"] = self.arguments.status
         if self.arguments.af:
             filters["af"] = self.arguments.af
         if self.arguments.type:
             filters["type"] = self.arguments.type
+
         measurements = MeasurementRequest(**filters)
 
-        for measurement in measurements:
-            print(measurement.id)
+        print("\n{:<8} {:10} {:<45} {:>14}\n{}".format(
+            "ID", "Type", "Description", "Status", "=" * 80
+        ))
+        for measurement in itertools.islice(measurements, self.MAX_RESULTS):
+
+            destination = measurement.destination_name or \
+                measurement.destination_address or \
+                ""
+
+            print(colourise("{:<8} {:10} {:<45} {:>14}".format(
+                measurement.id,
+                measurement.type.lower(),
+                destination[:45],
+                measurement.status
+            ), self._get_colour_from_status(measurement.status)))
 
         # Print total count of found measurements
-        print(measurements.total_count)
+        print("{}\n{:>80}".format(
+            "=" * 80,
+            "Showing {} of {} total measurements".format(
+                min(self.MAX_RESULTS, measurements.total_count),
+                measurements.total_count
+            )
+        ))
+
+    @staticmethod
+    def _get_colour_from_status(status):
+        status = status.lower()
+        if status == "ongoing":
+            return "green"
+        if status in ("failed", "forced to stop", "no suitable probes"):
+            return "red"
+        if status in ("specified", "scheduled"):
+            return "blue"
+        if status == "stopped":
+            return "yellow"
+        return "white"
