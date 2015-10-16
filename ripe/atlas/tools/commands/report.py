@@ -1,14 +1,13 @@
 from __future__ import print_function
 
 from ripe.atlas.cousteau import AtlasRequest
-from ripe.atlas.sagan import Result
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
+from ..helpers.rendering import SaganSet, Rendering
 from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
 from .base import Command as BaseCommand
-from ..probes import Probe
 
 
 class Command(BaseCommand):
@@ -75,7 +74,6 @@ class Command(BaseCommand):
 
     def run(self):
 
-        self.payload = ""
         pk = self.arguments.measurement_id
         measurement_exists, detail = AtlasRequest(
             url_path=self.URLS["detail"].format(pk)).get()
@@ -88,7 +86,7 @@ class Command(BaseCommand):
 
         latest_url = self.URLS["latest"].format(pk)
         if self.arguments.probes:
-            latest_url += "?probes={0}".format(self.arguments.probes)
+            latest_url += "?probes={}".format(self.arguments.probes)
 
         results = AtlasRequest(url_path=latest_url).get()[1]
 
@@ -96,30 +94,23 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
 
+        results = SaganSet(iterable=results, probes=self.arguments.probes)
+        if self.arguments.aggregate_by:
+            results = aggregate(results, self.get_aggregators())
+
         description = detail["description"] or ""
         if description:
-            description = "\n{0}\n\n".format(description)
+            description = "\n{}\n".format(description)
 
-        self.payload += "\n" + self.renderer.on_start()
+        header = "RIPE Atlas Report for Measurement #{}\n" \
+                 "===================================================" \
+                 "{}".format(pk, description)
 
-        sagans = self.create_enhanced_sagans(results)
-
-        if self.arguments.aggregate_by:
-            aggregators = self.get_aggregators()
-            enhanced_results = aggregate(sagans, aggregators)
-        else:
-            enhanced_results = sagans
-
-        self.multi_level_render(enhanced_results)
-
-        self.payload += "\n" + self.renderer.on_finish()
-
-        print(self.renderer.render(
-            "reports/base.txt",
-            measurement_id=self.arguments.measurement_id,
-            description=description,
-            payload=self.payload
-        ), end="")
+        Rendering(
+            renderer=self.arguments.renderer,
+            header=header,
+            payload=results
+        ).render()
 
     def get_aggregators(self):
         """Return aggregators list based on user input"""
@@ -137,50 +128,3 @@ class Command(BaseCommand):
             else:
                 aggregation_keys.append(aggregation_class(key=key))
         return aggregation_keys
-
-    def create_enhanced_sagans(self, results):
-        """
-        Create Sagan Result objects and add additonal an Probe attribute to
-        each one of them.
-        """
-        # Sagans
-        sagans = []
-        for result in results:
-            sagans.append(
-                Result.get(
-                    result,
-                    on_error=Result.ACTION_IGNORE,
-                    on_malformation=Result.ACTION_IGNORE
-                )
-            )
-
-        # Probes
-        probes = self.get_probes()
-        if not probes:
-            probes = set([r.probe_id for r in sagans])
-        probe_objects = Probe.get_many(probes)
-        probes_dict = {}
-        for probe in probe_objects:
-            probes_dict[probe.id] = probe
-
-        # Populate probe attrs to sagans
-        for sagan in sagans:
-            sagan.probe = probes_dict[sagan.probe_id]
-
-        return sagans
-
-    def multi_level_render(self, aggregation_data, indent=""):
-        """Traverses through aggregation data and print them indented"""
-
-        if isinstance(aggregation_data, dict):
-
-            for k, v in aggregation_data.items():
-                self.payload = "{}{}{}\n".format(self.payload, indent, k)
-                self.multi_level_render(v, indent=indent + " ")
-
-        elif isinstance(aggregation_data, list):
-
-            for index, data in enumerate(aggregation_data):
-                res = self.renderer.on_result(data)
-                if res:
-                    self.payload = "{}{} {}".format(self.payload, indent, res)
