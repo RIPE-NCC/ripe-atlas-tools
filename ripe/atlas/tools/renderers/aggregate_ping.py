@@ -37,7 +37,7 @@ class Renderer(BaseRenderer):
     def on_start(self):
         return "Collecting results...\n"
 
-    def on_result(self, result, probes=None):
+    def on_result(self, result):
         # destination_name is included in every ping result
         # but not exposed to on_start, on_finish via msm metadata
         # set it only if it was empty

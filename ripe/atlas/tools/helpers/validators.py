@@ -1,10 +1,21 @@
 from __future__ import print_function, absolute_import
 
 import argparse
+import os
 import re
 
 
 class ArgumentType(object):
+
+    @staticmethod
+    def path(string):
+        if not os.path.exists(string) and not string == "-":
+            raise argparse.ArgumentTypeError(
+                'The file name specified, "{}" does not appear to exist'.format(
+                    string
+                )
+            )
+        return string
 
     @staticmethod
     def country_code(string):

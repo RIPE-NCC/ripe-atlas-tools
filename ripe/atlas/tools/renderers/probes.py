@@ -93,7 +93,7 @@ class Renderer(BaseRenderer):
         """Renders the title of each aggregation bucket."""
         self.blob += "{}\n".format(indent + bucket)
 
-    def on_result(self, result, probes=None, indent=""):
+    def on_result(self, result, indent=""):
         fields = []
 
         for field in self.fields:

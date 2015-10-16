@@ -15,7 +15,7 @@ class Command(BaseCommand):
     NAME = "probes"
 
     DESCRIPTION = (
-        "Fetches and prints probes fullfiling specified criteria based on "
+        "Fetches and prints probes fulfilling specified criteria based on "
         "given filters."
     )
 
@@ -292,7 +292,7 @@ class Command(BaseCommand):
         """Fetches degrees based on the given location."""
         error_log = (
             "Following error occured while trying to fetch lat/lon"
-            "for location <{0}>:\n{1}"
+            "for location <{}>:\n{}"
         )
         goole_api_url = "http://maps.googleapis.com/maps/api/geocode/json"
         try:

@@ -13,7 +13,7 @@ class Renderer(BaseRenderer):
     def on_start(self):
         return "Collecting results...\n"
 
-    def on_result(self, result, probes=None):
+    def on_result(self, result):
         probe_id = result.probe_id
 
         for certificate in result.certificates:

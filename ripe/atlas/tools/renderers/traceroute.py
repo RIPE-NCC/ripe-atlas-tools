@@ -6,7 +6,7 @@ class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_TRACEROUTE]
 
-    def on_result(self, result, probes=None):
+    def on_result(self, result):
 
         r = ""
 

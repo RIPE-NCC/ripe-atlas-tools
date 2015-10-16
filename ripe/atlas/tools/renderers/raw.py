@@ -17,5 +17,4 @@ class Renderer(BaseRenderer):
     ]
 
     def on_result(self, result, probes=None):
-        if not probes or result.probe_id in probes:
-            return json.dumps(result.raw_data, separators=(",", ":")) + "\n"
+        return json.dumps(result.raw_data, separators=(",", ":")) + "\n"
