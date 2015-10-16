@@ -22,8 +22,15 @@ class SaganSet(object):
         sagans = []
 
         for line in self._iterable:
-            if not line.strip():
+
+            # line may be a dictionary (parsed JSON)
+            if hasattr(line, "strip"):
+                line = line.strip()
+
+            # Break out when there's nothing left
+            if not line:
                 break
+
             try:
                 sagan = Result.get(
                     line,
