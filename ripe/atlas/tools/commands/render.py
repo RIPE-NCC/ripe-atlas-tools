@@ -57,7 +57,8 @@ class Command(BaseCommand):
             action="append",
             help="Tell the rendering engine to aggregate the results by the "
                  "selected option.  Note that if you opt for aggregation, no "
-                 "output will be generated until all results are received."
+                 "output will be generated until all results are received, and "
+                 "if large data sets may explode your system."
         )
 
     def run(self):
@@ -68,13 +69,9 @@ class Command(BaseCommand):
         if using_regular_file:
             source = open(self.arguments.from_file)
 
+        results = SaganSet(iterable=source, probes=self.arguments.probes)
         if self.arguments.aggregate_by:
-            results = aggregate(
-                SaganSet(iterable=source, probes=self.arguments.probes),
-                self.get_aggregators()
-            )
-        else:
-            results = SaganSet(iterable=source, probes=self.arguments.probes)
+            results = aggregate(results, self.get_aggregators())
 
         Rendering(renderer=self.arguments.renderer, payload=results).render()
 
