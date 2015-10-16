@@ -1,7 +1,8 @@
 from __future__ import print_function, absolute_import
 
-from ripe.atlas.cousteau import AtlasRequest
+from ripe.atlas.cousteau import Measurement, APIResponseError
 
+from ..exceptions import RipeAtlasToolsException
 from ..renderers import Renderer
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
@@ -36,15 +37,16 @@ class Command(BaseCommand):
 
     def run(self):
 
-        pk = self.arguments.measurement_id
-
-        detail = AtlasRequest(url_path=self.URLS["detail"].format(pk)).get()[1]
+        try:
+            measurement = Measurement(id=self.arguments.measurement_id)
+        except APIResponseError:
+            raise RipeAtlasToolsException("That measurement does not exist")
 
         try:
             Stream(capture_limit=self.arguments.limit).stream(
                 self.arguments.renderer,
-                detail["type"]["name"],
-                pk
+                measurement.type.lower(),
+                self.arguments.measurement_id
             )
         except (KeyboardInterrupt, CaptureLimitExceeded):
             self.ok("Disconnecting from the stream")
