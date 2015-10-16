@@ -81,7 +81,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--limit",
             type=int,
-            help="Return limited amount of probes"
+            help="Return limited number of probes"
         )
         self.parser.add_argument(
             "--additional-fields",
