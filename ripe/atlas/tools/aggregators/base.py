@@ -1,3 +1,6 @@
+from ..helpers.rendering import SaganSet
+
+
 class ValueKeyAggregator(object):
     """Aggregator based on tha actual value of the key/attribute"""
     def __init__(self, key):
@@ -69,16 +72,21 @@ def aggregate(entities, aggregators):
     Caution: being recursive is a bit hard to read/understand, if you change
     something make sure you run tests.
     """
+
     if not aggregators:
         return entities
-    if isinstance(entities, list):
+
+    if isinstance(entities, (list, SaganSet)):
+
         aggregator = aggregators.pop(0)
         buckets = {}
         for entity in entities:
             bucket = aggregator.get_bucket(entity)
             aggregator.insert2bucket(buckets, bucket, entity)
         return aggregate(buckets, aggregators)
+
     elif isinstance(entities, dict):
+
         for k, v in entities.iteritems():
             entities[k] = aggregate(entities[k], aggregators[:])
 
