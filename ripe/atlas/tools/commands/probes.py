@@ -19,10 +19,6 @@ class Command(BaseCommand):
         "given filters."
     )
 
-    def __init__(self, *args, **kwargs):
-        BaseCommand.__init__(self, *args, **kwargs)
-        self.renderer = None
-
     def add_arguments(self):
         """Adds all commands line arguments for this command."""
         asn = self.parser.add_argument_group("ASN")
@@ -142,23 +138,23 @@ class Command(BaseCommand):
             return
 
         render_args = self._clean_render_args()
-        self.renderer = Renderer(**render_args)
-        self.renderer.on_start()
+        renderer = Renderer(**render_args)
+        renderer.on_start()
 
         if self.arguments.aggregate_by:
 
             aggregators = self.get_aggregators()
             buckets = aggregate(probes, aggregators)
-            self.renderer.render_aggregation(buckets)
+            renderer.render_aggregation(buckets)
 
         else:
 
-            self.renderer.on_table_title()
+            renderer.on_table_title()
             for index, probe in enumerate(probes):
-                self.renderer.on_result(probe)
+                renderer.on_result(probe)
 
-        self.renderer.total_count = probes_request.total_count
-        self.renderer.on_finish()
+        renderer.total_count = probes_request.total_count
+        renderer.on_finish()
 
     def produce_ids_only(self, probes):
         """If user has specified ids-only arg print only ids and exit."""
