@@ -9,7 +9,7 @@ class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_TLS]
 
-    def on_result(self, result, probes=None):
+    def on_result(self, result):
         r = ""
         for certificate in result.certificates:
             r += self.get_formatted_response(certificate)
@@ -21,9 +21,9 @@ class Renderer(BaseRenderer):
                   OpenSSL.crypto.FILETYPE_PEM,
                   certificate.raw_data.replace("\\/", "/").replace("\n\n", "\n")
                 )
-        
+
         pkey_type = x509.get_pubkey().type()
-      
+
         #TODO: to be improved
         if pkey_type == 6:
           pkey_type_descr = "rsaEncryption"

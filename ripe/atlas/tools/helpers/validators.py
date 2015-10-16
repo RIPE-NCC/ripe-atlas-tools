@@ -2,10 +2,21 @@ from __future__ import print_function, absolute_import
 
 import argparse
 from dateutil import parser
+import os
 import re
 
 
 class ArgumentType(object):
+
+    @staticmethod
+    def path(string):
+        if not os.path.exists(string) and not string == "-":
+            raise argparse.ArgumentTypeError(
+                'The file name specified, "{}" does not appear to exist'.format(
+                    string
+                )
+            )
+        return string
 
     @staticmethod
     def country_code(string):
@@ -35,4 +46,3 @@ class ArgumentType(object):
                 "2010-10-01T00:00:00 or a portion thereof.  All times are in "
                 "UTC."
             )
-

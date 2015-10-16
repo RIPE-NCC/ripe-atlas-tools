@@ -11,16 +11,15 @@ class Command(BaseCommand):
     NAME = "configure"
 
     EDITOR = os.environ.get("EDITOR", "/usr/bin/vim")
-    DESCRIPTION = "An easy way to configure this tool.  Alternatively, you " \
-                  "can always just create/edit {0}".format(Configuration.USER_RC)
+    DESCRIPTION = "An easy way to configure this tool. Alternatively, you " \
+                  "can always just create/edit {}".format(Configuration.USER_RC)
 
     def add_arguments(self):
         self.parser.add_argument(
             "--editor",
             action="store_true",
             help="Invoke {0} to edit the configuration directly".format(
-                self.EDITOR
-            )
+                self.EDITOR)
         )
         self.parser.add_argument(
             "--set",
@@ -31,8 +30,8 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--init",
             action="store_true",
-            help="Create a configuration file and save it into your home directory at: {0}".format(
-                Configuration.USER_RC)
+            help="Create a configuration file and save it into your home "
+                 "directory at: {}".format(Configuration.USER_RC)
         )
 
     def run(self):
@@ -50,7 +49,7 @@ class Command(BaseCommand):
 
         if self.arguments.init or self.arguments.editor:
             return self.ok(
-                "Configuration file writen to {0}".format(Configuration.USER_RC))
+                "Configuration file writen to {}".format(Configuration.USER_RC))
 
         if self.arguments.set:
             if "=" not in self.arguments.set:
@@ -65,15 +64,15 @@ class Command(BaseCommand):
             required_type = type(self._get_from_dict(conf, path))
         except KeyError:
             raise RipeAtlasToolsException(
-                'Invalid configuration key: "{0}"'.format(".".join(path)))
+                'Invalid configuration key: "{}"'.format(".".join(path)))
 
         if value.isdigit():
             value = int(value)
 
         if not isinstance(value, required_type):
             raise RipeAtlasToolsException(
-                'Invalid configuration value: "{0}".  You must supply a '
-                '{1} for this key'.format(value, required_type.__name__)
+                'Invalid configuration value: "{}". You must supply a {} for '
+                'this key'.format(value, required_type.__name__)
             )
 
         self._set_in_dict(conf, path, value)

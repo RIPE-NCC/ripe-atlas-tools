@@ -1,18 +1,14 @@
 from __future__ import print_function
 
 from ripe.atlas.cousteau import (
-    AtlasRequest, AtlasLatestRequest, AtlasResultsRequest,
-    Measurement, APIResponseError
-)
-from ripe.atlas.sagan import Result
+    AtlasLatestRequest, AtlasResultsRequest, Measurement, APIResponseError)
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
-from ..helpers.colours import colourise
+from ..helpers.rendering import SaganSet, Rendering
 from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
 from .base import Command as BaseCommand
-from ..probes import Probe
 
 
 class Command(BaseCommand):
@@ -45,13 +41,13 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=int,
-            help="The measurement id you want reported"
+            help="The measurement id you want reported."
         )
         self.parser.add_argument(
             "--probes",
             type=ArgumentType.comma_separated_integers,
             help="A comma-separated list of probe ids you want to see "
-                 "exclusively"
+                 "exclusively."
         )
         self.parser.add_argument(
             "--renderer",
@@ -95,8 +91,6 @@ class Command(BaseCommand):
 
     def run(self):
 
-        self.payload = ""
-
         try:
             measurement = Measurement(id=self.arguments.measurement_id)
         except APIResponseError:
@@ -111,30 +105,23 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(
                 "There aren't any results available for that measurement")
 
+        results = SaganSet(iterable=results, probes=self.arguments.probes)
+        if self.arguments.aggregate_by:
+            results = aggregate(results, self.get_aggregators())
+
         description = measurement.description or ""
         if description:
-            description = "\n{}\n\n".format(description)
+            description = "\n{}\n".format(description)
 
-        self.payload += "\n" + self.renderer.on_start()
+        header = "RIPE Atlas Report for Measurement #{}\n" \
+                 "===================================================" \
+                 "{}".format(self.arguments.measurement_id, description)
 
-        sagans = self.create_enhanced_sagans(results)
-
-        if self.arguments.aggregate_by:
-            aggregators = self.get_aggregators()
-            enhanced_results = aggregate(sagans, aggregators)
-        else:
-            enhanced_results = sagans
-
-        self.multi_level_render(enhanced_results)
-
-        self.payload += "\n" + self.renderer.on_finish()
-
-        print(self.renderer.render(
-            "reports/base.txt",
-            measurement_id=self.arguments.measurement_id,
-            description=description,
-            payload=self.payload
-        ), end="")
+        Rendering(
+            renderer=self.arguments.renderer,
+            header=header,
+            payload=results
+        ).render()
 
     def get_aggregators(self):
         """Return aggregators list based on user input"""
@@ -152,54 +139,3 @@ class Command(BaseCommand):
             else:
                 aggregation_keys.append(aggregation_class(key=key))
         return aggregation_keys
-
-    def create_enhanced_sagans(self, results):
-        """
-        Create Sagan Result objects and add additional an Probe attribute to
-        each one of them.
-        """
-
-        sagans = []
-        for result in results:
-            sagans.append(
-                Result.get(
-                    result,
-                    on_error=Result.ACTION_IGNORE,
-                    on_malformation=Result.ACTION_IGNORE
-                )
-            )
-
-        # Probes
-        probes = self.arguments.probes
-        if not probes:
-            probes = set([r.probe_id for r in sagans])
-
-        probes_dict = {}
-        for probe in Probe.get_many(probes):
-            probes_dict[probe.id] = probe
-
-        # Attache a probe attribute to each sagan
-        for sagan in sagans:
-            sagan.probe = probes_dict[sagan.probe_id]
-
-        return sagans
-
-    def multi_level_render(self, aggregation_data, indent=""):
-        """Traverses through aggregation data and prints them indented"""
-
-        if isinstance(aggregation_data, dict):
-
-            for k, v in aggregation_data.items():
-                self.payload = "{}{}\n{}\n".format(
-                    self.payload,
-                    indent,
-                    colourise(colourise(k, "blue"), "bold")
-                )
-                self.multi_level_render(v, indent=indent + " ")
-
-        elif isinstance(aggregation_data, list):
-
-            for index, data in enumerate(aggregation_data):
-                res = self.renderer.on_result(data)
-                if res:
-                    self.payload = "{}{} {}".format(self.payload, indent, res)

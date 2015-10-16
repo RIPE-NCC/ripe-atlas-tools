@@ -8,14 +8,10 @@ class Renderer(BaseRenderer):
     RENDERS = [BaseRenderer.TYPE_DNS]
     TIME_FORMAT = "%a %b %d %H:%M:%S %Z %Y"
 
-    def on_result(self, result, probes=None):
+    def on_result(self, result):
 
         created = result.created.astimezone(get_localzone())
         probe_id = result.probe_id
-
-        # Ignore some results if specific probes were explicitly selected
-        if probes and probe_id not in probes:
-            return ""
 
         r = "\n\nProbe #{0}\n{1}\n".format(probe_id, "=" * 79)
         if result.responses:

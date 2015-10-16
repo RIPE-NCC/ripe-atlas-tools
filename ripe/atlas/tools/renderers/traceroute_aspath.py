@@ -1,6 +1,3 @@
-import json
-import urllib2
-
 from ..ipdetails import IP
 from .base import Renderer as BaseRenderer
 from .base import Result
@@ -18,9 +15,9 @@ class Renderer(BaseRenderer):
         #TODO: if a method to pass options to renderers will be defined
         # this could be set by user input.
         self.RADIUS = 2
-        
+
     @staticmethod
-    def _get_asns_for_output(asns,radius):
+    def _get_asns_for_output(asns, radius):
         asns_with_padding = [""] * radius + asns
         asns_with_padding = asns_with_padding[-radius:]
         return " ".join(["{:>8}".format("AS{}".format(asn) if asn else "") for asn in asns_with_padding])
@@ -28,8 +25,8 @@ class Renderer(BaseRenderer):
     def on_start(self):
         return "For each traceroute path toward the target, the " \
                "last {} ASNs will be shown\n\n".format(self.RADIUS)
-        
-    def on_result(self, result, probes=None):
+
+    def on_result(self, result):
 
         ip_hops = []
 
@@ -74,5 +71,5 @@ class Renderer(BaseRenderer):
                 "s" if self.paths[as_path] > 1 else "",
                 self.paths[as_path]['responded']
             )
-            
+
         return s

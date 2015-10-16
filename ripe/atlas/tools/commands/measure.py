@@ -452,7 +452,7 @@ class Command(BaseCommand):
             r["retry"] = self.arguments.retry
             r["set_nsid_bit"] = self.arguments.set_nsid_bit
             r["udp_payload_size"] = self.arguments.udp_payload_size
-            r["use_probe_resolver"] = self.arguments.use_probe_resolver
+            r["use_probe_resolver"] = not target
 
         return r
 
