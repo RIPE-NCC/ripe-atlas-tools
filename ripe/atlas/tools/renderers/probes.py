@@ -82,9 +82,6 @@ class Renderer(BaseRenderer):
                 if self.max_per_aggr and index >= self.max_per_aggr - 1:
                     break
 
-    def on_start(self, indent=""):
-        self.blob += "We found the following probes with the given criteria:\n"
-
     def on_table_title(self, indent=""):
         """Renders the header of the table"""
         self.blob += "{}{}\n".format(indent, self.header_message)
@@ -101,7 +98,3 @@ class Renderer(BaseRenderer):
 
         message = self.probe_template.format(*fields)
         self.blob += "{}{}\n".format(indent, message)
-
-    def on_finish(self):
-        self.blob += "Total probes found: {}\n".format(self.total_count)
-        sys.stdout.write(self.blob)
