@@ -12,7 +12,6 @@ from ..helpers.validators import ArgumentType
 class Command(BaseCommand):
 
     NAME = "measurements"
-    MAX_RESULTS = 50
 
     DESCRIPTION = (
         "Fetches and prints measurements fulfilling specified criteria based "
@@ -54,6 +53,12 @@ class Command(BaseCommand):
             type=ArgumentType.datetime,
             help=""
         )
+        self.parser.add_argument(
+            "--limit",
+            type=ArgumentType.integer_range(1, 1000),
+            default=50,
+            help="The number of measurements to return."
+        )
 
     def run(self):
 
@@ -70,7 +75,7 @@ class Command(BaseCommand):
         print("\n{:<8} {:10} {:<45} {:>14}\n{}".format(
             "ID", "Type", "Description", "Status", "=" * 80
         ))
-        for measurement in itertools.islice(measurements, self.MAX_RESULTS):
+        for measurement in itertools.islice(measurements, self.arguments.limit):
 
             destination = measurement.destination_name or \
                 measurement.destination_address or \
@@ -87,7 +92,7 @@ class Command(BaseCommand):
         print("{}\n{:>80}".format(
             "=" * 80,
             "Showing {} of {} total measurements".format(
-                min(self.MAX_RESULTS, measurements.total_count),
+                min(self.arguments.limit, measurements.total_count),
                 measurements.total_count
             )
         ))
