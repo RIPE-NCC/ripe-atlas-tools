@@ -49,9 +49,24 @@ class Renderer(object):
 
     @classmethod
     def get_renderer(cls, name=None, kind=None):
+        renderer = None
 
-        error_message = 'The renderer you selected, "{}" could not be ' \
-                        'found.'.format(name)
+        if name:
+            renderer = cls.get_renderer_by_name(name)
+
+        if not renderer and kind:
+            renderer = cls.get_renderer_by_kind(kind)
+
+        if kind:
+            cls._test_renderer_accepts_kind(renderer, kind)
+
+        return renderer
+
+    @classmethod
+    def get_renderer_by_name(cls, name):
+        error_message = (
+            'The renderer you selected, "{}" could not be found.'
+        ).format(name)
 
         try:  # User-defined, user-supplied
             r = cls.import_renderer("renderers", name)
@@ -59,12 +74,20 @@ class Renderer(object):
             try:  # User-defined, officially-supported
                 r = cls.import_renderer("ripe.atlas.tools.renderers", name)
             except ImportError:
-                if name:
-                    raise RipeAtlasToolsException(error_message)
-                r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
+                raise RipeAtlasToolsException(error_message)
 
-        if kind:
-            cls._test_renderer_accepts_kind(r, kind)
+        return r
+
+    @classmethod
+    def get_renderer_by_kind(cls, kind):
+        error_message = (
+            'The selected renderer, "{}" could not be found.'
+        ).format(kind)
+
+        try:
+            r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
+        except ImportError:
+            raise RipeAtlasToolsException(error_message)
 
         return r
 
