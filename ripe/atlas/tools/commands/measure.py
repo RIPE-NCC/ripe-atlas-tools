@@ -129,14 +129,14 @@ class Command(BaseCommand):
         )
         origins.add_argument(
             "--from-probes",
-            type=str,
+            type=ArgumentType.comma_separated_integers,
             metavar="PROBES",
             help="A comma-separated list of probe-ids you want to use in your"
                  "measurement. Example: --from-probes=1,2,34,157,10006"
         )
         origins.add_argument(
             "--from-measurement",
-            type=ArgumentType.comma_separated_integers,
+            type=int,
             metavar="MEASUREMENT_ID",
             help="A measurement id which you want to use as the basis for probe"
                  "selection in your new measurement.  This is a handy way to"
@@ -188,7 +188,7 @@ class Command(BaseCommand):
             help="The timeout per-packet"
         )
         traceroute.add_argument(
-            "--dontfrag",
+            "--dont-fragment",
             type=bool,
             default=conf["specification"]["types"]["traceroute"]["dontfrag"],
             help="Don't Fragment the packet"
@@ -201,13 +201,13 @@ class Command(BaseCommand):
                  "If 0, a standard traceroute will be performed"
         )
         traceroute.add_argument(
-            "--firsthop",
+            "--first-hop",
             type=int,
             default=conf["specification"]["types"]["traceroute"]["firsthop"],
             help="Value must be between 1 and 255"
         )
         traceroute.add_argument(
-            "--maxhops",
+            "--max-hops",
             type=int,
             default=conf["specification"]["types"]["traceroute"]["maxhops"],
             help="Value must be between 1 and 255"
@@ -233,13 +233,13 @@ class Command(BaseCommand):
 
         dns = self.parser.add_argument_group("DNS Measurements")
         dns.add_argument(
-            "--cd",
+            "--set-cd-bit",
             type=bool,
             default=conf["specification"]["types"]["dns"]["cd"],
             help="Set the DNSSEC Checking Disabled flag (RFC4035)"
         )
         dns.add_argument(
-            "--do",
+            "--set-do-bit",
             type=bool,
             default=conf["specification"]["types"]["dns"]["do"],
             help="Set the DNSSEC OK flag (RFC3225)"
@@ -269,7 +269,7 @@ class Command(BaseCommand):
             help="The DNS label to query"
         )
         dns.add_argument(
-            "--use-nsid",
+            "--set-nsid-bit",
             type=bool,
             default=conf["specification"]["types"]["dns"]["use-nsid"],
             help="Include an EDNS name server ID request with the query"
@@ -281,7 +281,7 @@ class Command(BaseCommand):
             help="May be any integer between 512 and 4096 inclusive"
         )
         dns.add_argument(
-            "--recursion-desired",
+            "--set-rd-bit",
             type=bool,
             default=conf["specification"]["types"]["dns"]["recursion-desired"],
             help="Set the Recursion Desired flag"
@@ -424,10 +424,10 @@ class Command(BaseCommand):
 
         elif self.arguments.type == "traceroute":
             r["destination_option_size"] = self.arguments.destination_option_size
-            r["dontfrag"] = self.arguments.dontfrag
-            r["firsthop"] = self.arguments.firsthop
+            r["dont_fragment"] = self.arguments.dont_fragment
+            r["first_hop"] = self.arguments.first_hop
             r["hop_by_hop_option_size"] = self.arguments.hop_by_hop_option_size
-            r["maxhops"] = self.arguments.maxhops
+            r["max_hops"] = self.arguments.max_hops
             r["packets"] = self.clean_shared_option("traceroute", "packets")
             r["paris"] = self.arguments.paris
             r["port"] = self.arguments.port
@@ -442,18 +442,17 @@ class Command(BaseCommand):
                         "DNS measurements require a query type, class, and "
                         "argument"
                     )
-            r["cd"] = self.arguments.cd
-            r["do"] = self.arguments.do
+            r["set_cd_bit"] = self.arguments.cd
+            r["set_do_bit"] = self.arguments.do
             r["protocol"] = self.clean_protocol()
             r["query_argument"] = self.arguments.query_argument
             r["query_class"] = self.arguments.query_class
             r["query_type"] = self.arguments.query_type
-            r["recursion_desired"] = self.arguments.recursion_desired
+            r["set_rd_bit"] = self.arguments.set_rd_bit
             r["retry"] = self.arguments.retry
-            r["use_NSID"] = self.arguments.use_nsid
+            r["set_nsid_bit"] = self.arguments.set_nsid_bit
             r["udp_payload_size"] = self.arguments.udp_payload_size
             r["use_probe_resolver"] = not target
-
 
         return r
 
@@ -475,7 +474,7 @@ class Command(BaseCommand):
             r["value"] = self.arguments.from_asn
         elif self.arguments.from_probes:
             r["type"] = "probes"
-            r["value"] = self.arguments.from_probes
+            r["value"] = ",".join([str(_) for _ in self.arguments.from_probes])
         elif self.arguments.from_measurement:
             r["type"] = "msm"
             r["value"] = self.arguments.from_measurement
@@ -493,8 +492,14 @@ class Command(BaseCommand):
             ).format(response["HTTP_MSG"])
 
             try:
-                message += "\n  " + json.loads(
-                    response["ADDITIONAL_MSG"])["error"]["message"]
+                message += "\n  {}".format(
+                    json.loads(response["ADDITIONAL_MSG"])["error"]["message"])
+            except Exception:
+                pass  # Too many things can go wrong here and we don't care
+
+            try:
+                message += "\n  {}".format(
+                    json.loads(response["ADDITIONAL_MSG"])["detail"])
             except Exception:
                 pass  # Too many things can go wrong here and we don't care
 

@@ -1,6 +1,7 @@
 from __future__ import print_function
 
-from ripe.atlas.cousteau import AtlasRequest
+from ripe.atlas.cousteau import (
+    AtlasLatestRequest, AtlasResultsRequest, Measurement, APIResponseError)
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
@@ -16,10 +17,7 @@ class Command(BaseCommand):
 
     DESCRIPTION = "Report the results of a measurement.\n\nExample:\n" \
                   "  ripe-atlas report 1001 --probes 157,10006\n"
-    URLS = {
-        "detail": "/api/v2/measurements/{}.json",
-        "latest": "/api/v2/measurements/{}/latest.json",
-    }
+
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],
         "rtt-median": [
@@ -43,7 +41,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=int,
-            help="The measurement id you want reported"
+            help="The measurement id you want reported."
         )
         self.parser.add_argument(
             "--probes",
@@ -66,29 +64,42 @@ class Command(BaseCommand):
                  "selected option.  Note that if you opt for aggregation, no "
                  "output will be generated until all results are received."
         )
+        self.parser.add_argument(
+            "--start-time",
+            type=ArgumentType.datetime,
+            help="The start time of the report."
+        )
+        self.parser.add_argument(
+            "--stop-time",
+            type=ArgumentType.datetime,
+            help="The stop time of the report."
+        )
 
-    def get_probes(self):
+    def _get_request(self):
+
+        kwargs = {"msm_id": self.arguments.measurement_id}
         if self.arguments.probes:
-            return [int(i) for i in self.arguments.probes.split(",")]
-        return []
+            kwargs["probe_ids"] = ",".join([str(_) for _ in self.arguments.probes])
+        if self.arguments.start_time:
+            kwargs["start"] = self.arguments.start_time
+        if self.arguments.stop_time:
+            kwargs["stop"] = self.arguments.stop_time
+
+        if "start" in kwargs or "stop" in kwargs:
+            return AtlasResultsRequest(**kwargs)
+        return AtlasLatestRequest(**kwargs)
 
     def run(self):
 
-        pk = self.arguments.measurement_id
-        measurement_exists, detail = AtlasRequest(
-            url_path=self.URLS["detail"].format(pk)).get()
-
-        if not measurement_exists:
-            raise RipeAtlasToolsException("That measurement id does not exist")
+        try:
+            measurement = Measurement(id=self.arguments.measurement_id)
+        except APIResponseError:
+            raise RipeAtlasToolsException("That measurement does not exist")
 
         self.renderer = Renderer.get_renderer(
-            self.arguments.renderer, detail["type"]["name"])()
+            self.arguments.renderer, measurement.type.lower())()
 
-        latest_url = self.URLS["latest"].format(pk)
-        if self.arguments.probes:
-            latest_url += "?probes={}".format(self.arguments.probes)
-
-        results = AtlasRequest(url_path=latest_url).get()[1]
+        results = self._get_request().get()[1]
 
         if not results:
             raise RipeAtlasToolsException(
@@ -98,13 +109,13 @@ class Command(BaseCommand):
         if self.arguments.aggregate_by:
             results = aggregate(results, self.get_aggregators())
 
-        description = detail["description"] or ""
+        description = measurement.description or ""
         if description:
             description = "\n{}\n".format(description)
 
         header = "RIPE Atlas Report for Measurement #{}\n" \
                  "===================================================" \
-                 "{}".format(pk, description)
+                 "{}".format(self.arguments.measurement_id, description)
 
         Rendering(
             renderer=self.arguments.renderer,
