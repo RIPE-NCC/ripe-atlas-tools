@@ -85,7 +85,8 @@ class Command(BaseCommand):
         if os.path.exists(Configuration.USER_RC):
             return
 
-        os.makedirs(Configuration.USER_CONFIG_DIR)
+        if not os.path.exists(Configuration.USER_CONFIG_DIR):
+            os.makedirs(Configuration.USER_CONFIG_DIR)
 
         Configuration.write(conf)
 
