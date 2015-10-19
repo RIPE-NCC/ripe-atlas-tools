@@ -50,7 +50,7 @@ class TestProbesCommand(unittest.TestCase):
         self.cmd = Command()
 
     def test_with_empty_args(self):
-        """User passes no args, should fail with SystemExit"""
+        """User passes no args, should fail with RipeAtlasToolsException"""
         with self.assertRaises(RipeAtlasToolsException):
             self.cmd.init_args([])
             self.cmd.run()
@@ -374,7 +374,7 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
             self.cmd.run()
-            expected_output = (
+            expected_blob = (
                 "We found the following probes with the given criteria:\n"
                 "COUNTRY_CODE: NL\n"
                 " ASN_V4: 3333\n"
@@ -397,7 +397,9 @@ class TestProbesCommand(unittest.TestCase):
                 "    2     3333   None   DE None        \n"
                 "Total probes found: 4\n"
             )
-            self.assertEquals(mystdout.getvalue(), expected_output)
+            expected_set = set(expected_blob.split("\n"))
+            returned_set = set(mystdout.getvalue().split("\n"))
+            self.assertEquals(returned_set, expected_set)
 
         sys.stdout = old_stdout
 
@@ -444,7 +446,7 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
             self.cmd.run()
-            expected_output = (
+            expected_blob = (
                 "We found the following probes with the given criteria:\n"
                 "COUNTRY_CODE: NL\n"
                 " ASN_V4: 3333\n"
@@ -467,7 +469,9 @@ class TestProbesCommand(unittest.TestCase):
                 "    2     3333   None   DE None        \n"
                 "Total probes found: 4\n"
             )
-            self.assertEquals(mystdout.getvalue(), expected_output)
+            expected_set = set(expected_blob.split("\n"))
+            returned_set = set(mystdout.getvalue().split("\n"))
+            self.assertEquals(returned_set, expected_set)
 
         sys.stdout = old_stdout
 
