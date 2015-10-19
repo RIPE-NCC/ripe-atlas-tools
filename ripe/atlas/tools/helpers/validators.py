@@ -46,3 +46,26 @@ class ArgumentType(object):
                 "2010-10-01T00:00:00 or a portion thereof.  All times are in "
                 "UTC."
             )
+
+    class integer_range(object):
+
+        def __init__(self, minimum=0, maximum=7):
+            self.minimum = minimum
+            self.maximum = maximum
+
+        def __call__(self, string, *args, **kwargs):
+            try:
+                integer = int(string)
+                if integer < self.minimum or integer > self.maximum:
+                    raise argparse.ArgumentTypeError(
+                        "The integer must be between {} and {}.".format(
+                            self.minimum,
+                            self.maximum
+                        )
+                    )
+            except ValueError:
+                raise argparse.ArgumentTypeError(
+                    "An integer must be specified."
+                )
+
+            return integer
