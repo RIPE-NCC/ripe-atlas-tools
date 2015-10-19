@@ -1,3 +1,4 @@
-from probes import TestProbesCommand
+from .probes import TestProbesCommand
+from .report import TestReportCommand
 
-__all__ = [probes]
+__all__ = [TestProbesCommand, TestReportCommand]

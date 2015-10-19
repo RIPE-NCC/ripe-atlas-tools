@@ -1,3 +1,3 @@
-from ping import TestPingRenderer
+from .ping import TestPingRenderer
 
 __all__ = [TestPingRenderer]
