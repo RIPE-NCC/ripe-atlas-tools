@@ -12,6 +12,7 @@ from ..helpers.validators import ArgumentType
 class Command(BaseCommand):
 
     NAME = "measurements"
+    LIMITS = (1, 1000)
 
     DESCRIPTION = (
         "Fetches and prints measurements fulfilling specified criteria based "
@@ -19,7 +20,7 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self):
-        """Adds all commands line arguments for this command."""
+
         self.parser.add_argument(
             "--search",
             type=str,
@@ -43,34 +44,44 @@ class Command(BaseCommand):
             choices=("ping", "traceroute", "dns", "sslcert", "ntp", "http"),
             help="The measurement type"
         )
-        self.parser.add_argument(
+
+        timing = self.parser.add_argument_group("Timing")
+        timing.add_argument(
             "--started-before",
             type=ArgumentType.datetime,
-            help=""
+            help="Filter for measurements that started before a specific date. "
+                 "The format required is YYYY-MM-DDTHH:MM:SS"
         )
-        self.parser.add_argument(
+        timing.add_argument(
             "--started-after",
             type=ArgumentType.datetime,
-            help=""
+            help="Filter for measurements that started after a specific date. "
+                 "The format required is YYYY-MM-DDTHH:MM:SS"
         )
+        timing.add_argument(
+            "--stopped-before",
+            type=ArgumentType.datetime,
+            help="Filter for measurements that stopped before a specific date. "
+                 "The format required is YYYY-MM-DDTHH:MM:SS"
+        )
+        timing.add_argument(
+            "--stopped-after",
+            type=ArgumentType.datetime,
+            help="Filter for measurements that stopped after a specific date. "
+                 "The format required is YYYY-MM-DDTHH:MM:SS"
+        )
+
         self.parser.add_argument(
             "--limit",
-            type=ArgumentType.integer_range(1, 1000),
+            type=ArgumentType.integer_range(self.LIMITS[0], self.LIMITS[1]),
             default=50,
-            help="The number of measurements to return."
+            help="The number of measurements to return.  The number must be "
+                 "between {} and {}".format(self.LIMITS[0], self.LIMITS[1])
         )
 
     def run(self):
 
-        filters = {"return_objects": True}
-        if self.arguments.status:
-            filters["status"] = self.arguments.status
-        if self.arguments.af:
-            filters["af"] = self.arguments.af
-        if self.arguments.type:
-            filters["type"] = self.arguments.type
-
-        measurements = MeasurementRequest(**filters)
+        measurements = MeasurementRequest(**self._get_filters())
 
         print("\n{:<8} {:10} {:<45} {:>14}\n{}".format(
             "ID", "Type", "Description", "Status", "=" * 80
@@ -96,6 +107,27 @@ class Command(BaseCommand):
                 measurements.total_count
             )
         ))
+
+    def _get_filters(self):
+
+        r = {"return_objects": True}
+
+        if self.arguments.status:
+            r["status"] = self.arguments.status
+        if self.arguments.af:
+            r["af"] = self.arguments.af
+        if self.arguments.type:
+            r["type"] = self.arguments.type
+        if self.arguments.started_before:
+            r["start_time__lt"] = self.arguments.started_before
+        if self.arguments.started_after:
+            r["start_time__gt"] = self.arguments.started_after
+        if self.arguments.stopped_before:
+            r["stop_time__lt"] = self.arguments.stopped_before
+        if self.arguments.stopped_after:
+            r["stop_time__gt"] = self.arguments.stopped_after
+
+        return r
 
     @staticmethod
     def _get_colour_from_status(status):
