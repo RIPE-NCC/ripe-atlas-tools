@@ -119,7 +119,7 @@ class Command(BaseCommand):
             # Get class and aggregator key
             aggregation_class = self.AGGREGATORS[aggr_key][1]
             key = self.AGGREGATORS[aggr_key][0]
-            if aggr_key == "rtt":
+            if aggr_key == "rtt-median":
                 # Get range for the aggregation
                 key_range = self.AGGREGATORS[aggr_key][2]
                 aggregation_keys.append(
