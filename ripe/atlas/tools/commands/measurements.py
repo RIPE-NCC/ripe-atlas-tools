@@ -46,30 +46,15 @@ class Command(BaseCommand):
         )
 
         timing = self.parser.add_argument_group("Timing")
-        timing.add_argument(
-            "--started-before",
-            type=ArgumentType.datetime,
-            help="Filter for measurements that started before a specific date. "
-                 "The format required is YYYY-MM-DDTHH:MM:SS"
-        )
-        timing.add_argument(
-            "--started-after",
-            type=ArgumentType.datetime,
-            help="Filter for measurements that started after a specific date. "
-                 "The format required is YYYY-MM-DDTHH:MM:SS"
-        )
-        timing.add_argument(
-            "--stopped-before",
-            type=ArgumentType.datetime,
-            help="Filter for measurements that stopped before a specific date. "
-                 "The format required is YYYY-MM-DDTHH:MM:SS"
-        )
-        timing.add_argument(
-            "--stopped-after",
-            type=ArgumentType.datetime,
-            help="Filter for measurements that stopped after a specific date. "
-                 "The format required is YYYY-MM-DDTHH:MM:SS"
-        )
+        for position in ("started", "stopped"):
+            for chrono in ("before", "after"):
+                timing.add_argument(
+                    "--{}-{}".format(position, chrono),
+                    type=ArgumentType.datetime,
+                    help="Filter for measurements that {} {} a specific date. "
+                         "The format required is YYYY-MM-DDTHH:MM:SS".format(
+                             position, chrono)
+                )
 
         self.parser.add_argument(
             "--limit",
@@ -112,6 +97,8 @@ class Command(BaseCommand):
 
         r = {"return_objects": True}
 
+        if self.arguments.search:
+            r["search"] = self.arguments.search
         if self.arguments.status:
             r["status"] = self.arguments.status
         if self.arguments.af:
