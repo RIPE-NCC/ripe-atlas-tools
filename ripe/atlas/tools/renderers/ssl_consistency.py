@@ -1,7 +1,7 @@
 from .base import Renderer as BaseRenderer
 from ripe.atlas.cousteau import ProbeRequest
 
-THRESHOLD = 80 #%
+THRESHOLD = 80  # %
 
 
 class Renderer(BaseRenderer):
@@ -10,20 +10,17 @@ class Renderer(BaseRenderer):
     def __init__(self):
         self.uniqcerts = {}
 
-    def on_start(self):
-        return "Collecting results...\n"
-
     def on_result(self, result):
         probe_id = result.probe_id
 
         for certificate in result.certificates:
             cert_id = certificate.checksum_sha256
             if cert_id not in self.uniqcerts:
-              self.uniqcerts[cert_id] = {
-                "cert": None,
-                "cnt": 0,
-                "probes": []
-              }
+                self.uniqcerts[cert_id] = {
+                    "cert": None,
+                    "cnt": 0,
+                    "probes": []
+                }
             self.uniqcerts[cert_id]["cert"] = certificate
             self.uniqcerts[cert_id]["cnt"] += 1
             self.uniqcerts[cert_id]["probes"].append(probe_id)

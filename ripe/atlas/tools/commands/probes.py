@@ -139,7 +139,8 @@ class Command(BaseCommand):
 
         render_args = self._clean_render_args()
         renderer = Renderer(**render_args)
-        renderer.on_start()
+        renderer.blob += (
+            "We found the following probes with the given criteria:\n")
 
         if self.arguments.aggregate_by:
 
@@ -153,8 +154,10 @@ class Command(BaseCommand):
             for index, probe in enumerate(probes):
                 renderer.on_result(probe)
 
-        renderer.total_count = probes_request.total_count
-        renderer.on_finish()
+        renderer.blob += (
+            "Total probes found: {}\n".format(probes_request.total_count))
+
+        sys.stdout.write(renderer.blob)
 
     def produce_ids_only(self, probes):
         """If user has specified ids-only arg print only ids and exit."""
