@@ -13,6 +13,11 @@ class Command(BaseCommand):
 
     NAME = "measurements"
     LIMITS = (1, 1000)
+    STATUSES = {
+        "scheduled": 1,
+        "ongoing": 2,
+        "stopped": 3
+    }
 
     DESCRIPTION = (
         "Fetches and prints measurements fulfilling specified criteria based "
@@ -66,9 +71,12 @@ class Command(BaseCommand):
 
     def run(self):
 
-        measurements = MeasurementRequest(**self._get_filters())
+        filters = self._get_filters()
+        measurements = MeasurementRequest(**filters)
 
-        print("\n{:<8} {:10} {:<45} {:>14}\n{}".format(
+        print(self._get_filter_display(filters))
+
+        print("{:<8} {:10} {:<45} {:>14}\n{}".format(
             "ID", "Type", "Description", "Status", "=" * 80
         ))
         for measurement in itertools.islice(measurements, self.arguments.limit):
@@ -85,13 +93,30 @@ class Command(BaseCommand):
             ), self._get_colour_from_status(measurement.status)))
 
         # Print total count of found measurements
-        print("{}\n{:>80}".format(
+        print("{}\n{:>80}\n".format(
             "=" * 80,
             "Showing {} of {} total measurements".format(
                 min(self.arguments.limit, measurements.total_count),
                 measurements.total_count
             )
         ))
+
+    @staticmethod
+    def _get_filter_display(filters):
+
+        if len(filters.keys()) == 1:  # There's always at least one internal one
+            return ""
+
+        r = colourise("\nFilters:\n", "white")
+        for k, v in filters.items():
+            if k == "return_objects":
+                continue
+            r += colourise(
+                "  {}: {}\n".format(k.capitalize(), v.capitalize()),
+                "cyan"
+            )
+
+        return r
 
     def _get_filters(self):
 
