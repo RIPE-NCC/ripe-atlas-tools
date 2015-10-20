@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from ripe.atlas.cousteau import AtlasRequest
+from ripe.atlas.cousteau import AtlasRequest, Measurement, APIResponseError
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
@@ -17,7 +17,6 @@ class Command(BaseCommand):
     DESCRIPTION = "Report the results of a measurement.\n\nExample:\n" \
                   "  ripe-atlas report 1001 --probes 157,10006\n"
     URLS = {
-        "detail": "/api/v2/measurements/{}.json",
         "latest": "/api/v2/measurements/{}/latest.json",
     }
     AGGREGATORS = {
@@ -33,11 +32,6 @@ class Command(BaseCommand):
         "prefix_v4": ["probe.prefix_v4", ValueKeyAggregator],
         "prefix_v6": ["probe.prefix_v6", ValueKeyAggregator],
     }
-
-    def __init__(self, *args, **kwargs):
-        BaseCommand.__init__(self, *args, **kwargs)
-        self.payload = ""
-        self.renderer = None
 
     def add_arguments(self):
         self.parser.add_argument(
@@ -67,26 +61,19 @@ class Command(BaseCommand):
                  "output will be generated until all results are received."
         )
 
-    def get_probes(self):
-        if self.arguments.probes:
-            return [int(i) for i in self.arguments.probes.split(",")]
-        return []
-
     def run(self):
 
-        pk = self.arguments.measurement_id
-        measurement_exists, detail = AtlasRequest(
-            url_path=self.URLS["detail"].format(pk)).get()
+        try:
+            measurement = Measurement(id=self.arguments.measurement_id)
+        except APIResponseError:
+            raise RipeAtlasToolsException("That measurement does not exist")
 
-        if not measurement_exists:
-            raise RipeAtlasToolsException("That measurement id does not exist")
-
-        self.renderer = Renderer.get_renderer(
-            self.arguments.renderer, detail["type"]["name"])()
-
-        latest_url = self.URLS["latest"].format(pk)
+        latest_url = self.URLS["latest"].format(measurement.id)
         if self.arguments.probes:
             latest_url += "?probes={}".format(self.arguments.probes)
+
+        renderer = Renderer.get_renderer(
+            self.arguments.renderer, measurement.type.lower())()
 
         results = AtlasRequest(url_path=latest_url).get()[1]
 
@@ -98,19 +85,15 @@ class Command(BaseCommand):
         if self.arguments.aggregate_by:
             results = aggregate(results, self.get_aggregators())
 
-        description = detail["description"] or ""
+        description = measurement.description or ""
         if description:
             description = "\n{}\n".format(description)
 
         header = "RIPE Atlas Report for Measurement #{}\n" \
                  "===================================================" \
-                 "{}".format(pk, description)
+                 "{}".format(measurement.id, description)
 
-        Rendering(
-            renderer=self.arguments.renderer,
-            header=header,
-            payload=results
-        ).render()
+        Rendering(renderer=renderer, header=header, payload=results).render()
 
     def get_aggregators(self):
         """Return aggregators list based on user input"""

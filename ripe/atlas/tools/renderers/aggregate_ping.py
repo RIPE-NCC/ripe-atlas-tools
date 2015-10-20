@@ -29,10 +29,10 @@ class Renderer(BaseRenderer):
     def median(rtts):
         sorted_rtts = sorted(rtts)
         index = (len(rtts) - 1) // 2
-        if (len(rtts) % 2):
+        if len(rtts) % 2:
             return sorted_rtts[index]
         else:
-            return (sorted_rtts[index] + sorted_rtts[index +1])/2.0
+            return (sorted_rtts[index] + sorted_rtts[index + 1]) / 2.0
 
     def on_start(self):
         return "Collecting results...\n"

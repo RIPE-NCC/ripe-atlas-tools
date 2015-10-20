@@ -69,29 +69,21 @@ class Rendering(object):
 
     def __init__(self, renderer=None, header="", footer="", payload=()):
 
-        self.preferred_renderer = renderer
+        self.renderer = renderer
         self.header = header + "\n" if header else ""
         self.footer = footer + "\n" if footer else ""
         self.payload = payload
 
-        self.renderer = None  # Defined automagically in _get_rendered_results()
-
     def render(self):
         print(self.header)
+        self.renderer.header()
         self._smart_render(self.payload)
+        self.renderer.additional()
+        self.renderer.footer()
         print(self.footer)
 
     def _get_rendered_results(self, data):
-
         for sagan in data:
-
-            # Guess the renderer using Sagan's .type property
-            if not self.renderer:
-                self.renderer = Renderer.get_renderer(
-                    self.preferred_renderer,
-                    sagan.type
-                )()
-
             yield self.renderer.on_result(sagan)
 
     def _smart_render(self, data, indent=""):
