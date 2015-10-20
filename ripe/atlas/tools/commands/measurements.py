@@ -13,10 +13,23 @@ class Command(BaseCommand):
 
     NAME = "measurements"
     LIMITS = (1, 1000)
+
+    STATUS_SPECIFIED = 0
+    STATUS_SCHEDULED = 1
+    STATUS_ONGOING = 2
+    STATUS_STOPPED = 4
+    STATUS_FORCED_STOP = 5
+    STATUS_NO_SUITABLE_PROBES = 6
+    STATUS_FAILED = 7
     STATUSES = {
-        "scheduled": 1,
-        "ongoing": 2,
-        "stopped": 3
+        "scheduled": (STATUS_SPECIFIED, STATUS_SCHEDULED,),
+        "ongoing": (STATUS_ONGOING,),
+        "stopped": (
+            STATUS_STOPPED,
+            STATUS_FORCED_STOP,
+            STATUS_NO_SUITABLE_PROBES,
+            STATUS_FAILED,
+        )
     }
 
     DESCRIPTION = (
@@ -34,7 +47,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--status",
             type=str,
-            choices=("scheduled", "ongoing", "stopped"),
+            choices=self.STATUSES.keys(),
             help="The measurement status"
         )
         self.parser.add_argument(
@@ -85,12 +98,13 @@ class Command(BaseCommand):
                 measurement.destination_address or \
                 ""
 
+            status_id = measurement.meta_data["status"]["id"]
             print(colourise("{:<8} {:10} {:<45} {:>14}".format(
                 measurement.id,
                 measurement.type.lower(),
                 destination[:45],
                 measurement.status
-            ), self._get_colour_from_status(measurement.status)))
+            ), self._get_colour_from_status(status_id)))
 
         # Print total count of found measurements
         print("{}\n{:>80}\n".format(
@@ -112,7 +126,9 @@ class Command(BaseCommand):
             if k == "return_objects":
                 continue
             r += colourise(
-                "  {}: {}\n".format(k.capitalize(), v.capitalize()),
+                "  {}: {}\n".format(
+                    k.capitalize().replace("__", " "),
+                    str(v).capitalize()),
                 "cyan"
             )
 
@@ -125,7 +141,7 @@ class Command(BaseCommand):
         if self.arguments.search:
             r["search"] = self.arguments.search
         if self.arguments.status:
-            r["status"] = self.arguments.status
+            r["status__in"] = self.STATUSES[self.arguments.status]
         if self.arguments.af:
             r["af"] = self.arguments.af
         if self.arguments.type:
@@ -141,15 +157,13 @@ class Command(BaseCommand):
 
         return r
 
-    @staticmethod
-    def _get_colour_from_status(status):
-        status = status.lower()
-        if status == "ongoing":
+    def _get_colour_from_status(self, status):
+        if status in self.STATUSES["ongoing"]:
             return "green"
-        if status in ("failed", "forced to stop", "no suitable probes"):
-            return "red"
-        if status in ("specified", "scheduled"):
-            return "blue"
-        if status == "stopped":
+        if status == self.STATUS_STOPPED:
             return "yellow"
+        if status in self.STATUSES["stopped"]:
+            return "red"
+        if status in self.STATUSES["scheduled"]:
+            return "blue"
         return "white"
