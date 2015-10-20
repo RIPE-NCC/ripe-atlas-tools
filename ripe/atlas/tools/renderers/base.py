@@ -99,6 +99,27 @@ class Renderer(object):
         )
 
     @staticmethod
+    def header(*args, **kwargs):
+        """
+        Override this to add an additional header.
+        """
+        pass
+
+    @staticmethod
+    def additional(*args, **kwargs):
+        """
+        Override this for summary logic.
+        """
+        pass
+
+    @staticmethod
+    def footer(*args, **kwargs):
+        """
+        Override this to add an additional footer.
+        """
+        pass
+
+    @staticmethod
     def _test_renderer_accepts_kind(renderer, kind):
         if kind not in renderer.RENDERS:
             raise RipeAtlasToolsException(
