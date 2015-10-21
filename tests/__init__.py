@@ -1,5 +1,5 @@
-from aggregators import TestAggregators
-from commands import TestProbesCommand
-from renderers import TestPingRenderer
+from .aggregators import TestAggregators
+from .commands import TestProbesCommand
+from .renderers import TestPingRenderer
 
 __all__ = [TestAggregators, TestProbesCommand, TestPingRenderer]

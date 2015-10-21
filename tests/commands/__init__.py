@@ -1,3 +1,3 @@
-from probes import TestProbesCommand
+from .probes import TestProbesCommand
 
 __all__ = [probes]
