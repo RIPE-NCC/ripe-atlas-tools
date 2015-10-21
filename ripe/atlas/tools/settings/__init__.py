@@ -19,68 +19,6 @@ class Configuration(object):
             "fetch": "",
             "create": "",
         },
-        "tags": {
-            "ipv4": {
-                "ping": {
-                    "include": [],
-                    "exclude": []
-                },
-                "traceroute": {
-                    "include": [],
-                    "exclude": []
-                },
-                "dns": {
-                    "include": [],
-                    "exclude": []
-                },
-                "sslcert": {
-                    "include": [],
-                    "exclude": []
-                },
-                "http": {
-                    "include": [],
-                    "exclude": []
-                },
-                "ntp": {
-                    "include": [],
-                    "exclude": []
-                },
-                "all": {
-                    "include": ["system-ipv4-works"],
-                    "exclude": []
-                },
-            },
-            "ipv6": {
-                "ping": {
-                    "include": [],
-                    "exclude": []
-                },
-                "traceroute": {
-                    "include": [],
-                    "exclude": []
-                },
-                "dns": {
-                    "include": [],
-                    "exclude": []
-                },
-                "sslcert": {
-                    "include": [],
-                    "exclude": []
-                },
-                "http": {
-                    "include": [],
-                    "exclude": []
-                },
-                "ntp": {
-                    "include": [],
-                    "exclude": []
-                },
-                "all": {
-                    "include": ["system-ipv6-works"],
-                    "exclude": []
-                }
-            }
-        },
         "specification": {
             "af": 4,
             "description": "",
@@ -133,6 +71,68 @@ class Configuration(object):
                     "udp-payload-size": 512,
                     "recursion-desired": True,
                     "retry": 0
+                }
+            },
+            "tags": {
+                "ipv4": {
+                    "ping": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "traceroute": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "dns": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "sslcert": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "http": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "ntp": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "all": {
+                        "include": ["system-ipv4-works"],
+                        "exclude": []
+                    },
+                },
+                "ipv6": {
+                    "ping": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "traceroute": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "dns": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "sslcert": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "http": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "ntp": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "all": {
+                        "include": ["system-ipv6-works"],
+                        "exclude": []
+                    }
                 }
             }
         },

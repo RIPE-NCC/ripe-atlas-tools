@@ -500,11 +500,12 @@ class Command(BaseCommand):
 
         af = "ipv{}".format(self._get_af())
         kind = self.arguments.type
+        spec = conf["specification"]
         for clude in ("in", "ex"):
             clude += "clude"
             if not r["tags"][clude]:
-                r["tags"][clude] += conf["tags"][af][kind][clude]
-                r["tags"][clude] += conf["tags"][af]["all"][clude]
+                r["tags"][clude] += spec["tags"][af][kind][clude]
+                r["tags"][clude] += spec["tags"][af]["all"][clude]
 
         return r
 
