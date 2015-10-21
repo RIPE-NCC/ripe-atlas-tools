@@ -231,5 +231,5 @@ the command line:
 Can I Contribute?
 -----------------
 
-Absolutely.  Pull requests are welcome, but give us a little time to get the
-architecture settled first.
+Absolutely.  Please read our `guide`_ on how to contribute.
+.. _guide: https://github.com/RIPE-NCC/ripe-atlas-tools/blob/master/CONTRIBUTING.rst

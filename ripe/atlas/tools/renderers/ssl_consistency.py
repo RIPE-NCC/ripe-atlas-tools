@@ -28,7 +28,9 @@ class Renderer(BaseRenderer):
 
     def on_finish(self):
         s = ""
-        most_seen_cnt = max([self.uniqcerts[cert_id]["cnt"] for cert_id in self.uniqcerts])
+        most_seen_cnt = max(
+            [self.uniqcerts[cert_id]["cnt"] for cert_id in self.uniqcerts]
+        )
 
         for cert_id in sorted(self.uniqcerts,
                               key=lambda id: self.uniqcerts[id]["cnt"],
@@ -45,10 +47,11 @@ class Renderer(BaseRenderer):
                 subject_cn=certificate.subject_cn,
                 sha256fp=certificate.checksum_sha256,
                 seenby=self.uniqcerts[cert_id]["cnt"],
-                s="s" if self.uniqcerts[cert_id]["cnt"] > 1 else "")
+                s="s" if self.uniqcerts[cert_id]["cnt"] > 1 else ""
+            )
 
-            #TODO: a better way to determine consistency?
-            if self.uniqcerts[cert_id]["cnt"] < most_seen_cnt*THRESHOLD/100:
+            # TODO: a better way to determine consistency?
+            if self.uniqcerts[cert_id]["cnt"] < most_seen_cnt * THRESHOLD / 100:
                 s += "\n"
                 s += "  Below the threshold ({0}%)\n".format(THRESHOLD)
                 s += "  Probes that saw it: \n"
@@ -59,8 +62,9 @@ class Renderer(BaseRenderer):
                 for probe in probes:
                     s += "    ID: {id}, country code: {cc}, " \
                         "ASN (v4/v6): {asn4}/{asn6}\n".format(
-                        id=probe["id"], cc=probe["country_code"],
-                        asn4=probe["asn_v4"], asn6=probe["asn_v6"])
+                            id=probe["id"], cc=probe["country_code"],
+                            asn4=probe["asn_v4"], asn6=probe["asn_v6"]
+                        )
 
             s += "\n"
 

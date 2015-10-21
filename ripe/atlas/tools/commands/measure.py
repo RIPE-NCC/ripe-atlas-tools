@@ -300,10 +300,10 @@ class Command(BaseCommand):
         if self.arguments.dry_run:
             print("Definitions:")
             for param, val in self._get_measurement_kwargs().iteritems():
-                print("  {}: {}".format(param,val))
+                print("  {}: {}".format(param, val))
             print("Sources:")
             for param, val in self._get_source_kwargs().iteritems():
-                print("  {}: {}".format(param,val))
+                print("  {}: {}".format(param, val))
             return
 
         (is_success, response) = AtlasCreateRequest(
@@ -453,7 +453,6 @@ class Command(BaseCommand):
             r["use_NSID"] = self.arguments.use_nsid
             r["udp_payload_size"] = self.arguments.udp_payload_size
             r["use_probe_resolver"] = not target
-
 
         return r
 
