@@ -36,7 +36,7 @@ class Colour(object):
         return cls._colourise(t, 36)
 
     @classmethod
-    def white(cls,t):
+    def white(cls, t):
         return cls._colourise(t, 37)
 
     @classmethod

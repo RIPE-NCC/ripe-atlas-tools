@@ -23,7 +23,9 @@ class Renderer(BaseRenderer):
 
     @staticmethod
     def mean(rtts):
-        return round(float(sum(rtt for rtt in rtts if rtt is not None))/max(len(rtts),1), 3)
+        return round(
+            float(sum(rtt for rtt in rtts if rtt is not None)) / max(len(rtts), 1), 3
+        )
 
     @staticmethod
     def median(rtts):

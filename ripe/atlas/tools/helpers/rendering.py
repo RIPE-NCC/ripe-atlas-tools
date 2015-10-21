@@ -3,7 +3,6 @@ from __future__ import print_function
 from ripe.atlas.sagan import Result, ResultParseError
 
 from ..probes import Probe
-from ..renderers import Renderer
 
 
 class SaganSet(object):

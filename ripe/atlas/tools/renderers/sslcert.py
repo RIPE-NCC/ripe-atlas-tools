@@ -1,6 +1,7 @@
 from .base import Renderer as BaseRenderer
 import OpenSSL
 
+
 class Renderer(BaseRenderer):
     """
     Somehow, we need to figure out how to make an SSL result look like the the
@@ -18,17 +19,17 @@ class Renderer(BaseRenderer):
     @classmethod
     def get_formatted_response(cls, certificate):
         x509 = OpenSSL.crypto.load_certificate(
-                  OpenSSL.crypto.FILETYPE_PEM,
-                  certificate.raw_data.replace("\\/", "/").replace("\n\n", "\n")
-                )
+            OpenSSL.crypto.FILETYPE_PEM,
+            certificate.raw_data.replace("\\/", "/").replace("\n\n", "\n")
+        )
 
         pkey_type = x509.get_pubkey().type()
 
-        #TODO: to be improved
+        # TODO: to be improved
         if pkey_type == 6:
-          pkey_type_descr = "rsaEncryption"
+            pkey_type_descr = "rsaEncryption"
         else:
-          pkey_type_descr = pkey_type
+            pkey_type_descr = pkey_type
 
         return cls.render(
             "reports/sslcert.txt",

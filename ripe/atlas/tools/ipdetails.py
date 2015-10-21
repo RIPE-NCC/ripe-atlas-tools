@@ -4,6 +4,7 @@ import IPy
 
 from cache import cache
 
+
 class IP(object):
 
     RIPESTAT_URL = "https://stat.ripe.net/data/prefix-overview/data.json?resource={ip}"

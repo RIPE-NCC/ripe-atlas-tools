@@ -28,7 +28,7 @@ class Command(BaseCommand):
             "over.  If you're\ncurious about who we are and what sorts of " \
             "stuff we work on, here's a break\ndown of our contributions to " \
             "date.\n\nName                     Changes  URL\n{}\n".format(
-            "-" * 79)
+                "-" * 79)
 
         for contributor in self.get_contributors():
             r += "{name:20}  {changes:10}  {url}\n".format(**contributor)
