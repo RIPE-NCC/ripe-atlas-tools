@@ -1,6 +1,7 @@
 from __future__ import print_function
 
-from ripe.atlas.cousteau import AtlasRequest, Measurement, APIResponseError
+from ripe.atlas.cousteau import (
+    AtlasLatestRequest, AtlasResultsRequest, Measurement, APIResponseError)
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
@@ -16,9 +17,7 @@ class Command(BaseCommand):
 
     DESCRIPTION = "Report the results of a measurement.\n\nExample:\n" \
                   "  ripe-atlas report 1001 --probes 157,10006\n"
-    URLS = {
-        "latest": "/api/v2/measurements/{}/latest.json",
-    }
+
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],
         "rtt-median": [
@@ -37,7 +36,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=int,
-            help="The measurement id you want reported"
+            help="The measurement id you want reported."
         )
         self.parser.add_argument(
             "--probes",
@@ -60,6 +59,30 @@ class Command(BaseCommand):
                  "selected option.  Note that if you opt for aggregation, no "
                  "output will be generated until all results are received."
         )
+        self.parser.add_argument(
+            "--start-time",
+            type=ArgumentType.datetime,
+            help="The start time of the report."
+        )
+        self.parser.add_argument(
+            "--stop-time",
+            type=ArgumentType.datetime,
+            help="The stop time of the report."
+        )
+
+    def _get_request(self):
+
+        kwargs = {"msm_id": self.arguments.measurement_id}
+        if self.arguments.probes:
+            kwargs["probe_ids"] = ",".join([str(_) for _ in self.arguments.probes])
+        if self.arguments.start_time:
+            kwargs["start"] = self.arguments.start_time
+        if self.arguments.stop_time:
+            kwargs["stop"] = self.arguments.stop_time
+
+        if "start" in kwargs or "stop" in kwargs:
+            return AtlasResultsRequest(**kwargs)
+        return AtlasLatestRequest(**kwargs)
 
     def run(self):
 
@@ -68,14 +91,10 @@ class Command(BaseCommand):
         except APIResponseError:
             raise RipeAtlasToolsException("That measurement does not exist")
 
-        latest_url = self.URLS["latest"].format(measurement.id)
-        if self.arguments.probes:
-            latest_url += "?probes={}".format(self.arguments.probes)
-
         renderer = Renderer.get_renderer(
             self.arguments.renderer, measurement.type.lower())()
 
-        results = AtlasRequest(url_path=latest_url).get()[1]
+        results = self._get_request().get()[1]
 
         if not results:
             raise RipeAtlasToolsException(
