@@ -19,10 +19,6 @@ class Command(BaseCommand):
         "given filters."
     )
 
-    def __init__(self, *args, **kwargs):
-        BaseCommand.__init__(self, *args, **kwargs)
-        self.renderer = None
-
     def add_arguments(self):
         """Adds all commands line arguments for this command."""
         asn = self.parser.add_argument_group("ASN")
@@ -85,7 +81,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--limit",
             type=int,
-            help="Return limited amount of probes"
+            help="Return limited number of probes"
         )
         self.parser.add_argument(
             "--additional-fields",
@@ -142,26 +138,26 @@ class Command(BaseCommand):
             return
 
         render_args = self._clean_render_args()
-        self.renderer = Renderer(**render_args)
-        self.renderer.blob += (
+        renderer = Renderer(**render_args)
+        renderer.blob += (
             "We found the following probes with the given criteria:\n")
 
         if self.arguments.aggregate_by:
 
             aggregators = self.get_aggregators()
             buckets = aggregate(probes, aggregators)
-            self.renderer.render_aggregation(buckets)
+            renderer.render_aggregation(buckets)
 
         else:
 
-            self.renderer.on_table_title()
+            renderer.on_table_title()
             for index, probe in enumerate(probes):
-                self.renderer.on_result(probe)
+                renderer.on_result(probe)
 
-        self.renderer.blob += (
+        renderer.blob += (
             "Total probes found: {}\n".format(probes_request.total_count))
 
-        sys.stdout.write(self.renderer.blob)
+        sys.stdout.write(renderer.blob)
 
     def produce_ids_only(self, probes):
         """If user has specified ids-only arg print only ids and exit."""
