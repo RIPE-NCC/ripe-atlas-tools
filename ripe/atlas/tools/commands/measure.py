@@ -154,7 +154,7 @@ class Command(BaseCommand):
             type=str,
             action="append",
             metavar="TAG",
-            help="Include only probes that are marked with these tags. " \
+            help="Include only probes that are marked with these tags. "
                  "Example: --include-tag=system-ipv6-works"
         )
         self.parser.add_argument(
@@ -162,7 +162,7 @@ class Command(BaseCommand):
             type=str,
             action="append",
             metavar="TAG",
-            help="Exclude probes that are marked with these tags. " \
+            help="Exclude probes that are marked with these tags. "
                  "Example: --exclude-tag=NAT"
         )
 
@@ -409,12 +409,10 @@ class Command(BaseCommand):
 
         spec = conf["specification"]  # Shorter names are easier to read
         r = {
-            "af": spec["af"],
+            "af": self._get_af(),
             "description": spec["description"],
         }
 
-        if self.arguments.af:
-            r["af"] = self.arguments.af
         if self.arguments.description:
             r["description"] = self.arguments.description
 
@@ -495,21 +493,34 @@ class Command(BaseCommand):
             r["type"] = "msm"
             r["value"] = self.arguments.from_measurement
 
-        if self.arguments.include_tag or self.arguments.exclude_tag:
-            r["tags"] = {}
-            r["tags"]["include"] = self.arguments.include_tag or []
-            r["tags"]["exclude"] = self.arguments.exclude_tag or []
-        else:
-            smart_tags = conf["smart-tags"]
-            try:
-                r["tags"] = smart_tags[self.arguments.type][str(self.arguments.af)]
-            except KeyError:
-                try:
-                    r["tags"] = smart_tags["af"][str(self.arguments.af)]
-                except KeyError:
-                    pass
+        r["tags"] = {
+            "include": self.arguments.include_tag or [],
+            "exclude": self.arguments.exclude_tag or []
+        }
+
+        af = "ipv{}".format(self._get_af())
+        kind = self.arguments.type
+        for clude in ("in", "ex"):
+            clude += "clude"
+            if not r["tags"][clude]:
+                r["tags"][clude] += conf["tags"][af][kind][clude]
+                r["tags"][clude] += conf["tags"][af]["all"][clude]
 
         return r
+
+    def _get_af(self):
+        """
+        Returns the specified af, or a guessed one, or the configured one.  In
+        that order.
+        """
+        if self.arguments.af:
+            return self.arguments.af
+        if self.arguments.target:
+            if self.arguments.target.contains(":"):
+                return 6
+            if self.arguments.target.contains("."):
+                return 4
+        return conf["specification"]["af"]
 
     @staticmethod
     def _handle_api_error(response):
