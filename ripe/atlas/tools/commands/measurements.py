@@ -180,7 +180,8 @@ class Command(BaseCommand):
                     "-"
                 )[:self.COLUMNS["target"][1]])
             elif field == "description":
-                r.append(measurement.description[:self.COLUMNS["description"][1]])
+                description = measurement.description or ""
+                r.append(description[:self.COLUMNS["description"][1]])
             else:
                 r.append(getattr(measurement, field))
 
