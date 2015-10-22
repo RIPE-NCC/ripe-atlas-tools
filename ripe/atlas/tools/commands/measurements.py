@@ -1,6 +1,7 @@
 from __future__ import print_function, absolute_import
 
 import itertools
+import re
 
 from ripe.atlas.cousteau import MeasurementRequest
 
@@ -32,6 +33,16 @@ class Command(BaseCommand):
         )
     }
 
+    # Column name: (width, alignment)
+    COLUMNS = {
+        "id": ("<", 7),
+        "type": ("<", 10),
+        "description": ("<", 45),
+        "status": (">", 14),
+        "target": ("<", 45),
+        "url": ("<", 45),
+    }
+
     DESCRIPTION = (
         "Fetches and prints measurements fulfilling specified criteria based "
         "on given filters."
@@ -42,25 +53,41 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--search",
             type=str,
-            help="A search string.  This could match the target or description"
+            help="A search string.  This could match the target or description."
         )
         self.parser.add_argument(
             "--status",
             type=str,
             choices=self.STATUSES.keys(),
-            help="The measurement status"
+            help="The measurement status."
         )
         self.parser.add_argument(
             "--af",
             type=int,
             choices=(4, 6),
-            help="The address family"
+            help="The address family."
         )
         self.parser.add_argument(
             "--type",
             type=str,
             choices=("ping", "traceroute", "dns", "sslcert", "ntp", "http"),
-            help="The measurement type"
+            help="The measurement type."
+        )
+        self.parser.add_argument(
+            "--field",
+            type=str,
+            action="append",
+            choices=("id", "type", "description", "status", "target", "url"),
+            default=[],
+            help="The field(s) to display. Invoke multiple times for multiple "
+                 "fields. The default is id, type, description, and status."
+        )
+        self.parser.add_argument(
+            "--ids-only",
+            action="store_true",
+            default=False,
+            help="Display a list of measurement ids matching your filter "
+                 "criteria."
         )
 
         timing = self.parser.add_argument_group("Timing")
@@ -84,36 +111,80 @@ class Command(BaseCommand):
 
     def run(self):
 
+        if not self.arguments.field:
+            self.arguments.field = ("id", "type", "description", "status")
+
         filters = self._get_filters()
         measurements = MeasurementRequest(**filters)
+        truncated_measurements = itertools.islice(
+            measurements, self.arguments.limit)
+
+        if self.arguments.ids_only:
+            for measurement in truncated_measurements:
+                print(measurement.id)
+            return
+
+        hr = self._get_horizontal_rule()
 
         print(self._get_filter_display(filters))
+        print(self._get_header())
+        print(colourise(hr, "bold"))
 
-        print("{:<8} {:10} {:<45} {:>14}\n{}".format(
-            "ID", "Type", "Description", "Status", "=" * 80
-        ))
-        for measurement in itertools.islice(measurements, self.arguments.limit):
+        for measurement in truncated_measurements:
+            print(colourise(self._get_line_format().format(
+                *self._get_line_items(measurement)
+            ), self._get_colour_from_status(measurement.status_id)))
 
-            destination = measurement.destination_name or \
-                measurement.destination_address or \
-                ""
-
-            status_id = measurement.meta_data["status"]["id"]
-            print(colourise("{:<8} {:10} {:<45} {:>14}".format(
-                measurement.id,
-                measurement.type.lower(),
-                destination[:45],
-                measurement.status
-            ), self._get_colour_from_status(status_id)))
+        print(colourise(hr, "bold"))
 
         # Print total count of found measurements
-        print("{}\n{:>80}\n".format(
-            "=" * 80,
+        print(("{:>" + str(len(hr)) + "}\n").format(
             "Showing {} of {} total measurements".format(
                 min(self.arguments.limit, measurements.total_count),
                 measurements.total_count
             )
         ))
+
+    def _get_line_format(self):
+        r = ""
+        for field in self.arguments.field:
+            if r:
+                r += " "
+            r += ("{:" + "{}{}".format(*self.COLUMNS[field]) + "}")
+        return r
+
+    def _get_header(self):
+        return self._get_line_format().format(
+            *[_.capitalize() for _ in self.arguments.field]
+        )
+
+    def _get_horizontal_rule(self):
+        return re.sub(r".", "=", self._get_line_format().format(*self.arguments.field))
+
+    def _get_line_items(self, measurement):
+
+        r = []
+
+        for field in self.arguments.field:
+            if field == "url":
+                r.append("https://atlas.ripe.net/measurements/{}/".format(
+                    measurement.id
+                ))
+            elif field == "type":
+                r.append(measurement.type.lower())
+                continue
+            elif field == "target":
+                r.append((
+                    measurement.destination_name or
+                    measurement.destination_address or
+                    "-"
+                )[:self.COLUMNS["target"][1]])
+            elif field == "description":
+                r.append(measurement.description[:self.COLUMNS["description"][1]])
+            else:
+                r.append(getattr(measurement, field))
+
+        return r
 
     @staticmethod
     def _get_filter_display(filters):
@@ -125,10 +196,10 @@ class Command(BaseCommand):
         for k, v in filters.items():
             if k == "return_objects":
                 continue
+            if k not in ("search",):
+                v = str(v).capitalize()
             r += colourise(
-                "  {}: {}\n".format(
-                    k.capitalize().replace("__", " "),
-                    str(v).capitalize()),
+                "  {}: {}\n".format(k.capitalize().replace("__", " "), v),
                 "cyan"
             )
 
