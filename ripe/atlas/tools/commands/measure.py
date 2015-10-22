@@ -28,6 +28,10 @@ class Command(BaseCommand):
         "ntp": Ntp
     }
 
+    def __init__(self, *args, **kwargs):
+        BaseCommand.__init__(self, *args, **kwargs)
+        self._is_oneoff = True
+
     def add_arguments(self):
 
         # Required
@@ -327,6 +331,7 @@ class Command(BaseCommand):
             key=self.arguments.auth,
             measurements=[creation_class(**self._get_measurement_kwargs())],
             sources=[AtlasSource(**self._get_source_kwargs())],
+            is_oneoff=self._is_oneoff
         ).create()
 
         if not is_success:
@@ -416,10 +421,9 @@ class Command(BaseCommand):
         if self.arguments.description:
             r["description"] = self.arguments.description
 
-        r["is_oneoff"] = True
         if self.arguments.interval or spec["times"]["interval"]:
             r["interval"] = self.arguments.interval
-            r["is_oneoff"] = False
+            self._is_oneoff = False
             self.arguments.no_report = True
         elif not spec["times"]["one-off"]:
             raise RipeAtlasToolsException(
