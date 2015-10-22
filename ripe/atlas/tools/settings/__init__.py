@@ -178,7 +178,7 @@ class Configuration(object):
             os.path.dirname(__file__), "templates", "base.yaml")
 
         authorisation = re.compile("^authorisation:$", re.MULTILINE)
-        smart_tags = re.compile("^smart-tags:$", re.MULTILINE)
+        tags = re.compile("^  tags:$", re.MULTILINE)
         specification = re.compile("^specification:$", re.MULTILINE)
         ripe = re.compile("^ripe-ncc:$", re.MULTILINE)
 
@@ -204,9 +204,9 @@ class Configuration(object):
                 "specification:",
                 payload
             )
-            payload = smart_tags.sub(
-                "\n# Tags added to probes selection\n"
-                "smart-tags:",
+            payload = tags.sub(
+                "  # Tags added to probes selection\n"
+                "  tags:",
                 payload
             )
 
