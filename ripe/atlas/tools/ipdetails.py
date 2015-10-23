@@ -1,8 +1,7 @@
-import json
-import urllib2
+import requests
 import IPy
 
-from cache import cache
+from .cache import cache
 
 
 class IP(object):
@@ -34,9 +33,12 @@ class IP(object):
 
         details = {"ASN": None, "Holder": None, "Prefix": None}
 
-        if self.ip_object.iptype() in ['RESERVED', 'UNSPECIFIED', 'LOOPBACK',
-                                       'UNASSIGNED', 'DOCUMENTATION', 'ULA',
-                                       'LINKLOCAL', 'PRIVATE']:
+        not_querable_types = [
+            'RESERVED', 'UNSPECIFIED', 'LOOPBACK',
+            'UNASSIGNED', 'DOCUMENTATION', 'ULA',
+            'LINKLOCAL', 'PRIVATE'
+        ]
+        if self.ip_object.iptype() in not_querable_types:
             return details
 
         found = False
@@ -53,17 +55,28 @@ class IP(object):
         if not found:
             URL = IP.RIPESTAT_URL.format(ip=self.address)
 
-            res = json.loads(urllib2.urlopen(URL).read())
+            try:
+                response = requests.get(URL)
+                if not response.ok:
+                    return details
+                res = response.json()
+            except requests.exceptions.RequestException:
+                return details
 
-            if res["status"] == "ok":
-                if res["data"]["asns"] != []:
-                    details["ASN"] = str(res["data"]["asns"][0]["asn"])
-                    details["Holder"] = res["data"]["asns"][0]["holder"]
-                    details["Prefix"] = res["data"]["resource"]
+            if (
+                res["status"] == "ok" and
+                res["data"]["asns"]
+            ):
+                details["ASN"] = str(res["data"]["asns"][0]["asn"])
+                details["Holder"] = res["data"]["asns"][0]["holder"]
+                details["Prefix"] = res["data"]["resource"]
 
-                    cache.set("IPDetailsPrefix:{}".format(details["Prefix"]),
-                              details, 60*60*24*7)
+                cache.set(
+                    "IPDetailsPrefix:{}".format(details["Prefix"]),
+                    details,
+                    60 * 60 * 24 * 7
+                )
 
-        cache.set("IPDetails:{}".format(self.address), details, 60*60*24*7)
+        cache.set("IPDetails:{}".format(self.address), details, 60 * 60 * 24 * 7)
 
         return details

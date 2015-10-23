@@ -48,18 +48,18 @@ class Renderer(BaseRenderer):
         """Construct the probe line string template"""
         # special case for ids-only arg
         if self.fields == ["id"]:
-            self.probe_template = "{:<}"
+            self.probe_template = "{!s:<}"
             return
 
         if not self.custom_format_flag:
             self.fields = ["id", "asn_v4", "asn_v6", "country_code", "status"]
-            self.probe_template = "{:<5} {:<6} {:<6} {:^2} {:<12}"
+            self.probe_template = "{!s:<5} {!s:<6} {!s:<6} {!s:^2} {!s:<12}"
         else:
             for field in self.fields:
-                self.probe_template += " {:<}"
+                self.probe_template += " {!s:<}"
 
         for fields in self.additional_fields:
-            self.probe_template += " {:<}"
+            self.probe_template += " {!s:<}"
 
     def render_aggregation(self, aggregation_data, indent=""):
         """
