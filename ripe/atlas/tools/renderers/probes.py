@@ -5,42 +5,65 @@ class Renderer(BaseRenderer):
 
     RENDERS = []
 
-    def __init__(self, fields=None, additional_fields=None, max_per_aggr=None):
+    # Column name: (alignment, width)
+    COLUMNS = {
+        "id": ("<", 5),
+        "asn_v4": ("<", 6),
+        "asn_v6": ("<", 6),
+        "country_code": ("^", 7),
+        "status": ("<", 12),
+        "prefix_v4": ("<", 18),
+        "prefix_v6": ("<", 18),
+        "coordinates": ("<", 21),
+        "is_public": ("<", 1),
+        "description": ("<", ),
+        "address_v4": ("<", 15),
+        "address_v6": ("<", 39),
+        "is_anchor": ("<", 1),
+    }
+
+    def __init__(self, fields=None, max_per_aggr=None):
 
         self.blob = ""
-        self.additional_fields = additional_fields or []
         self.probe_template = ""
         self.header_message = ""
-        self.fields = []
+        self.fields = fields
         self.max_per_aggr = max_per_aggr
-        self.custom_format_flag = False
         self.total_count = 0
-
-        if fields:
-            self.custom_format_flag = True
-            self.fields = fields
 
         self._construct_probe_line()
         self._construct_header()
 
-        self.fields.extend(self.additional_fields)
+    def _get_line_format(self):
+        """
+        Loop over the field arguments and generate a string that makes use of
+        Python's string format mini language.  We later use this string to
+        format the values for each row.
+        """
+        r = ""
+        for field in self.fields:
+            if r:
+                r += " "
+            r += ("{:" + "{}{}".format(*self.COLUMNS[field]) + "}")
+        return r
+
+    def _get_header(self):
+        """
+        Generates a header by using the line formatter and the list of field
+        arguments.
+        """
+        return self._get_line_format().format(
+            *[_.capitalize() for _ in self.fields]
+        )
 
     def _construct_header(self):
         """Construct the header message string template"""
         header_fields = []
         header_template = ""
 
-        if not self.custom_format_flag:
-            header_fields = ["ID", "ASNv4", "ASNv6", "CC", "Status"]
-            header_template = "{:<5} {:<6} {:<6} {:<2} {:<12}"
-        else:
-            for field in self.fields:
-                header_fields.append(field.upper())
-                header_template += " {:<}"
-
-        for field in self.additional_fields:
+        for field in self.fields:
+            header_fields.append(field.upper())
             header_template += " {:<}"
-            header_fields.append(field)
 
         self.header_message = header_template.format(*header_fields)
 
@@ -51,14 +74,7 @@ class Renderer(BaseRenderer):
             self.probe_template = "{:<}"
             return
 
-        if not self.custom_format_flag:
-            self.fields = ["id", "asn_v4", "asn_v6", "country_code", "status"]
-            self.probe_template = "{:<5} {:<6} {:<6} {:^2} {:<12}"
-        else:
-            for field in self.fields:
-                self.probe_template += " {:<}"
-
-        for fields in self.additional_fields:
+        for field in self.fields:
             self.probe_template += " {:<}"
 
     def render_aggregation(self, aggregation_data, indent=""):

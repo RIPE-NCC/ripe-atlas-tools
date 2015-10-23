@@ -1,16 +1,19 @@
 from __future__ import print_function, absolute_import
+
+import itertools
 import sys
 import requests
 
 from ripe.atlas.cousteau import ProbeRequest
 from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
 
+from .base import Command as BaseCommand, TabularFieldsMixin
 from ..exceptions import RipeAtlasToolsException
+from ..helpers.colours import colourise
 from ..renderers.probes import Renderer
-from .base import Command as BaseCommand
 
 
-class Command(BaseCommand):
+class Command(TabularFieldsMixin, BaseCommand):
 
     NAME = "probes"
 
@@ -18,6 +21,23 @@ class Command(BaseCommand):
         "Fetches and prints probes fulfilling specified criteria based on "
         "given filters."
     )
+
+    # Column name: (alignment, width)
+    COLUMNS = {
+        "id": ("<", 5),
+        "asn_v4": ("<", 6),
+        "asn_v6": ("<", 6),
+        "country_code": ("^", 7),
+        "status": ("<", 12),
+        "prefix_v4": ("<", 18),
+        "prefix_v6": ("<", 18),
+        "coordinates": ("<", 21),
+        "is_public": ("<", 1),
+        "description": ("<", ),
+        "address_v4": ("<", 15),
+        "address_v6": ("<", 39),
+        "is_anchor": ("<", 1),
+    }
 
     def add_arguments(self):
         """Adds all commands line arguments for this command."""
@@ -81,15 +101,18 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--limit",
             type=int,
+            default=25,
             help="Return limited number of probes"
         )
         self.parser.add_argument(
-            "--additional-fields",
+            "--field",
             type=str,
-            help=(
-                "Print additional probe fields. Specify field names as given "
-                "from the API as a comma separated string."
-            )
+            action="append",
+            choices=self.COLUMNS.keys(),
+            default=[],
+            help="The field(s) to display. Invoke multiple times for multiple "
+                 "fields. The default is id, asn_v4, asn_v6, country_code, and "
+                 "status."
         )
         self.parser.add_argument(
             "--aggregate-by",
@@ -125,20 +148,31 @@ class Command(BaseCommand):
         )
 
     def run(self):
-        filters = self.build_request_args()
-        probes_request = ProbeRequest(return_objects=True, **filters)
-        probes = list(probes_request)
 
-        if self.arguments.limit:
-            probes = probes[:self.arguments.limit]
+        if not self.arguments.field:
+            self.arguments.field = (
+                "id", "asn_v4", "asn_v6", "country_code", "status")
+
+        filters = self.build_request_args()
+        probes = ProbeRequest(return_objects=True, **filters)
+        truncated_probes = itertools.islice(
+            probes, self.arguments.limit)
 
         if self.arguments.ids_only:
-            ids = self.produce_ids_only(probes)
-            sys.stdout.write(ids)
+            for probe in truncated_probes:
+                print(probe.id)
             return
 
-        render_args = self._clean_render_args()
-        renderer = Renderer(**render_args)
+        hr = self._get_horizontal_rule()
+
+        print(self._get_filter_display(filters))
+        print(self._get_header())
+        print(colourise(hr, "bold"))
+
+        renderer = Renderer(
+            fields=self.arguments.field,
+            max_per_aggr=self.arguments.max_per_aggregation
+        )
         renderer.blob += (
             "We found the following probes with the given criteria:\n")
 
@@ -154,10 +188,17 @@ class Command(BaseCommand):
             for index, probe in enumerate(probes):
                 renderer.on_result(probe)
 
-        renderer.blob += (
-            "Total probes found: {}\n".format(probes_request.total_count))
-
         sys.stdout.write(renderer.blob)
+
+        print(colourise(hr, "bold"))
+
+        # Print total count of found measurements
+        print(("{:>" + str(len(hr)) + "}\n").format(
+            "Showing {} of {} total probes".format(
+                min(self.arguments.limit, probes.total_count),
+                probes.total_count
+            )
+        ))
 
     def produce_ids_only(self, probes):
         """If user has specified ids-only arg print only ids and exit."""
@@ -168,26 +209,6 @@ class Command(BaseCommand):
                 break
 
         return ",".join(probe_ids)
-
-    def _clean_render_args(self):
-        """
-        Clean arguments that will be used by renderer and return the kwargs
-        structure for it.
-        """
-        args = {"max_per_aggr": self.arguments.max_per_aggregation}
-
-        if self.arguments.additional_fields:
-            args.update(self._clean_additional_fields())
-
-        return args
-
-    def _clean_additional_fields(self):
-        """Parse and store additional fields argument."""
-        additional_fields = [
-            x.strip() for x in self.arguments.additional_fields.split(",")
-        ]
-
-        return {"additional_fields": additional_fields}
 
     def build_request_args(self):
         """

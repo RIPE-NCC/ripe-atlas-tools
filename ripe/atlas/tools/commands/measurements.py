@@ -1,16 +1,15 @@
 from __future__ import print_function, absolute_import
 
 import itertools
-import re
 
 from ripe.atlas.cousteau import MeasurementRequest
 
-from .base import Command as BaseCommand
+from .base import Command as BaseCommand, TabularFieldsMixin
 from ..helpers.colours import colourise
 from ..helpers.validators import ArgumentType
 
 
-class Command(BaseCommand):
+class Command(TabularFieldsMixin, BaseCommand):
 
     NAME = "measurements"
     LIMITS = (1, 1000)
@@ -33,7 +32,7 @@ class Command(BaseCommand):
         )
     }
 
-    # Column name: (width, alignment)
+    # Column name: (alignment, width)
     COLUMNS = {
         "id": ("<", 7),
         "type": ("<", 10),
@@ -77,7 +76,7 @@ class Command(BaseCommand):
             "--field",
             type=str,
             action="append",
-            choices=("id", "type", "description", "status", "target", "url"),
+            choices=self.COLUMNS.keys(),
             default=[],
             help="The field(s) to display. Invoke multiple times for multiple "
                  "fields. The default is id, type, description, and status."
@@ -145,22 +144,6 @@ class Command(BaseCommand):
             )
         ))
 
-    def _get_line_format(self):
-        r = ""
-        for field in self.arguments.field:
-            if r:
-                r += " "
-            r += ("{:" + "{}{}".format(*self.COLUMNS[field]) + "}")
-        return r
-
-    def _get_header(self):
-        return self._get_line_format().format(
-            *[_.capitalize() for _ in self.arguments.field]
-        )
-
-    def _get_horizontal_rule(self):
-        return re.sub(r".", "=", self._get_line_format().format(*self.arguments.field))
-
     def _get_line_items(self, measurement):
 
         r = []
@@ -184,25 +167,6 @@ class Command(BaseCommand):
                 r.append(description[:self.COLUMNS["description"][1]])
             else:
                 r.append(getattr(measurement, field))
-
-        return r
-
-    @staticmethod
-    def _get_filter_display(filters):
-
-        if len(filters.keys()) == 1:  # There's always at least one internal one
-            return ""
-
-        r = colourise("\nFilters:\n", "white")
-        for k, v in filters.items():
-            if k == "return_objects":
-                continue
-            if k not in ("search",):
-                v = str(v).capitalize()
-            r += colourise(
-                "  {}: {}\n".format(k.capitalize().replace("__", " "), v),
-                "cyan"
-            )
 
         return r
 
