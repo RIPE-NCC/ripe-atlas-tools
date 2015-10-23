@@ -72,6 +72,68 @@ class Configuration(object):
                     "recursion-desired": True,
                     "retry": 0
                 }
+            },
+            "tags": {
+                "ipv4": {
+                    "ping": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "traceroute": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "dns": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "sslcert": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "http": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "ntp": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "all": {
+                        "include": ["system-ipv4-works"],
+                        "exclude": []
+                    },
+                },
+                "ipv6": {
+                    "ping": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "traceroute": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "dns": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "sslcert": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "http": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "ntp": {
+                        "include": [],
+                        "exclude": []
+                    },
+                    "all": {
+                        "include": ["system-ipv6-works"],
+                        "exclude": []
+                    }
+                }
             }
         },
         "ripe-ncc": {
@@ -116,21 +178,36 @@ class Configuration(object):
             os.path.dirname(__file__), "templates", "base.yaml")
 
         authorisation = re.compile("^authorisation:$", re.MULTILINE)
+        tags = re.compile("^  tags:$", re.MULTILINE)
         specification = re.compile("^specification:$", re.MULTILINE)
         ripe = re.compile("^ripe-ncc:$", re.MULTILINE)
 
         with open(template) as t:
-            payload = ripe.sub(
-                "\n# Don't mess with these, or Bad Things may happen\nripe-ncc:",
-                authorisation.sub(
-                    "# Authorisation\nauthorisation:",
-                    specification.sub(
-                        "\n# Measurement Creation\nspecification:",
-                        t.read().format(
-                            payload=yaml.dump(config, default_flow_style=False)
-                        )
-                    )
+            payload = t.read().format(
+                payload=yaml.dump(
+                    config,
+                    default_flow_style=False
                 )
+            )
+            payload = ripe.sub(
+                "\n# Don't mess with these, or Bad Things may happen\n"
+                "ripe-ncc:",
+                payload
+            )
+            payload = authorisation.sub(
+                "# Authorisation\n"
+                "authorisation:",
+                payload
+            )
+            payload = specification.sub(
+                "\n# Measurement Creation\n"
+                "specification:",
+                payload
+            )
+            payload = tags.sub(
+                "  # Tags added to probes selection\n"
+                "  tags:",
+                payload
             )
 
         with open(Configuration.USER_RC, "w") as rc:
