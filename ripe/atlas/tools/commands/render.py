@@ -2,6 +2,15 @@ from __future__ import print_function
 
 import sys
 
+import itertools
+
+try:
+    import ujson as json
+except ImportError:
+    import json
+
+from ripe.atlas.sagan import Result
+
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..helpers.rendering import SaganSet, Rendering
 from ..helpers.validators import ArgumentType
@@ -29,6 +38,10 @@ class Command(BaseCommand):
         "prefix_v4": ["probe.prefix_v4", ValueKeyAggregator],
         "prefix_v6": ["probe.prefix_v6", ValueKeyAggregator],
     }
+
+    def __init__(self, *args, **kwargs):
+        BaseCommand.__init__(self, *args, **kwargs)
+        self.file = None
 
     def add_arguments(self):
         self.parser.add_argument(
@@ -65,18 +78,19 @@ class Command(BaseCommand):
 
         using_regular_file = self.arguments.from_file != "-"
 
-        source = sys.stdin
-        if using_regular_file:
-            source = open(self.arguments.from_file)
+        sample, source = self._get_sample_result_and_source(using_regular_file)
 
         results = SaganSet(iterable=source, probes=self.arguments.probes)
         if self.arguments.aggregate_by:
             results = aggregate(results, self.get_aggregators())
 
-        Rendering(renderer=self.arguments.renderer, payload=results).render()
+        renderer = Renderer.get_renderer(
+            self.arguments.renderer, Result.get(sample).type)()
+
+        Rendering(renderer=renderer, payload=results).render()
 
         if using_regular_file:
-            source.close()
+            self.file.close()
 
     def get_aggregators(self):
         """
@@ -99,3 +113,30 @@ class Command(BaseCommand):
                 aggregation_keys.append(aggregation_class(key=key))
 
         return aggregation_keys
+
+    def _get_sample_result_and_source(self, using_regular_file):
+        """
+        We need to get the first result from the source in order to detect the
+        type.  Additionally, if the source is actually one great big JSON list,
+        then we need to parse it so we iterate over the results since there's no
+        newline characters.
+        """
+
+        self.file = sys.stdin
+        if using_regular_file:
+            self.file = open(self.arguments.from_file)
+
+        # Pop the first line off the source stack.  This may very well be a Very
+        # Large String and cause a memory explosion, but we like to let our
+        # users shoot themselves in the foot.
+        sample = self.file.next()
+
+        # Re-attach the line back onto the iterable so we don't lose anything
+        source = itertools.chain([sample], self.file)
+
+        # In the case of the Very Large String, we parse out the JSON here
+        if sample.startswith("["):
+            source = json.loads("".join(source))
+            sample = source[0]  # Reassign sample to an actual result
+
+        return sample, source
