@@ -19,6 +19,9 @@ class Renderer(object):
 
     @staticmethod
     def get_available():
+        """
+        Return a list of renderers available to be used.
+        """
 
         paths = [os.path.dirname(__file__)]
         if "HOME" in os.environ:
@@ -31,9 +34,6 @@ class Renderer(object):
         r.remove("base")
 
         return r
-
-    def add_arguments(self):
-        pass
 
     @staticmethod
     def render(template, **kwargs):
@@ -49,6 +49,12 @@ class Renderer(object):
 
     @classmethod
     def get_renderer(cls, name=None, kind=None):
+        """
+        Using the name if you've asked for it specificially, or attempting to
+        guess the appropriate renderer based on the kind of measurement, this
+        will return a Renderer subclass or None if nothing can be found.
+        """
+
         renderer = None
 
         if name:

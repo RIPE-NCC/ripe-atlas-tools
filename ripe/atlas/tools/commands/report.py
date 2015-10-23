@@ -104,15 +104,11 @@ class Command(BaseCommand):
         if self.arguments.aggregate_by:
             results = aggregate(results, self.get_aggregators())
 
-        description = measurement.description or ""
-        if description:
-            description = "\n{}\n".format(description)
-
-        header = "RIPE Atlas Report for Measurement #{}\n" \
-                 "===================================================" \
-                 "{}".format(measurement.id, description)
-
-        Rendering(renderer=renderer, header=header, payload=results).render()
+        Rendering(
+            renderer=renderer,
+            header=self._get_header(measurement),
+            payload=results
+        ).render()
 
     def get_aggregators(self):
         """Return aggregators list based on user input"""
@@ -130,3 +126,20 @@ class Command(BaseCommand):
             else:
                 aggregation_keys.append(aggregation_class(key=key))
         return aggregation_keys
+
+    def _get_header(self, measurement):
+        """
+        Most of the time you want a fancy header, but for the raw renderer,
+        we want nothing.
+        """
+
+        if self.arguments.renderer == "raw":
+            return ""
+
+        description = measurement.description or ""
+        if description:
+            description = "\n{}".format(description)
+
+        return ("\nRIPE Atlas Report for Measurement #{}\n"
+                "==================================================="
+                "{}\n".format(measurement.id, description))
