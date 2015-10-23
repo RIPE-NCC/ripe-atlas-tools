@@ -1,7 +1,5 @@
 from __future__ import print_function, absolute_import
 
-import json
-
 from ripe.atlas.cousteau import (
     Ping, Traceroute, Dns, Sslcert, Ntp, AtlasSource, AtlasCreateRequest)
 from ripe.atlas.sagan.dns import Message
@@ -530,29 +528,14 @@ class Command(BaseCommand):
     @staticmethod
     def _handle_api_error(response):
 
-        if "HTTP_MSG" in response:
+        error_detail = response
 
-            message = (
-                "There was a problem communicating with the RIPE Atlas "
-                "infrastructure.  The message given was:\n\n  {0}"
-            ).format(response["HTTP_MSG"])
+        if isinstance(response, dict) and "detail" in response:
+            error_detail = response["detail"]
 
-            try:
-                message += "\n  {}".format(
-                    json.loads(response["ADDITIONAL_MSG"])["error"]["message"])
-            except Exception:
-                pass  # Too many things can go wrong here and we don't care
+        message = (
+            "There was a problem communicating with the RIPE Atlas "
+            "infrastructure.  The message given was:\n\n  {}"
+        ).format(error_detail)
 
-            try:
-                message += "\n  {}".format(
-                    json.loads(response["ADDITIONAL_MSG"])["detail"])
-            except Exception:
-                pass  # Too many things can go wrong here and we don't care
-
-            raise RipeAtlasToolsException(message)
-
-        raise RipeAtlasToolsException(
-            "There was a problem found in the attempt to create your "
-            "measurement.  Please send the command you tried to execute "
-            "to atlas@ripe.net and we'll try to address it."
-        )
+        raise RipeAtlasToolsException(message)
