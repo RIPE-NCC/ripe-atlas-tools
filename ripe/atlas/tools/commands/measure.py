@@ -1,7 +1,5 @@
 from __future__ import print_function, absolute_import
 
-import json
-
 from ripe.atlas.cousteau import (
     Ping, Traceroute, Dns, Sslcert, Ntp, AtlasSource, AtlasCreateRequest)
 from ripe.atlas.sagan.dns import Message
@@ -27,6 +25,10 @@ class Command(BaseCommand):
         "ssl": Sslcert,
         "ntp": Ntp
     }
+
+    def __init__(self, *args, **kwargs):
+        BaseCommand.__init__(self, *args, **kwargs)
+        self._is_oneoff = True
 
     def add_arguments(self):
 
@@ -148,6 +150,22 @@ class Command(BaseCommand):
             type=int,
             default=conf["specification"]["source"]["requested"],
             help="The number of probes you want to use"
+        )
+        self.parser.add_argument(
+            "--include-tag",
+            type=str,
+            action="append",
+            metavar="TAG",
+            help="Include only probes that are marked with these tags. "
+                 "Example: --include-tag=system-ipv6-works"
+        )
+        self.parser.add_argument(
+            "--exclude-tag",
+            type=str,
+            action="append",
+            metavar="TAG",
+            help="Exclude probes that are marked with these tags. "
+                 "Example: --exclude-tag=NAT"
         )
 
         # Type-specific
@@ -311,6 +329,7 @@ class Command(BaseCommand):
             key=self.arguments.auth,
             measurements=[creation_class(**self._get_measurement_kwargs())],
             sources=[AtlasSource(**self._get_source_kwargs())],
+            is_oneoff=self._is_oneoff
         ).create()
 
         if not is_success:
@@ -393,19 +412,16 @@ class Command(BaseCommand):
 
         spec = conf["specification"]  # Shorter names are easier to read
         r = {
-            "af": spec["af"],
+            "af": self._get_af(),
             "description": spec["description"],
         }
 
-        if self.arguments.af:
-            r["af"] = self.arguments.af
         if self.arguments.description:
             r["description"] = self.arguments.description
 
-        r["is_oneoff"] = True
         if self.arguments.interval or spec["times"]["interval"]:
             r["interval"] = self.arguments.interval
-            r["is_oneoff"] = False
+            self._is_oneoff = False
             self.arguments.no_report = True
         elif not spec["times"]["one-off"]:
             raise RipeAtlasToolsException(
@@ -479,34 +495,47 @@ class Command(BaseCommand):
             r["type"] = "msm"
             r["value"] = self.arguments.from_measurement
 
+        r["tags"] = {
+            "include": self.arguments.include_tag or [],
+            "exclude": self.arguments.exclude_tag or []
+        }
+
+        af = "ipv{}".format(self._get_af())
+        kind = self.arguments.type
+        spec = conf["specification"]
+        for clude in ("in", "ex"):
+            clude += "clude"
+            if not r["tags"][clude]:
+                r["tags"][clude] += spec["tags"][af][kind][clude]
+                r["tags"][clude] += spec["tags"][af]["all"][clude]
+
         return r
+
+    def _get_af(self):
+        """
+        Returns the specified af, or a guessed one, or the configured one.  In
+        that order.
+        """
+        if self.arguments.af:
+            return self.arguments.af
+        if self.arguments.target:
+            if self.arguments.target.contains(":"):
+                return 6
+            if self.arguments.target.contains("."):
+                return 4
+        return conf["specification"]["af"]
 
     @staticmethod
     def _handle_api_error(response):
 
-        if "HTTP_MSG" in response:
+        error_detail = response
 
-            message = (
-                "There was a problem communicating with the RIPE Atlas "
-                "infrastructure.  The message given was:\n\n  {0}"
-            ).format(response["HTTP_MSG"])
+        if isinstance(response, dict) and "detail" in response:
+            error_detail = response["detail"]
 
-            try:
-                message += "\n  {}".format(
-                    json.loads(response["ADDITIONAL_MSG"])["error"]["message"])
-            except Exception:
-                pass  # Too many things can go wrong here and we don't care
+        message = (
+            "There was a problem communicating with the RIPE Atlas "
+            "infrastructure.  The message given was:\n\n  {}"
+        ).format(error_detail)
 
-            try:
-                message += "\n  {}".format(
-                    json.loads(response["ADDITIONAL_MSG"])["detail"])
-            except Exception:
-                pass  # Too many things can go wrong here and we don't care
-
-            raise RipeAtlasToolsException(message)
-
-        raise RipeAtlasToolsException(
-            "There was a problem found in the attempt to create your "
-            "measurement.  Please send the command you tried to execute "
-            "to atlas@ripe.net and we'll try to address it."
-        )
+        raise RipeAtlasToolsException(message)

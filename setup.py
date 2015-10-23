@@ -45,7 +45,13 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
         },
         test_suite="nose.collector",
         scripts=[
-            "scripts/ripe-atlas"
+            "scripts/aping",
+            "scripts/atraceroute",
+            "scripts/adig",
+            "scripts/atls",
+            "scripts/ahttp",
+            "scripts/antp",
+            "scripts/ripe-atlas",
         ],
         classifiers=[
             "Operating System :: POSIX",

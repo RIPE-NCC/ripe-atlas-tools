@@ -38,13 +38,13 @@ class RipeAtlas(object):
 
     def _setup_command(self):
 
-        caller = os.path.basename(__file__)
+        caller = os.path.basename(sys.argv[0])
         shortcut = re.match('^a(ping|traceroute|dig|ssl|ntp|http)$', caller)
 
         available_commands = self._get_available_commands()
         if shortcut:
             self.command = "measure"
-            self.kwargs["type"] = shortcut.group(1)
+            sys.argv.insert(1, self._translate_shortcut(shortcut.group(1)))
         else:
             if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
                 raise RipeAtlasToolsException(
@@ -53,6 +53,14 @@ class RipeAtlas(object):
                     )
                 )
             self.command = sys.argv.pop(1)
+
+    @staticmethod
+    def _translate_shortcut(shortcut):
+        if shortcut == "dig":
+            return "dns"
+        if shortcut in ("ssl", "tls"):
+            return "sslcert"
+        return shortcut
 
     def main(self):
 
