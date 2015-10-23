@@ -332,7 +332,6 @@ class Command(BaseCommand):
             is_oneoff=self._is_oneoff
         ).create()
 
-        print(response)
         if not is_success:
             self._handle_api_error(response)  # Raises an exception
 
@@ -529,9 +528,14 @@ class Command(BaseCommand):
     @staticmethod
     def _handle_api_error(response):
 
+        error_detail = response
+
+        if isinstance(response, dict) and "detail" in response:
+            error_detail = response["detail"]
+
         message = (
             "There was a problem communicating with the RIPE Atlas "
             "infrastructure.  The message given was:\n\n  {}"
-        ).format(response)
+        ).format(error_detail)
 
         raise RipeAtlasToolsException(message)
