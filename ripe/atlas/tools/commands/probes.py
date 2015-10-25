@@ -1,7 +1,6 @@
 from __future__ import print_function, absolute_import
 
 import itertools
-import sys
 import requests
 
 from ripe.atlas.cousteau import ProbeRequest
@@ -10,7 +9,6 @@ from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
 from .base import Command as BaseCommand, TabularFieldsMixin
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
-from ..renderers.probes import Renderer
 
 
 class Command(TabularFieldsMixin, BaseCommand):
@@ -27,17 +25,22 @@ class Command(TabularFieldsMixin, BaseCommand):
         "id": ("<", 5),
         "asn_v4": ("<", 6),
         "asn_v6": ("<", 6),
-        "country_code": ("^", 7),
+        "country": ("^", 7),
         "status": ("<", 12),
         "prefix_v4": ("<", 18),
         "prefix_v6": ("<", 18),
-        "coordinates": ("<", 21),
-        "is_public": ("<", 1),
-        "description": ("<", ),
+        "coordinates": ("<", 19),
+        "is_public": ("<", 6),
+        "description": ("<", 30),
         "address_v4": ("<", 15),
         "address_v6": ("<", 39),
-        "is_anchor": ("<", 1),
+        "is_anchor": ("^", 6),
     }
+    
+    def __init__(self, *args, **kwargs):
+        BaseCommand.__init__(self, *args, **kwargs)
+        self.aggregators = []
+        self.first_line_padding = False
 
     def add_arguments(self):
         """Adds all commands line arguments for this command."""
@@ -88,7 +91,7 @@ class Command(TabularFieldsMixin, BaseCommand):
             help="location as <lat>,<lon>-string, i.e. '48.45,9.16'"
         )
         geo_location.add_argument(
-            "--country-code",
+            "--country",
             type=str,
             help="The country code of probes."
         )
@@ -111,14 +114,14 @@ class Command(TabularFieldsMixin, BaseCommand):
             choices=self.COLUMNS.keys(),
             default=[],
             help="The field(s) to display. Invoke multiple times for multiple "
-                 "fields. The default is id, asn_v4, asn_v6, country_code, and "
+                 "fields. The default is id, asn_v4, asn_v6, country, and "
                  "status."
         )
         self.parser.add_argument(
             "--aggregate-by",
             type=str,
             choices=[
-                'country_code',
+                'country',
                 'asn_v4', 'asn_v6',
                 'prefix_v4', 'prefix_v6'
             ],
@@ -151,9 +154,21 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         if not self.arguments.field:
             self.arguments.field = (
-                "id", "asn_v4", "asn_v6", "country_code", "status")
+                "id", "asn_v4", "asn_v6", "country", "status")
 
         filters = self.build_request_args()
+
+        if not filters and not self.arguments.all:
+            print(colourise(
+                "\nTypically you'd want to run this with some arguments to "
+                "filter the probe \nlist, as fetch all of the probes can take "
+                "a Very Long Time.  However, if you \ndon't care about the "
+                "wait, you can use --all and go get yourself a coffee.\n",
+                "blue"
+            ))
+            return
+
+        self.set_aggregators()
         probes = ProbeRequest(return_objects=True, **filters)
         truncated_probes = itertools.islice(
             probes, self.arguments.limit)
@@ -166,29 +181,20 @@ class Command(TabularFieldsMixin, BaseCommand):
         hr = self._get_horizontal_rule()
 
         print(self._get_filter_display(filters))
-        print(self._get_header())
+        print(colourise(self._get_header(), "bold"))
         print(colourise(hr, "bold"))
-
-        renderer = Renderer(
-            fields=self.arguments.field,
-            max_per_aggr=self.arguments.max_per_aggregation
-        )
-        renderer.blob += (
-            "We found the following probes with the given criteria:\n")
 
         if self.arguments.aggregate_by:
 
-            aggregators = self.get_aggregators()
-            buckets = aggregate(probes, aggregators)
-            renderer.render_aggregation(buckets)
+            buckets = aggregate(list(truncated_probes), self.aggregators)
+            self.render_aggregation(buckets)
 
         else:
 
-            renderer.on_table_title()
-            for index, probe in enumerate(probes):
-                renderer.on_result(probe)
-
-        sys.stdout.write(renderer.blob)
+            for probe in truncated_probes:
+                print(colourise(self._get_line_format().format(
+                    *self._get_line_items(probe)
+                ), self._get_colour_from_status(probe.status)))
 
         print(colourise(hr, "bold"))
 
@@ -200,15 +206,33 @@ class Command(TabularFieldsMixin, BaseCommand):
             )
         ))
 
-    def produce_ids_only(self, probes):
-        """If user has specified ids-only arg print only ids and exit."""
-        probe_ids = []
-        for index, probe in enumerate(probes):
-            probe_ids.append(str(probe.id))
-            if self.arguments.limit and index >= self.arguments.limit - 1:
-                break
+    def render_aggregation(self, aggregation_data, indent=0):
+        """
+        Recursively traverses through aggregation data and print them indented.
+        """
 
-        return ",".join(probe_ids)
+        if isinstance(aggregation_data, dict):
+
+            for k, v in aggregation_data.items():
+
+                if not indent:
+                    if self.first_line_padding:
+                        print("")
+                    else:
+                        self.first_line_padding = True
+
+                print((" " * indent) + colourise(k, "bold"))
+                self.render_aggregation(v, indent=indent + 1)
+
+        elif isinstance(aggregation_data, list):
+
+            for index, data in enumerate(aggregation_data):
+                print(" " + colourise(self._get_line_format().format(
+                    *self._get_line_items(data)
+                ), self._get_colour_from_status(data.status)))
+                if self.arguments.max_per_aggregation:
+                    if index >= self.arguments.max_per_aggregation - 1:
+                        break
 
     def build_request_args(self):
         """
@@ -247,7 +271,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         if self.arguments.center:
             args.update(self._clean_center())
 
-        if self.arguments.country_code:
+        if self.arguments.country:
             args.update(self._clean_country_code())
 
         return args
@@ -363,16 +387,77 @@ class Command(TabularFieldsMixin, BaseCommand):
 
     def _clean_country_code(self):
         """Make sure country_code argument are sane."""
-        country_code_args = {"country_code": self.arguments.country_code}
+        return {"country_code": self.arguments.country}
 
-        return country_code_args
-
-    def get_aggregators(self):
+    def set_aggregators(self):
         """
         Builds and returns the key aggregators that will be used in
         the aggregation.
         """
-        aggregation_keys = []
-        for aggr_key in self.arguments.aggregate_by:
-            aggregation_keys.append(ValueKeyAggregator(key=aggr_key))
-        return aggregation_keys
+
+        self.aggregators = []
+
+        if not self.arguments.aggregate_by:
+            return
+
+        for key in self.arguments.aggregate_by:
+            if key == "country":
+                self.aggregators.append(ValueKeyAggregator(
+                    key="country_code", prefix="Country"))
+            else:
+                self.aggregators.append(ValueKeyAggregator(key=key))
+
+    def _get_line_items(self, probe):
+
+        r = []
+
+        for field in self.arguments.field:
+            if field == "country":
+                r.append(probe.country_code.lower())
+            elif field in ("asn_v4", "asn_v6"):
+                r.append(getattr(probe, field) or "")
+            elif field == "description":
+                description = probe.description or ""
+                r.append(description[:self.COLUMNS["description"][1]])
+            elif field == "coordinates":
+                r.append("{},{}".format(
+                    probe.geometry["coordinates"][1],
+                    probe.geometry["coordinates"][0],
+                ))
+            elif field in ("is_public", "is_anchor"):
+                if getattr(probe, field):
+                    r.append(u"\u2714".encode("utf-8"))
+                else:
+                    r.append(u"\u2718".encode("utf-8"))
+            else:
+                r.append(getattr(probe, field))
+
+        return r
+
+    def _get_colour_from_status(self, status):
+        if status == "Connected":
+            return "green"
+        if status == "Disconnected":
+            return "yellow"
+        if status == "Abandoned":
+            return "red"
+        return "white"
+
+    def _get_line_format(self):
+        r = TabularFieldsMixin._get_line_format(self)
+        if not self.aggregators:
+            return r
+        return (" " * len(self.aggregators)) + r
+
+    def _get_header_names(self):
+        r = []
+        for field in self.arguments.field:
+            if field == "id":
+                r.append("ID")
+            elif field == "is_public":
+                r.append("Public")
+            elif field == "is_anchor":
+                r.append("Anchor")
+            else:
+                r.append(field.capitalize())
+        return r

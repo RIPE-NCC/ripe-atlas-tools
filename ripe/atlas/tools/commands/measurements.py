@@ -114,7 +114,7 @@ class Command(TabularFieldsMixin, BaseCommand):
             self.arguments.field = ("id", "type", "description", "status")
 
         filters = self._get_filters()
-        measurements = MeasurementRequest(**filters)
+        measurements = MeasurementRequest(return_objects=True, **filters)
         truncated_measurements = itertools.islice(
             measurements, self.arguments.limit)
 
@@ -172,7 +172,7 @@ class Command(TabularFieldsMixin, BaseCommand):
 
     def _get_filters(self):
 
-        r = {"return_objects": True}
+        r = {}
 
         if self.arguments.search:
             r["search"] = self.arguments.search

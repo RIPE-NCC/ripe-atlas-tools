@@ -81,14 +81,15 @@ class TabularFieldsMixin(object):
             r += ("{:" + "{}{}".format(*self.COLUMNS[field]) + "}")
         return r
 
+    def _get_header_names(self):
+        return [_.capitalize() for _ in self.arguments.field]
+
     def _get_header(self):
         """
         Generates a header by using the line formatter and the list of field
         arguments.
         """
-        return self._get_line_format().format(
-            *[_.capitalize() for _ in self.arguments.field]
-        )
+        return self._get_line_format().format(*self._get_header_names())
 
     def _get_horizontal_rule(self):
         """
@@ -105,7 +106,7 @@ class TabularFieldsMixin(object):
     @staticmethod
     def _get_filter_display(filters):
 
-        if len(filters.keys()) == 1:  # There's always at least one internal one
+        if not filters:
             return ""
 
         r = colourise("\nFilters:\n", "white")
