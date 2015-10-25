@@ -30,7 +30,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         "prefix_v4": ("<", 18),
         "prefix_v6": ("<", 18),
         "coordinates": ("<", 19),
-        "is_public": ("<", 6),
+        "is_public": ("^", 6),
         "description": ("<", 30),
         "address_v4": ("<", 15),
         "address_v6": ("<", 39),
@@ -192,9 +192,14 @@ class Command(TabularFieldsMixin, BaseCommand):
         else:
 
             for probe in truncated_probes:
-                print(colourise(self._get_line_format().format(
-                    *self._get_line_items(probe)
-                ), self._get_colour_from_status(probe.status)))
+                print(
+                    colourise(
+                        self._get_line_format().format(
+                            *self._get_line_items(probe)
+                        ).encode("utf-8"),
+                        self._get_colour_from_status(probe.status)
+                    )
+                )
 
         print(colourise(hr, "bold"))
 
@@ -426,9 +431,9 @@ class Command(TabularFieldsMixin, BaseCommand):
                 ))
             elif field in ("is_public", "is_anchor"):
                 if getattr(probe, field):
-                    r.append(u"\u2714".encode("utf-8"))
+                    r.append(u"\u2714")  # Check mark
                 else:
-                    r.append(u"\u2718".encode("utf-8"))
+                    r.append(u"\u2718")  # X
             else:
                 r.append(getattr(probe, field))
 
@@ -447,7 +452,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         r = TabularFieldsMixin._get_line_format(self)
         if not self.aggregators:
             return r
-        return (" " * len(self.aggregators)) + r
+        return (u" " * len(self.aggregators)) + r
 
     def _get_header_names(self):
         r = []

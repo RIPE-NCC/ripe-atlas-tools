@@ -74,11 +74,11 @@ class TabularFieldsMixin(object):
         Python's string format mini language.  We later use this string to
         format the values for each row.
         """
-        r = ""
+        r = u""
         for field in self.arguments.field:
             if r:
-                r += " "
-            r += ("{:" + "{}{}".format(*self.COLUMNS[field]) + "}")
+                r += u" "
+            r += (u"{:" + u"{}{}".format(*self.COLUMNS[field]) + u"}")
         return r
 
     def _get_header_names(self):
