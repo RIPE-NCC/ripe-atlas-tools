@@ -226,15 +226,21 @@ class Command(TabularFieldsMixin, BaseCommand):
                     else:
                         self.first_line_padding = True
 
-                print((" " * indent) + colourise(k, "bold"))
+                print((u" " * indent) + colourise(k, "bold"))
                 self.render_aggregation(v, indent=indent + 1)
 
         elif isinstance(aggregation_data, list):
 
-            for index, data in enumerate(aggregation_data):
-                print(" " + colourise(self._get_line_format().format(
-                    *self._get_line_items(data)
-                ), self._get_colour_from_status(data.status)))
+            for index, probe in enumerate(aggregation_data):
+                print(" ", end="")
+                print(
+                    colourise(
+                        self._get_line_format().format(
+                            *self._get_line_items(probe)
+                        ).encode("utf-8"),
+                        self._get_colour_from_status(probe.status)
+                    )
+                )
                 if self.arguments.max_per_aggregation:
                     if index >= self.arguments.max_per_aggregation - 1:
                         break
@@ -420,7 +426,7 @@ class Command(TabularFieldsMixin, BaseCommand):
                 description = probe.description or ""
                 r.append(description[:self.COLUMNS["description"][1]])
             elif field == "coordinates":
-                r.append("{},{}".format(
+                r.append(u"{},{}".format(
                     probe.geometry["coordinates"][1],
                     probe.geometry["coordinates"][0],
                 ))
