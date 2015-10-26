@@ -1,6 +1,7 @@
 from __future__ import print_function, absolute_import
 
 import itertools
+import six
 import requests
 
 from ripe.atlas.cousteau import ProbeRequest
@@ -192,14 +193,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         else:
 
             for probe in truncated_probes:
-                print(
-                    colourise(
-                        self._get_line_format().format(
-                            *self._get_line_items(probe)
-                        ).encode("utf-8"),
-                        self._get_colour_from_status(probe.status)
-                    )
-                )
+                print(self._get_line(probe))
 
         print(colourise(hr, "bold"))
 
@@ -233,14 +227,7 @@ class Command(TabularFieldsMixin, BaseCommand):
 
             for index, probe in enumerate(aggregation_data):
                 print(" ", end="")
-                print(
-                    colourise(
-                        self._get_line_format().format(
-                            *self._get_line_items(probe)
-                        ).encode("utf-8"),
-                        self._get_colour_from_status(probe.status)
-                    )
-                )
+                print(self._get_line(probe))
                 if self.arguments.max_per_aggregation:
                     if index >= self.arguments.max_per_aggregation - 1:
                         break
@@ -468,3 +455,18 @@ class Command(TabularFieldsMixin, BaseCommand):
             else:
                 r.append(field.capitalize())
         return r
+
+    def _get_line(self, probe):
+        if six.PY2:
+            return colourise(
+                self._get_line_format().format(
+                    *self._get_line_items(probe)
+                ).encode("utf-8"),
+                self._get_colour_from_status(probe.status)
+            )
+        return colourise(
+            self._get_line_format().format(
+                *self._get_line_items(probe)
+            ),
+            self._get_colour_from_status(probe.status)
+        )
