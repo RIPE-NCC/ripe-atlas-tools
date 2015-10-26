@@ -456,16 +456,28 @@ class Command(TabularFieldsMixin, BaseCommand):
         return r
 
     def _get_line(self, probe):
+        """
+        Python 2 and 3 differ on how to render strings with non-ascii characters
+        in them, so we have to accommodate both here.
+        """
+
         if six.PY2:
+
             return colourise(
                 self._get_line_format().format(
                     *self._get_line_items(probe)
                 ).encode("utf-8"),
                 self._get_colour_from_status(probe.status)
             )
+
         return colourise(
-            self._get_line_format().format(
-                *self._get_line_items(probe)
-            ),
+            self._get_line_format().format(*self._get_line_items(probe)),
             self._get_colour_from_status(probe.status)
         )
+
+    def _get_filter_key_value_pair(self, k, v):
+        if k == "country_code":
+            return "Country", v.upper()
+        if k == "asn":
+            return "ASN", v
+        return TabularFieldsMixin._get_filter_key_value_pair(self, k, v)

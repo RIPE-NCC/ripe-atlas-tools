@@ -103,21 +103,21 @@ class TabularFieldsMixin(object):
     def _get_line_items(self, measurement):
         raise NotImplementedError("This needs to be defined in the subclass.")
 
-    @staticmethod
-    def _get_filter_display(filters):
+    def _get_filter_display(self, filters):
 
         if not filters:
             return ""
 
         r = colourise("\nFilters:\n", "white")
         for k, v in filters.items():
-            if k == "return_objects":
-                continue
             if k not in ("search",):
                 v = str(v).capitalize()
             r += colourise(
-                "  {}: {}\n".format(k.capitalize().replace("__", " "), v),
+                "  {}: {}\n".format(*self._get_filter_key_value_pair(k, v)),
                 "cyan"
             )
 
         return r
+
+    def _get_filter_key_value_pair(self, k, v):
+        return k.capitalize().replace("__", " "), v
