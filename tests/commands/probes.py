@@ -48,6 +48,7 @@ class TestProbesCommand(unittest.TestCase):
 
     def setUp(self):
         self.cmd = Command()
+        self.maxDiff = None
 
     def test_with_empty_args(self):
         """User passes no args, should fail with RipeAtlasToolsException"""
