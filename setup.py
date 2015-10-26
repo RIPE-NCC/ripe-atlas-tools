@@ -4,12 +4,6 @@ from setuptools import setup
 __version__ = None
 exec(open("ripe/atlas/tools/version.py").read())
 
-tests_require = [
-    "nose",
-    "coverage",
-    "mock",
-]
-
 # Allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
@@ -39,9 +33,14 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
             "pyyaml",
             "pyOpenSSL>=0.13",
         ],
-        tests_require=tests_require,
+        tests_require=[
+            "nose",
+            "coverage",
+            "mock",
+        ],
         extras_require={
-            "doc": ["sphinx"]
+            "doc": ["sphinx", "sphinx_rtd_theme"],
+            "fast": ["ujson"],
         },
         test_suite="nose.collector",
         scripts=[
@@ -58,6 +57,8 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
             "Operating System :: Unix",
             "Programming Language :: Python",
             "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3.3",
+            "Programming Language :: Python :: 3.4",
             "Topic :: Internet :: WWW/HTTP",
         ],
     )
