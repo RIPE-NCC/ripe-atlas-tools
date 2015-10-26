@@ -78,7 +78,7 @@ class TabularFieldsMixin(object):
         for field in self.arguments.field:
             if r:
                 r += u" "
-            r += (u"{:" + u"{}{}".format(*self.COLUMNS[field]) + u"}")
+            r += (u"{!s:" + u"{}{}".format(*self.COLUMNS[field]) + u"}")
         return r
 
     def _get_header_names(self):

@@ -87,7 +87,7 @@ def aggregate(entities, aggregators):
 
     elif isinstance(entities, dict):
 
-        for k, v in entities.iteritems():
+        for k, v in entities.items():
             entities[k] = aggregate(entities[k], aggregators[:])
 
     return entities
