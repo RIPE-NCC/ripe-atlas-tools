@@ -36,7 +36,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         "address_v6": ("<", 39),
         "is_anchor": ("^", 6),
     }
-    
+
     def __init__(self, *args, **kwargs):
         BaseCommand.__init__(self, *args, **kwargs)
         self.aggregators = []
@@ -253,11 +253,6 @@ class Command(TabularFieldsMixin, BaseCommand):
         """Cleans all arguments for the API request and checks for sanity."""
         args = {}
 
-        set_args = [k for k, v in vars(self.arguments).items() if v]
-        if not set_args:
-            raise RipeAtlasToolsException(
-                "You must specify at least one argument. Try --help for usage.")
-
         if any(
             [self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]
         ):
@@ -439,7 +434,8 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         return r
 
-    def _get_colour_from_status(self, status):
+    @staticmethod
+    def _get_colour_from_status(status):
         if status == "Connected":
             return "green"
         if status == "Disconnected":
