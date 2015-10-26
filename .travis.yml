@@ -1,0 +1,15 @@
+language: python
+env:
+  - TOXENV=py27
+  - TOXENV=py34
+  - TOXENV=pypy
+  - TOXENV=py27-pyflakes
+  - TOXENV=py27-pep8
+  - TOXENV=py27-coverage
+install:
+  - pip install tox
+  - pip install coveralls
+script:
+  tox
+after_success:
+  coveralls --verbose
