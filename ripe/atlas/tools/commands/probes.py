@@ -160,14 +160,13 @@ class Command(TabularFieldsMixin, BaseCommand):
         filters = self.build_request_args()
 
         if not filters and not self.arguments.all:
-            print(colourise(
-                "\nTypically you'd want to run this with some arguments to "
-                "filter the probe \nlist, as fetch all of the probes can take "
-                "a Very Long Time.  However, if you \ndon't care about the "
-                "wait, you can use --all and go get yourself a coffee.\n",
+            raise RipeAtlasToolsException(colourise(
+                "Typically you'd want to run this with some arguments to "
+                "filter the probe \nlist, as fetching all of the probes can "
+                "take a Very Long Time.  However, if you \ndon't care about "
+                "the wait, you can use --all and go get yourself a coffee.",
                 "blue"
             ))
-            return
 
         self.set_aggregators()
         probes = ProbeRequest(return_objects=True, **filters)
