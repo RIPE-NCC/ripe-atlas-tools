@@ -4,6 +4,7 @@ import random
 import requests
 
 from ..cache import cache
+from ..helpers.colours import colourise
 from .base import Command as BaseCommand
 
 
@@ -20,20 +21,7 @@ class Command(BaseCommand):
         "users": "/users"
     }
 
-    def run(self):
-
-        r = "\nThanks for using RIPE Atlas!\n\nThis toolkit " \
-            "(Magellan) is a group effort, spearheaded by the team at the " \
-            "RIPE\nNCC, but supported by members of the community from all " \
-            "over.  If you're\ncurious about who we are and what sorts of " \
-            "stuff we work on, here's a break\ndown of our contributions to " \
-            "date.\n\nName                     Changes  URL\n{}\n".format(
-                "-" * 79)
-
-        for contributor in self.get_contributors():
-            r += "{name:20}  {changes:10}  {url}\n".format(**contributor)
-
-        print(r + """
+    BOAT = """
                                                              |
                                                              |
                                                              |
@@ -52,7 +40,28 @@ class Command(BaseCommand):
                                       _ /_/   \      |    \  | `.         \\
                                        `-.'    \.--._|.---`  |   `-._______\\
                                           ``-.-------'-------'------------/
-                                              `'._______________________.'\n""")
+                                              `'._______________________.'\n"""
+
+    WATER = ("~" * 80)
+
+    def run(self):
+
+        r = "\nThanks for using RIPE Atlas!\n\nThis toolkit " \
+            "(Magellan) is a group effort, spearheaded by the team at the " \
+            "RIPE\nNCC, but supported by members of the community from all " \
+            "over.  If you're\ncurious about who we are and what sorts of " \
+            "stuff we work on, here's a break\ndown of our contributions to " \
+            "date.\n\nName                     Changes  URL\n{}\n".format(
+                "-" * 79)
+
+        for contributor in self.get_contributors():
+            r += "{name:20}  {changes:10}  {url}\n".format(**contributor)
+
+        print("{}{}{}\n".format(
+            r,
+            colourise(colourise(self.BOAT, "black"), "bold"),
+            colourise(self.WATER, "blue")
+        ))
 
     def get_contributors(self):
 
