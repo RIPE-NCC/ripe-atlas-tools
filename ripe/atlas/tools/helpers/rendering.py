@@ -77,7 +77,7 @@ class Rendering(object):
         print(self.header, end="")
         self.renderer.header()
         self._smart_render(self.payload)
-        self.renderer.additional()
+        self.renderer.additional(self.payload)
         self.renderer.footer()
         print(self.footer, end="")
 
@@ -89,6 +89,9 @@ class Rendering(object):
         """
         Traverses the aggregation data and prints everything nicely indented.
         """
+
+        if not data:
+            return
 
         if isinstance(data, (list, SaganSet)):
 
