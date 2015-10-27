@@ -21,15 +21,8 @@ attempt to fill that gap.
 Contents:
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    installation
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   quickstart
+   use

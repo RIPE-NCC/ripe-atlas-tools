@@ -29,3 +29,9 @@ Creating a Measurement
 
 .. _`RIPE Atlas`: https://atlas.ripe.net/
 .. _`API Keys`: https://atlas.ripe.net/keys/
+
+Advanced Use
+------------
+
+Refer to the :ref:`complete usage documentation <use>` for more advanced
+options.

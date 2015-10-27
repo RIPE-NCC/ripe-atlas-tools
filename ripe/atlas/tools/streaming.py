@@ -42,6 +42,6 @@ class Stream(object):
         try:
             stream.start_stream(stream_type="result", msm=pk)
             stream.timeout(self.timeout)
-        except (KeyboardInterrupt, CaptureLimitExceeded), e:
+        except (KeyboardInterrupt, CaptureLimitExceeded) as e:
             stream.disconnect()
             raise e

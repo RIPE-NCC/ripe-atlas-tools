@@ -79,8 +79,8 @@ class Command(BaseCommand):
         self.parser.add_argument(  # Most types
             "--target",
             type=str,
-            help="The target, either a domain name or IP address.  If creating"
-                 "a DNS measurement, the absence of this option will imply"
+            help="The target, either a domain name or IP address.  If creating "
+                 "a DNS measurement, the absence of this option will imply "
                  "that you wish to use the probe's resolver."
         )
         self.parser.add_argument(
@@ -88,7 +88,7 @@ class Command(BaseCommand):
             action="store_true",
             help="Don't wait for a response from the measurement, just return "
                  "the URL at which you can later get information about the "
-                 "measurement"
+                 "measurement."
         )
 
         self.parser.add_argument(
@@ -97,7 +97,7 @@ class Command(BaseCommand):
             help="Rather than run this measurement as a one-off (the default), "
                  "create this measurement as a recurring one, with an interval "
                  "of n seconds between attempted measurements. This option "
-                 "implies --no-report"
+                 "implies --no-report."
         )
 
         origins = self.parser.add_mutually_exclusive_group()
@@ -133,17 +133,17 @@ class Command(BaseCommand):
             "--from-probes",
             type=ArgumentType.comma_separated_integers,
             metavar="PROBES",
-            help="A comma-separated list of probe-ids you want to use in your"
+            help="A comma-separated list of probe-ids you want to use in your "
                  "measurement. Example: --from-probes=1,2,34,157,10006"
         )
         origins.add_argument(
             "--from-measurement",
             type=int,
             metavar="MEASUREMENT_ID",
-            help="A measurement id which you want to use as the basis for probe"
-                 "selection in your new measurement.  This is a handy way to"
-                 "re-create a measurement under conditions similar to another"
-                 "measurement. Example: --from-measurement=1000192"
+            help="A measurement id which you want to use as the basis for "
+                 "probe selection in your new measurement.  This is a handy "
+                 "way to re-create a measurement under conditions similar to "
+                 "another measurement. Example: --from-measurement=1000192"
         )
         self.parser.add_argument(
             "--probes",
@@ -207,7 +207,6 @@ class Command(BaseCommand):
         )
         traceroute.add_argument(
             "--dont-fragment",
-            type=bool,
             default=conf["specification"]["types"]["traceroute"]["dontfrag"],
             help="Don't Fragment the packet"
         )
@@ -251,18 +250,6 @@ class Command(BaseCommand):
 
         dns = self.parser.add_argument_group("DNS Measurements")
         dns.add_argument(
-            "--set-cd-bit",
-            type=bool,
-            default=conf["specification"]["types"]["dns"]["cd"],
-            help="Set the DNSSEC Checking Disabled flag (RFC4035)"
-        )
-        dns.add_argument(
-            "--set-do-bit",
-            type=bool,
-            default=conf["specification"]["types"]["dns"]["do"],
-            help="Set the DNSSEC OK flag (RFC3225)"
-        )
-        dns.add_argument(
             "--query-class",
             type=str,
             choices=("IN", "CHAOS"),
@@ -274,7 +261,7 @@ class Command(BaseCommand):
         dns.add_argument(
             "--query-type",
             type=str,
-            choices=Message.ANSWER_CLASSES.keys() + ["ANY"],  # The only ones we can parse
+            choices=list(Message.ANSWER_CLASSES.keys()) + ["ANY"],  # The only ones we can parse
             default=conf["specification"]["types"]["dns"]["query-type"],
             help='The query type.  The default is "{}"'.format(
                 conf["specification"]["types"]["dns"]["query-type"]
@@ -287,8 +274,17 @@ class Command(BaseCommand):
             help="The DNS label to query"
         )
         dns.add_argument(
+            "--set-cd-bit",
+            default=conf["specification"]["types"]["dns"]["cd"],
+            help="Set the DNSSEC Checking Disabled flag (RFC4035)"
+        )
+        dns.add_argument(
+            "--set-do-bit",
+            default=conf["specification"]["types"]["dns"]["do"],
+            help="Set the DNSSEC OK flag (RFC3225)"
+        )
+        dns.add_argument(
             "--set-nsid-bit",
-            type=bool,
             default=conf["specification"]["types"]["dns"]["use-nsid"],
             help="Include an EDNS name server ID request with the query"
         )
@@ -300,7 +296,6 @@ class Command(BaseCommand):
         )
         dns.add_argument(
             "--set-rd-bit",
-            type=bool,
             default=conf["specification"]["types"]["dns"]["recursion-desired"],
             help="Set the Recursion Desired flag"
         )
@@ -317,7 +312,7 @@ class Command(BaseCommand):
 
         if self.arguments.dry_run:
             print("Definitions:")
-            for param, val in self._get_measurement_kwargs().iteritems():
+            for param, val in self._get_measurement_kwargs().items():
                 print("  {}: {}".format(param, val))
             print("Sources:")
             for param, val in self._get_source_kwargs().iteritems():
@@ -458,8 +453,8 @@ class Command(BaseCommand):
                         "DNS measurements require a query type, class, and "
                         "argument"
                     )
-            r["set_cd_bit"] = self.arguments.cd
-            r["set_do_bit"] = self.arguments.do
+            r["set_cd_bit"] = self.arguments.set_cd_bit
+            r["set_do_bit"] = self.arguments.set_do_bit
             r["protocol"] = self.clean_protocol()
             r["query_argument"] = self.arguments.query_argument
             r["query_class"] = self.arguments.query_class
