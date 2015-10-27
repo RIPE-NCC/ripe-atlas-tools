@@ -459,7 +459,9 @@ class TestProbesCommand(unittest.TestCase):
                 "                Showing 1 of 4 total probes\n"
                 "\n"
             )
-            self.assertEquals(mystdout.getvalue(), expected_output)
+            expected_set = set(expected_output.split("\n"))
+            returned_set = set(mystdout.getvalue().split("\n"))
+            self.assertEquals(returned_set, expected_set)
 
         sys.stdout = old_stdout
 
@@ -481,7 +483,7 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
             self.cmd.run()
-            expected_blob = (
+            expected_output = (
                 "\n"
                 "Filters:\n  "
                 "Country: GR\n"
@@ -509,8 +511,8 @@ class TestProbesCommand(unittest.TestCase):
                 "                Showing 4 of 4 total probes\n"
                 "\n"
             )
-            expected_set = expected_blob
-            returned_set = mystdout.getvalue()
+            expected_set = set(expected_output.split("\n"))
+            returned_set = set(mystdout.getvalue().split("\n"))
             self.assertEquals(returned_set, expected_set)
 
         sys.stdout = old_stdout
