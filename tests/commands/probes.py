@@ -48,6 +48,7 @@ class TestProbesCommand(unittest.TestCase):
 
     def setUp(self):
         self.cmd = Command()
+        self.maxDiff = None
 
     def test_with_empty_args(self):
         """User passes no args, should fail with RipeAtlasToolsException"""
@@ -187,12 +188,12 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_country_arg(self):
         """User passed country code arg"""
-        self.cmd.init_args(["--country-code", "GR"])
+        self.cmd.init_args(["--country", "GR"])
         self.assertEquals(self.cmd.build_request_args(), {"country_code": "GR"})
 
     def test_country_arg_with_radius(self):
         """User passed country code arg together with radius"""
-        self.cmd.init_args(["--country-code", "GR", "--radius", "4"])
+        self.cmd.init_args(["--country", "GR", "--radius", "4"])
         self.assertEquals(self.cmd.build_request_args(), {"country_code": "GR"})
 
     def test_sane_args1(self):
@@ -245,7 +246,7 @@ class TestProbesCommand(unittest.TestCase):
     def test_render_ids_only(self):
         """User passed ids_only arg, testing rendiring"""
         self.cmd.init_args([
-            "--ids-only", "--country-code", "GR"
+            "--ids-only", "--country", "GR"
         ])
 
         old_stdout = sys.stdout
@@ -254,7 +255,7 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
             self.cmd.run()
-            self.assertEquals(mystdout.getvalue(), "1,2,3,4,5")
+            self.assertEquals(mystdout.getvalue(), "1\n2\n3\n4\n5\n")
 
         sys.stdout = old_stdout
 
@@ -262,7 +263,7 @@ class TestProbesCommand(unittest.TestCase):
         """User passed ids_only arg together with limit, testing rendering"""
         self.cmd.init_args([
             "--ids-only",
-            "--country-code", "GR",
+            "--country", "GR",
             "--limit", "2"
         ])
 
@@ -272,17 +273,18 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
             self.cmd.run()
-            self.assertEquals(mystdout.getvalue(), "1,2")
+            self.assertEquals(mystdout.getvalue(), "1\n2\n")
 
         sys.stdout = old_stdout
 
     def test_render_ids_only_with_aggr(self):
         """
-        User passed ids_only arg together with aggrement, testing rendiring
+        User passed ids_only arg together with aggregate, testing rendering
         """
         self.cmd.init_args([
             "--ids-only",
-            "--aggregate-by", "country_code"
+            "--country", "GR",
+            "--aggregate-by", "country"
         ])
 
         old_stdout = sys.stdout
@@ -291,7 +293,7 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
             self.cmd.run()
-            self.assertEquals(mystdout.getvalue(), "1,2,3,4,5")
+            self.assertEquals(mystdout.getvalue(), "1\n2\n3\n4\n5\n")
 
         sys.stdout = old_stdout
 
@@ -299,7 +301,7 @@ class TestProbesCommand(unittest.TestCase):
         """User passed --aggregate-by args"""
         self.cmd.init_args([
             "--aggregate-by", "asn_v4",
-            "--aggregate-by", "country_code",
+            "--aggregate-by", "country",
             "--aggregate-by", "prefix_v4"
         ])
         expected_output = [
@@ -307,8 +309,8 @@ class TestProbesCommand(unittest.TestCase):
             ValueKeyAggregator(key="country_code"),
             ValueKeyAggregator(key="prefix_v4")
         ]
-        output = self.cmd.get_aggregators()
-        for index, v in enumerate(output):
+        self.cmd.set_aggregators()
+        for index, v in enumerate(self.cmd.aggregators):
             self.assertTrue(isinstance(v, ValueKeyAggregator))
             self.assertEquals(
                 v.aggregation_keys,
@@ -317,31 +319,8 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_render_without_aggregation(self):
         """Tests rendering of results without aggregation"""
-        self.cmd.init_args(["--limit", "4"])
-
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            self.cmd.run()
-            expected_output = (
-                "We found the following probes with the given criteria:\n"
-                "ID    ASNv4  ASNv6  CC Status      \n"
-                "1     3333   None   GR None        \n"
-                "2     3333   None   DE None        \n"
-                "3     3332   None   DE None        \n"
-                "4     3333   None   NL None        \n"
-                "Total probes found: 4\n"
-            )
-            self.assertEquals(mystdout.getvalue(), expected_output)
-
-        sys.stdout = old_stdout
-
-    def test_render_without_aggregation_with_limit(self):
-        """Tests rendering of results without aggregation but with limit"""
         self.cmd.init_args([
-            "--country-code", "GR", "--limit", "2"
+            "--country", "GR"
         ])
 
         old_stdout = sys.stdout
@@ -351,11 +330,50 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = FakeGen()
             self.cmd.run()
             expected_output = (
-                "We found the following probes with the given criteria:\n"
-                "ID    ASNv4  ASNv6  CC Status      \n"
-                "1     3333   None   GR None        \n"
-                "2     3333   None   DE None        \n"
-                "Total probes found: 4\n"
+                "\n"
+                "Filters:\n"
+                "  Country: GR\n"
+                "\n"
+                "ID    Asn_v4 Asn_v6 Country Status      \n"
+                "========================================\n"
+                "1     3333            gr    None        \n"
+                "2     3333            de    None        \n"
+                "3     3332            de    None        \n"
+                "4     3333            nl    None        \n"
+                "5     3333            gr    None        \n"
+                "========================================\n"
+                "             Showing 4 of 4 total probes\n"
+                "\n"
+            )
+            self.assertEquals(mystdout.getvalue(), expected_output)
+
+        sys.stdout = old_stdout
+
+    def test_render_without_aggregation_with_limit(self):
+        """Tests rendering of results without aggregation but with limit"""
+        self.cmd.init_args([
+            "--country", "GR",
+            "--limit", "2"
+        ])
+
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+        with mock.patch(path) as mock_get:
+            mock_get.return_value = FakeGen()
+            self.cmd.run()
+            expected_output = (
+                "\n"
+                "Filters:\n"
+                "  Country: GR\n"
+                "\n"
+                "ID    Asn_v4 Asn_v6 Country Status      \n"
+                "========================================\n"
+                "1     3333            gr    None        \n"
+                "2     3333            de    None        \n"
+                "========================================\n"
+                "             Showing 2 of 4 total probes\n"
+                "\n"
             )
             self.assertEquals(mystdout.getvalue(), expected_output)
 
@@ -364,8 +382,10 @@ class TestProbesCommand(unittest.TestCase):
     def test_render_with_aggregation(self):
         """Tests rendering of results with aggregation"""
         self.cmd.init_args([
-            "--country-code", "GR", "--aggregate-by", "country_code",
-            "--aggregate-by", "asn_v4", "--aggregate-by", "prefix_v4"
+            "--country", "GR",
+            "--aggregate-by", "country",
+            "--aggregate-by", "asn_v4",
+            "--aggregate-by", "prefix_v4"
         ])
 
         old_stdout = sys.stdout
@@ -375,27 +395,33 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = FakeGen()
             self.cmd.run()
             expected_blob = (
-                "We found the following probes with the given criteria:\n"
-                "COUNTRY_CODE: NL\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    4     3333   None   NL None        \n"
-                "COUNTRY_CODE: GR\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    1     3333   None   GR None        \n"
-                "    5     3333   None   GR None        \n"
-                "COUNTRY_CODE: DE\n"
+                "\n"
+                "Filters:\n"
+                "  Country: GR\n"
+                "\n"
+                "   ID    Asn_v4 Asn_v6 Country Status      \n"
+                "===========================================\n"
+                "Country: DE\n"
                 " ASN_V4: 3332\n"
                 "  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    3     3332   None   DE None        \n"
-                " ASN_V4: 3333\n  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    2     3333   None   DE None        \n"
-                "Total probes found: 4\n"
+                "   3     3332            de    None        \n"
+                " ASN_V4: 3333\n"
+                "  PREFIX_V4: 193.0/22\n"
+                "   2     3333            de    None        \n"
+                "\n"
+                "Country: GR\n"
+                " ASN_V4: 3333\n"
+                "  PREFIX_V4: 193.0/22\n"
+                "   1     3333            gr    None        \n"
+                "   5     3333            gr    None        \n"
+                "\n"
+                "Country: NL\n"
+                " ASN_V4: 3333\n"
+                "  PREFIX_V4: 193.0/22\n"
+                "   4     3333            nl    None        \n"
+                "===========================================\n"
+                "                Showing 4 of 4 total probes\n"
+                "\n"
             )
             expected_set = set(expected_blob.split("\n"))
             returned_set = set(mystdout.getvalue().split("\n"))
@@ -406,8 +432,10 @@ class TestProbesCommand(unittest.TestCase):
     def test_render_with_aggregation_with_limit(self):
         """Tests rendering of results with aggregation with limit"""
         self.cmd.init_args([
-            "--country-code", "GR", "--aggregate-by", "country_code",
-            "--aggregate-by", "asn_v4", "--aggregate-by", "prefix_v4",
+            "--country", "GR",
+            "--aggregate-by", "country",
+            "--aggregate-by", "asn_v4",
+            "--aggregate-by", "prefix_v4",
             "--limit", "1"
         ])
 
@@ -418,15 +446,23 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = FakeGen()
             self.cmd.run()
             expected_output = (
-                "We found the following probes with the given criteria:\n"
-                "COUNTRY_CODE: GR\n"
+                "\n"
+                "Filters:\n"
+                "  Country: GR\n"
+                "\n"
+                "   ID    Asn_v4 Asn_v6 Country Status      \n"
+                "===========================================\n"
+                "Country: GR\n"
                 " ASN_V4: 3333\n"
                 "  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    1     3333   None   GR None        \n"
-                "Total probes found: 4\n"
+                "   1     3333            gr    None        \n"
+                "===========================================\n"
+                "                Showing 1 of 4 total probes\n"
+                "\n"
             )
-            self.assertEquals(mystdout.getvalue(), expected_output)
+            expected_set = set(expected_output.split("\n"))
+            returned_set = set(mystdout.getvalue().split("\n"))
+            self.assertEquals(returned_set, expected_set)
 
         sys.stdout = old_stdout
 
@@ -435,8 +471,10 @@ class TestProbesCommand(unittest.TestCase):
         Tests rendering of results with aggregation with max per aggr option
         """
         self.cmd.init_args([
-            "--country-code", "GR", "--aggregate-by", "country_code",
-            "--aggregate-by", "asn_v4", "--aggregate-by", "prefix_v4",
+            "--country", "GR",
+            "--aggregate-by", "country",
+            "--aggregate-by", "asn_v4",
+            "--aggregate-by", "prefix_v4",
             "--max-per-aggregation", "1"
         ])
 
@@ -446,44 +484,36 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
             self.cmd.run()
-            expected_blob = (
-                "We found the following probes with the given criteria:\n"
-                "COUNTRY_CODE: NL\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    4     3333   None   NL None        \n"
-                "COUNTRY_CODE: GR\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    1     3333   None   GR None        \n"
-                "COUNTRY_CODE: DE\n"
+            expected_output = (
+                "\n"
+                "Filters:\n  "
+                "Country: GR\n"
+                "\n"
+                "   ID    Asn_v4 Asn_v6 Country Status      \n"
+                "===========================================\n"
+                "Country: DE\n"
                 " ASN_V4: 3332\n"
                 "  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    3     3332   None   DE None        \n"
+                "   3     3332            de    None        \n"
                 " ASN_V4: 3333\n"
                 "  PREFIX_V4: 193.0/22\n"
-                "    ID    ASNv4  ASNv6  CC Status      \n"
-                "    2     3333   None   DE None        \n"
-                "Total probes found: 4\n"
+                "   2     3333            de    None        \n"
+                "\n"
+                "Country: GR\n"
+                " ASN_V4: 3333\n"
+                "  PREFIX_V4: 193.0/22\n"
+                "   1     3333            gr    None        \n"
+                "\n"
+                "Country: NL\n"
+                " ASN_V4: 3333\n"
+                "  PREFIX_V4: 193.0/22\n"
+                "   4     3333            nl    None        \n"
+                "===========================================\n"
+                "                Showing 4 of 4 total probes\n"
+                "\n"
             )
-            expected_set = set(expected_blob.split("\n"))
+            expected_set = set(expected_output.split("\n"))
             returned_set = set(mystdout.getvalue().split("\n"))
             self.assertEquals(returned_set, expected_set)
 
         sys.stdout = old_stdout
-
-    def test_render_args(self):
-        """User passed max_per_aggr and additional fields args"""
-        self.cmd.init_args([
-            "--max-per-aggregation",
-            "3",
-            "--additional-fields",
-            "blaaaa, grrrrr"
-        ])
-        self.assertEquals(
-            self.cmd._clean_render_args(),
-            {"max_per_aggr": 3, "additional_fields": ["blaaaa", "grrrrr"]}
-        )

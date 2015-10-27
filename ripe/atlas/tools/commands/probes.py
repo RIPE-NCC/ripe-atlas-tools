@@ -1,16 +1,18 @@
 from __future__ import print_function, absolute_import
-import sys
+
+import itertools
+import six
 import requests
 
 from ripe.atlas.cousteau import ProbeRequest
 from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
 
+from .base import Command as BaseCommand, TabularFieldsMixin
 from ..exceptions import RipeAtlasToolsException
-from ..renderers.probes import Renderer
-from .base import Command as BaseCommand
+from ..helpers.colours import colourise
 
 
-class Command(BaseCommand):
+class Command(TabularFieldsMixin, BaseCommand):
 
     NAME = "probes"
 
@@ -18,6 +20,28 @@ class Command(BaseCommand):
         "Fetches and prints probes fulfilling specified criteria based on "
         "given filters."
     )
+
+    # Column name: (alignment, width)
+    COLUMNS = {
+        "id": ("<", 5),
+        "asn_v4": ("<", 6),
+        "asn_v6": ("<", 6),
+        "country": ("^", 7),
+        "status": ("<", 12),
+        "prefix_v4": ("<", 18),
+        "prefix_v6": ("<", 18),
+        "coordinates": ("<", 19),
+        "is_public": ("^", 6),
+        "description": ("<", 30),
+        "address_v4": ("<", 15),
+        "address_v6": ("<", 39),
+        "is_anchor": ("^", 6),
+    }
+
+    def __init__(self, *args, **kwargs):
+        BaseCommand.__init__(self, *args, **kwargs)
+        self.aggregators = []
+        self.first_line_padding = False
 
     def add_arguments(self):
         """Adds all commands line arguments for this command."""
@@ -68,7 +92,7 @@ class Command(BaseCommand):
             help="location as <lat>,<lon>-string, i.e. '48.45,9.16'"
         )
         geo_location.add_argument(
-            "--country-code",
+            "--country",
             type=str,
             help="The country code of probes."
         )
@@ -81,21 +105,24 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--limit",
             type=int,
+            default=25,
             help="Return limited number of probes"
         )
         self.parser.add_argument(
-            "--additional-fields",
+            "--field",
             type=str,
-            help=(
-                "Print additional probe fields. Specify field names as given "
-                "from the API as a comma separated string."
-            )
+            action="append",
+            choices=self.COLUMNS.keys(),
+            default=[],
+            help="The field(s) to display. Invoke multiple times for multiple "
+                 "fields. The default is id, asn_v4, asn_v6, country, and "
+                 "status."
         )
         self.parser.add_argument(
             "--aggregate-by",
             type=str,
             choices=[
-                'country_code',
+                'country',
                 'asn_v4', 'asn_v6',
                 'prefix_v4', 'prefix_v6'
             ],
@@ -125,69 +152,84 @@ class Command(BaseCommand):
         )
 
     def run(self):
-        filters = self.build_request_args()
-        probes_request = ProbeRequest(return_objects=True, **filters)
-        probes = list(probes_request)
 
-        if self.arguments.limit:
-            probes = probes[:self.arguments.limit]
+        if not self.arguments.field:
+            self.arguments.field = (
+                "id", "asn_v4", "asn_v6", "country", "status")
+
+        filters = self.build_request_args()
+
+        if not filters and not self.arguments.all:
+            raise RipeAtlasToolsException(colourise(
+                "Typically you'd want to run this with some arguments to "
+                "filter the probe \nlist, as fetching all of the probes can "
+                "take a Very Long Time.  However, if you \ndon't care about "
+                "the wait, you can use --all and go get yourself a coffee.",
+                "blue"
+            ))
+
+        self.set_aggregators()
+        probes = ProbeRequest(return_objects=True, **filters)
+        truncated_probes = itertools.islice(
+            probes, self.arguments.limit)
 
         if self.arguments.ids_only:
-            ids = self.produce_ids_only(probes)
-            sys.stdout.write(ids)
+            for probe in truncated_probes:
+                print(probe.id)
             return
 
-        render_args = self._clean_render_args()
-        renderer = Renderer(**render_args)
-        renderer.blob += (
-            "We found the following probes with the given criteria:\n")
+        hr = self._get_horizontal_rule()
+
+        print(self._get_filter_display(filters))
+        print(colourise(self._get_header(), "bold"))
+        print(colourise(hr, "bold"))
 
         if self.arguments.aggregate_by:
 
-            aggregators = self.get_aggregators()
-            buckets = aggregate(probes, aggregators)
-            renderer.render_aggregation(buckets)
+            buckets = aggregate(list(truncated_probes), self.aggregators)
+            self.render_aggregation(buckets)
 
         else:
 
-            renderer.on_table_title()
-            for index, probe in enumerate(probes):
-                renderer.on_result(probe)
+            for probe in truncated_probes:
+                print(self._get_line(probe))
 
-        renderer.blob += (
-            "Total probes found: {}\n".format(probes_request.total_count))
+        print(colourise(hr, "bold"))
 
-        sys.stdout.write(renderer.blob)
+        # Print total count of found measurements
+        print(("{:>" + str(len(hr)) + "}\n").format(
+            "Showing {} of {} total probes".format(
+                min(self.arguments.limit, probes.total_count),
+                probes.total_count
+            )
+        ))
 
-    def produce_ids_only(self, probes):
-        """If user has specified ids-only arg print only ids and exit."""
-        probe_ids = []
-        for index, probe in enumerate(probes):
-            probe_ids.append(str(probe.id))
-            if self.arguments.limit and index >= self.arguments.limit - 1:
-                break
-
-        return ",".join(probe_ids)
-
-    def _clean_render_args(self):
+    def render_aggregation(self, aggregation_data, indent=0):
         """
-        Clean arguments that will be used by renderer and return the kwargs
-        structure for it.
+        Recursively traverses through aggregation data and print them indented.
         """
-        args = {"max_per_aggr": self.arguments.max_per_aggregation}
 
-        if self.arguments.additional_fields:
-            args.update(self._clean_additional_fields())
+        if isinstance(aggregation_data, dict):
 
-        return args
+            for k, v in aggregation_data.items():
 
-    def _clean_additional_fields(self):
-        """Parse and store additional fields argument."""
-        additional_fields = [
-            x.strip() for x in self.arguments.additional_fields.split(",")
-        ]
+                if not indent:
+                    if self.first_line_padding:
+                        print("")
+                    else:
+                        self.first_line_padding = True
 
-        return {"additional_fields": additional_fields}
+                print((u" " * indent) + colourise(k, "bold"))
+                self.render_aggregation(v, indent=indent + 1)
+
+        elif isinstance(aggregation_data, list):
+
+            for index, probe in enumerate(aggregation_data):
+                print(" ", end="")
+                print(self._get_line(probe))
+                if self.arguments.max_per_aggregation:
+                    if index >= self.arguments.max_per_aggregation - 1:
+                        break
 
     def build_request_args(self):
         """
@@ -202,11 +244,6 @@ class Command(BaseCommand):
     def _clean_request_args(self):
         """Cleans all arguments for the API request and checks for sanity."""
         args = {}
-
-        set_args = [k for k, v in vars(self.arguments).items() if v]
-        if not set_args:
-            raise RipeAtlasToolsException(
-                "You must specify at least one argument. Try --help for usage.")
 
         if any(
             [self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]
@@ -226,7 +263,7 @@ class Command(BaseCommand):
         if self.arguments.center:
             args.update(self._clean_center())
 
-        if self.arguments.country_code:
+        if self.arguments.country:
             args.update(self._clean_country_code())
 
         return args
@@ -342,16 +379,105 @@ class Command(BaseCommand):
 
     def _clean_country_code(self):
         """Make sure country_code argument are sane."""
-        country_code_args = {"country_code": self.arguments.country_code}
+        return {"country_code": self.arguments.country}
 
-        return country_code_args
-
-    def get_aggregators(self):
+    def set_aggregators(self):
         """
         Builds and returns the key aggregators that will be used in
         the aggregation.
         """
-        aggregation_keys = []
-        for aggr_key in self.arguments.aggregate_by:
-            aggregation_keys.append(ValueKeyAggregator(key=aggr_key))
-        return aggregation_keys
+
+        self.aggregators = []
+
+        if not self.arguments.aggregate_by:
+            return
+
+        for key in self.arguments.aggregate_by:
+            if key == "country":
+                self.aggregators.append(ValueKeyAggregator(
+                    key="country_code", prefix="Country"))
+            else:
+                self.aggregators.append(ValueKeyAggregator(key=key))
+
+    def _get_line_items(self, probe):
+
+        r = []
+
+        for field in self.arguments.field:
+            if field == "country":
+                r.append(probe.country_code.lower())
+            elif field in ("asn_v4", "asn_v6"):
+                r.append(getattr(probe, field) or "")
+            elif field == "description":
+                description = probe.description or ""
+                r.append(description[:self.COLUMNS["description"][1]])
+            elif field == "coordinates":
+                r.append(u"{},{}".format(
+                    probe.geometry["coordinates"][1],
+                    probe.geometry["coordinates"][0],
+                ))
+            elif field in ("is_public", "is_anchor"):
+                if getattr(probe, field):
+                    r.append(u"\u2714")  # Check mark
+                else:
+                    r.append(u"\u2718")  # X
+            else:
+                r.append(getattr(probe, field))
+
+        return r
+
+    @staticmethod
+    def _get_colour_from_status(status):
+        if status == "Connected":
+            return "green"
+        if status == "Disconnected":
+            return "yellow"
+        if status == "Abandoned":
+            return "red"
+        return "white"
+
+    def _get_line_format(self):
+        r = TabularFieldsMixin._get_line_format(self)
+        if not self.aggregators:
+            return r
+        return (u" " * len(self.aggregators)) + r
+
+    def _get_header_names(self):
+        r = []
+        for field in self.arguments.field:
+            if field == "id":
+                r.append("ID")
+            elif field == "is_public":
+                r.append("Public")
+            elif field == "is_anchor":
+                r.append("Anchor")
+            else:
+                r.append(field.capitalize())
+        return r
+
+    def _get_line(self, probe):
+        """
+        Python 2 and 3 differ on how to render strings with non-ascii characters
+        in them, so we have to accommodate both here.
+        """
+
+        if six.PY2:
+
+            return colourise(
+                self._get_line_format().format(
+                    *self._get_line_items(probe)
+                ).encode("utf-8"),
+                self._get_colour_from_status(probe.status)
+            )
+
+        return colourise(
+            self._get_line_format().format(*self._get_line_items(probe)),
+            self._get_colour_from_status(probe.status)
+        )
+
+    def _get_filter_key_value_pair(self, k, v):
+        if k == "country_code":
+            return "Country", v.upper()
+        if k == "asn":
+            return "ASN", v
+        return TabularFieldsMixin._get_filter_key_value_pair(self, k, v)
