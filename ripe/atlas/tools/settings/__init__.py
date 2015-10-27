@@ -157,7 +157,7 @@ class Configuration(object):
         Updates a dictionary with another dictionary, only it goes deep.
         Stolen from http://stackoverflow.com/questions/3232943/
         """
-        for k, v in u.iteritems():
+        for k, v in u.items():
             if isinstance(v, collections.Mapping):
                 r = cls.deep_update(d.get(k, {}), v)
                 d[k] = r

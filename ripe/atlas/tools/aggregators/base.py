@@ -3,9 +3,9 @@ from ..helpers.rendering import SaganSet
 
 class ValueKeyAggregator(object):
     """Aggregator based on tha actual value of the key/attribute"""
-    def __init__(self, key):
+    def __init__(self, key, prefix=None):
         self.aggregation_keys = key.split('.')
-        self.key_prefix = self.aggregation_keys[-1].upper()
+        self.key_prefix = prefix or self.aggregation_keys[-1].upper()
 
     def get_key_value(self, entity):
         """
@@ -87,7 +87,7 @@ def aggregate(entities, aggregators):
 
     elif isinstance(entities, dict):
 
-        for k, v in entities.iteritems():
+        for k, v in entities.items():
             entities[k] = aggregate(entities[k], aggregators[:])
 
     return entities
