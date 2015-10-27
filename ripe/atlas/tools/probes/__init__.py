@@ -44,7 +44,7 @@ class Probe(object):
                 fetch_ids.append(str(pk))
 
         if fetch_ids:
-            kwargs = {"id__in": ",".join(fetch_ids)}
+            kwargs = {"id__in": fetch_ids}
             for probe in [p for p in ProbeRequest(return_objects=True, **kwargs)]:
                 cache.set("probe:{}".format(probe.id), probe, cls.EXPIRE_TIME)
                 r.append(probe)
