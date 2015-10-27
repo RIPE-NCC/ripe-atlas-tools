@@ -423,8 +423,8 @@ class TestProbesCommand(unittest.TestCase):
                 "                Showing 4 of 4 total probes\n"
                 "\n"
             )
-            expected_set = expected_blob
-            returned_set = mystdout.getvalue()
+            expected_set = set(expected_blob.split("\n"))
+            returned_set = set(mystdout.getvalue().split("\n"))
             self.assertEquals(returned_set, expected_set)
 
         sys.stdout = old_stdout
