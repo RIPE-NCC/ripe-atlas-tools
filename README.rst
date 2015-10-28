@@ -1,6 +1,6 @@
 .. image:: https://readthedocs.org/projects/ripe-atlas-tools/badge/?version=latest
-:target: http://ripe-atlas-tools.readthedocs.org/en/latest/?badge=latest
-:alt: Documentation Status
+  :target: http://ripe-atlas-tools.readthedocs.org/en/latest/?badge=latest
+  :alt: Documentation Status
 
 RIPE Atlas Tools (Magellan)
 ===========================
