@@ -94,6 +94,12 @@ to go.
 Python Requirements
 ===================
 
+Importantly, Magellan requires Python 2.7 or higher.  For most desktop users,
+this shouldn't be a problem, but for some older servers like CentOS 6 and lower,
+this may cause some pain.  Thankfully, for most such systems, there are usually
+work-arounds that allow you to install a more modern version of Python in
+parallel.
+
 Magellan depends on two other RIPE Atlas libraries, Cousteau and Sagan, which in
 turn depend on a reasonable number of Python libraries.  Thankfully, Python's
 package manager, ``pip`` should handle all of these for you:
