@@ -308,18 +308,43 @@ class Command(BaseCommand):
 
     def run(self):
 
+        if self.arguments.dry_run:
+            self.dry_run()
+
+        is_success, response = self.create()
+
+        if not is_success:
+            self._handle_api_error(response)  # Raises an exception
+
+        pk = response["measurements"][0]
+        url = "{0}/measurements/{1}/".format(conf["ripe-ncc"]["endpoint"], pk)
+
+        self.ok(
+            "Looking good!  Your measurement was created and details about "
+            "it can be found here:\n\n  {0}".format(url)
+        )
+
+        if not self.arguments.no_report:
+            self.stream(pk, url)
+
+    def dry_run(self):
+
+        print("Definitions:")
+
+        for param, val in self._get_measurement_kwargs().items():
+            print("  {}: {}".format(param, val))
+
+        print("Sources:")
+
+        for param, val in self._get_source_kwargs().iteritems():
+            print("  {}: {}".format(param, val))
+
+        return
+
+    def create(self):
         creation_class = self.CREATION_CLASSES[self.arguments.type]
 
-        if self.arguments.dry_run:
-            print("Definitions:")
-            for param, val in self._get_measurement_kwargs().items():
-                print("  {}: {}".format(param, val))
-            print("Sources:")
-            for param, val in self._get_source_kwargs().iteritems():
-                print("  {}: {}".format(param, val))
-            return
-
-        (is_success, response) = AtlasCreateRequest(
+        return AtlasCreateRequest(
             server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
             key=self.arguments.auth,
             measurements=[creation_class(**self._get_measurement_kwargs())],
@@ -327,28 +352,16 @@ class Command(BaseCommand):
             is_oneoff=self._is_oneoff
         ).create()
 
-        if not is_success:
-            self._handle_api_error(response)  # Raises an exception
-
-        pk = response["measurements"][0]
-        url = "{0}/measurements/{1}/".format(conf["ripe-ncc"]["endpoint"], pk)
-        self.ok(
-            "Looking good!  Your measurement was created and details about "
-            "it can be found here:\n\n  {0}".format(url)
-        )
-
-        if not self.arguments.no_report:
-            self.ok("Connecting to stream...")
-            try:
-                Stream(
-                    capture_limit=self.arguments.probes,
-                    timeout=300  # 5min
-                ).stream(self.arguments.renderer, self.arguments.type, pk)
-            except (KeyboardInterrupt, CaptureLimitExceeded):
-                pass  # User said stop, so we fall through to the finally block.
-            finally:
-                self.ok("Disconnecting from stream\n\nYou can find details "
-                        "about this measurement here:\n\n  {0}".format(url))
+    def stream(self, pk, url):
+        self.ok("Connecting to stream...")
+        try:
+            Stream(capture_limit=self.arguments.probes, timeout=300).stream(
+                self.arguments.renderer, self.arguments.type, pk)
+        except (KeyboardInterrupt, CaptureLimitExceeded):
+            pass  # User said stop, so we fall through to the finally block.
+        finally:
+            self.ok("Disconnecting from stream\n\nYou can find details "
+                    "about this measurement here:\n\n  {0}".format(url))
 
     def clean_target(self):
 
