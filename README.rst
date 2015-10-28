@@ -1,9 +1,5 @@
-.. image:: https://readthedocs.org/projects/ripe-atlas-tools/badge/?version=latest
-  :target: http://ripe-atlas-tools.readthedocs.org/en/latest/?badge=latest
-  :alt: Documentation Status
-
-RIPE Atlas Tools (Magellan)
-===========================
+RIPE Atlas Tools (Magellan) |Documentation|
+===========================================
 
 The official command-line client for RIPE Atlas.
 
@@ -18,8 +14,6 @@ Full Documentation
 ------------------
 
 Everything is up on `ReadTheDocs`_
-
-.. _ReadTheDocs: https://ripe-atlas-tools.readthedocs.org/
 
 
 How Does it Work?
@@ -66,8 +60,6 @@ Can I Contribute?
 
 Absolutely.  Please read our `guide`_ on how to contribute.
 
-.. _guide: https://github.com/RIPE-NCC/ripe-atlas-tools/blob/master/CONTRIBUTING.rst
-
 
 Colophon
 --------
@@ -76,4 +68,9 @@ This project was code-named by means of a `poll`_.  In order to conform to the
 RIPE Atlas theme, it had to be named for an explorer, and so the winning
 suggestion was for Magellan, *"in memory of those times when RTT was ~3 years"*.
 
+.. |Documentation| image:: https://readthedocs.org/projects/ripe-atlas-tools/badge/?version=latest
+  :target: http://ripe-atlas-tools.readthedocs.org/en/latest/?badge=latest
+  :alt: Documentation Status
+.. _ReadTheDocs: https://ripe-atlas-tools.readthedocs.org/
+.. _guide: https://github.com/RIPE-NCC/ripe-atlas-tools/blob/master/CONTRIBUTING.rst
 .. _poll: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/13
