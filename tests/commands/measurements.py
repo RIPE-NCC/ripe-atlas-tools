@@ -1,21 +1,14 @@
 import collections
 import datetime
-import sys
 import unittest
 
-# Python 3 try/catches
+# Python 3 comes with mock in unittest
 try:
     from unittest import mock
 except ImportError:
     import mock
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
-
 from ripe.atlas.tools.commands.measurements import Command
-from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 
 from .. import capture_sys_output
 
