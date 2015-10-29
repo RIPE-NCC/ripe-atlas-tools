@@ -10,7 +10,7 @@ except ImportError:
 
 from ripe.atlas.tools.commands.measurements import Command
 
-from .. import capture_sys_output
+from ..base import capture_sys_output
 
 
 class FakeGen(object):

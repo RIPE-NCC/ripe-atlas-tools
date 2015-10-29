@@ -13,10 +13,10 @@ from ripe.atlas.tools.commands.measure import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.settings import Configuration
 
-from .. import capture_sys_output
+from ..base import capture_sys_output
 
 
-class TestProbesCommand(unittest.TestCase):
+class TestMeasureCommand(unittest.TestCase):
 
     CONF = "ripe.atlas.tools.commands.measure.conf"
     KINDS = ("ping", "traceroute", "dns", "ssl", "ntp",)
