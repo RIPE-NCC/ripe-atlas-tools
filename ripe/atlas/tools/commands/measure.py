@@ -1,10 +1,13 @@
 from __future__ import print_function, absolute_import
 
+import re
+
 from ripe.atlas.cousteau import (
     Ping, Traceroute, Dns, Sslcert, Ntp, AtlasSource, AtlasCreateRequest)
 from ripe.atlas.sagan.dns import Message
 
 from ..exceptions import RipeAtlasToolsException
+from ..helpers.colours import colourise
 from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
 from ..settings import conf
@@ -66,7 +69,6 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--af",
             type=int,
-            default=conf["specification"]["af"],
             choices=(4, 6),
             help="The address family, either 4 or 6"
         )
@@ -207,7 +209,8 @@ class Command(BaseCommand):
         )
         traceroute.add_argument(
             "--dont-fragment",
-            default=conf["specification"]["types"]["traceroute"]["dontfrag"],
+            action="store_true",
+            default=conf["specification"]["types"]["traceroute"]["dont-fragment"],
             help="Don't Fragment the packet"
         )
         traceroute.add_argument(
@@ -220,13 +223,13 @@ class Command(BaseCommand):
         traceroute.add_argument(
             "--first-hop",
             type=int,
-            default=conf["specification"]["types"]["traceroute"]["firsthop"],
+            default=conf["specification"]["types"]["traceroute"]["first-hop"],
             help="Value must be between 1 and 255"
         )
         traceroute.add_argument(
             "--max-hops",
             type=int,
-            default=conf["specification"]["types"]["traceroute"]["maxhops"],
+            default=conf["specification"]["types"]["traceroute"]["max-hops"],
             help="Value must be between 1 and 255"
         )
         traceroute.add_argument(
@@ -275,28 +278,26 @@ class Command(BaseCommand):
         )
         dns.add_argument(
             "--set-cd-bit",
-            default=conf["specification"]["types"]["dns"]["cd"],
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["set-cd-bit"],
             help="Set the DNSSEC Checking Disabled flag (RFC4035)"
         )
         dns.add_argument(
             "--set-do-bit",
-            default=conf["specification"]["types"]["dns"]["do"],
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["set-do-bit"],
             help="Set the DNSSEC OK flag (RFC3225)"
         )
         dns.add_argument(
             "--set-nsid-bit",
-            default=conf["specification"]["types"]["dns"]["use-nsid"],
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["set-nsid-bit"],
             help="Include an EDNS name server ID request with the query"
         )
         dns.add_argument(
-            "--udp-payload-size",
-            type=int,
-            default=conf["specification"]["types"]["dns"]["udp-payload-size"],
-            help="May be any integer between 512 and 4096 inclusive"
-        )
-        dns.add_argument(
             "--set-rd-bit",
-            default=conf["specification"]["types"]["dns"]["recursion-desired"],
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["set-rd-bit"],
             help="Set the Recursion Desired flag"
         )
         dns.add_argument(
@@ -305,21 +306,58 @@ class Command(BaseCommand):
             default=conf["specification"]["types"]["dns"]["retry"],
             help="Number of times to retry"
         )
+        dns.add_argument(
+            "--udp-payload-size",
+            type=int,
+            default=conf["specification"]["types"]["dns"]["udp-payload-size"],
+            help="May be any integer between 512 and 4096 inclusive"
+        )
 
     def run(self):
 
+        if self.arguments.dry_run:
+            return self.dry_run()
+
+        is_success, response = self.create()
+
+        if not is_success:
+            self._handle_api_error(response)  # Raises an exception
+
+        pk = response["measurements"][0]
+        url = "{0}/measurements/{1}/".format(conf["ripe-ncc"]["endpoint"], pk)
+
+        self.ok(
+            "Looking good!  Your measurement was created and details about "
+            "it can be found here:\n\n  {0}".format(url)
+        )
+
+        if not self.arguments.no_report:
+            self.stream(pk, url)
+
+    def dry_run(self):
+
+        print(colourise("\nDefinitions:\n{}".format("=" * 80), "bold"))
+
+        for param, val in self._get_measurement_kwargs().items():
+            print(colourise("{:<25} {}".format(param, val), "cyan"))
+
+        print(colourise("\nSources:\n{}".format("=" * 80), "bold"))
+
+        for param, val in self._get_source_kwargs().items():
+            if param == "tags":
+                print(colourise("tags\n  include{}{}\n  exclude{}{}\n".format(
+                    " " * 17,
+                    ", ".join(val["include"]),
+                    " " * 17,
+                    ", ".join(val["exclude"])
+                ), "cyan"))
+                continue
+            print(colourise("{:<25} {}".format(param, val), "cyan"))
+
+    def create(self):
         creation_class = self.CREATION_CLASSES[self.arguments.type]
 
-        if self.arguments.dry_run:
-            print("Definitions:")
-            for param, val in self._get_measurement_kwargs().items():
-                print("  {}: {}".format(param, val))
-            print("Sources:")
-            for param, val in self._get_source_kwargs().iteritems():
-                print("  {}: {}".format(param, val))
-            return
-
-        (is_success, response) = AtlasCreateRequest(
+        return AtlasCreateRequest(
             server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
             key=self.arguments.auth,
             measurements=[creation_class(**self._get_measurement_kwargs())],
@@ -327,28 +365,16 @@ class Command(BaseCommand):
             is_oneoff=self._is_oneoff
         ).create()
 
-        if not is_success:
-            self._handle_api_error(response)  # Raises an exception
-
-        pk = response["measurements"][0]
-        url = "{0}/measurements/{1}/".format(conf["ripe-ncc"]["endpoint"], pk)
-        self.ok(
-            "Looking good!  Your measurement was created and details about "
-            "it can be found here:\n\n  {0}".format(url)
-        )
-
-        if not self.arguments.no_report:
-            self.ok("Connecting to stream...")
-            try:
-                Stream(
-                    capture_limit=self.arguments.probes,
-                    timeout=300  # 5min
-                ).stream(self.arguments.renderer, self.arguments.type, pk)
-            except (KeyboardInterrupt, CaptureLimitExceeded):
-                pass  # User said stop, so we fall through to the finally block.
-            finally:
-                self.ok("Disconnecting from stream\n\nYou can find details "
-                        "about this measurement here:\n\n  {0}".format(url))
+    def stream(self, pk, url):
+        self.ok("Connecting to stream...")
+        try:
+            Stream(capture_limit=self.arguments.probes, timeout=300).stream(
+                self.arguments.renderer, self.arguments.type, pk)
+        except (KeyboardInterrupt, CaptureLimitExceeded):
+            pass  # User said stop, so we fall through to the finally block.
+        finally:
+            self.ok("Disconnecting from stream\n\nYou can find details "
+                    "about this measurement here:\n\n  {0}".format(url))
 
     def clean_target(self):
 
@@ -381,11 +407,18 @@ class Command(BaseCommand):
         elif self.arguments.type == "traceroute":
             if not self.arguments.protocol:
                 self.arguments.protocol = spec["traceroute"]["protocol"]
+
             if self.arguments.protocol not in ("ICMP", "UDP", "TCP"):
                 raise RipeAtlasToolsException(
                     "Traceroute measurements may only choose a protocol of "
                     "ICMP, UDP or TCP"
                 )
+
+        # Everything else gets kicked
+        else:
+            raise RipeAtlasToolsException(
+                "Measurements of type \"{}\" have no use for a protocol "
+                "value.".format(self.arguments.type))
 
         return self.arguments.protocol
 
@@ -450,18 +483,17 @@ class Command(BaseCommand):
             for opt in ("class", "type", "argument"):
                 if not getattr(self.arguments, "query_{0}".format(opt)):
                     raise RipeAtlasToolsException(
-                        "DNS measurements require a query type, class, and "
-                        "argument"
-                    )
-            r["set_cd_bit"] = self.arguments.set_cd_bit
-            r["set_do_bit"] = self.arguments.set_do_bit
-            r["protocol"] = self.clean_protocol()
-            r["query_argument"] = self.arguments.query_argument
+                        "At a minimum, DNS measurements require a query "
+                        "argument.")
             r["query_class"] = self.arguments.query_class
             r["query_type"] = self.arguments.query_type
+            r["query_argument"] = self.arguments.query_argument
+            r["set_cd_bit"] = self.arguments.set_cd_bit
+            r["set_do_bit"] = self.arguments.set_do_bit
             r["set_rd_bit"] = self.arguments.set_rd_bit
-            r["retry"] = self.arguments.retry
             r["set_nsid_bit"] = self.arguments.set_nsid_bit
+            r["protocol"] = self.clean_protocol()
+            r["retry"] = self.arguments.retry
             r["udp_payload_size"] = self.arguments.udp_payload_size
             r["use_probe_resolver"] = not target
 
@@ -470,6 +502,7 @@ class Command(BaseCommand):
     def _get_source_kwargs(self):
 
         r = conf["specification"]["source"]
+
         r["requested"] = self.arguments.probes
         if self.arguments.from_country:
             r["type"] = "country"
@@ -514,9 +547,9 @@ class Command(BaseCommand):
         if self.arguments.af:
             return self.arguments.af
         if self.arguments.target:
-            if self.arguments.target.contains(":"):
+            if ":" in self.arguments.target:
                 return 6
-            if self.arguments.target.contains("."):
+            if re.match(r"^\d+\.\d+\.\d+\.\d+$", self.arguments.target):
                 return 4
         return conf["specification"]["af"]
 

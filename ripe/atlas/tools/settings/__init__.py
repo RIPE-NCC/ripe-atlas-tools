@@ -43,10 +43,10 @@ class Configuration(object):
                     "packets": 3,
                     "size": 48,
                     "protocol": "ICMP",
-                    "dontfrag": False,
+                    "dont-fragment": False,
                     "paris": 0,
-                    "firsthop": 1,
-                    "maxhops": 255,
+                    "first-hop": 1,
+                    "max-hops": 255,
                     "port": 80,
                     "destination-option-size": None,
                     "hop-by-hop-option-size": None,
@@ -60,16 +60,15 @@ class Configuration(object):
                     "timeout": 4000
                 },
                 "dns": {
-                    "cd": False,
-                    "do": False,
+                    "set-cd-bit": False,
+                    "set-do-bit": False,
                     "protocol": "UDP",
                     "query-class": "IN",
                     "query-type": "A",
                     "query-argument": None,
-                    "use-nsid": False,
-                    "use-probe-resolver": False,
+                    "set-nsid-bit": False,
                     "udp-payload-size": 512,
-                    "recursion-desired": True,
+                    "set-rd-bit": True,
                     "retry": 0
                 }
             },
@@ -87,7 +86,7 @@ class Configuration(object):
                         "include": [],
                         "exclude": []
                     },
-                    "sslcert": {
+                    "ssl": {
                         "include": [],
                         "exclude": []
                     },
@@ -117,7 +116,7 @@ class Configuration(object):
                         "include": [],
                         "exclude": []
                     },
-                    "sslcert": {
+                    "ssl": {
                         "include": [],
                         "exclude": []
                     },
@@ -183,7 +182,7 @@ class Configuration(object):
         ripe = re.compile("^ripe-ncc:$", re.MULTILINE)
 
         with open(template) as t:
-            payload = t.read().format(
+            payload = str(t.read()).format(
                 payload=yaml.dump(
                     config,
                     default_flow_style=False
