@@ -1,7 +1,10 @@
 import sys
 
 from contextlib import contextmanager
-from StringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:  # Python 3
+    from io import StringIO
 
 @contextmanager
 def capture_sys_output():
