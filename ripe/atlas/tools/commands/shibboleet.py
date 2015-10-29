@@ -17,42 +17,44 @@ class Command(BaseCommand):
     }
     URLS = {
         "root": "https://api.github.com",
-        "statistics": "/repos/RIPE-NCC/ripe-atlas-tools/stats/contributors",
+        "statistics": [
+            "/repos/RIPE-NCC/ripe.atlas.sagan/stats/contributors",
+            "/repos/RIPE-NCC/ripe-atlas-cousteau/stats/contributors",
+            "/repos/RIPE-NCC/ripe-atlas-tools/stats/contributors",
+        ],
         "users": "/users"
     }
 
-    BOAT = """
-                                                             |
-                                                             |
-                                                             |
-                                                     |       |
-                                                     |      ---
-                                                    ---     '-'
-                                                    '-'  ____|_____
-                                                 ____|__/    |    /
-                                                /    | /     |   /
-                                               /     |(      |  (
-                                              (      | \     |   \\
-                                               \     |  \____|____\   /|
-                                               /\____|___`---.----` .' |
-                                           .-'/      |  \    |__.--'    \\
-                                         .'/ (       |   \   |.          \\
-                                      _ /_/   \      |    \  | `.         \\
-                                       `-.'    \.--._|.---`  |   `-._______\\
-                                          ``-.-------'-------'------------/
-                                              `'._______________________.'\n"""
+    SPACING = (
+        61, 61, 61, 53, 7, 53, 6, 52, 5, 52, 49, 48, 47, 46, 47, 47, 43, 41, 38,
+        39, 42, 46
+    )
+    BOAT = (
+        "\n{}|\n{}|\n{}|\n{}|{}|\n{}|{}---\n{}---{}'-'\n{}'-'  ____|_____\n{}__"
+        "__|__/    |    /\n{}/    | /     |   /\n{}/     |(      |  (\n{}(     "
+        " | \     |   \\\n{}\     |  \____|____\   /|\n{}/\____|___`---.----` ."
+        "' |\n{}.-'/      |  \    |__.--'    \\\n{}.'/ (       |   \   |.      "
+        "    \\\n{}_ /_/   \      |    \  | `.         \\\n{}`-.'    \.--._|.--"
+        "-`  |   `-._______\\\n{}``-.-------'-------'------------/\n{}`'.______"
+        "_________________.'\n"
+    ).format(*[" " * _ for _ in SPACING])
 
     WATER = ("~" * 80)
 
+    def __init__(self, *args, **kwargs):
+        BaseCommand.__init__(self, *args, **kwargs)
+        self.statistics = {}
+
     def run(self):
 
-        r = "\nThanks for using RIPE Atlas!\n\nThis toolkit " \
-            "(Magellan) is a group effort, spearheaded by the team at the " \
-            "RIPE\nNCC, but supported by members of the community from all " \
-            "over.  If you're\ncurious about who we are and what sorts of " \
-            "stuff we work on, here's a break\ndown of our contributions to " \
-            "date.\n\nName                     Changes  URL\n{}\n".format(
-                "-" * 79)
+        r = (
+            "\nThanks for using RIPE Atlas!\n\nThis toolkit "
+            "(Magellan) is a group effort, spearheaded by the team at the "
+            "RIPE\nNCC, but supported by members of the community from all "
+            "over.  If you're\ncurious about who we are and what sorts of "
+            "stuff we work on, here's a break\ndown of our contributions to "
+            "date.\n\nName                     Changes  URL\n{}\n"
+        ).format("-" * 79)
 
         for contributor in self.get_contributors():
             r += "{name:20}  {changes:10}  {url}\n".format(**contributor)
@@ -67,37 +69,44 @@ class Command(BaseCommand):
 
         cache_key = "github:statistics"
 
-        r = cache.get(cache_key)
-        if r:
-            random.shuffle(r)
-            return r
-
-        response = requests.get(
-            "{}{}".format(self.URLS["root"], self.URLS["statistics"]),
-            headers=self.HEADERS
-        )
+        self.statistics = cache.get(cache_key, {})
+        if not self.statistics:
+            for url in self.URLS["statistics"]:
+                self._update_statistics_from_url(url)
+            cache.set(cache_key, self.statistics, 60 * 10)
 
         r = []
-        for contributor in response.json():
-            user = self.get_user(contributor["author"]["login"])
-            d = {
-                "changes": 0,
-                "name": user["name"] or contributor["author"]["login"],
-                "url": contributor["author"]["html_url"]
-            }
-            for week in contributor["weeks"]:
-                d["changes"] += week["a"] + week["d"]
-            r.append(d)
+        for k, v in self.statistics.items():
+            r.append({"name": k, "changes": v["changes"], "url": v["url"]})
 
         random.shuffle(r)
 
-        # Sometimes GitHub just returns nothing
-        if not r:
-            return self.get_contributors()
-
-        cache.set(cache_key, r, 60 * 10)
-
         return r
+
+    def _update_statistics_from_url(self, url):
+
+        response = requests.get(
+            "{}{}".format(self.URLS["root"], url), headers=self.HEADERS)
+
+        contributors = response.json()
+
+        # Sometimes, GitHub just returns nothing
+        if not contributors:
+            return self._update_statistics_from_url(url)
+
+        for contributor in response.json():
+
+            user = self.get_user(contributor["author"]["login"])
+            name = user["name"] or contributor["author"]["login"]
+
+            if name not in self.statistics:
+                self.statistics[name] = {
+                    "changes": 0,
+                    "url": contributor["author"]["html_url"]
+                }
+
+            for week in contributor["weeks"]:
+                self.statistics[name]["changes"] += week["a"] + week["d"]
 
     def get_user(self, username):
 
