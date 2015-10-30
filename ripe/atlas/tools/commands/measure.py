@@ -1,6 +1,9 @@
 from __future__ import print_function, absolute_import
 
 import re
+import sys
+
+from collections import OrderedDict
 
 from ripe.atlas.cousteau import (
     Ping, Traceroute, Dns, Sslcert, Ntp, AtlasSource, AtlasCreateRequest)
@@ -21,17 +24,32 @@ class Command(BaseCommand):
 
     DESCRIPTION = "Create a measurement and optionally wait for the results"
 
-    CREATION_CLASSES = {
-        "ping": Ping,
-        "traceroute": Traceroute,
-        "dns": Dns,
-        "ssl": Sslcert,
-        "ntp": Ntp
-    }
+    CREATION_CLASSES = OrderedDict((
+        ("ping", Ping),
+        ("traceroute", Traceroute),
+        ("dns", Dns),
+        ("ssl", Sslcert),
+        ("ntp", Ntp)
+    ))
 
     def __init__(self, *args, **kwargs):
-        BaseCommand.__init__(self, *args, **kwargs)
+
+        # I don't like this
+
+        self._type = None
+        if len(sys.argv) > 1:
+            kinds = self.CREATION_CLASSES.keys()
+            if sys.argv[1] not in self.CREATION_CLASSES.keys():
+                raise RipeAtlasToolsException(
+                    "Usage: ripe-atlas measure <{}>".format("|".join(kinds)))
+            self._type = sys.argv.pop(1)
+
+        if len(sys.argv) == 1:
+            sys.argv.append("--help")
+
         self._is_oneoff = True
+
+        BaseCommand.__init__(self, *args, **kwargs)
 
     def add_arguments(self):
 
@@ -172,150 +190,170 @@ class Command(BaseCommand):
 
         # Type-specific
 
-        ping_or_trace = self.parser.add_argument_group(
-            "Ping and Traceroute Measurements")
-        ping_or_trace.add_argument(
-            "--packets",
-            type=ArgumentType.integer_range(minimum=1),
-            help="The number of packets sent"
-        )
-        ping_or_trace.add_argument(
-            "--size",
-            type=ArgumentType.integer_range(minimum=1),
-            help="The size of packets sent"
-        )
-
-        trace_or_dns = self.parser.add_argument_group(
-            "Traceroute or DNS Measurements")
-        trace_or_dns.add_argument(
-            "--protocol",
-            type=str,
-            choices=("ICMP", "UDP", "TCP"),
-            help="The protocol used.  For DNS measurements, this is limited to "
-                 "UDP and TCP, but traceroutes may use ICMP as well"
-        )
-
-        ping = self.parser.add_argument_group(
-            "Ping Measurements")
-        ping.add_argument(
-            "--packet-interval",
-            type=ArgumentType.integer_range(minimum=1),
-            default=conf["specification"]["types"]["ping"]["packet-interval"],
-        )
-
-        traceroute = self.parser.add_argument_group(
-            "Traceroute Measurements")
-        traceroute.add_argument(
-            "--timeout",
-            type=ArgumentType.integer_range(minimum=1),
-            default=conf["specification"]["types"]["traceroute"]["timeout"],
-            help="The timeout per-packet"
-        )
-        traceroute.add_argument(
-            "--dont-fragment",
-            action="store_true",
-            default=conf["specification"]["types"]["traceroute"]["dont-fragment"],
-            help="Don't Fragment the packet"
-        )
-        traceroute.add_argument(
-            "--paris",
-            type=ArgumentType.integer_range(minimum=0, maximum=64),
-            default=conf["specification"]["types"]["traceroute"]["paris"],
-            help="Use Paris. Value must be between 0 and 64."
-                 "If 0, a standard traceroute will be performed"
-        )
-        traceroute.add_argument(
-            "--first-hop",
-            type=ArgumentType.integer_range(minimum=1, maximum=255),
-            default=conf["specification"]["types"]["traceroute"]["first-hop"],
-            help="Value must be between 1 and 255"
-        )
-        traceroute.add_argument(
-            "--max-hops",
-            type=ArgumentType.integer_range(minimum=1, maximum=255),
-            default=conf["specification"]["types"]["traceroute"]["max-hops"],
-            help="Value must be between 1 and 255"
-        )
-        traceroute.add_argument(
-            "--port",
-            type=ArgumentType.integer_range(minimum=1, maximum=2**16),
-            default=conf["specification"]["types"]["traceroute"]["port"],
-            help="Destination port, valid for TCP only"
-        )
-        traceroute.add_argument(
-            "--destination-option-size",
-            type=ArgumentType.integer_range(minimum=1),
-            default=conf["specification"]["types"]["traceroute"]["destination-option-size"],
-            help="IPv6 destination option header"
-        )
-        traceroute.add_argument(
-            "--hop-by-hop-option-size",
-            type=ArgumentType.integer_range(minimum=1),
-            default=conf["specification"]["types"]["traceroute"]["hop-by-hop-option-size"],
-            help=" IPv6 hop by hop option header"
-        )
-
-        dns = self.parser.add_argument_group("DNS Measurements")
-        dns.add_argument(
-            "--query-class",
-            type=str,
-            choices=("IN", "CHAOS"),
-            default=conf["specification"]["types"]["dns"]["query-class"],
-            help='The query class.  The default is "{}"'.format(
-                conf["specification"]["types"]["dns"]["query-class"]
+        if self._type == "ping":
+            specific = self.parser.add_argument_group("Ping-specific Options")
+            specific.add_argument(
+                "--packets",
+                type=ArgumentType.integer_range(minimum=1),
+                help="The number of packets sent"
             )
-        )
-        dns.add_argument(
-            "--query-type",
-            type=str,
-            choices=list(Message.ANSWER_CLASSES.keys()) + ["ANY"],  # The only ones we can parse
-            default=conf["specification"]["types"]["dns"]["query-type"],
-            help='The query type.  The default is "{}"'.format(
-                conf["specification"]["types"]["dns"]["query-type"]
+            specific.add_argument(
+                "--size",
+                type=ArgumentType.integer_range(minimum=1),
+                help="The size of packets sent"
             )
-        )
-        dns.add_argument(
-            "--query-argument",
-            type=str,
-            default=conf["specification"]["types"]["dns"]["query-argument"],
-            help="The DNS label to query"
-        )
-        dns.add_argument(
-            "--set-cd-bit",
-            action="store_true",
-            default=conf["specification"]["types"]["dns"]["set-cd-bit"],
-            help="Set the DNSSEC Checking Disabled flag (RFC4035)"
-        )
-        dns.add_argument(
-            "--set-do-bit",
-            action="store_true",
-            default=conf["specification"]["types"]["dns"]["set-do-bit"],
-            help="Set the DNSSEC OK flag (RFC3225)"
-        )
-        dns.add_argument(
-            "--set-nsid-bit",
-            action="store_true",
-            default=conf["specification"]["types"]["dns"]["set-nsid-bit"],
-            help="Include an EDNS name server ID request with the query"
-        )
-        dns.add_argument(
-            "--set-rd-bit",
-            action="store_true",
-            default=conf["specification"]["types"]["dns"]["set-rd-bit"],
-            help="Set the Recursion Desired flag"
-        )
-        dns.add_argument(
-            "--retry",
-            type=ArgumentType.integer_range(minimum=1),
-            default=conf["specification"]["types"]["dns"]["retry"],
-            help="Number of times to retry"
-        )
-        dns.add_argument(
-            "--udp-payload-size",
-            type=ArgumentType.integer_range(minimum=1),
-            default=conf["specification"]["types"]["dns"]["udp-payload-size"],
-            help="May be any integer between 512 and 4096 inclusive"
-        )
+            specific.add_argument(
+                "--packet-interval",
+                type=ArgumentType.integer_range(minimum=1),
+                default=conf["specification"]["types"]["ping"]["packet-interval"],
+            )
+
+        if self._type == "traceroute":
+            specific = self.parser.add_argument_group(
+                "Traceroute-specific Options")
+            specific.add_argument(
+                "--packets",
+                type=ArgumentType.integer_range(minimum=1),
+                help="The number of packets sent"
+            )
+            specific.add_argument(
+                "--size",
+                type=ArgumentType.integer_range(minimum=1),
+                help="The size of packets sent"
+            )
+            specific.add_argument(
+                "--protocol",
+                type=str,
+                choices=("ICMP", "UDP", "TCP"),
+                help="The protocol used."
+            )
+            specific.add_argument(
+                "--timeout",
+                type=ArgumentType.integer_range(minimum=1),
+                default=conf["specification"]["types"]["traceroute"]["timeout"],
+                help="The timeout per-packet"
+            )
+            specific.add_argument(
+                "--dont-fragment",
+                action="store_true",
+                default=conf["specification"]["types"]["traceroute"]["dont-fragment"],
+                help="Don't Fragment the packet"
+            )
+            specific.add_argument(
+                "--paris",
+                type=ArgumentType.integer_range(minimum=0, maximum=64),
+                default=conf["specification"]["types"]["traceroute"]["paris"],
+                help="Use Paris. Value must be between 0 and 64."
+                     "If 0, a standard traceroute will be performed"
+            )
+            specific.add_argument(
+                "--first-hop",
+                type=ArgumentType.integer_range(minimum=1, maximum=255),
+                default=conf["specification"]["types"]["traceroute"]["first-hop"],
+                help="Value must be between 1 and 255"
+            )
+            specific.add_argument(
+                "--max-hops",
+                type=ArgumentType.integer_range(minimum=1, maximum=255),
+                default=conf["specification"]["types"]["traceroute"]["max-hops"],
+                help="Value must be between 1 and 255"
+            )
+            specific.add_argument(
+                "--port",
+                type=ArgumentType.integer_range(minimum=1, maximum=2**16),
+                default=conf["specification"]["types"]["traceroute"]["port"],
+                help="Destination port, valid for TCP only"
+            )
+            specific.add_argument(
+                "--destination-option-size",
+                type=ArgumentType.integer_range(minimum=1),
+                default=conf["specification"]["types"]["traceroute"]["destination-option-size"],
+                help="IPv6 destination option header"
+            )
+            specific.add_argument(
+                "--hop-by-hop-option-size",
+                type=ArgumentType.integer_range(minimum=1),
+                default=conf["specification"]["types"]["traceroute"]["hop-by-hop-option-size"],
+                help=" IPv6 hop by hop option header"
+            )
+
+        if self._type == "dns":
+            specific = self.parser.add_argument_group("DNS-specific Options")
+            specific.add_argument(
+                "--protocol",
+                type=str,
+                choices=("UDP", "TCP"),
+                help="The protocol used."
+            )
+            specific.add_argument(
+                "--query-class",
+                type=str,
+                choices=("IN", "CHAOS"),
+                default=conf["specification"]["types"]["dns"]["query-class"],
+                help='The query class.  The default is "{}"'.format(
+                    conf["specification"]["types"]["dns"]["query-class"]
+                )
+            )
+            specific.add_argument(
+                "--query-type",
+                type=str,
+                choices=list(Message.ANSWER_CLASSES.keys()) + ["ANY"],  # The only ones we can parse
+                default=conf["specification"]["types"]["dns"]["query-type"],
+                help='The query type.  The default is "{}"'.format(
+                    conf["specification"]["types"]["dns"]["query-type"]
+                )
+            )
+            specific.add_argument(
+                "--query-argument",
+                type=str,
+                default=conf["specification"]["types"]["dns"]["query-argument"],
+                help="The DNS label to query"
+            )
+            specific.add_argument(
+                "--set-cd-bit",
+                action="store_true",
+                default=conf["specification"]["types"]["dns"]["set-cd-bit"],
+                help="Set the DNSSEC Checking Disabled flag (RFC4035)"
+            )
+            specific.add_argument(
+                "--set-do-bit",
+                action="store_true",
+                default=conf["specification"]["types"]["dns"]["set-do-bit"],
+                help="Set the DNSSEC OK flag (RFC3225)"
+            )
+            specific.add_argument(
+                "--set-nsid-bit",
+                action="store_true",
+                default=conf["specification"]["types"]["dns"]["set-nsid-bit"],
+                help="Include an EDNS name server ID request with the query"
+            )
+            specific.add_argument(
+                "--set-rd-bit",
+                action="store_true",
+                default=conf["specification"]["types"]["dns"]["set-rd-bit"],
+                help="Set the Recursion Desired flag"
+            )
+            specific.add_argument(
+                "--retry",
+                type=ArgumentType.integer_range(minimum=1),
+                default=conf["specification"]["types"]["dns"]["retry"],
+                help="Number of times to retry"
+            )
+            specific.add_argument(
+                "--udp-payload-size",
+                type=ArgumentType.integer_range(minimum=1),
+                default=conf["specification"]["types"]["dns"]["udp-payload-size"],
+                help="May be any integer between 512 and 4096 inclusive"
+            )
+
+        if self._type == "ntp":
+            specific = self.parser.add_argument_group("NTP-specific Options")
+            specific.add_argument(
+                "--timeout",
+                type=ArgumentType.integer_range(minimum=1),
+                default=conf["specification"]["types"]["ntp"]["timeout"],
+                help="The timeout per-packet"
+            )
 
     def run(self):
 
