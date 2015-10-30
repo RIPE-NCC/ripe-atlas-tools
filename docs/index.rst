@@ -26,3 +26,4 @@ Contents:
    installation
    quickstart
    use
+   troubleshooting
