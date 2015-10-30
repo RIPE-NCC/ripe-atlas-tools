@@ -532,7 +532,7 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["not-a-type"])
+                self.cmd.init_args(["ping", "not-a-type"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument type: invalid choice: "
@@ -542,7 +542,7 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["--renderer", "not-a-renderer"])
+                self.cmd.init_args(["ping", "--renderer", "not-a-renderer"])
             self.assertTrue(stderr.getvalue().split("\n")[-2].startswith(
                 "ripe-atlas measure: error: argument --renderer: invalid "
                 "choice: 'not-a-renderer' (choose from"
@@ -550,7 +550,7 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["--af", "5"])
+                self.cmd.init_args(["ping", "--af", "5"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --af: invalid choice: 5 "
@@ -559,7 +559,7 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["--target", "not a target"])
+                self.cmd.init_args(["ping", "--target", "not a target"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --target: "
@@ -569,14 +569,14 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["--from-area", "not an area"])
+                self.cmd.init_args(["ping", "--from-area", "not an area"])
             self.assertTrue(stderr.getvalue().split("\n")[-2].startswith(
                 "ripe-atlas measure: error: argument --from-area: invalid "
                 "choice:"))
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["--from-probes", "0,50000"])
+                self.cmd.init_args(["ping", "--from-probes", "0,50000"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --from-probes: 0 "
@@ -599,11 +599,20 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["--protocol", "invalid"])
+                self.cmd.init_args(["traceroute", "--protocol", "invalid"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --protocol: invalid "
                 "choice: 'invalid' (choose from 'ICMP', 'UDP', 'TCP')"
+            )
+
+        with capture_sys_output() as (stdout, stderr):
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args(["dns", "--protocol", "invalid"])
+            self.assertEqual(
+                stderr.getvalue().split("\n")[-2],
+                "ripe-atlas measure: error: argument --protocol: invalid "
+                "choice: 'invalid' (choose from 'UDP', 'TCP')"
             )
 
         min_options = {
