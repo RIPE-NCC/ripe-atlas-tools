@@ -28,15 +28,19 @@ class TestArgumentTypeHelper(unittest.TestCase):
     def test_comma_separated_integers(self):
 
         self.assertEqual(
-            [1, 2, 3], ArgumentType.comma_separated_integers("1,2,3"))
+            [1, 2, 3], ArgumentType.comma_separated_integers()("1,2,3"))
 
         self.assertEqual(
-            [1, 2, 3], ArgumentType.comma_separated_integers("1, 2, 3"))
+            [1, 2, 3], ArgumentType.comma_separated_integers()("1, 2, 3"))
 
-        self.assertEqual([1], ArgumentType.comma_separated_integers("1"))
+        self.assertEqual([1], ArgumentType.comma_separated_integers()("1"))
 
         with self.assertRaises(argparse.ArgumentTypeError):
-            ArgumentType.comma_separated_integers("1,2,3,pizza!")
+            ArgumentType.comma_separated_integers()("1,2,3,pizza!")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            ArgumentType.comma_separated_integers(minimum=5)("4,5,6,7")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            ArgumentType.comma_separated_integers(maximum=5)("1,2,3,4,6")
 
     def test_datetime(self):
 
@@ -67,3 +71,15 @@ class TestArgumentTypeHelper(unittest.TestCase):
         for value in ("0", "11", "-1"):
             with self.assertRaises(argparse.ArgumentTypeError):
                 ArgumentType.integer_range(1, 10)(value)
+
+    def test_ip_or_domain(self):
+
+        passable_hosts = (
+            "localhost", "ripe.net", "www.ripe.net", "1.2.3.4",
+            "2001:67c:2e8:22::c100:68b"
+        )
+        for host in passable_hosts:
+            self.assertEqual(host, ArgumentType.ip_or_domain(host))
+
+        with self.assertRaises(argparse.ArgumentTypeError):
+            ArgumentType.ip_or_domain("Definitely not a host")
