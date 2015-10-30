@@ -40,7 +40,10 @@ class Command(BaseCommand):
         )
         self.parser.add_argument(
             "--probes",
-            type=ArgumentType.comma_separated_integers,
+            type=ArgumentType.comma_separated_integers(
+                minimum=1,
+                maximum=50000
+            ),
             help="A comma-separated list of probe ids you want to see "
                  "exclusively."
         )

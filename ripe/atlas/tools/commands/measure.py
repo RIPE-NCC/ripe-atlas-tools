@@ -80,7 +80,7 @@ class Command(BaseCommand):
         )
         self.parser.add_argument(  # Most types
             "--target",
-            type=str,
+            type=ArgumentType.ip_or_domain,
             help="The target, either a domain name or IP address.  If creating "
                  "a DNS measurement, the absence of this option will imply "
                  "that you wish to use the probe's resolver."
@@ -126,21 +126,21 @@ class Command(BaseCommand):
         )
         origins.add_argument(
             "--from-asn",
-            type=int,
+            type=ArgumentType.integer_range(1, 2**32),
             metavar="ASN",
             help="The ASN from which you'd like to select your probes. "
-                 "Example: --from-asn=3265"
+                 "Example: --from-asn=3333"
         )
         origins.add_argument(
             "--from-probes",
-            type=ArgumentType.comma_separated_integers,
+            type=ArgumentType.comma_separated_integers(minimum=1),
             metavar="PROBES",
             help="A comma-separated list of probe-ids you want to use in your "
                  "measurement. Example: --from-probes=1,2,34,157,10006"
         )
         origins.add_argument(
             "--from-measurement",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1),
             metavar="MEASUREMENT_ID",
             help="A measurement id which you want to use as the basis for "
                  "probe selection in your new measurement.  This is a handy "
@@ -149,13 +149,13 @@ class Command(BaseCommand):
         )
         self.parser.add_argument(
             "--probes",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1),
             default=conf["specification"]["source"]["requested"],
             help="The number of probes you want to use"
         )
         self.parser.add_argument(
             "--include-tag",
-            type=str,
+            type=ArgumentType.regex(r"^[a-z_\-]+$"),
             action="append",
             metavar="TAG",
             help="Include only probes that are marked with these tags. "
@@ -163,11 +163,11 @@ class Command(BaseCommand):
         )
         self.parser.add_argument(
             "--exclude-tag",
-            type=str,
+            type=ArgumentType.regex(r"^[a-z_\-]+$"),
             action="append",
             metavar="TAG",
             help="Exclude probes that are marked with these tags. "
-                 "Example: --exclude-tag=NAT"
+                 "Example: --exclude-tag=system-ipv6-works"
         )
 
         # Type-specific
@@ -175,10 +175,14 @@ class Command(BaseCommand):
         ping_or_trace = self.parser.add_argument_group(
             "Ping and Traceroute Measurements")
         ping_or_trace.add_argument(
-            "--packets", type=int, help="The number of packets sent"
+            "--packets",
+            type=ArgumentType.integer_range(minimum=1),
+            help="The number of packets sent"
         )
         ping_or_trace.add_argument(
-            "--size", type=int, help="The size of packets sent"
+            "--size",
+            type=ArgumentType.integer_range(minimum=1),
+            help="The size of packets sent"
         )
 
         trace_or_dns = self.parser.add_argument_group(
@@ -195,7 +199,7 @@ class Command(BaseCommand):
             "Ping Measurements")
         ping.add_argument(
             "--packet-interval",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1),
             default=conf["specification"]["types"]["ping"]["packet-interval"],
         )
 
@@ -203,7 +207,7 @@ class Command(BaseCommand):
             "Traceroute Measurements")
         traceroute.add_argument(
             "--timeout",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1),
             default=conf["specification"]["types"]["traceroute"]["timeout"],
             help="The timeout per-packet"
         )
@@ -215,38 +219,38 @@ class Command(BaseCommand):
         )
         traceroute.add_argument(
             "--paris",
-            type=int,
+            type=ArgumentType.integer_range(minimum=0, maximum=64),
             default=conf["specification"]["types"]["traceroute"]["paris"],
             help="Use Paris. Value must be between 0 and 64."
                  "If 0, a standard traceroute will be performed"
         )
         traceroute.add_argument(
             "--first-hop",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1, maximum=255),
             default=conf["specification"]["types"]["traceroute"]["first-hop"],
             help="Value must be between 1 and 255"
         )
         traceroute.add_argument(
             "--max-hops",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1, maximum=255),
             default=conf["specification"]["types"]["traceroute"]["max-hops"],
             help="Value must be between 1 and 255"
         )
         traceroute.add_argument(
             "--port",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1, maximum=2**16),
             default=conf["specification"]["types"]["traceroute"]["port"],
             help="Destination port, valid for TCP only"
         )
         traceroute.add_argument(
             "--destination-option-size",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1),
             default=conf["specification"]["types"]["traceroute"]["destination-option-size"],
             help="IPv6 destination option header"
         )
         traceroute.add_argument(
             "--hop-by-hop-option-size",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1),
             default=conf["specification"]["types"]["traceroute"]["hop-by-hop-option-size"],
             help=" IPv6 hop by hop option header"
         )
@@ -302,13 +306,13 @@ class Command(BaseCommand):
         )
         dns.add_argument(
             "--retry",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1),
             default=conf["specification"]["types"]["dns"]["retry"],
             help="Number of times to retry"
         )
         dns.add_argument(
             "--udp-payload-size",
-            type=int,
+            type=ArgumentType.integer_range(minimum=1),
             default=conf["specification"]["types"]["dns"]["udp-payload-size"],
             help="May be any integer between 512 and 4096 inclusive"
         )
