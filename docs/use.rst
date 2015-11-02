@@ -357,22 +357,22 @@ Option                        Arguments           Explanation
                                                   return.  The number must be
                                                   between 1 and 1000
 
---started-before              An ISO timestamp    Filter for measurements that
+``--started-before``          An ISO timestamp    Filter for measurements that
                                                   started before a specific
                                                   date. The format required is
                                                   YYYY-MM-DDTHH:MM:SS
 
---started-after               An ISO timestamp    Filter for measurements that
+``--started-after``           An ISO timestamp    Filter for measurements that
                                                   started after a specific date.
                                                   The format required is
                                                   YYYY-MM-DDTHH:MM:SS
 
---stopped-before              An ISO timestamp    Filter for measurements that
+``--stopped-before``          An ISO timestamp    Filter for measurements that
                                                   stopped before a specific
                                                   date. The format required is
                                                   YYYY-MM-DDTHH:MM:SS
 
---stopped-after               An ISO timestamp    Filter for measurements that
+``--stopped-after``           An ISO timestamp    Filter for measurements that
                                                   stopped after a specific date.
                                                   The format required is
                                                   YYYY-MM-DDTHH:MM:SS
