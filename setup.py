@@ -52,13 +52,17 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
             "scripts/antp",
             "scripts/ripe-atlas",
         ],
+        keywords=['RIPE', 'RIPE NCC', 'RIPE Atlas', 'Command Line'],
         classifiers=[
+            "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
             "Operating System :: POSIX",
             "Operating System :: Unix",
             "Programming Language :: Python",
             "Programming Language :: Python :: 2.7",
             "Programming Language :: Python :: 3.3",
             "Programming Language :: Python :: 3.4",
+            "Programming Language :: Python :: Implementation :: CPython",
+            "Programming Language :: Python :: Implementation :: PyPy",
             "Topic :: Internet :: WWW/HTTP",
         ],
     )
