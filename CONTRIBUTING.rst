@@ -9,29 +9,35 @@ we adhere to the `Code of Conduct`_ by the Python Software Foundation.
 
 The following steps will help you get started:
 
-Fork, then clone the repo:::
+Fork, then clone the repo:
 
-    git clone git@github.com:your-username/ripe-atlas-tools.git
+.. code:: bash
 
-Make sure the tests pass beforehand:::
+    $ git clone git@github.com:your-username/ripe-atlas-tools.git
 
-    tox
+Make sure the tests pass beforehand:
 
-or
+.. code:: bash
 
-::
-
-    nosetests tests/
-
-Make your changes. Include tests for your change. Make the tests pass:::
-
-    tox
+    $ tox
 
 or
 
-::
+.. code:: bash
 
-    nosetests tests/
+    $ nosetests tests/
+
+Make your changes. Include tests for your change. Make the tests pass:
+
+.. code:: bash
+
+    $ tox
+
+or
+
+.. code:: bash
+
+    $ nosetests tests/
 
 Push to your fork and `submit a pull request`_.
 
