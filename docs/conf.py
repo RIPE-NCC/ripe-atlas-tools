@@ -15,8 +15,12 @@
 import sys
 import os
 
-__version__ = None
-exec(open("../ripe/atlas/tools/version.py").read())
+from ripe.atlas.tools.version import __version__
+
+
+# Believe it or not, this is the officially sanctioned way to add custom CSS.
+def setup(app):
+    app.add_stylesheet("custom.css")
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -205,7 +209,6 @@ try:
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 except ImportError:
     pass
-
 
 # -- Options for LaTeX output ---------------------------------------------
 
