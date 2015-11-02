@@ -1,7 +1,6 @@
-RIPE Atlas Tools (Magellan) |Documentation|
-===========================================
-
-|Build Status| |PYPI Version| |Python Versions| |Python Implementations| |Python Format|
+RIPE Atlas Tools (Magellan)
+===========================
+|Documentation| |Build Status| |PYPI Version| |Python Versions| |Python Implementations| |Python Format|
 
 The official command-line client for RIPE Atlas.
 
