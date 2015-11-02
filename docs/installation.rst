@@ -72,7 +72,7 @@ Gentoo
 
 If you're a Gentoo user, you never have to worry about development libraries,
 but if you intend to use the bleeding-edge version of this package (and what
-self-respecing Gentoo user wouldn't?) then you'll probably want to make sure
+self-respecting Gentoo user wouldn't?) then you'll probably want to make sure
 that git is built with curl support:
 
 .. code:: bash
@@ -85,8 +85,19 @@ code from GitHub, then Gentoo will have everything ready for you.
 Apple OSX
 .........
 
-Get a free copy of Xcode from the app store, and from there you should be good
-to go.
+These instructions expect that you've got Python's ``pip`` installed, so if you
+have no idea what that is, or simply don't have it yet, you should be able to
+install pip with one easy command (as root):
+
+.. code:: bash
+
+    # easy_install pip
+
+Outside of that, a few of the Python dependencies require that you have a
+compiler on your system.  For this, you need only get a free copy of `Xcode`_
+from the app store, and from there you should be good to go.
+
+.. _Xcode: https://itunes.apple.com/us/app/xcode/id497799835
 
 
 .. _installation-python-requirements:
