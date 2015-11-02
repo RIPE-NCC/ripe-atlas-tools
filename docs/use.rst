@@ -5,8 +5,8 @@ How to Use the RIPE Atlas Toolkit
 
 .. _use-configure:
 
-Configure
-=========
+Configuration
+=============
 
 For most features, Magellan will work out-of-the-box, but if you'd like to
 customise the experience, or if you want to use this tool to create a
@@ -59,8 +59,8 @@ notation to dictation the value you wish to change::
 
 .. _use-go:
 
-Quick Measurement Information (go)
-==================================
+Quick Measurement Information
+=============================
 
 For the impatient, and for those looking to see how they might write their own
 plugins, we have a simple ``go`` command:::
@@ -71,10 +71,404 @@ This will open a web browser and take you to the detail page for the measurement
 id provided.
 
 
+.. _use-measurements:
+
+Measurement Querying
+====================
+
+A querying tool for finding existing measurements in the RIPE Atlas database.
+You can request a table-formatted list of measurements based on search-string
+lookups, type, start time, etc.
+
+
+.. _use-measurements-options:
+
+Options
+-------
+
+============================  ==================  ==============================
+Option                        Arguments           Explanation
+============================  ==================  ==============================
+``--search``                  A free-form string  This could match the target or
+                                                  description.
+
+``--status``                  One of: scheduled,  The measurement status.
+                              stopped, ongoing
+
+``--af``                      One of: 4, 6        The address family.
+
+``--type``                    One of: ping,       The measurement type.
+                              traceroute, dns,
+                              sslcert, ntp,
+                              http
+
+``--field``                   One of: status,     The field(s) to display.
+                              target, url, type,  Invoke multiple times for
+                              id, description     multiple fields. The default
+                                                  is id, type, description, and
+                                                  status.
+
+``--ids-only``                                    Display a list of measurement
+                                                  ids matching your filter
+                                                  criteria.
+
+``--limit``                   An integer          The number of measurements to
+                                                  return.  The number must be
+                                                  between 1 and 1000
+
+``--started-before``          An ISO timestamp    Filter for measurements that
+                                                  started before a specific
+                                                  date. The format required is
+                                                  YYYY-MM-DDTHH:MM:SS
+
+``--started-after``           An ISO timestamp    Filter for measurements that
+                                                  started after a specific date.
+                                                  The format required is
+                                                  YYYY-MM-DDTHH:MM:SS
+
+``--stopped-before``          An ISO timestamp    Filter for measurements that
+                                                  stopped before a specific
+                                                  date. The format required is
+                                                  YYYY-MM-DDTHH:MM:SS
+
+``--stopped-after``           An ISO timestamp    Filter for measurements that
+                                                  stopped after a specific date.
+                                                  The format required is
+                                                  YYYY-MM-DDTHH:MM:SS
+============================  ==================  ==============================
+
+
+.. _use-measurements-examples:
+
+Examples
+--------
+
+Get a list of measurements::
+
+    $ ripe-atlas measurements
+
+Filter that list by ``status=ongoing``::
+
+    $ ripe-atlas measurements --status ongoing
+
+Further filter it by getting measurements that conform to IPv6::
+
+    $ ripe-atlas measurements --status ongoing --af 6
+
+Get that same list, but strip out everything but the measurement ids::
+
+    $ ripe-atlas measurements --status ongoing --af 6 --ids-only
+
+Limit that list to 200 entries::
+
+    $ ripe-atlas measurements --status ongoing --af 6 --limit 200
+
+Get that list, but show only the id, url and target fields:
+
+    $ ripe-atlas measurements --status ongoing --af 6 \
+      --field id --field url --field target
+
+Filter for measurements of type ``dns`` that started after January 1, 2015::
+
+    $ ripe-atlas measurements --type dns --started-after 2015-01-01
+
+
+.. _use-probes:
+
+Probe Querying
+==============
+
+Just like the ``measurements`` command, but for probes, and a lot more powerful.
+You can use this command to find probes within an ASN, prefix, or geographical
+region, and then aggregate by country, ASN, and/or prefix.
+
+
+.. _use-probes-options:
+
+Options
+-------
+
+============================  ==================  ==============================
+Option                        Arguments           Explanation
+============================  ==================  ==============================
+``--limit``                   An integer          Return limited number of
+                                                  probes.
+
+``--field``                   One of: status,     The field(s) to display.
+                              description,        Invoke multiple times for
+                              address_v6,         multiple fields. The default
+                              address_v4,         is id, asn_v4, asn_v6,
+                              asn_v4, is_public,  country, and status.
+                              asn_v6, id,
+                              prefix_v4,
+                              prefix_v6,
+                              is_anchor,
+                              country,
+                              coordinates
+
+``--aggregate-by``            country, asn_v4,    Aggregate list of probes based
+                              asn_v6,             on all specified aggregations.
+                              prefix_v4,          Multiple aggregations
+                              prefix_v6           supported.
+
+``--all``                                         Fetch *ALL* probes. That will
+                                                  give you a loooong list.
+
+``--max-per-aggregation``     An integer          Maximum number of probes per
+                                                  aggregated bucket.
+
+``--ids-only``                                    Print only IDs of probes.
+                                                  Useful to pipe it to another
+                                                  command.
+
+``--asn``                     An integer          Filter the list by an ASN
+
+``--asnv4``                   An integer          Filter the list by an ASN
+
+``--asnv6``                   An integer          Filter the list by an ASN
+
+``--prefix``                  A prefix string     Filter the list by a prefix
+
+``--prefixv4``                A prefix string     Filter the list by a prefix
+
+``--prefixv6``                A prefix string     Filter the list by a prefix
+
+``--location``                A free-form string  The location of probes as a
+                                                  string i.e. 'Amsterdam'
+
+``--center``                  A pair of           Location as
+                              geographic          <lat>,<lon>-string, i.e.
+                              coordinates         "48.45,9.16"
+
+``--radius``                  An integer          Radius in km from specified
+                                                  center/point.
+
+``--country``                 A two-letter        The country in which the
+                              ISO country code    probes are located.
+============================  ==================  ==============================
+
+Examples
+--------
+
+Get a list of probes within ASN 3333::
+
+    $ ripe-atlas probes --asn 3333
+
+Further filter that list to show only probes in ASN 3333 from the Netherlands::
+
+    $ ripe-atlas probes --asn 3333 --country nl
+
+Change the limit from the default of 25 to 200::
+
+    $ ripe-atlas probes --asn 3333 --limit 200
+
+Aggregate the probes by country, and then by ASN::
+
+    $ ripe-atlas probes --asn 3333 --aggregate-by country --aggregate-by asn
+
+Show the id, url, target, description, and whether the probe is public or not::
+
+    $ ripe-atlas probes --asn 3333 --field id --field url --field description \
+      --field is_public
+
+
+.. _use-report:
+
+Result Reporting
+================
+
+A means to generate a simple text-based report based on the results from a
+measurement.  Typically, this is used to get the latest results of a measurement
+in a human-readable format, but with the ``--start-time`` and ``--stop-time``
+options, you can get results from any time range you like.
+
+
+.. _use-report-options:
+
+Options
+-------
+
+==================  ==================  ========================================
+Option              Arguments           Explanation
+==================  ==================  ========================================
+``--probes``        A comma-separated   Limit the report to only results
+                    list of probe ids   obtained from specific probes.
+
+``--renderer``      One of: dns, http,  The renderer you want to use. If this
+                    ntp, ping, raw,     isn't defined, an appropriate renderer
+                    ssl_consistency,    will be selected.
+                    sslcert,
+                    traceroute,
+                    traceroute_aspath,
+                    aggregate_ping
+
+``--aggregate-by``  One of: status,     Tell the rendering engine to aggregate
+                    prefix_v4,          the results by the selected option. Note
+                    prefix_v6,          that if you opt for aggregation, no
+                    country,            output will be generated until all
+                    rtt-median,         results are received.
+                    asn_v4, asn_v6
+
+``--start-time``    An ISO timestamp    The start time of the report. The format
+                                        should conform to YYYY-MM-DDTHH:MM:SS
+
+``--stop-time``     An ISO timestamp    The stop time of the report. The format
+                                        should conform to YYYY-MM-DDTHH:MM:SS
+==================  ==================  ========================================
+
+
+.. _use-report-examples:
+
+Examples
+--------
+
+Get the latest results of measurement 1001::
+
+    $ ripe-atlas report 1001
+
+The same, but specifically request the ping renderer::
+
+    $ ripe-atlas report 1001 --renderer ping
+
+Aggregate those results by country::
+
+    $ ripe-atlas report 1001 --aggregate-by country
+
+Get results from the same measurement, but show all results from the first week
+of 2015::
+
+    $ ripe-atlas report 1001 --start-time 2015-01-01 --stop-time 2015-01-07
+
+Get results from the first day of 2015 until right now::
+
+    $ ripe-atlas report 1001 --start-time 2015-01-01
+
+
+.. _use-stream:
+
+Result Streaming
+================
+
+Connect to the streaming API and render the results in real-time as they come
+in.
+
+.. _use-stream-options:
+
+Options
+-------
+
+==================  ==================  ========================================
+Option              Arguments           Explanation
+==================  ==================  ========================================
+``--limit``         A number < 1000     The maximum number of results you want
+                                        to stream.  The default is to stream
+                                        forever until you hit ``Ctrl+C``.
+
+``--renderer``      One of: dns, http,  The renderer you want to use. If this
+                    ntp, ping, raw,     isn't defined, an appropriate renderer
+                    ssl_consistency,    will be selected.
+                    sslcert,
+                    traceroute,
+                    traceroute_aspath,
+                    aggregate_ping
+==================  ==================  ========================================
+
+
+.. _use-stream-examples:
+
+Examples
+--------
+
+Stream the results from measurement #1001::
+
+    $ ripe-atlas stream 1001
+
+Limit those results to 500::
+
+    $ ripe-atlas stream 1001 --limit 500
+
+Specify a renderer::
+
+    $ ripe-atlas stream 1001 --renderer ping
+
+Combine for fun and profit::
+
+    $ ripe-atlas stream 1001 --renderer ping --limit 500
+
+
+.. _use-render:
+
+Result Rendering
+================
+
+Sometimes you already have a large collection of measurement results and you
+just want Magellan to render them nicely for you.  In these cases, ``render`` is
+your friend.
+
+You can use the ``--renderer`` flag to target specific renderers too if the
+default isn't enough for you.
+
+
+.. _use-render-options:
+
+Options
+-------
+
+==================  ==================  ========================================
+Option              Arguments           Explanation
+==================  ==================  ========================================
+``--renderer``      One of: dns, http,  The renderer you want to use. If this
+                    ntp, ping, raw,     isn't defined, an appropriate renderer
+                    ssl_consistency,    will be selected.
+                    sslcert,
+                    traceroute,
+                    traceroute_aspath,
+                    aggregate_ping
+
+``--probes``        A comma-separated   Limit the results to those returned from
+                    list of probe ids   specific probes
+
+``--from-file``     A file path         The source of the data to be rendered.
+                                        If nothing is specified, we assume "-"
+                                        or, standard in (the default).
+
+``--aggregate-by``  One of: dns, ntp,   Tell the rendering engine to aggregate
+                    http, ping, raw,    the results by the selected option. Note
+                    ssl_consistency,    that if you opt for aggregation, no
+                    sslcert,            output will be generated until all
+                    traceroute,         results are received, and if large data
+                    traceroute_aspath,  sets may explode your system.
+                    aggregate_ping,
+==================  ==================  ========================================
+
+
+.. _use-render-examples:
+
+Examples
+--------
+
+Pipe the contents of an arbitrary file file into the renderer.  The rendering
+engine will be guessed from the first line of input::
+
+    $ cat /path/to/file/full/of/results | ripe-atlas render
+
+The same, but point Magellan to a file deliberately rather than using a pipe::
+
+    $ ripe-atlas render --from-file /path/to/file/full/of/results
+
+Specify a particular renderer::
+
+    $ cat /path/to/file/full/of/results | ripe-atlas render --renderer ping
+
+Aggregate the output by country::
+
+    $ cat /path/to/file/full/of/results | ripe-atlas render --aggregate-by country
+
+
 .. _use-measure:
 
-Measure
-=======
+Measurement Creation
+====================
 
 The most complicated command we have, this will create a measurement (given a
 plethora of options) and begin streaming the results back to you in a
@@ -310,398 +704,3 @@ complex query::
 
     $ ripe-atlas measure dns --query-type AAAA --query-argument example.com \
       --set-nsid-bit --set-rd-bit --set-do-bit --set-cd-bit
-
-
-.. _use-measurements:
-
-Measurements
-============
-
-A querying tool for finding existing measurements in the RIPE Atlas database.
-You can request a table-formatted list of measurements based on search-string
-lookups, type, start time, etc.
-
-
-.. _use-measurements-options:
-
-Options
--------
-
-============================  ==================  ==============================
-Option                        Arguments           Explanation
-============================  ==================  ==============================
-``--search``                  A free-form string  This could match the target or
-                                                  description.
-
-``--status``                  One of: scheduled,  The measurement status.
-                              stopped, ongoing
-
-``--af``                      One of: 4, 6        The address family.
-
-``--type``                    One of: ping,       The measurement type.
-                              traceroute, dns,
-                              sslcert, ntp,
-                              http
-
-``--field``                   One of: status,     The field(s) to display.
-                              target, url, type,  Invoke multiple times for
-                              id, description     multiple fields. The default
-                                                  is id, type, description, and
-                                                  status.
-
-``--ids-only``                                    Display a list of measurement
-                                                  ids matching your filter
-                                                  criteria.
-
-``--limit``                   An integer          The number of measurements to
-                                                  return.  The number must be
-                                                  between 1 and 1000
-
-``--started-before``          An ISO timestamp    Filter for measurements that
-                                                  started before a specific
-                                                  date. The format required is
-                                                  YYYY-MM-DDTHH:MM:SS
-
-``--started-after``           An ISO timestamp    Filter for measurements that
-                                                  started after a specific date.
-                                                  The format required is
-                                                  YYYY-MM-DDTHH:MM:SS
-
-``--stopped-before``          An ISO timestamp    Filter for measurements that
-                                                  stopped before a specific
-                                                  date. The format required is
-                                                  YYYY-MM-DDTHH:MM:SS
-
-``--stopped-after``           An ISO timestamp    Filter for measurements that
-                                                  stopped after a specific date.
-                                                  The format required is
-                                                  YYYY-MM-DDTHH:MM:SS
-============================  ==================  ==============================
-
-
-.. _use-measurements-examples:
-
-Examples
---------
-
-Get a list of measurements::
-
-    $ ripe-atlas measurements
-
-Filter that list by ``status=ongoing``::
-
-    $ ripe-atlas measurements --status ongoing
-
-Further filter it by getting measurements that conform to IPv6::
-
-    $ ripe-atlas measurements --status ongoing --af 6
-
-Get that same list, but strip out everything but the measurement ids::
-
-    $ ripe-atlas measurements --status ongoing --af 6 --ids-only
-
-Limit that list to 200 entries::
-
-    $ ripe-atlas measurements --status ongoing --af 6 --limit 200
-
-Get that list, but show only the id, url and target fields:
-
-    $ ripe-atlas measurements --status ongoing --af 6 \
-      --field id --field url --field target
-
-Filter for measurements of type ``dns`` that started after January 1, 2015::
-
-    $ ripe-atlas measurements --type dns --started-after 2015-01-01
-
-
-.. _use-probes:
-
-Probes
-======
-
-Just like the ``measurements`` command, but for probes, and a lot more powerful.
-You can use this command to find probes within an ASN, prefix, or geographical
-region, and then aggregate by country, ASN, and/or prefix.
-
-
-.. _use-probes-options:
-
-Options
--------
-
-============================  ==================  ==============================
-Option                        Arguments           Explanation
-============================  ==================  ==============================
-``--limit``                   An integer          Return limited number of
-                                                  probes.
-
-``--field``                   One of: status,     The field(s) to display.
-                              description,        Invoke multiple times for
-                              address_v6,         multiple fields. The default
-                              address_v4,         is id, asn_v4, asn_v6,
-                              asn_v4, is_public,  country, and status.
-                              asn_v6, id,
-                              prefix_v4,
-                              prefix_v6,
-                              is_anchor,
-                              country,
-                              coordinates
-
-``--aggregate-by``            country, asn_v4,    Aggregate list of probes based
-                              asn_v6,             on all specified aggregations.
-                              prefix_v4,          Multiple aggregations
-                              prefix_v6           supported.
-
-``--all``                                         Fetch *ALL* probes. That will
-                                                  give you a loooong list.
-
-``--max-per-aggregation``     An integer          Maximum number of probes per
-                                                  aggregated bucket.
-
-``--ids-only``                                    Print only IDs of probes.
-                                                  Useful to pipe it to another
-                                                  command.
-
-``--asn``                     An integer          Filter the list by an ASN
-
-``--asnv4``                   An integer          Filter the list by an ASN
-
-``--asnv6``                   An integer          Filter the list by an ASN
-
-``--prefix``                  A prefix string     Filter the list by a prefix
-
-``--prefixv4``                A prefix string     Filter the list by a prefix
-
-``--prefixv6``                A prefix string     Filter the list by a prefix
-
-``--location``                A free-form string  The location of probes as a
-                                                  string i.e. 'Amsterdam'
-
-``--center``                  A pair of           Location as
-                              geographic          <lat>,<lon>-string, i.e.
-                              coordinates         "48.45,9.16"
-
-``--radius``                  An integer          Radius in km from specified
-                                                  center/point.
-
-``--country``                 A two-letter        The country in which the
-                              ISO country code    probes are located.
-============================  ==================  ==============================
-
-Examples
---------
-
-Get a list of probes within ASN 3333::
-
-    $ ripe-atlas probes --asn 3333
-
-Further filter that list to show only probes in ASN 3333 from the Netherlands::
-
-    $ ripe-atlas probes --asn 3333 --country nl
-
-Change the limit from the default of 25 to 200::
-
-    $ ripe-atlas probes --asn 3333 --limit 200
-
-Aggregate the probes by country, and then by ASN::
-
-    $ ripe-atlas probes --asn 3333 --aggregate-by country --aggregate-by asn
-
-Show the id, url, target, description, and whether the probe is public or not::
-
-    $ ripe-atlas probes --asn 3333 --field id --field url --field description \
-      --field is_public
-
-
-.. _use-render:
-
-Render
-======
-
-Sometimes you already have a large collection of measurement results and you
-just want Magellan to render them nicely for you.  In these cases, ``render`` is
-your friend.
-
-You can use the ``--renderer`` flag to target specific renderers too if the
-default isn't enough for you.
-
-
-.. _use-render-options:
-
-Options
--------
-
-==================  ==================  ========================================
-Option              Arguments           Explanation
-==================  ==================  ========================================
-``--renderer``      One of: dns, http,  The renderer you want to use. If this
-                    ntp, ping, raw,     isn't defined, an appropriate renderer
-                    ssl_consistency,    will be selected.
-                    sslcert,
-                    traceroute,
-                    traceroute_aspath,
-                    aggregate_ping
-
-``--probes``        A comma-separated   Limit the results to those returned from
-                    list of probe ids   specific probes
-
-``--from-file``     A file path         The source of the data to be rendered.
-                                        If nothing is specified, we assume "-"
-                                        or, standard in (the default).
-
-``--aggregate-by``  One of: dns, ntp,   Tell the rendering engine to aggregate
-                    http, ping, raw,    the results by the selected option. Note
-                    ssl_consistency,    that if you opt for aggregation, no
-                    sslcert,            output will be generated until all
-                    traceroute,         results are received, and if large data
-                    traceroute_aspath,  sets may explode your system.
-                    aggregate_ping,
-==================  ==================  ========================================
-
-
-.. _use-render-examples:
-
-Examples
---------
-
-Pipe the contents of an arbitrary file file into the renderer.  The rendering
-engine will be guessed from the first line of input::
-
-    $ cat /path/to/file/full/of/results | ripe-atlas render
-
-The same, but point Magellan to a file deliberately rather than using a pipe::
-
-    $ ripe-atlas render --from-file /path/to/file/full/of/results
-
-Specify a particular renderer::
-
-    $ cat /path/to/file/full/of/results | ripe-atlas render --renderer ping
-
-Aggregate the output by country::
-
-    $ cat /path/to/file/full/of/results | ripe-atlas render --aggregate-by country
-
-
-.. _use-report:
-
-Report
-======
-
-A means to generate a simple text-based report based on the results from a
-measurement.  Typically, this is used to get the latest results of a measurement
-in a human-readable format, but with the ``--start-time`` and ``--stop-time``
-options, you can get results from any time range you like.
-
-
-.. _use-report-options:
-
-Options
--------
-
-==================  ==================  ========================================
-Option              Arguments           Explanation
-==================  ==================  ========================================
-``--probes``        A comma-separated   Limit the report to only results
-                    list of probe ids   obtained from specific probes.
-
-``--renderer``      One of: dns, http,  The renderer you want to use. If this
-                    ntp, ping, raw,     isn't defined, an appropriate renderer
-                    ssl_consistency,    will be selected.
-                    sslcert,
-                    traceroute,
-                    traceroute_aspath,
-                    aggregate_ping
-
-``--aggregate-by``  One of: status,     Tell the rendering engine to aggregate
-                    prefix_v4,          the results by the selected option. Note
-                    prefix_v6,          that if you opt for aggregation, no
-                    country,            output will be generated until all
-                    rtt-median,         results are received.
-                    asn_v4, asn_v6
-
-``--start-time``    An ISO timestamp    The start time of the report. The format
-                                        should conform to YYYY-MM-DDTHH:MM:SS
-
-``--stop-time``     An ISO timestamp    The stop time of the report. The format
-                                        should conform to YYYY-MM-DDTHH:MM:SS
-==================  ==================  ========================================
-
-
-.. _use-report-examples:
-
-Examples
---------
-
-Get the latest results of measurement 1001::
-
-    $ ripe-atlas report 1001
-
-The same, but specifically request the ping renderer::
-
-    $ ripe-atlas report 1001 --renderer ping
-
-Aggregate those results by country::
-
-    $ ripe-atlas report 1001 --aggregate-by country
-
-Get results from the same measurement, but show all results from the first week
-of 2015::
-
-    $ ripe-atlas report 1001 --start-time 2015-01-01 --stop-time 2015-01-07
-
-Get results from the first day of 2015 until right now::
-
-    $ ripe-atlas report 1001 --start-time 2015-01-01
-
-
-.. _use-stream:
-
-Stream
-======
-
-Connect to the streaming API and render the results in real-time as they come
-in.
-
-.. _use-stream-options:
-
-Options
--------
-
-==================  ==================  ========================================
-Option              Arguments           Explanation
-==================  ==================  ========================================
-``--limit``         A number < 1000     The maximum number of results you want
-                                        to stream.  The default is to stream
-                                        forever until you hit ``Ctrl+C``.
-
-``--renderer``      One of: dns, http,  The renderer you want to use. If this
-                    ntp, ping, raw,     isn't defined, an appropriate renderer
-                    ssl_consistency,    will be selected.
-                    sslcert,
-                    traceroute,
-                    traceroute_aspath,
-                    aggregate_ping
-==================  ==================  ========================================
-
-
-.. _use-stream-examples:
-
-Examples
---------
-
-Stream the results from measurement #1001::
-
-    $ ripe-atlas stream 1001
-
-Limit those results to 500::
-
-    $ ripe-atlas stream 1001 --limit 500
-
-Specify a renderer::
-
-    $ ripe-atlas stream 1001 --renderer ping
-
-Combine for fun and profit::
-
-    $ ripe-atlas stream 1001 --renderer ping --limit 500
-
