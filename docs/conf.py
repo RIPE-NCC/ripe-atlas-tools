@@ -15,7 +15,8 @@
 import sys
 import os
 
-from ripe.atlas.tools.version import __version__
+__version__ = None
+exec(open("../ripe/atlas/tools/version.py").read())
 
 
 # Believe it or not, this is the officially sanctioned way to add custom CSS.
