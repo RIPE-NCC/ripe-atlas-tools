@@ -11,7 +11,15 @@ try:
 except ImportError:
     import mock
 
-from ripe.atlas.tools.commands.measure import Command
+from ripe.atlas.tools.commands.measure import (
+    Command,
+    PingMeasureCommand,
+    TracerouteMeasureCommand,
+    DnsMeasureCommand,
+    SslMeasureCommand,
+    HttpMeasureCommand,
+    NtpMeasureCommand,
+)
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.settings import Configuration
 
@@ -21,59 +29,45 @@ from ..base import capture_sys_output
 class TestMeasureCommand(unittest.TestCase):
 
     CONF = "ripe.atlas.tools.commands.measure.conf"
-    KINDS = ("ping", "traceroute", "dns", "ssl", "ntp",)
+    KINDS = {
+        "ping": PingMeasureCommand,
+        "traceroute": TracerouteMeasureCommand,
+        "dns": DnsMeasureCommand,
+        "ssl": SslMeasureCommand,
+        "http": HttpMeasureCommand,
+        "ntp": NtpMeasureCommand,
+    }
 
     def setUp(self):
-        self.cmd = Command()
         self.maxDiff = None
 
     def test_no_arguments(self):
-        with capture_sys_output() as (stdout, stderr):
-            with self.assertRaises(SystemExit):
-                self.cmd.init_args([])
-                self.cmd.run()
-            self.assertEqual(
-                "ripe-atlas measure: error: too few arguments",
-                stderr.getvalue().split("\n")[-2]
-            )
-
-    def test_types_no_arguments(self):
-
-        for kind in ("ping", "traceroute", "ssl", "ntp",):
-            with capture_sys_output():
-                with self.assertRaises(RipeAtlasToolsException) as e:
-                    self.cmd.init_args([kind])
-                    self.cmd.run()
-                self.assertEqual(
-                    str(e.exception),
-                    "You must specify a target for that kind of measurement"
-                )
-
         with capture_sys_output():
             with self.assertRaises(RipeAtlasToolsException) as e:
-                self.cmd.init_args(["dns"])
-                self.cmd.run()
-            self.assertEqual(
-                str(e.exception),
-                "At a minimum, DNS measurements require a query argument."
-            )
+                Command().init_args([])
+            self.assertTrue(
+                str(e.exception).startswith("Usage: ripe-atlas measure <"))
 
     def test_bad_type_argument(self):
         with capture_sys_output():
-            with self.assertRaises(SystemExit):
-                self.cmd.init_args(["not-a-type"])
+            with self.assertRaises(RipeAtlasToolsException) as e:
+                Command().init_args(["not-a-type"])
+            self.assertTrue(
+                str(e.exception).startswith("Usage: ripe-atlas measure <"))
 
     def test_dry_run(self):
+
         with capture_sys_output() as (stdout, stderr):
-            self.cmd.init_args(["ping", "--target", "ripe.net", "--dry-run"])
-            self.cmd.run()
+            cmd = PingMeasureCommand()
+            cmd.init_args(["ping", "--target", "ripe.net", "--dry-run"])
+            cmd.run()
             expected = (
                 "\n"
                 "Definitions:\n"
                 "================================================================================\n"
                 "target                    ripe.net\n"
                 "packet_interval           1000\n"
-                "description               \n"
+                "description               Ping measurement to ripe.net\n"
                 "af                        4\n"
                 "packets                   3\n"
                 "size                      48\n"
@@ -91,7 +85,8 @@ class TestMeasureCommand(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), expected)
 
         with capture_sys_output() as (stdout, stderr):
-            self.cmd.init_args([
+            cmd = PingMeasureCommand()
+            cmd.init_args([
                 "ping",
                 "--target", "ripe.net",
                 "--af", "6",
@@ -103,14 +98,14 @@ class TestMeasureCommand(unittest.TestCase):
                 "--exclude-tag", "foxtrot",
                 "--dry-run"
             ])
-            self.cmd.run()
+            cmd.run()
             expected = (
                 "\n"
                 "Definitions:\n"
                 "================================================================================\n"
                 "target                    ripe.net\n"
                 "packet_interval           1000\n"
-                "description               \n"
+                "description               Ping measurement to ripe.net\n"
                 "af                        6\n"
                 "packets                   3\n"
                 "size                      48\n"
@@ -129,92 +124,30 @@ class TestMeasureCommand(unittest.TestCase):
 
     def test_clean_target(self):
 
+        cmd = PingMeasureCommand()
         with capture_sys_output():
-            self.cmd.init_args(["ping", "--target", "ripe.net"])
-            self.assertEqual(self.cmd.clean_target(), "ripe.net")
+            cmd.init_args(["ping", "--target", "ripe.net"])
+            self.assertEqual(cmd.clean_target(), "ripe.net")
 
+        cmd = DnsMeasureCommand()
         with capture_sys_output():
-            self.cmd.init_args(["dns"])
-            self.assertEqual(self.cmd.clean_target(), None)
-
-    @mock.patch("ripe.atlas.tools.commands.measure.conf", Configuration.DEFAULT)
-    def test_clean_protocol(self):
-
-        spec = Configuration.DEFAULT["specification"]["types"]
-
-        self.cmd.init_args(["traceroute", "--protocol", "UDP"])
-        self.assertEqual(self.cmd.clean_protocol(), "UDP")
-        self.assertEqual(self.cmd.arguments.protocol, "UDP")
-
-        self.cmd.init_args(["traceroute", "--protocol", "TCP"])
-        self.assertEqual(self.cmd.clean_protocol(), "TCP")
-        self.assertEqual(self.cmd.arguments.protocol, "TCP")
-
-        self.cmd.init_args(["traceroute", "--protocol", "ICMP"])
-        self.assertEqual(self.cmd.clean_protocol(), "ICMP")
-        self.assertEqual(self.cmd.arguments.protocol, "ICMP")
-
-        self.cmd.init_args(["traceroute"])
-        self.assertEqual(
-            self.cmd.clean_protocol(), spec["traceroute"]["protocol"])
-        self.assertEqual(
-            self.cmd.arguments.protocol, spec["traceroute"]["protocol"])
-
-        self.cmd.init_args(["dns", "--protocol", "UDP"])
-        self.assertEqual(self.cmd.clean_protocol(), "UDP")
-        self.assertEqual(self.cmd.arguments.protocol, "UDP")
-
-        self.cmd.init_args(["dns", "--protocol", "TCP"])
-        self.assertEqual(self.cmd.clean_protocol(), "TCP")
-        self.assertEqual(self.cmd.arguments.protocol, "TCP")
-
-        self.cmd.init_args(["dns"])
-        self.assertEqual(self.cmd.clean_protocol(), spec["dns"]["protocol"])
-        self.assertEqual(self.cmd.arguments.protocol, spec["dns"]["protocol"])
-
-        for kind in ("ping", "ssl", "ntp"):
-            with self.assertRaises(RipeAtlasToolsException) as e:
-                self.cmd.init_args([kind])
-                self.cmd.clean_protocol()
-            self.assertEqual(
-                str(e.exception),
-                "Measurements of type \"{}\" have no use for a "
-                "protocol value.".format(kind)
-            )
-
-    @mock.patch("ripe.atlas.tools.commands.measure.conf", Configuration.DEFAULT)
-    def test_clean_shared_option(self):
-
-        spec = Configuration.DEFAULT["specification"]["types"]
-        for kind in ("ping", "traceroute"):
-
-            self.cmd.init_args([kind, "--size", "25", "--packets", "6"])
-            self.assertEqual(self.cmd.clean_shared_option("ping", "size"), 25)
-            self.assertEqual(self.cmd.clean_shared_option("ping", "packets"), 6)
-
-            self.cmd.init_args([kind])
-            self.assertEqual(
-                self.cmd.clean_shared_option(kind, "size"), spec[kind]["size"])
-
-            self.cmd.init_args(["ping"])
-            self.assertEqual(
-                self.cmd.clean_shared_option(kind, "packets"),
-                spec[kind]["packets"]
-            )
+            cmd.init_args(["dns", "--query-argument", "ripe.net"])
+            self.assertEqual(cmd.clean_target(), None)
 
     @mock.patch("ripe.atlas.tools.commands.measure.conf", Configuration.DEFAULT)
     def test_get_measurement_kwargs_ping(self):
 
         spec = Configuration.DEFAULT["specification"]["types"]["ping"]
 
-        self.cmd.init_args([
+        cmd = PingMeasureCommand()
+        cmd.init_args([
             "ping", "--target", "ripe.net"
         ])
         self.assertEqual(
-            self.cmd._get_measurement_kwargs(),
+            cmd._get_measurement_kwargs(),
             {
                 "af": Configuration.DEFAULT["specification"]["af"],
-                "description": Configuration.DEFAULT["specification"]["description"],
+                "description": "Ping measurement to ripe.net",
                 "target": "ripe.net",
                 "packets": spec["packets"],
                 "packet_interval": spec["packet-interval"],
@@ -222,7 +155,8 @@ class TestMeasureCommand(unittest.TestCase):
             }
         )
 
-        self.cmd.init_args([
+        cmd = PingMeasureCommand()
+        cmd.init_args([
             "ping",
             "--target", "ripe.net",
             "--af", "6",
@@ -232,7 +166,7 @@ class TestMeasureCommand(unittest.TestCase):
             "--size", "24"
         ])
         self.assertEqual(
-            self.cmd._get_measurement_kwargs(),
+            cmd._get_measurement_kwargs(),
             {
                 "af": 6,
                 "description": "This is my description",
@@ -248,14 +182,15 @@ class TestMeasureCommand(unittest.TestCase):
 
         spec = Configuration.DEFAULT["specification"]["types"]["traceroute"]
 
-        self.cmd.init_args([
+        cmd = TracerouteMeasureCommand()
+        cmd.init_args([
             "traceroute", "--target", "ripe.net"
         ])
         self.assertEqual(
-            self.cmd._get_measurement_kwargs(),
+            cmd._get_measurement_kwargs(),
             {
                 "af": Configuration.DEFAULT["specification"]["af"],
-                "description": Configuration.DEFAULT["specification"]["description"],
+                "description": "Traceroute measurement to ripe.net",
                 "target": "ripe.net",
                 "packets": spec["packets"],
                 "size": spec["size"],
@@ -271,7 +206,8 @@ class TestMeasureCommand(unittest.TestCase):
             }
         )
 
-        self.cmd.init_args([
+        cmd = TracerouteMeasureCommand()
+        cmd.init_args([
             "traceroute",
             "--af", "6",
             "--description", "This is my description",
@@ -289,7 +225,7 @@ class TestMeasureCommand(unittest.TestCase):
             "--timeout", "1500"
         ])
         self.assertEqual(
-            self.cmd._get_measurement_kwargs(),
+            cmd._get_measurement_kwargs(),
             {
                 "af": 6,
                 "description": "This is my description",
@@ -313,14 +249,15 @@ class TestMeasureCommand(unittest.TestCase):
 
         spec = Configuration.DEFAULT["specification"]["types"]["dns"]
 
-        self.cmd.init_args([
+        cmd = DnsMeasureCommand()
+        cmd.init_args([
             "dns", "--query-argument", "ripe.net"
         ])
         self.assertEqual(
-            self.cmd._get_measurement_kwargs(),
+            cmd._get_measurement_kwargs(),
             {
                 "af": Configuration.DEFAULT["specification"]["af"],
-                "description": Configuration.DEFAULT["specification"]["description"],
+                "description": "DNS measurement for ripe.net",
                 "query_class": spec["query-class"],
                 "query_type": spec["query-type"],
                 "query_argument": "ripe.net",
@@ -335,7 +272,8 @@ class TestMeasureCommand(unittest.TestCase):
             }
         )
 
-        self.cmd.init_args([
+        cmd = DnsMeasureCommand()
+        cmd.init_args([
             "dns",
             "--af", "6",
             "--description", "This is my description",
@@ -352,7 +290,7 @@ class TestMeasureCommand(unittest.TestCase):
             "--udp-payload-size", "5"
         ])
         self.assertEqual(
-            self.cmd._get_measurement_kwargs(),
+            cmd._get_measurement_kwargs(),
             {
                 "af": 6,
                 "description": "This is my description",
@@ -376,26 +314,31 @@ class TestMeasureCommand(unittest.TestCase):
 
         spec = Configuration.DEFAULT["specification"]
 
-        for kind in self.KINDS:
+        for kind, klass in self.KINDS.items():
+
+            cmd = klass()
+            args = [kind, "--target", "example.com"]
+            if kind == "dns":
+                args = ["dns", "--query-argument", "example.com"]
 
             tags = spec["tags"]["ipv{}".format(spec["af"])]
             includes = tags[kind]["include"] + tags["all"]["include"]
             excludes = tags[kind]["exclude"] + tags["all"]["exclude"]
 
-            self.cmd.init_args([kind])
-            self.assertEqual(self.cmd._get_source_kwargs(), {
+            cmd.init_args(list(args))
+            self.assertEqual(cmd._get_source_kwargs(), {
                 "requested": spec["source"]["requested"],
                 "type": spec["source"]["type"],
                 "value": spec["source"]["value"],
                 "tags": {"include": includes, "exclude": excludes}
             })
 
-            self.cmd.init_args([
-                kind,
+            cmd = klass()
+            cmd.init_args(args + [
                 "--probes", "10",
                 "--from-country", "ca"
             ])
-            self.assertEqual(self.cmd._get_source_kwargs(), {
+            self.assertEqual(cmd._get_source_kwargs(), {
                 "requested": 10,
                 "type": "country",
                 "value": "CA",
@@ -404,36 +347,36 @@ class TestMeasureCommand(unittest.TestCase):
 
             for area in ("WW", "West", "North-Central", "South-Central",
                          "North-East", "South-East"):
-                self.cmd.init_args([
-                    kind,
+                cmd = klass()
+                cmd.init_args(args + [
                     "--probes", "10",
                     "--from-area", area
                 ])
-                self.assertEqual(self.cmd._get_source_kwargs(), {
+                self.assertEqual(cmd._get_source_kwargs(), {
                     "requested": 10,
                     "type": "area",
                     "value": area,
                     "tags": {"include": includes, "exclude": excludes}
                 })
 
-            self.cmd.init_args([
-                kind,
+            cmd = klass()
+            cmd.init_args(args + [
                 "--probes", "10",
                 "--from-prefix", "1.2.3.0/22"
             ])
-            self.assertEqual(self.cmd._get_source_kwargs(), {
+            self.assertEqual(cmd._get_source_kwargs(), {
                 "requested": 10,
                 "type": "prefix",
                 "value": "1.2.3.0/22",
                 "tags": {"include": includes, "exclude": excludes}
             })
 
-            self.cmd.init_args([
-                kind,
+            cmd = klass()
+            cmd.init_args(args + [
                 "--probes", "10",
                 "--from-asn", "3333"
             ])
-            self.assertEqual(self.cmd._get_source_kwargs(), {
+            self.assertEqual(cmd._get_source_kwargs(), {
                 "requested": 10,
                 "type": "asn",
                 "value": 3333,
@@ -444,36 +387,36 @@ class TestMeasureCommand(unittest.TestCase):
             for __ in range(0, 20):
                 requested = randint(1, 500)
                 selection = [str(randint(1, 5000)) for _ in range(0, 100)]
-                self.cmd.init_args([
-                    kind,
+                cmd = klass()
+                cmd.init_args(args + [
                     "--probes", str(requested),
                     "--from-probes", ",".join(selection)
                 ])
-                self.assertEqual(self.cmd._get_source_kwargs(), {
+                self.assertEqual(cmd._get_source_kwargs(), {
                     "requested": requested,
                     "type": "probes",
                     "value": ",".join(selection),
                     "tags": {"include": includes, "exclude": excludes}
                 })
 
-            self.cmd.init_args([
-                kind,
+            cmd = klass()
+            cmd.init_args(args + [
                 "--probes", "10",
                 "--from-measurement", "1001"
             ])
-            self.assertEqual(self.cmd._get_source_kwargs(), {
+            self.assertEqual(cmd._get_source_kwargs(), {
                 "requested": 10,
                 "type": "msm",
                 "value": 1001,
                 "tags": {"include": includes, "exclude": excludes}
             })
 
-            self.cmd.init_args([
-                kind,
+            cmd = klass()
+            cmd.init_args(args + [
                 "--include-tag", "tag-to-include",
                 "--exclude-tag", "tag-to-exclude"
             ])
-            self.assertEqual(self.cmd._get_source_kwargs(), {
+            self.assertEqual(cmd._get_source_kwargs(), {
                 "requested": spec["source"]["requested"],
                 "type": spec["source"]["type"],
                 "value": spec["source"]["value"],
@@ -489,40 +432,45 @@ class TestMeasureCommand(unittest.TestCase):
         conf["specification"]["af"] = 100
 
         with mock.patch(self.CONF, conf):
-            for kind in self.KINDS:
+            for kind, klass in self.KINDS.items():
 
                 for af in (4, 6):
-                    self.cmd.init_args([kind, "--af", str(af)])
-                    self.assertEqual(self.cmd._get_af(), af)
+                    cmd = Command()
+                    cmd.init_args([kind, "--af", str(af)])
+                    self.assertEqual(cmd._get_af(), af)
 
-                self.cmd.init_args([kind, "--target", "1.2.3.4"])
-                self.assertEqual(self.cmd._get_af(), 4)
+                cmd = klass()
+                cmd.init_args([kind, "--target", "1.2.3.4"])
+                self.assertEqual(cmd._get_af(), 4)
 
-                self.cmd.init_args([kind, "--target", "1:2:3:4:5:6:7:8"])
-                self.assertEqual(self.cmd._get_af(), 6)
+                cmd = klass()
+                cmd.init_args([kind, "--target", "1:2:3:4:5:6:7:8"])
+                self.assertEqual(cmd._get_af(), 6)
 
-                self.cmd.init_args([kind, "--target", "1.2.3.4.5"])
+                cmd = klass()
+                cmd.init_args([kind, "--target", "1.2.3.4.5"])
                 self.assertEqual(
-                    self.cmd._get_af(),
+                    cmd._get_af(),
                     conf["specification"]["af"]
                 )
 
     def test_handle_api_error(self):
 
+        cmd = Command()
         message = (
             "There was a problem communicating with the RIPE Atlas "
             "infrastructure.  The message given was:\n\n  {}"
         )
 
         with self.assertRaises(RipeAtlasToolsException) as e:
-            self.cmd._handle_api_error("This is a plain text error")
+            cmd._handle_api_error("This is a plain text error")
         self.assertEqual(
             str(e.exception),
             message.format("This is a plain text error")
         )
 
         with self.assertRaises(RipeAtlasToolsException) as e:
-            self.cmd._handle_api_error({"detail": "This is a formatted error"})
+            cmd._handle_api_error({"detail": "This is a formatted error"})
         self.assertEqual(
             str(e.exception),
             message.format("This is a formatted error")
@@ -532,17 +480,10 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["ping", "not-a-type"])
-            self.assertEqual(
-                stderr.getvalue().split("\n")[-2],
-                "ripe-atlas measure: error: argument type: invalid choice: "
-                "'not-a-type' (choose from 'traceroute', 'ntp', 'ping', 'dns', "
-                "'ssl')"
-            )
-
-        with capture_sys_output() as (stdout, stderr):
-            with self.assertRaises(SystemExit):
-                self.cmd.init_args(["ping", "--renderer", "not-a-renderer"])
+                PingMeasureCommand().init_args([
+                    "ping",
+                    "--renderer", "not-a-renderer"
+                ])
             self.assertTrue(stderr.getvalue().split("\n")[-2].startswith(
                 "ripe-atlas measure: error: argument --renderer: invalid "
                 "choice: 'not-a-renderer' (choose from"
@@ -550,7 +491,7 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["ping", "--af", "5"])
+                PingMeasureCommand().init_args(["ping", "--af", "5"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --af: invalid choice: 5 "
@@ -559,7 +500,10 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["ping", "--target", "not a target"])
+                PingMeasureCommand().init_args([
+                    "ping",
+                    "--target", "not a target"
+                ])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --target: "
@@ -569,14 +513,14 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["ping", "--from-area", "not an area"])
+                PingMeasureCommand().init_args(["ping", "--from-area", "not an area"])
             self.assertTrue(stderr.getvalue().split("\n")[-2].startswith(
                 "ripe-atlas measure: error: argument --from-area: invalid "
                 "choice:"))
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["ping", "--from-probes", "0,50000"])
+                PingMeasureCommand().init_args(["ping", "--from-probes", "0,50000"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --from-probes: 0 "
@@ -587,7 +531,7 @@ class TestMeasureCommand(unittest.TestCase):
             with capture_sys_output() as (stdout, stderr):
                 for tag in ("NotATag", "tag!", "not a tag", "νοτ α ταγ"):
                     with self.assertRaises(SystemExit):
-                        self.cmd.init_args([
+                        PingMeasureCommand().init_args([
                             "ping",
                             "--{}clude-tag".format(clude), tag
                         ])
@@ -599,7 +543,7 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["traceroute", "--protocol", "invalid"])
+                TracerouteMeasureCommand().init_args(["traceroute", "--protocol", "invalid"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --protocol: invalid "
@@ -608,7 +552,7 @@ class TestMeasureCommand(unittest.TestCase):
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
-                self.cmd.init_args(["dns", "--protocol", "invalid"])
+                DnsMeasureCommand().init_args(["dns", "--protocol", "invalid"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --protocol: invalid "
@@ -616,47 +560,70 @@ class TestMeasureCommand(unittest.TestCase):
             )
 
         min_options = {
-            "from-measurement": 1,
-            "probes": 1,
-            "packets": 1,
-            "size": 1,
-            "packet-interval": 1,
-            "timeout": 1,
-            "destination-option-size": 1,
-            "hop-by-hop-option-size": 1,
-            "retry": 1,
-            "udp-payload-size": 1
+            "from-measurement": ((PingMeasureCommand,), 1),
+            "probes": ((PingMeasureCommand,), 1),
+            "packets": ((PingMeasureCommand, TracerouteMeasureCommand), 1),
+            "size": ((PingMeasureCommand, TracerouteMeasureCommand), 1),
+            "packet-interval": ((PingMeasureCommand,), 1),
+            "timeout": ((TracerouteMeasureCommand, NtpMeasureCommand,), 1),
+            "destination-option-size": ((TracerouteMeasureCommand,), 1),
+            "hop-by-hop-option-size": ((TracerouteMeasureCommand,), 1),
+            "retry": ((DnsMeasureCommand,), 1),
+            "udp-payload-size": ((DnsMeasureCommand,), 1),
         }
-        for option, minimum in min_options.items():
-            with capture_sys_output() as (stdout, stderr):
-                test_value = minimum - 1
-                with self.assertRaises(SystemExit):
-                    self.cmd.init_args(["--{}".format(option), str(test_value)])
-                self.assertEqual(
-                    stderr.getvalue().split("\n")[-2],
-                    "ripe-atlas measure: error: argument --{}: "
-                    "The integer must be greater than {}.".format(
-                        option,
-                        minimum
-                    )
-                )
-
-        min_max_options = {
-            "from-asn": (0, 2**32 + 1),
-            "paris": (-1, 65),
-            "first-hop": (0, 256),
-            "max-hops": (0, 256),
-            "port": (0, 2**16 + 1),
-        }
-        for option, extremes in min_max_options.items():
-            for val in extremes:
+        for option, (klasses, minimum) in min_options.items():
+            for klass in klasses:
                 with capture_sys_output() as (stdout, stderr):
+                    test_value = minimum - 1
                     with self.assertRaises(SystemExit):
-                        self.cmd.init_args(["--{}".format(option), str(val)])
+                        klass().init_args([
+                            klass.__name__.replace("MeasureCommand", "").lower(),
+                            "--{}".format(option), str(test_value)
+                        ])
                     self.assertEqual(
                         stderr.getvalue().split("\n")[-2],
-                        "ripe-atlas measure: error: argument --{}: The "
-                        "integer must be between {} and {}.".format(
-                            option, extremes[0] + 1, extremes[1] - 1
+                        "ripe-atlas measure: error: argument --{}: "
+                        "The integer must be greater than {}.".format(
+                            option,
+                            minimum
                         )
                     )
+
+        min_max_options = {
+            "from-asn": (
+                (PingMeasureCommand,),
+                (0, 2**32 + 1)
+            ),
+            "paris": (
+                (TracerouteMeasureCommand,),
+                (-1, 65)
+            ),
+            "first-hop": (
+                (TracerouteMeasureCommand,),
+                (0, 256)
+            ),
+            "max-hops": (
+                (TracerouteMeasureCommand,),
+                (0, 256)
+            ),
+            "port": (
+                (TracerouteMeasureCommand,),
+                (0, 2**16 + 1)
+            ),
+        }
+        for option, (klasses, extremes) in min_max_options.items():
+            for klass in klasses:
+                for val in extremes:
+                    with capture_sys_output() as (stdout, stderr):
+                        with self.assertRaises(SystemExit):
+                            klass().init_args([
+                                klass.__name__.replace("MeasureCommand", "").lower(),
+                                "--{}".format(option), str(val)
+                            ])
+                        self.assertEqual(
+                            stderr.getvalue().split("\n")[-2],
+                            "ripe-atlas measure: error: argument --{}: The "
+                            "integer must be between {} and {}.".format(
+                                option, extremes[0] + 1, extremes[1] - 1
+                            )
+                        )

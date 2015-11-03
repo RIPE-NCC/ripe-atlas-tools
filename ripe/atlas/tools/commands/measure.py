@@ -6,7 +6,7 @@ import sys
 from collections import OrderedDict
 
 from ripe.atlas.cousteau import (
-    Ping, Traceroute, Dns, Sslcert, Ntp, AtlasSource, AtlasCreateRequest)
+    Ping, Traceroute, Dns, Sslcert, Http, Ntp, AtlasSource, AtlasCreateRequest)
 from ripe.atlas.sagan.dns import Message
 
 from ..exceptions import RipeAtlasToolsException
@@ -30,6 +30,7 @@ class Command(BaseCommand):
         ("traceroute", Traceroute),
         ("dns", Dns),
         ("ssl", Sslcert),
+        ("http", Http),
         ("ntp", Ntp)
     ))
 
@@ -43,7 +44,12 @@ class Command(BaseCommand):
     def _modify_parser_args(self, args):
 
         kinds = self.CREATION_CLASSES.keys()
-        error = "Usage: ripe-atlas measure <{}>".format("|".join(kinds))
+        error = (
+            "Usage: ripe-atlas measure <{}> [options]\n"
+            "\n"
+            "  Example: ripe-atlas measure ping --target example.com"
+            "".format("|".join(kinds))
+        )
 
         if not args:
             raise RipeAtlasToolsException(error)
@@ -253,22 +259,12 @@ class Command(BaseCommand):
         return self.arguments.target
 
     def clean_description(self):
-        return self.arguments.description or "{} measurement to {}".format(
-            self._type.capitalize(),
-            self.arguments.target
-        )
-
-    def clean_shared_option(self, kind, argument):
-        """
-        Some options, like --protocol, are shared across types, and the defaults
-        for those types can differ.  This is where we set these options to their
-        appropriate default value.
-        """
-        r = getattr(self.arguments, argument)
-        if not getattr(self.arguments, argument):
-            r = conf["specification"]["types"][kind][argument.replace("_", "-")]
-            setattr(self.arguments, argument, r)
-        return r
+        if self.arguments.description:
+            return self.arguments.description
+        if conf["specification"]["description"]:
+            return conf["specification"]["description"]
+        return "{} measurement to {}".format(
+            self._type.capitalize(), self.arguments.target)
 
     def _get_measurement_kwargs(self):
 
@@ -585,6 +581,11 @@ class DnsMeasureCommand(Command):
         """
         return self.arguments.target
 
+    def clean_description(self):
+        if self.arguments.target:
+            return Command.clean_description(self)
+        return "DNS measurement for {}".format(self.arguments.query_argument)
+
     def _get_measurement_kwargs(self):
 
         r = Command._get_measurement_kwargs(self)
@@ -604,9 +605,13 @@ class DnsMeasureCommand(Command):
         r["protocol"] = self.arguments.protocol
         r["retry"] = self.arguments.retry
         r["udp_payload_size"] = self.arguments.udp_payload_size
-        r["use_probe_resolver"] = not r["target"]
+        r["use_probe_resolver"] = "target" not in r
 
         return r
+
+
+class SslMeasureCommand(Command):
+    pass
 
 
 class NtpMeasureCommand(Command):
@@ -622,6 +627,10 @@ class NtpMeasureCommand(Command):
             default=conf["specification"]["types"]["ntp"]["timeout"],
             help="The timeout per-packet"
         )
+
+
+class HttpMeasureCommand(Command):
+    pass
 
 
 class Factory(BaseFactory):
