@@ -1,15 +1,10 @@
-import sys
 import mock
 import unittest
-
-try:
-    from cStringIO import StringIO
-except ImportError:  # Python 3
-    from io import StringIO
 
 from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
+from ..base import capture_sys_output
 
 from ..base import capture_sys_output
 
@@ -160,19 +155,16 @@ class TestReportCommand(unittest.TestCase):
             "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n\n"
         )
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.cousteau.AtlasRequest.get'
-        with mock.patch(path) as mock_get:
-            mock_get.side_effect = [
-                (True, {"type": {"name": "ping"}, "description": ""}),
-                (True, self.mocked_results)
-            ]
-            self.cmd.init_args(["1"])
-            self.cmd.run()
-            self.assertEquals(mystdout.getvalue(), expected_output)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.cousteau.AtlasRequest.get'
+            with mock.patch(path) as mock_get:
+                mock_get.side_effect = [
+                    (True, {"type": {"name": "ping"}, "description": ""}),
+                    (True, self.mocked_results)
+                ]
+                self.cmd.init_args(["1"])
+                self.cmd.run()
+                self.assertEquals(stdout.getvalue(), expected_output)
 
     def test_valid_case_with_aggr(self):
         """Test case we we have result with aggregation."""
@@ -195,16 +187,13 @@ class TestReportCommand(unittest.TestCase):
             " 20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n\n"
         )
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.cousteau.AtlasRequest.get'
-        with mock.patch(path) as mock_get:
-            mock_get.side_effect = [
-                (True, {"type": {"name": "ping"}, "description": ""}),
-                (True, self.mocked_results)
-            ]
-            self.cmd.init_args(["--aggregate-by", "rtt-median", "1"])
-            self.cmd.run()
-            self.assertEquals(mystdout.getvalue(), expected_output)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.cousteau.AtlasRequest.get'
+            with mock.patch(path) as mock_get:
+                mock_get.side_effect = [
+                    (True, {"type": {"name": "ping"}, "description": ""}),
+                    (True, self.mocked_results)
+                ]
+                self.cmd.init_args(["--aggregate-by", "rtt-median", "1"])
+                self.cmd.run()
+                self.assertEquals(stdout.getvalue(), expected_output)
