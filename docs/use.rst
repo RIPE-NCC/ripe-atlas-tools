@@ -432,13 +432,12 @@ Option              Arguments           Explanation
                                         If nothing is specified, we assume "-"
                                         or, standard in (the default).
 
-``--aggregate-by``  One of: dns, ntp,   Tell the rendering engine to aggregate
-                    http, ping, raw,    the results by the selected option. Note
-                    ssl_consistency,    that if you opt for aggregation, no
-                    sslcert,            output will be generated until all
-                    traceroute,         results are received, and if large data
-                    traceroute_aspath,  sets may explode your system.
-                    aggregate_ping,
+``--aggregate-by``  One of: country,    Tell the rendering engine to aggregate
+                    asn_v4, asn_v6,     the results by the selected option. Note
+                    prefix_v4,          that if you opt for aggregation, no
+                    prefix_v6           output will be generated until all
+                                        results are received, and if large data
+                                        sets may explode your system.
 ==================  ==================  ========================================
 
 
@@ -704,3 +703,4 @@ complex query::
 
     $ ripe-atlas measure dns --query-type AAAA --query-argument example.com \
       --set-nsid-bit --set-rd-bit --set-do-bit --set-cd-bit
+
