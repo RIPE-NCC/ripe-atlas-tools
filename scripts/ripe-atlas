@@ -68,12 +68,18 @@ class RipeAtlas(object):
 
         try:
 
-            cmd = __import__(
+            module = __import__(
                 "ripe.atlas.tools.commands." + self.command,
                 globals(),
                 locals(),
                 [self.command]
-            ).Command(*self.args, **self.kwargs)
+            )
+
+            if hasattr(module, "Factory"):
+                cmd = module.Factory(*self.args, **self.kwargs).build()
+            else:
+                cmd = module.Command(*self.args, **self.kwargs)
+
             cmd.init_args()
             cmd.run()
 

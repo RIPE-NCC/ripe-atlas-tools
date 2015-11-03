@@ -27,15 +27,13 @@ class Command(object):
             prog="ripe-atlas {}".format(self.NAME)
         )
 
-        self.add_arguments()
-
     def init_args(self, parser_args=None):
         """
         Initialises all parse arguments and makes them available to the class.
         """
 
         self.arguments = self.parser.parse_args(
-            self._modify_parser_args(parser_args or sys.argv))
+            self._modify_parser_args(parser_args or sys.argv[1:]))
 
     def run(self):
         raise NotImplemented()
@@ -62,6 +60,12 @@ class Command(object):
         use-case we're trying to solve here is popping a secondary argument off
         of the list and/or appending `--help` in some circumstances.
         """
+
+        if not args:
+            args.append("--help")
+
+        self.add_arguments()
+
         return args
 
     def ok(self, message):
@@ -128,3 +132,10 @@ class TabularFieldsMixin(object):
 
     def _get_filter_key_value_pair(self, k, v):
         return k.capitalize().replace("__", " "), v
+
+
+class Factory(object):
+
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return object()

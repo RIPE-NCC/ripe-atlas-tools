@@ -16,6 +16,7 @@ from ..renderers import Renderer
 from ..settings import conf
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
+from .base import Factory as BaseFactory
 
 
 class Command(BaseCommand):
@@ -34,35 +35,26 @@ class Command(BaseCommand):
 
     def __init__(self, *args, **kwargs):
 
-        # I don't like this
-
         self._type = None
-        if len(sys.argv) > 1:
-            kinds = self.CREATION_CLASSES.keys()
-            if sys.argv[1] not in self.CREATION_CLASSES.keys():
-                raise RipeAtlasToolsException(
-                    "Usage: ripe-atlas measure <{}>".format("|".join(kinds)))
-            self._type = sys.argv.pop(1)
-
-        if len(sys.argv) == 1:
-            sys.argv.append("--help")
-
         self._is_oneoff = True
 
         BaseCommand.__init__(self, *args, **kwargs)
 
+    def _modify_parser_args(self, args):
+
+        kinds = self.CREATION_CLASSES.keys()
+        error = "Usage: ripe-atlas measure <{}>".format("|".join(kinds))
+
+        if not args:
+            raise RipeAtlasToolsException(error)
+
+        if args[0] not in self.CREATION_CLASSES.keys():
+            raise RipeAtlasToolsException(error)
+        self._type = args.pop(0)
+
+        return BaseCommand._modify_parser_args(self, args)
+
     def add_arguments(self):
-
-        # Required
-
-        self.parser.add_argument(
-            "type",
-            type=str,
-            choices=self.CREATION_CLASSES.keys(),
-            help="The type of measurement you want to create"
-        )
-
-        # Optional
 
         self.parser.add_argument(
             "--renderer",
@@ -188,173 +180,6 @@ class Command(BaseCommand):
                  "Example: --exclude-tag=system-ipv6-works"
         )
 
-        # Type-specific
-
-        if self._type == "ping":
-            specific = self.parser.add_argument_group("Ping-specific Options")
-            specific.add_argument(
-                "--packets",
-                type=ArgumentType.integer_range(minimum=1),
-                help="The number of packets sent"
-            )
-            specific.add_argument(
-                "--size",
-                type=ArgumentType.integer_range(minimum=1),
-                help="The size of packets sent"
-            )
-            specific.add_argument(
-                "--packet-interval",
-                type=ArgumentType.integer_range(minimum=1),
-                default=conf["specification"]["types"]["ping"]["packet-interval"],
-            )
-
-        if self._type == "traceroute":
-            specific = self.parser.add_argument_group(
-                "Traceroute-specific Options")
-            specific.add_argument(
-                "--packets",
-                type=ArgumentType.integer_range(minimum=1),
-                help="The number of packets sent"
-            )
-            specific.add_argument(
-                "--size",
-                type=ArgumentType.integer_range(minimum=1),
-                help="The size of packets sent"
-            )
-            specific.add_argument(
-                "--protocol",
-                type=str,
-                choices=("ICMP", "UDP", "TCP"),
-                help="The protocol used."
-            )
-            specific.add_argument(
-                "--timeout",
-                type=ArgumentType.integer_range(minimum=1),
-                default=conf["specification"]["types"]["traceroute"]["timeout"],
-                help="The timeout per-packet"
-            )
-            specific.add_argument(
-                "--dont-fragment",
-                action="store_true",
-                default=conf["specification"]["types"]["traceroute"]["dont-fragment"],
-                help="Don't Fragment the packet"
-            )
-            specific.add_argument(
-                "--paris",
-                type=ArgumentType.integer_range(minimum=0, maximum=64),
-                default=conf["specification"]["types"]["traceroute"]["paris"],
-                help="Use Paris. Value must be between 0 and 64."
-                     "If 0, a standard traceroute will be performed"
-            )
-            specific.add_argument(
-                "--first-hop",
-                type=ArgumentType.integer_range(minimum=1, maximum=255),
-                default=conf["specification"]["types"]["traceroute"]["first-hop"],
-                help="Value must be between 1 and 255"
-            )
-            specific.add_argument(
-                "--max-hops",
-                type=ArgumentType.integer_range(minimum=1, maximum=255),
-                default=conf["specification"]["types"]["traceroute"]["max-hops"],
-                help="Value must be between 1 and 255"
-            )
-            specific.add_argument(
-                "--port",
-                type=ArgumentType.integer_range(minimum=1, maximum=2**16),
-                default=conf["specification"]["types"]["traceroute"]["port"],
-                help="Destination port, valid for TCP only"
-            )
-            specific.add_argument(
-                "--destination-option-size",
-                type=ArgumentType.integer_range(minimum=1),
-                default=conf["specification"]["types"]["traceroute"]["destination-option-size"],
-                help="IPv6 destination option header"
-            )
-            specific.add_argument(
-                "--hop-by-hop-option-size",
-                type=ArgumentType.integer_range(minimum=1),
-                default=conf["specification"]["types"]["traceroute"]["hop-by-hop-option-size"],
-                help=" IPv6 hop by hop option header"
-            )
-
-        if self._type == "dns":
-            specific = self.parser.add_argument_group("DNS-specific Options")
-            specific.add_argument(
-                "--protocol",
-                type=str,
-                choices=("UDP", "TCP"),
-                help="The protocol used."
-            )
-            specific.add_argument(
-                "--query-class",
-                type=str,
-                choices=("IN", "CHAOS"),
-                default=conf["specification"]["types"]["dns"]["query-class"],
-                help='The query class.  The default is "{}"'.format(
-                    conf["specification"]["types"]["dns"]["query-class"]
-                )
-            )
-            specific.add_argument(
-                "--query-type",
-                type=str,
-                choices=list(Message.ANSWER_CLASSES.keys()) + ["ANY"],  # The only ones we can parse
-                default=conf["specification"]["types"]["dns"]["query-type"],
-                help='The query type.  The default is "{}"'.format(
-                    conf["specification"]["types"]["dns"]["query-type"]
-                )
-            )
-            specific.add_argument(
-                "--query-argument",
-                type=str,
-                default=conf["specification"]["types"]["dns"]["query-argument"],
-                help="The DNS label to query"
-            )
-            specific.add_argument(
-                "--set-cd-bit",
-                action="store_true",
-                default=conf["specification"]["types"]["dns"]["set-cd-bit"],
-                help="Set the DNSSEC Checking Disabled flag (RFC4035)"
-            )
-            specific.add_argument(
-                "--set-do-bit",
-                action="store_true",
-                default=conf["specification"]["types"]["dns"]["set-do-bit"],
-                help="Set the DNSSEC OK flag (RFC3225)"
-            )
-            specific.add_argument(
-                "--set-nsid-bit",
-                action="store_true",
-                default=conf["specification"]["types"]["dns"]["set-nsid-bit"],
-                help="Include an EDNS name server ID request with the query"
-            )
-            specific.add_argument(
-                "--set-rd-bit",
-                action="store_true",
-                default=conf["specification"]["types"]["dns"]["set-rd-bit"],
-                help="Set the Recursion Desired flag"
-            )
-            specific.add_argument(
-                "--retry",
-                type=ArgumentType.integer_range(minimum=1),
-                default=conf["specification"]["types"]["dns"]["retry"],
-                help="Number of times to retry"
-            )
-            specific.add_argument(
-                "--udp-payload-size",
-                type=ArgumentType.integer_range(minimum=1),
-                default=conf["specification"]["types"]["dns"]["udp-payload-size"],
-                help="May be any integer between 512 and 4096 inclusive"
-            )
-
-        if self._type == "ntp":
-            specific = self.parser.add_argument_group("NTP-specific Options")
-            specific.add_argument(
-                "--timeout",
-                type=ArgumentType.integer_range(minimum=1),
-                default=conf["specification"]["types"]["ntp"]["timeout"],
-                help="The timeout per-packet"
-            )
-
     def run(self):
 
         if self.arguments.dry_run:
@@ -397,7 +222,7 @@ class Command(BaseCommand):
             print(colourise("{:<25} {}".format(param, val), "cyan"))
 
     def create(self):
-        creation_class = self.CREATION_CLASSES[self.arguments.type]
+        creation_class = self.CREATION_CLASSES[self._type]
 
         return AtlasCreateRequest(
             server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
@@ -411,7 +236,7 @@ class Command(BaseCommand):
         self.ok("Connecting to stream...")
         try:
             Stream(capture_limit=self.arguments.probes, timeout=300).stream(
-                self.arguments.renderer, self.arguments.type, pk)
+                self.arguments.renderer, self._type, pk)
         except (KeyboardInterrupt, CaptureLimitExceeded):
             pass  # User said stop, so we fall through to the finally block.
         finally:
@@ -420,11 +245,6 @@ class Command(BaseCommand):
 
     def clean_target(self):
 
-        # DNS measurements are a special case for targets
-        if self.arguments.type == "dns":
-            return self.arguments.target
-
-        # All other measurement types require it
         if not self.arguments.target:
             raise RipeAtlasToolsException(
                 "You must specify a target for that kind of measurement"
@@ -432,37 +252,11 @@ class Command(BaseCommand):
 
         return self.arguments.target
 
-    def clean_protocol(self):
-
-        spec = conf["specification"]["types"]
-
-        # DNS measurements only allow udp/tcp
-        if self.arguments.type == "dns":
-            if not self.arguments.protocol:
-                self.arguments.protocol = spec["dns"]["protocol"]
-            if self.arguments.protocol not in ("UDP", "TCP"):
-                raise RipeAtlasToolsException(
-                    "DNS measurements may only choose a protocol of UDP or TCP"
-                )
-
-        # Traceroute allows icmp/udp/tcp
-        elif self.arguments.type == "traceroute":
-            if not self.arguments.protocol:
-                self.arguments.protocol = spec["traceroute"]["protocol"]
-
-            if self.arguments.protocol not in ("ICMP", "UDP", "TCP"):
-                raise RipeAtlasToolsException(
-                    "Traceroute measurements may only choose a protocol of "
-                    "ICMP, UDP or TCP"
-                )
-
-        # Everything else gets kicked
-        else:
-            raise RipeAtlasToolsException(
-                "Measurements of type \"{}\" have no use for a protocol "
-                "value.".format(self.arguments.type))
-
-        return self.arguments.protocol
+    def clean_description(self):
+        return self.arguments.description or "{} measurement to {}".format(
+            self._type.capitalize(),
+            self.arguments.target
+        )
 
     def clean_shared_option(self, kind, argument):
         """
@@ -478,17 +272,16 @@ class Command(BaseCommand):
 
     def _get_measurement_kwargs(self):
 
+        # This is kept apart from the r = {} because dns measurements don't
+        # require a target attribute
         target = self.clean_target()
 
-        spec = conf["specification"]  # Shorter names are easier to read
         r = {
             "af": self._get_af(),
-            "description": spec["description"],
+            "description": self.clean_description(),
         }
 
-        if self.arguments.description:
-            r["description"] = self.arguments.description
-
+        spec = conf["specification"]  # Shorter names are easier to read
         if self.arguments.interval or spec["times"]["interval"]:
             r["interval"] = self.arguments.interval
             self._is_oneoff = False
@@ -502,42 +295,6 @@ class Command(BaseCommand):
 
         if target:
             r["target"] = target
-
-        if self.arguments.type == "ping":
-            r["packets"] = self.clean_shared_option("ping", "packets")
-            r["packet_interval"] = self.arguments.packet_interval
-            r["size"] = self.clean_shared_option("ping", "size")
-
-        elif self.arguments.type == "traceroute":
-            r["destination_option_size"] = self.arguments.destination_option_size
-            r["dont_fragment"] = self.arguments.dont_fragment
-            r["first_hop"] = self.arguments.first_hop
-            r["hop_by_hop_option_size"] = self.arguments.hop_by_hop_option_size
-            r["max_hops"] = self.arguments.max_hops
-            r["packets"] = self.clean_shared_option("traceroute", "packets")
-            r["paris"] = self.arguments.paris
-            r["port"] = self.arguments.port
-            r["protocol"] = self.clean_protocol()
-            r["size"] = self.clean_shared_option("traceroute", "size")
-            r["timeout"] = self.arguments.timeout
-
-        elif self.arguments.type == "dns":
-            for opt in ("class", "type", "argument"):
-                if not getattr(self.arguments, "query_{0}".format(opt)):
-                    raise RipeAtlasToolsException(
-                        "At a minimum, DNS measurements require a query "
-                        "argument.")
-            r["query_class"] = self.arguments.query_class
-            r["query_type"] = self.arguments.query_type
-            r["query_argument"] = self.arguments.query_argument
-            r["set_cd_bit"] = self.arguments.set_cd_bit
-            r["set_do_bit"] = self.arguments.set_do_bit
-            r["set_rd_bit"] = self.arguments.set_rd_bit
-            r["set_nsid_bit"] = self.arguments.set_nsid_bit
-            r["protocol"] = self.clean_protocol()
-            r["retry"] = self.arguments.retry
-            r["udp_payload_size"] = self.arguments.udp_payload_size
-            r["use_probe_resolver"] = not target
 
         return r
 
@@ -571,7 +328,7 @@ class Command(BaseCommand):
         }
 
         af = "ipv{}".format(self._get_af())
-        kind = self.arguments.type
+        kind = self._type
         spec = conf["specification"]
         for clude in ("in", "ex"):
             clude += "clude"
@@ -609,3 +366,280 @@ class Command(BaseCommand):
         ).format(error_detail)
 
         raise RipeAtlasToolsException(message)
+
+
+class PingMeasureCommand(Command):
+
+    def add_arguments(self):
+
+        Command.add_arguments(self)
+
+        spec = conf["specification"]["types"]["ping"]
+
+        specific = self.parser.add_argument_group("Ping-specific Options")
+        specific.add_argument(
+            "--packets",
+            type=ArgumentType.integer_range(minimum=1),
+            default=spec["packets"],
+            help="The number of packets sent"
+        )
+        specific.add_argument(
+            "--size",
+            type=ArgumentType.integer_range(minimum=1),
+            default=spec["size"],
+            help="The size of packets sent"
+        )
+        specific.add_argument(
+            "--packet-interval",
+            type=ArgumentType.integer_range(minimum=1),
+            default=spec["packet-interval"],
+        )
+
+    def _get_measurement_kwargs(self):
+
+        r = Command._get_measurement_kwargs(self)
+
+        r["packets"] = self.arguments.packets
+        r["packet_interval"] = self.arguments.packet_interval
+        r["size"] = self.arguments.size
+
+        return r
+
+
+class TracerouteMeasureCommand(Command):
+
+    def add_arguments(self):
+
+        Command.add_arguments(self)
+
+        spec = conf["specification"]["types"]["traceroute"]
+
+        specific = self.parser.add_argument_group(
+            "Traceroute-specific Options")
+        specific.add_argument(
+            "--packets",
+            type=ArgumentType.integer_range(minimum=1),
+            default=spec["packets"],
+            help="The number of packets sent"
+        )
+        specific.add_argument(
+            "--size",
+            type=ArgumentType.integer_range(minimum=1),
+            default=spec["size"],
+            help="The size of packets sent"
+        )
+        specific.add_argument(
+            "--protocol",
+            type=str,
+            choices=("ICMP", "UDP", "TCP"),
+            default=spec["protocol"],
+            help="The protocol used."
+        )
+        specific.add_argument(
+            "--timeout",
+            type=ArgumentType.integer_range(minimum=1),
+            default=spec["timeout"],
+            help="The timeout per-packet"
+        )
+        specific.add_argument(
+            "--dont-fragment",
+            action="store_true",
+            default=spec["dont-fragment"],
+            help="Don't Fragment the packet"
+        )
+        specific.add_argument(
+            "--paris",
+            type=ArgumentType.integer_range(minimum=0, maximum=64),
+            default=spec["paris"],
+            help="Use Paris. Value must be between 0 and 64."
+                 "If 0, a standard traceroute will be performed"
+        )
+        specific.add_argument(
+            "--first-hop",
+            type=ArgumentType.integer_range(minimum=1, maximum=255),
+            default=spec["first-hop"],
+            help="Value must be between 1 and 255"
+        )
+        specific.add_argument(
+            "--max-hops",
+            type=ArgumentType.integer_range(minimum=1, maximum=255),
+            default=spec["max-hops"],
+            help="Value must be between 1 and 255"
+        )
+        specific.add_argument(
+            "--port",
+            type=ArgumentType.integer_range(minimum=1, maximum=2**16),
+            default=spec["port"],
+            help="Destination port, valid for TCP only"
+        )
+        specific.add_argument(
+            "--destination-option-size",
+            type=ArgumentType.integer_range(minimum=1),
+            default=spec["destination-option-size"],
+            help="IPv6 destination option header"
+        )
+        specific.add_argument(
+            "--hop-by-hop-option-size",
+            type=ArgumentType.integer_range(minimum=1),
+            default=spec["hop-by-hop-option-size"],
+            help=" IPv6 hop by hop option header"
+        )
+
+    def _get_measurement_kwargs(self):
+
+        r = Command._get_measurement_kwargs(self)
+
+        r["destination_option_size"] = self.arguments.destination_option_size
+        r["dont_fragment"] = self.arguments.dont_fragment
+        r["first_hop"] = self.arguments.first_hop
+        r["hop_by_hop_option_size"] = self.arguments.hop_by_hop_option_size
+        r["max_hops"] = self.arguments.max_hops
+        r["packets"] = self.arguments.packets
+        r["paris"] = self.arguments.paris
+        r["port"] = self.arguments.port
+        r["protocol"] = self.arguments.protocol
+        r["size"] = self.arguments.size
+        r["timeout"] = self.arguments.timeout
+
+        return r
+
+
+class DnsMeasureCommand(Command):
+
+    def add_arguments(self):
+
+        Command.add_arguments(self)
+
+        specific = self.parser.add_argument_group("DNS-specific Options")
+        specific.add_argument(
+            "--protocol",
+            type=str,
+            choices=("UDP", "TCP"),
+            default=conf["specification"]["types"]["dns"]["protocol"],
+            help="The protocol used."
+        )
+        specific.add_argument(
+            "--query-class",
+            type=str,
+            choices=("IN", "CHAOS"),
+            default=conf["specification"]["types"]["dns"]["query-class"],
+            help='The query class.  The default is "{}"'.format(
+                conf["specification"]["types"]["dns"]["query-class"]
+            )
+        )
+        specific.add_argument(
+            "--query-type",
+            type=str,
+            choices=list(Message.ANSWER_CLASSES.keys()) + ["ANY"],  # The only ones we can parse
+            default=conf["specification"]["types"]["dns"]["query-type"],
+            help='The query type.  The default is "{}"'.format(
+                conf["specification"]["types"]["dns"]["query-type"]
+            )
+        )
+        specific.add_argument(
+            "--query-argument",
+            type=str,
+            default=conf["specification"]["types"]["dns"]["query-argument"],
+            help="The DNS label to query"
+        )
+        specific.add_argument(
+            "--set-cd-bit",
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["set-cd-bit"],
+            help="Set the DNSSEC Checking Disabled flag (RFC4035)"
+        )
+        specific.add_argument(
+            "--set-do-bit",
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["set-do-bit"],
+            help="Set the DNSSEC OK flag (RFC3225)"
+        )
+        specific.add_argument(
+            "--set-nsid-bit",
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["set-nsid-bit"],
+            help="Include an EDNS name server ID request with the query"
+        )
+        specific.add_argument(
+            "--set-rd-bit",
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["set-rd-bit"],
+            help="Set the Recursion Desired flag"
+        )
+        specific.add_argument(
+            "--retry",
+            type=ArgumentType.integer_range(minimum=1),
+            default=conf["specification"]["types"]["dns"]["retry"],
+            help="Number of times to retry"
+        )
+        specific.add_argument(
+            "--udp-payload-size",
+            type=ArgumentType.integer_range(minimum=1),
+            default=conf["specification"]["types"]["dns"]["udp-payload-size"],
+            help="May be any integer between 512 and 4096 inclusive"
+        )
+
+    def clean_target(self):
+        """
+        Targets aren't required for this type
+        """
+        return self.arguments.target
+
+    def _get_measurement_kwargs(self):
+
+        r = Command._get_measurement_kwargs(self)
+
+        for opt in ("class", "type", "argument"):
+            if not getattr(self.arguments, "query_{0}".format(opt)):
+                raise RipeAtlasToolsException(
+                    "At a minimum, DNS measurements require a query argument.")
+
+        r["query_class"] = self.arguments.query_class
+        r["query_type"] = self.arguments.query_type
+        r["query_argument"] = self.arguments.query_argument
+        r["set_cd_bit"] = self.arguments.set_cd_bit
+        r["set_do_bit"] = self.arguments.set_do_bit
+        r["set_rd_bit"] = self.arguments.set_rd_bit
+        r["set_nsid_bit"] = self.arguments.set_nsid_bit
+        r["protocol"] = self.arguments.protocol
+        r["retry"] = self.arguments.retry
+        r["udp_payload_size"] = self.arguments.udp_payload_size
+        r["use_probe_resolver"] = not r["target"]
+
+        return r
+
+
+class NtpMeasureCommand(Command):
+
+    def add_arguments(self):
+
+        Command.add_arguments(self)
+
+        specific = self.parser.add_argument_group("NTP-specific Options")
+        specific.add_argument(
+            "--timeout",
+            type=ArgumentType.integer_range(minimum=1),
+            default=conf["specification"]["types"]["ntp"]["timeout"],
+            help="The timeout per-packet"
+        )
+
+
+class Factory(BaseFactory):
+
+    TYPES = {
+        "ping": PingMeasureCommand,
+        "traceroute": TracerouteMeasureCommand,
+        "dns": DnsMeasureCommand,
+    }
+
+    def __init__(self):
+
+        self.build_class = Command
+        if len(sys.argv) >= 2:
+            self.build_class = self.TYPES.get(
+                sys.argv[1].lower(),
+                self.build_class
+            )
+
+    def build(self, *args, **kwargs):
+        return self.build_class(*args, **kwargs)
