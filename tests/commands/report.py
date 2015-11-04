@@ -6,8 +6,6 @@ from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
 from ..base import capture_sys_output
 
-from ..base import capture_sys_output
-
 
 class TestReportCommand(unittest.TestCase):
 
