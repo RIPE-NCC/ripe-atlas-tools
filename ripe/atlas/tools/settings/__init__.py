@@ -70,7 +70,19 @@ class Configuration(object):
                     "udp-payload-size": 512,
                     "set-rd-bit": True,
                     "retry": 0
-                }
+                },
+                "http": {
+                    "header-bytes": 0,
+                    "version": "1.1",
+                    "method": "GET",
+                    "port": "80",
+                    "path": "/",
+                    "query-string": None,
+                    "user-agent": "RIPE ATLAS: https://atlas.ripe.net/",
+                    "max-bytes-read": None,
+                    "extended-timing": None,
+                    "more-extended-timing": None,
+                },
             },
             "tags": {
                 "ipv4": {
