@@ -118,7 +118,7 @@ class TestReportCommand(unittest.TestCase):
         path = 'ripe.atlas.cousteau.AtlasRequest.get'
         with mock.patch(path) as mock_get:
             mock_get.side_effect = [
-                (True, {"type": {"name": "ping"}}),
+                (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}}),
                 (True, {})
             ]
             with self.assertRaises(RipeAtlasToolsException):
@@ -130,7 +130,7 @@ class TestReportCommand(unittest.TestCase):
         path = 'ripe.atlas.cousteau.AtlasRequest.get'
         with mock.patch(path) as mock_get:
             mock_get.side_effect = [
-                (True, {"type": {"name": "shit"}}),
+                (True, {"creation_time": 1, "start_time": 1, "type": {"name": "shit"}}),
                 (True, {})
             ]
             with self.assertRaises(RipeAtlasToolsException):
@@ -140,7 +140,7 @@ class TestReportCommand(unittest.TestCase):
     def test_valid_case_no_aggr(self):
         """Test case we we have result no aggregation."""
         expected_output = (
-            "RIPE Atlas Report for Measurement #1\n"
+            "\nRIPE Atlas Report for Measurement #1\n"
             "===================================================\n\n"
             "20 bytes from probe #1216  109.190.83.40   to hsi.cablecom.ch (62.2.16.24): ttl=54 times:27.429,  25.672,  25.681, \n"
             "20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
@@ -150,14 +150,14 @@ class TestReportCommand(unittest.TestCase):
             "20 bytes from probe #579   195.88.195.170  to hsi.cablecom.ch (62.2.16.24): ttl=51 times:23.201,  22.981,  22.863, \n"
             "20 bytes from probe #677   78.128.9.202    to hsi.cablecom.ch (62.2.16.24): ttl=54 times:40.715,  40.259,  40.317, \n"
             "20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n"
-            "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n\n"
+            "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
         )
 
         with capture_sys_output() as (stdout, stderr):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"type": {"name": "ping"}, "description": ""}),
+                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 self.cmd.init_args(["1"])
@@ -167,7 +167,7 @@ class TestReportCommand(unittest.TestCase):
     def test_valid_case_with_aggr(self):
         """Test case we we have result with aggregation."""
         expected_output = (
-            "RIPE Atlas Report for Measurement #1\n"
+            "\nRIPE Atlas Report for Measurement #1\n"
             "===================================================\n\n"
             "RTT_MEDIAN: 40-50\n"
             " 20 bytes from probe #202   178.190.51.206  to hsi.cablecom.ch (62.2.16.24): ttl=52 times:40.024,  40.399,  39.29,  \n"
@@ -182,14 +182,14 @@ class TestReportCommand(unittest.TestCase):
             " 20 bytes from probe #579   195.88.195.170  to hsi.cablecom.ch (62.2.16.24): ttl=51 times:23.201,  22.981,  22.863, \n"
             " 20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
             "RTT_MEDIAN: 30-40\n"
-            " 20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n\n"
+            " 20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n"
         )
 
         with capture_sys_output() as (stdout, stderr):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"type": {"name": "ping"}, "description": ""}),
+                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 self.cmd.init_args(["--aggregate-by", "rtt-median", "1"])

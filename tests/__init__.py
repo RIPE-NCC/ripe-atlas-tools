@@ -6,7 +6,11 @@ from .commands import (
     TestReportCommand
 )
 from .helpers import TestArgumentTypeHelper
-from .renderers import TestPingRenderer
+from .renderers import (
+    TestPingRenderer,
+    TestSSLConsistency,
+    TestAggregatePing
+)
 
 
 __all__ = [
@@ -15,5 +19,8 @@ __all__ = [
     TestMeasureCommand,
     TestMeasurementsCommand,
     TestReportCommand,
+    TestArgumentTypeHelper,
     TestPingRenderer,
+    TestSSLConsistency,
+    TestAggregatePing,
 ]
