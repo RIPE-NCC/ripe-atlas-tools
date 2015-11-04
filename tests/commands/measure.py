@@ -82,7 +82,10 @@ class TestMeasureCommand(unittest.TestCase):
                 "  exclude                 \n"
                 "\n"
             )
-            self.assertEqual(stdout.getvalue(), expected)
+            self.assertEqual(
+                set(stdout.getvalue().split("\n")),
+                set(expected.split("\n"))
+            )
 
         with capture_sys_output() as (stdout, stderr):
             cmd = PingMeasureCommand()
@@ -120,7 +123,10 @@ class TestMeasureCommand(unittest.TestCase):
                 "  exclude                 delta, echo, foxtrot\n"
                 "\n"
             )
-            self.assertEqual(stdout.getvalue(), expected)
+            self.assertEqual(
+                set(stdout.getvalue().split("\n")),
+                set(expected.split("\n"))
+            )
 
     def test_clean_target(self):
 
