@@ -194,4 +194,6 @@ class TestReportCommand(unittest.TestCase):
                 ]
                 self.cmd.init_args(["--aggregate-by", "rtt-median", "1"])
                 self.cmd.run()
-                self.assertEquals(stdout.getvalue(), expected_output)
+                expected_set = set(expected_output.split("\n"))
+                returned_set = set(stdout.getvalue().split("\n"))
+                self.assertEquals(returned_set, expected_set)

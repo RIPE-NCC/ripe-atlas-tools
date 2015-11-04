@@ -1,12 +1,6 @@
-import sys
 import mock
 import unittest
 import requests
-
-try:
-    from cStringIO import StringIO
-except ImportError:  # Python 3
-    from io import StringIO
 
 from ripe.atlas.tools.commands.probes import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
@@ -282,15 +276,12 @@ class TestProbesCommand(unittest.TestCase):
             "--ids-only", "--country", "GR"
         ])
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            cmd.run()
-            self.assertEquals(mystdout.getvalue(), "1\n2\n3\n4\n5\n")
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            with mock.patch(path) as mock_get:
+                mock_get.return_value = FakeGen()
+                cmd.run()
+                self.assertEquals(stdout.getvalue(), "1\n2\n3\n4\n5\n")
 
     def test_render_ids_only_with_limit(self):
         """User passed ids_only arg together with limit, testing rendering"""
@@ -301,15 +292,12 @@ class TestProbesCommand(unittest.TestCase):
             "--limit", "2"
         ])
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            cmd.run()
-            self.assertEquals(mystdout.getvalue(), "1\n2\n")
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            with mock.patch(path) as mock_get:
+                mock_get.return_value = FakeGen()
+                cmd.run()
+                self.assertEquals(stdout.getvalue(), "1\n2\n")
 
     def test_render_ids_only_with_aggr(self):
         """
@@ -322,15 +310,12 @@ class TestProbesCommand(unittest.TestCase):
             "--aggregate-by", "country"
         ])
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            cmd.run()
-            self.assertEquals(mystdout.getvalue(), "1\n2\n3\n4\n5\n")
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            with mock.patch(path) as mock_get:
+                mock_get.return_value = FakeGen()
+                cmd.run()
+                self.assertEquals(stdout.getvalue(), "1\n2\n3\n4\n5\n")
 
     def test_get_aggregators(self):
         """User passed --aggregate-by args"""
@@ -360,31 +345,28 @@ class TestProbesCommand(unittest.TestCase):
             "--country", "GR"
         ])
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            cmd.run()
-            expected_output = (
-                "\n"
-                "Filters:\n"
-                "  Country: GR\n"
-                "\n"
-                "ID    Asn_v4 Asn_v6 Country Status      \n"
-                "========================================\n"
-                "1     3333            gr    None        \n"
-                "2     3333            de    None        \n"
-                "3     3332            de    None        \n"
-                "4     3333            nl    None        \n"
-                "5     3333            gr    None        \n"
-                "========================================\n"
-                "             Showing 4 of 4 total probes\n"
-                "\n"
-            )
-            self.assertEquals(mystdout.getvalue(), expected_output)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            with mock.patch(path) as mock_get:
+                mock_get.return_value = FakeGen()
+                cmd.run()
+                expected_output = (
+                    "\n"
+                    "Filters:\n"
+                    "  Country: GR\n"
+                    "\n"
+                    "ID    Asn_v4 Asn_v6 Country Status      \n"
+                    "========================================\n"
+                    "1     3333            gr    None        \n"
+                    "2     3333            de    None        \n"
+                    "3     3332            de    None        \n"
+                    "4     3333            nl    None        \n"
+                    "5     3333            gr    None        \n"
+                    "========================================\n"
+                    "             Showing 4 of 4 total probes\n"
+                    "\n"
+                )
+                self.assertEquals(stdout.getvalue(), expected_output)
 
     def test_render_without_aggregation_with_limit(self):
         """Tests rendering of results without aggregation but with limit"""
@@ -394,28 +376,25 @@ class TestProbesCommand(unittest.TestCase):
             "--limit", "2"
         ])
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            cmd.run()
-            expected_output = (
-                "\n"
-                "Filters:\n"
-                "  Country: GR\n"
-                "\n"
-                "ID    Asn_v4 Asn_v6 Country Status      \n"
-                "========================================\n"
-                "1     3333            gr    None        \n"
-                "2     3333            de    None        \n"
-                "========================================\n"
-                "             Showing 2 of 4 total probes\n"
-                "\n"
-            )
-            self.assertEquals(mystdout.getvalue(), expected_output)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            with mock.patch(path) as mock_get:
+                mock_get.return_value = FakeGen()
+                cmd.run()
+                expected_output = (
+                    "\n"
+                    "Filters:\n"
+                    "  Country: GR\n"
+                    "\n"
+                    "ID    Asn_v4 Asn_v6 Country Status      \n"
+                    "========================================\n"
+                    "1     3333            gr    None        \n"
+                    "2     3333            de    None        \n"
+                    "========================================\n"
+                    "             Showing 2 of 4 total probes\n"
+                    "\n"
+                )
+                self.assertEquals(stdout.getvalue(), expected_output)
 
     def test_render_with_aggregation(self):
         """Tests rendering of results with aggregation"""
@@ -427,46 +406,43 @@ class TestProbesCommand(unittest.TestCase):
             "--aggregate-by", "prefix_v4"
         ])
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            cmd.run()
-            expected_blob = (
-                "\n"
-                "Filters:\n"
-                "  Country: GR\n"
-                "\n"
-                "   ID    Asn_v4 Asn_v6 Country Status      \n"
-                "===========================================\n"
-                "Country: DE\n"
-                " ASN_V4: 3332\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   3     3332            de    None        \n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   2     3333            de    None        \n"
-                "\n"
-                "Country: GR\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   1     3333            gr    None        \n"
-                "   5     3333            gr    None        \n"
-                "\n"
-                "Country: NL\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   4     3333            nl    None        \n"
-                "===========================================\n"
-                "                Showing 4 of 4 total probes\n"
-                "\n"
-            )
-            expected_set = set(expected_blob.split("\n"))
-            returned_set = set(mystdout.getvalue().split("\n"))
-            self.assertEquals(returned_set, expected_set)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            with mock.patch(path) as mock_get:
+                mock_get.return_value = FakeGen()
+                cmd.run()
+                expected_blob = (
+                    "\n"
+                    "Filters:\n"
+                    "  Country: GR\n"
+                    "\n"
+                    "   ID    Asn_v4 Asn_v6 Country Status      \n"
+                    "===========================================\n"
+                    "Country: DE\n"
+                    " ASN_V4: 3332\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   3     3332            de    None        \n"
+                    " ASN_V4: 3333\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   2     3333            de    None        \n"
+                    "\n"
+                    "Country: GR\n"
+                    " ASN_V4: 3333\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   1     3333            gr    None        \n"
+                    "   5     3333            gr    None        \n"
+                    "\n"
+                    "Country: NL\n"
+                    " ASN_V4: 3333\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   4     3333            nl    None        \n"
+                    "===========================================\n"
+                    "                Showing 4 of 4 total probes\n"
+                    "\n"
+                )
+                expected_set = set(expected_blob.split("\n"))
+                returned_set = set(stdout.getvalue().split("\n"))
+                self.assertEquals(returned_set, expected_set)
 
     def test_render_with_aggregation_with_limit(self):
         """Tests rendering of results with aggregation with limit"""
@@ -479,32 +455,29 @@ class TestProbesCommand(unittest.TestCase):
             "--limit", "1"
         ])
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            cmd.run()
-            expected_output = (
-                "\n"
-                "Filters:\n"
-                "  Country: GR\n"
-                "\n"
-                "   ID    Asn_v4 Asn_v6 Country Status      \n"
-                "===========================================\n"
-                "Country: GR\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   1     3333            gr    None        \n"
-                "===========================================\n"
-                "                Showing 1 of 4 total probes\n"
-                "\n"
-            )
-            expected_set = set(expected_output.split("\n"))
-            returned_set = set(mystdout.getvalue().split("\n"))
-            self.assertEquals(returned_set, expected_set)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            with mock.patch(path) as mock_get:
+                mock_get.return_value = FakeGen()
+                cmd.run()
+                expected_output = (
+                    "\n"
+                    "Filters:\n"
+                    "  Country: GR\n"
+                    "\n"
+                    "   ID    Asn_v4 Asn_v6 Country Status      \n"
+                    "===========================================\n"
+                    "Country: GR\n"
+                    " ASN_V4: 3333\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   1     3333            gr    None        \n"
+                    "===========================================\n"
+                    "                Showing 1 of 4 total probes\n"
+                    "\n"
+                )
+                expected_set = set(expected_output.split("\n"))
+                returned_set = set(stdout.getvalue().split("\n"))
+                self.assertEquals(returned_set, expected_set)
 
     def test_render_with_aggregation_with_max_per_aggr(self):
         """
@@ -519,42 +492,39 @@ class TestProbesCommand(unittest.TestCase):
             "--max-per-aggregation", "1"
         ])
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
-        with mock.patch(path) as mock_get:
-            mock_get.return_value = FakeGen()
-            cmd.run()
-            expected_output = (
-                "\n"
-                "Filters:\n  "
-                "Country: GR\n"
-                "\n"
-                "   ID    Asn_v4 Asn_v6 Country Status      \n"
-                "===========================================\n"
-                "Country: DE\n"
-                " ASN_V4: 3332\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   3     3332            de    None        \n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   2     3333            de    None        \n"
-                "\n"
-                "Country: GR\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   1     3333            gr    None        \n"
-                "\n"
-                "Country: NL\n"
-                " ASN_V4: 3333\n"
-                "  PREFIX_V4: 193.0/22\n"
-                "   4     3333            nl    None        \n"
-                "===========================================\n"
-                "                Showing 4 of 4 total probes\n"
-                "\n"
-            )
-            expected_set = set(expected_output.split("\n"))
-            returned_set = set(mystdout.getvalue().split("\n"))
-            self.assertEquals(returned_set, expected_set)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            with mock.patch(path) as mock_get:
+                mock_get.return_value = FakeGen()
+                cmd.run()
+                expected_output = (
+                    "\n"
+                    "Filters:\n  "
+                    "Country: GR\n"
+                    "\n"
+                    "   ID    Asn_v4 Asn_v6 Country Status      \n"
+                    "===========================================\n"
+                    "Country: DE\n"
+                    " ASN_V4: 3332\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   3     3332            de    None        \n"
+                    " ASN_V4: 3333\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   2     3333            de    None        \n"
+                    "\n"
+                    "Country: GR\n"
+                    " ASN_V4: 3333\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   1     3333            gr    None        \n"
+                    "\n"
+                    "Country: NL\n"
+                    " ASN_V4: 3333\n"
+                    "  PREFIX_V4: 193.0/22\n"
+                    "   4     3333            nl    None        \n"
+                    "===========================================\n"
+                    "                Showing 4 of 4 total probes\n"
+                    "\n"
+                )
+                expected_set = set(expected_output.split("\n"))
+                returned_set = set(stdout.getvalue().split("\n"))
+                self.assertEquals(returned_set, expected_set)
