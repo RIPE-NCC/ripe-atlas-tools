@@ -642,15 +642,20 @@ class Factory(BaseFactory):
         "ping": PingMeasureCommand,
         "traceroute": TracerouteMeasureCommand,
         "dns": DnsMeasureCommand,
+        "ssl": SslMeasureCommand,
+        "ntp": NtpMeasureCommand,
     }
 
     def __init__(self):
 
-        self.build_class = Command
+        self.build_class = None
         if len(sys.argv) >= 2:
-            self.build_class = self.TYPES.get(
-                sys.argv[1].lower(),
-                self.build_class
+            self.build_class = self.TYPES.get(sys.argv[1].lower())
+
+        if not self.build_class:
+            raise RipeAtlasToolsException(
+                "The measurement type you requested is invalid.  Please choose "
+                "one of {}.".format(", ".join(self.TYPES.keys()))
             )
 
     def create(self, *args, **kwargs):
