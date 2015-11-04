@@ -75,8 +75,14 @@ class RipeAtlas(object):
                 [self.command]
             )
 
+            #
+            # If the imported module contains a `Factory` class, execute that
+            # to get the `cmd` we're going to use.  Otherwise, we expect there
+            # to be a `Command` class in there.
+            #
+
             if hasattr(module, "Factory"):
-                cmd = module.Factory(*self.args, **self.kwargs).build()
+                cmd = module.Factory(*self.args, **self.kwargs).create()
             else:
                 cmd = module.Command(*self.args, **self.kwargs)
 

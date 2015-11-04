@@ -27,12 +27,13 @@ class Command(object):
             prog="ripe-atlas {}".format(self.NAME)
         )
 
-    def init_args(self, parser_args=None):
+    def init_args(self, args=None):
         """
         Initialises all parse arguments and makes them available to the class.
         """
 
-        args = parser_args if not None else sys.argv[1:]
+        if args is None:
+            args = sys.argv[1:]
 
         self.arguments = self.parser.parse_args(
             self._modify_parser_args(args))

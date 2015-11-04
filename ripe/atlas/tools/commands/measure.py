@@ -653,5 +653,5 @@ class Factory(BaseFactory):
                 self.build_class
             )
 
-    def build(self, *args, **kwargs):
+    def create(self, *args, **kwargs):
         return self.build_class(*args, **kwargs)
