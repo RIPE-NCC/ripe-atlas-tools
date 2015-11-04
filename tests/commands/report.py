@@ -1,6 +1,8 @@
 import mock
 import unittest
 
+from ripe.atlas.cousteau import Probe
+
 from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
@@ -153,6 +155,27 @@ class TestReportCommand(unittest.TestCase):
             "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
         )
 
+        probes = [
+            Probe(id=202, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=677, meta_data={
+                "country_code": "DE", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=2225, meta_data={
+                "country_code": "DE", "asn_v4": 3332, "asn_v6": "4444"}),
+            Probe(id=165, meta_data={
+                "country_code": "NL", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=1216, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=270, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=579, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=945, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=879, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+        ]
+
         with capture_sys_output() as (stdout, stderr):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
@@ -160,9 +183,12 @@ class TestReportCommand(unittest.TestCase):
                     (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
-                self.cmd.init_args(["1"])
-                self.cmd.run()
-                self.assertEquals(stdout.getvalue(), expected_output)
+                mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
+                with mock.patch(mpath) as mock_get_many:
+                    mock_get_many.return_value = probes
+                    self.cmd.init_args(["1"])
+                    self.cmd.run()
+                    self.assertEquals(stdout.getvalue(), expected_output)
 
     def test_valid_case_with_aggr(self):
         """Test case we we have result with aggregation."""
@@ -184,6 +210,26 @@ class TestReportCommand(unittest.TestCase):
             "RTT_MEDIAN: 30-40\n"
             " 20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n"
         )
+        probes = [
+            Probe(id=202, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=677, meta_data={
+                "country_code": "DE", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=2225, meta_data={
+                "country_code": "DE", "asn_v4": 3332, "asn_v6": "4444"}),
+            Probe(id=165, meta_data={
+                "country_code": "NL", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=1216, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=270, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=579, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=945, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=879, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+        ]
 
         with capture_sys_output() as (stdout, stderr):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
@@ -192,8 +238,11 @@ class TestReportCommand(unittest.TestCase):
                     (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
-                self.cmd.init_args(["--aggregate-by", "rtt-median", "1"])
-                self.cmd.run()
-                expected_set = set(expected_output.split("\n"))
-                returned_set = set(stdout.getvalue().split("\n"))
-                self.assertEquals(returned_set, expected_set)
+                mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
+                with mock.patch(mpath) as mock_get_many:
+                    mock_get_many.return_value = probes
+                    self.cmd.init_args(["--aggregate-by", "rtt-median", "1"])
+                    self.cmd.run()
+                    expected_set = set(expected_output.split("\n"))
+                    returned_set = set(stdout.getvalue().split("\n"))
+                    self.assertEquals(returned_set, expected_set)
