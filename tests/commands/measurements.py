@@ -102,9 +102,10 @@ class TestMeasurementsCommand(unittest.TestCase):
     @mock.patch("ripe.atlas.tools.commands.measurements.MeasurementRequest")
     def test_get_line_items(self, mock_request):
 
+        mock_request.return_value = FakeGen()
         cmd = Command()
         cmd.init_args([])
-        cmd.run()  # Forces the defaults
+        cmd.run()
         self.assertEqual(
             cmd._get_line_items(FakeGen.Measurement(
                 id=1, type="ping", status="Ongoing", status_id=2,

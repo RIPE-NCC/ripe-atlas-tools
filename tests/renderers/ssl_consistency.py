@@ -1,14 +1,9 @@
-import sys
 import mock
 import unittest
 from ripe.atlas.cousteau import Probe as CProbe
 from ripe.atlas.tools.helpers.rendering import SaganSet
 from ripe.atlas.tools.renderers.ssl_consistency import Renderer
-
-try:
-    from cStringIO import StringIO
-except ImportError:  # Python 3
-    from io import StringIO
+from ..base import capture_sys_output
 
 
 class TestSSLConsistency(unittest.TestCase):
@@ -116,16 +111,15 @@ class TestSSLConsistency(unittest.TestCase):
             "    ID: 2844, country code: GR, ASN (v4/v6): 3333/4444\n"
         )
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        path = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
-        with mock.patch(path) as mock_get_many:
-            mock_get_many.return_value = self.probes.values()
-            sagans = SaganSet(self.results)
-            Renderer().additional(sagans)
-            self.assertEquals(mystdout.getvalue(), expected_output)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
+            with mock.patch(path) as mock_get_many:
+                mock_get_many.return_value = self.probes.values()
+                sagans = SaganSet(self.results)
+                Renderer().additional(sagans)
+                expected_set = set(expected_output.split("\n"))
+                returned_set = set(stdout.getvalue().split("\n"))
+                self.assertEquals(returned_set, expected_set)
 
     def test_gather_unique_certs(self):
         """Test gathering of the unique certs in sagans set"""

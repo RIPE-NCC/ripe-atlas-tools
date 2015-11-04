@@ -1,7 +1,9 @@
 import unittest
 from collections import namedtuple
 
-from ripe.atlas.tools.aggregators.base import aggregate, ValueKeyAggregator, RangeKeyAggregator
+from ripe.atlas.tools.aggregators.base import (
+    aggregate, ValueKeyAggregator, RangeKeyAggregator
+)
 
 
 class TestAggregators(unittest.TestCase):
