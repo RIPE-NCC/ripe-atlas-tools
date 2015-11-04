@@ -20,7 +20,7 @@ from .base import Command as BaseCommand
 
 class Command(BaseCommand):
 
-    NAME = "report"
+    NAME = "render"
 
     DESCRIPTION = "Render the contents of an arbitrary file.\n\nExample:\n" \
                   "  cat /my/file | ripe-atlas render\n"
