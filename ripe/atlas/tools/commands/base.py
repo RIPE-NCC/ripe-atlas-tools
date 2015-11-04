@@ -32,8 +32,10 @@ class Command(object):
         Initialises all parse arguments and makes them available to the class.
         """
 
+        args = parser_args if not None else sys.argv[1:]
+
         self.arguments = self.parser.parse_args(
-            self._modify_parser_args(parser_args or sys.argv[1:]))
+            self._modify_parser_args(args))
 
     def run(self):
         raise NotImplemented()
@@ -60,9 +62,6 @@ class Command(object):
         use-case we're trying to solve here is popping a secondary argument off
         of the list and/or appending `--help` in some circumstances.
         """
-
-        if not args:
-            args.append("--help")
 
         self.add_arguments()
 

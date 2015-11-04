@@ -13,6 +13,8 @@ from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.cousteau import Probe
 from ripe.atlas.tools.aggregators import ValueKeyAggregator
 
+from ..base import capture_sys_output
+
 
 class FakeGen(object):
     def __init__(self,):
@@ -47,44 +49,54 @@ class FakeGen(object):
 class TestProbesCommand(unittest.TestCase):
 
     def setUp(self):
-        self.cmd = Command()
         self.maxDiff = None
 
     def test_with_empty_args(self):
         """User passes no args, should fail with RipeAtlasToolsException"""
         with self.assertRaises(RipeAtlasToolsException):
-            self.cmd.init_args([])
-            self.cmd.run()
+            cmd = Command()
+            cmd.init_args([])
+            cmd.run()
 
     def test_with_random_args(self):
         """User passes random args, should fail with SystemExit"""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["blaaaaaaa"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["blaaaaaaa"])
+                cmd.run()
 
     def test_arg_with_no_value(self):
         """User passed not boolean arg but no value"""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--asn"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--asn"])
+                cmd.run()
 
     def test_arg_with_wrong_type(self):
         """User passed arg with wrong type. e.g string for asn"""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--asn", "blaaaaa"])
-            self.cmd.run()
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--asnv4", "blaaaaa"])
-            self.cmd.run()
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--asnv6", "blaaaaa"])
-            self.cmd.run()
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--limit", "blaaaaa"])
-            self.cmd.run()
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--radius", "blaaaaa"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--asn", "blaaaaa"])
+                cmd.run()
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--asnv4", "blaaaaa"])
+                cmd.run()
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--asnv6", "blaaaaa"])
+                cmd.run()
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--limit", "blaaaaa"])
+                cmd.run()
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--radius", "blaaaaa"])
+                cmd.run()
 
     def test_location_google_breaks(self):
         """User passed location arg but google api gave error"""
@@ -93,13 +105,16 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch('requests.get') as mock_get:
             for exception in caught_exceptions:
                 mock_get.side_effect = exception
-                with self.assertRaises(RipeAtlasToolsException):
-                    self.cmd.init_args(["--location", "blaaaa"])
-                    self.cmd.run()
+                with capture_sys_output():
+                    with self.assertRaises(RipeAtlasToolsException):
+                        cmd = Command()
+                        cmd.init_args(["--location", "blaaaa"])
+                        cmd.run()
             mock_get.side_effect = Exception()
             with self.assertRaises(Exception):
-                self.cmd.init_args(["--location", "blaaaa"])
-                self.cmd.run()
+                cmd = Command()
+                cmd.init_args(["--location", "blaaaa"])
+                cmd.run()
 
     def test_location_google_wrong_output(self):
         """User passed location arg but google api gave not expected format"""
@@ -108,8 +123,9 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch('requests.Response.json') as mock_json:
                 mock_json.return_value = {"blaaa": "bla"}
                 with self.assertRaises(RipeAtlasToolsException):
-                    self.cmd.init_args(["--location", "blaaaa"])
-                    self.cmd.run()
+                    cmd = Command()
+                    cmd.init_args(["--location", "blaaaa"])
+                    cmd.run()
 
     def test_location_arg(self):
         """User passed location arg"""
@@ -118,8 +134,9 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch('requests.Response.json') as mock_json:
                 mock_json.return_value = {"results": [
                     {"geometry": {"location": {"lat": 1, "lng": 2}}}]}
-                self.cmd.init_args(["--location", "blaaaa"])
-                self.assertEquals(self.cmd.build_request_args(), {
+                cmd = Command()
+                cmd.init_args(["--location", "blaaaa"])
+                self.assertEquals(cmd.build_request_args(), {
                     "latitude": '1', "longitude": '2'})
 
     def test_location_arg_with_radius(self):
@@ -130,89 +147,102 @@ class TestProbesCommand(unittest.TestCase):
                 mock_json.return_value = {"results": [
                     {"geometry": {"location": {"lat": 1, "lng": 2}}}
                 ]}
-                self.cmd.init_args(["--location", "blaaaa", "--radius", "4"])
+                cmd = Command()
+                cmd.init_args(["--location", "blaaaa", "--radius", "4"])
                 self.assertEquals(
-                    self.cmd.build_request_args(),
+                    cmd.build_request_args(),
                     {"radius": "1,2:4"}
                 )
 
     def test_asn_args(self):
         """User passed asn arg together with asnv4 or asnv6"""
         with self.assertRaises(RipeAtlasToolsException):
-            self.cmd.init_args(["--asn", "3333", "--asnv4", "3333"])
-            self.cmd.run()
+            cmd = Command()
+            cmd.init_args(["--asn", "3333", "--asnv4", "3333"])
+            cmd.run()
 
         with self.assertRaises(RipeAtlasToolsException):
-            self.cmd.init_args(["--asn", "3333", "--asnv6", "3333"])
-            self.cmd.run()
+            cmd = Command()
+            cmd.init_args(["--asn", "3333", "--asnv6", "3333"])
+            cmd.run()
 
     def test_prefix_args(self):
         """User passed prefix arg together with prefixv4 or prefixv6"""
         with self.assertRaises(RipeAtlasToolsException):
-            self.cmd.init_args([
+            cmd = Command()
+            cmd.init_args([
                 "--prefix", "193.0.0.0/21",
                 "--prefixv4", "193.0.0.0/21"
             ])
-            self.cmd.run()
+            cmd.run()
 
         with self.assertRaises(RipeAtlasToolsException):
-            self.cmd.init_args([
+            cmd = Command()
+            cmd.init_args([
                 "--prefix", "2001:67c:2e8::/48",
                 "--prefixv6", "2001:67c:2e8::/48"
             ])
-            self.cmd.run()
+            cmd.run()
 
     def test_all_args(self):
         """User passed all arguments"""
-        self.cmd.init_args(["--all"])
-        self.assertEquals(self.cmd.build_request_args(), {})
+        cmd = Command()
+        cmd.init_args(["--all"])
+        self.assertEquals(cmd.build_request_args(), {})
 
     def test_center_arg_wrong_value(self):
         """User passed center arg with wrong value"""
         with self.assertRaises(RipeAtlasToolsException):
-            self.cmd.init_args(["--center", "blaaaa"])
-            self.cmd.run()
+            cmd = Command()
+            cmd.init_args(["--center", "blaaaa"])
+            cmd.run()
 
     def test_center_arg(self):
         """User passed center arg"""
-        self.cmd.init_args(["--center", "1,2"])
+        cmd = Command()
+        cmd.init_args(["--center", "1,2"])
         self.assertEquals(
-            self.cmd.build_request_args(),
+            cmd.build_request_args(),
             {"latitude": "1", "longitude": "2"}
         )
 
     def test_center_arg_with_radius(self):
         """User passed center and radius arg"""
-        self.cmd.init_args(["--center", "1,2", "--radius", "4"])
-        self.assertEquals(self.cmd.build_request_args(), {"radius": "1,2:4"})
+        cmd = Command()
+        cmd.init_args(["--center", "1,2", "--radius", "4"])
+        self.assertEquals(cmd.build_request_args(), {"radius": "1,2:4"})
 
     def test_country_arg(self):
         """User passed country code arg"""
-        self.cmd.init_args(["--country", "GR"])
-        self.assertEquals(self.cmd.build_request_args(), {"country_code": "GR"})
+        cmd = Command()
+        cmd.init_args(["--country", "GR"])
+        self.assertEquals(cmd.build_request_args(), {"country_code": "GR"})
 
     def test_country_arg_with_radius(self):
         """User passed country code arg together with radius"""
-        self.cmd.init_args(["--country", "GR", "--radius", "4"])
-        self.assertEquals(self.cmd.build_request_args(), {"country_code": "GR"})
+        cmd = Command()
+        cmd.init_args(["--country", "GR", "--radius", "4"])
+        self.assertEquals(cmd.build_request_args(), {"country_code": "GR"})
 
     def test_sane_args1(self):
         """User passed several arguments (1)"""
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--center", "1,2",
             "--radius", "4",
             "--asnv4", "3333",
             "--prefix", "193.0.0.0/21"
         ])
         self.assertEquals(
-            self.cmd.build_request_args(),
+            cmd.build_request_args(),
             {'asn_v4': 3333, 'prefix': '193.0.0.0/21', 'radius': '1,2:4'}
         )
 
     def test_sane_args2(self):
         """User passed several arguments (2)"""
 
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--location", "Amsterdam",
             "--asn", "3333",
             "--prefixv4", "193.0.0.0/21"
@@ -221,7 +251,7 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.Command.location2degrees'
         with mock.patch(path) as mock_get:
             mock_get.return_value = (1, 2)
-            self.assertEquals(self.cmd.build_request_args(), {
+            self.assertEquals(cmd.build_request_args(), {
                 'asn': 3333,
                 'prefix_v4': '193.0.0.0/21',
                 'latitude': 1,
@@ -231,12 +261,13 @@ class TestProbesCommand(unittest.TestCase):
     def test_sane_args3(self):
         """User passed several arguments (3)"""
 
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--center", "1,2",
             "--asnv6", "3333",
             "--prefixv6", "2001:67c:2e8::/48"
         ])
-        self.assertEquals(self.cmd.build_request_args(), {
+        self.assertEquals(cmd.build_request_args(), {
             'asn_v6': 3333,
             'prefix_v6': '2001:67c:2e8::/48',
             'latitude': '1',
@@ -245,7 +276,9 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_render_ids_only(self):
         """User passed ids_only arg, testing rendiring"""
-        self.cmd.init_args([
+
+        cmd = Command()
+        cmd.init_args([
             "--ids-only", "--country", "GR"
         ])
 
@@ -254,14 +287,15 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
-            self.cmd.run()
+            cmd.run()
             self.assertEquals(mystdout.getvalue(), "1\n2\n3\n4\n5\n")
 
         sys.stdout = old_stdout
 
     def test_render_ids_only_with_limit(self):
         """User passed ids_only arg together with limit, testing rendering"""
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--ids-only",
             "--country", "GR",
             "--limit", "2"
@@ -272,7 +306,7 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
-            self.cmd.run()
+            cmd.run()
             self.assertEquals(mystdout.getvalue(), "1\n2\n")
 
         sys.stdout = old_stdout
@@ -281,7 +315,8 @@ class TestProbesCommand(unittest.TestCase):
         """
         User passed ids_only arg together with aggregate, testing rendering
         """
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--ids-only",
             "--country", "GR",
             "--aggregate-by", "country"
@@ -292,14 +327,15 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
-            self.cmd.run()
+            cmd.run()
             self.assertEquals(mystdout.getvalue(), "1\n2\n3\n4\n5\n")
 
         sys.stdout = old_stdout
 
     def test_get_aggregators(self):
         """User passed --aggregate-by args"""
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--aggregate-by", "asn_v4",
             "--aggregate-by", "country",
             "--aggregate-by", "prefix_v4"
@@ -309,8 +345,8 @@ class TestProbesCommand(unittest.TestCase):
             ValueKeyAggregator(key="country_code"),
             ValueKeyAggregator(key="prefix_v4")
         ]
-        self.cmd.set_aggregators()
-        for index, v in enumerate(self.cmd.aggregators):
+        cmd.set_aggregators()
+        for index, v in enumerate(cmd.aggregators):
             self.assertTrue(isinstance(v, ValueKeyAggregator))
             self.assertEquals(
                 v.aggregation_keys,
@@ -319,7 +355,8 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_render_without_aggregation(self):
         """Tests rendering of results without aggregation"""
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--country", "GR"
         ])
 
@@ -328,7 +365,7 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
-            self.cmd.run()
+            cmd.run()
             expected_output = (
                 "\n"
                 "Filters:\n"
@@ -351,7 +388,8 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_render_without_aggregation_with_limit(self):
         """Tests rendering of results without aggregation but with limit"""
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--country", "GR",
             "--limit", "2"
         ])
@@ -361,7 +399,7 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
-            self.cmd.run()
+            cmd.run()
             expected_output = (
                 "\n"
                 "Filters:\n"
@@ -381,7 +419,8 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_render_with_aggregation(self):
         """Tests rendering of results with aggregation"""
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--country", "GR",
             "--aggregate-by", "country",
             "--aggregate-by", "asn_v4",
@@ -393,7 +432,7 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
-            self.cmd.run()
+            cmd.run()
             expected_blob = (
                 "\n"
                 "Filters:\n"
@@ -431,7 +470,8 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_render_with_aggregation_with_limit(self):
         """Tests rendering of results with aggregation with limit"""
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--country", "GR",
             "--aggregate-by", "country",
             "--aggregate-by", "asn_v4",
@@ -444,7 +484,7 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
-            self.cmd.run()
+            cmd.run()
             expected_output = (
                 "\n"
                 "Filters:\n"
@@ -470,7 +510,8 @@ class TestProbesCommand(unittest.TestCase):
         """
         Tests rendering of results with aggregation with max per aggr option
         """
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--country", "GR",
             "--aggregate-by", "country",
             "--aggregate-by", "asn_v4",
@@ -483,7 +524,7 @@ class TestProbesCommand(unittest.TestCase):
         path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
         with mock.patch(path) as mock_get:
             mock_get.return_value = FakeGen()
-            self.cmd.run()
+            cmd.run()
             expected_output = (
                 "\n"
                 "Filters:\n  "

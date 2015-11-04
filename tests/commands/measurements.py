@@ -69,17 +69,15 @@ class FakeGen(object):
 
 class TestMeasurementsCommand(unittest.TestCase):
 
-    def setUp(self):
-        self.cmd = Command()
-
     @mock.patch("ripe.atlas.tools.commands.measurements.MeasurementRequest")
     def test_with_empty_args(self, mock_request):
 
         mock_request.return_value = FakeGen()
 
+        cmd = Command()
         with capture_sys_output() as (stdout, stderr):
-            self.cmd.init_args([])
-            self.cmd.run()
+            cmd.init_args([])
+            cmd.run()
 
         expected_content = (
             "\n"
@@ -99,15 +97,16 @@ class TestMeasurementsCommand(unittest.TestCase):
             set(expected_content.split("\n"))
         )
         self.assertEqual(
-            self.cmd.arguments.field, ("id", "type", "description", "status"))
+            cmd.arguments.field, ("id", "type", "description", "status"))
 
     @mock.patch("ripe.atlas.tools.commands.measurements.MeasurementRequest")
     def test_get_line_items(self, mock_request):
 
-        self.cmd.init_args([])
-        self.cmd.run()  # Forces the defaults
+        cmd = Command()
+        cmd.init_args([])
+        cmd.run()  # Forces the defaults
         self.assertEqual(
-            self.cmd._get_line_items(FakeGen.Measurement(
+            cmd._get_line_items(FakeGen.Measurement(
                 id=1, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
                 destination_name="Name 1", description="Description 1",
@@ -115,12 +114,13 @@ class TestMeasurementsCommand(unittest.TestCase):
             [1, "ping", "Description 1", "Ongoing"]
         )
 
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--field", "id",
             "--field", "status"
         ])
         self.assertEqual(
-            self.cmd._get_line_items(FakeGen.Measurement(
+            cmd._get_line_items(FakeGen.Measurement(
                 id=1, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
                 destination_name="Name 1", description="Description 1",
@@ -128,11 +128,12 @@ class TestMeasurementsCommand(unittest.TestCase):
             [1, "Ongoing"]
         )
 
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--field", "url",
         ])
         self.assertEqual(
-            self.cmd._get_line_items(FakeGen.Measurement(
+            cmd._get_line_items(FakeGen.Measurement(
                 id=1, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
                 destination_name="Name 1", description="Description 1",
@@ -141,7 +142,8 @@ class TestMeasurementsCommand(unittest.TestCase):
         )
 
     def test_get_filters(self):
-        self.cmd.init_args([
+        cmd = Command()
+        cmd.init_args([
             "--search", "the force is strong with this one",
             "--status", "ongoing",
             "--af", "6",
@@ -151,7 +153,7 @@ class TestMeasurementsCommand(unittest.TestCase):
             "--stopped-before", "2015-01-01",
             "--stopped-after", "2014-01-01",
         ])
-        self.assertEqual(self.cmd._get_filters(), {
+        self.assertEqual(cmd._get_filters(), {
             "search": "the force is strong with this one",
             "status__in": (2,),
             "af": 6,
@@ -163,14 +165,15 @@ class TestMeasurementsCommand(unittest.TestCase):
         })
 
     def test_get_colour_from_status(self):
-        self.assertEqual(self.cmd._get_colour_from_status(0), "blue")
-        self.assertEqual(self.cmd._get_colour_from_status(1), "blue")
-        self.assertEqual(self.cmd._get_colour_from_status(2), "green")
-        self.assertEqual(self.cmd._get_colour_from_status(4), "yellow")
-        self.assertEqual(self.cmd._get_colour_from_status(5), "red")
-        self.assertEqual(self.cmd._get_colour_from_status(6), "red")
-        self.assertEqual(self.cmd._get_colour_from_status(7), "red")
-        self.assertEqual(self.cmd._get_colour_from_status("XXX"), "white")
+        cmd = Command()
+        self.assertEqual(cmd._get_colour_from_status(0), "blue")
+        self.assertEqual(cmd._get_colour_from_status(1), "blue")
+        self.assertEqual(cmd._get_colour_from_status(2), "green")
+        self.assertEqual(cmd._get_colour_from_status(4), "yellow")
+        self.assertEqual(cmd._get_colour_from_status(5), "red")
+        self.assertEqual(cmd._get_colour_from_status(6), "red")
+        self.assertEqual(cmd._get_colour_from_status(7), "red")
+        self.assertEqual(cmd._get_colour_from_status("XXX"), "white")
 
     def test_fail_arguments(self):
         expected_failures = (
@@ -181,6 +184,6 @@ class TestMeasurementsCommand(unittest.TestCase):
             ("--field", "not a field"),
         )
         for failure in expected_failures:
-            with capture_sys_output() as (stdout, stderr):
+            with capture_sys_output():
                 with self.assertRaises(SystemExit):
-                    self.cmd.init_args(failure)
+                    Command().init_args(failure)

@@ -58,6 +58,9 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(error)
         self._type = args.pop(0)
 
+        if not args:
+            args.append("--help")
+
         return BaseCommand._modify_parser_args(self, args)
 
     def add_arguments(self):
