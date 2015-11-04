@@ -27,17 +27,16 @@ class Command(object):
             prog="ripe-atlas {}".format(self.NAME)
         )
 
-        self.add_arguments()
-
-    def init_args(self, parser_args=None):
+    def init_args(self, args=None):
         """
         Initialises all parse arguments and makes them available to the class.
         """
 
-        if parser_args is None:
-            self.arguments = self.parser.parse_args()
-        else:
-            self.arguments = self.parser.parse_args(parser_args)
+        if args is None:
+            args = sys.argv[1:]
+
+        self.arguments = self.parser.parse_args(
+            self._modify_parser_args(args))
 
     def run(self):
         raise NotImplemented()
@@ -56,6 +55,18 @@ class Command(object):
 
         """
         pass
+
+    def _modify_parser_args(self, args):
+        """
+        A modifier hook that can be overridden in the child class to allow that
+        class to manipulate the arguments before being parsed.  The common
+        use-case we're trying to solve here is popping a secondary argument off
+        of the list and/or appending `--help` in some circumstances.
+        """
+
+        self.add_arguments()
+
+        return args
 
     def ok(self, message):
         sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
@@ -121,3 +132,10 @@ class TabularFieldsMixin(object):
 
     def _get_filter_key_value_pair(self, k, v):
         return k.capitalize().replace("__", " "), v
+
+
+class Factory(object):
+
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return object()

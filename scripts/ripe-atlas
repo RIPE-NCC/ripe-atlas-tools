@@ -68,12 +68,24 @@ class RipeAtlas(object):
 
         try:
 
-            cmd = __import__(
+            module = __import__(
                 "ripe.atlas.tools.commands." + self.command,
                 globals(),
                 locals(),
                 [self.command]
-            ).Command(*self.args, **self.kwargs)
+            )
+
+            #
+            # If the imported module contains a `Factory` class, execute that
+            # to get the `cmd` we're going to use.  Otherwise, we expect there
+            # to be a `Command` class in there.
+            #
+
+            if hasattr(module, "Factory"):
+                cmd = module.Factory(*self.args, **self.kwargs).create()
+            else:
+                cmd = module.Command(*self.args, **self.kwargs)
+
             cmd.init_args()
             cmd.run()
 

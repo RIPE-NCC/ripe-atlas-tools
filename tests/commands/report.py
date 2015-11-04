@@ -11,6 +11,8 @@ from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
 
+from ..base import capture_sys_output
+
 
 class TestReportCommand(unittest.TestCase):
 
@@ -31,33 +33,38 @@ class TestReportCommand(unittest.TestCase):
 
     def test_with_empty_args(self):
         """User passes no args, should fail with SystemExit"""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args([])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args([])
+                self.cmd.run()
 
     def test_with_random_args(self):
         """User passes random args, should fail with SystemExit"""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["blaaaaaaa"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args(["blaaaaaaa"])
+                self.cmd.run()
 
     def test_arg_with_no_value(self):
         """User passed not boolean arg but no value"""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--probes"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args(["--probes"])
+                self.cmd.run()
 
     def test_arg_with_wrong_type(self):
         """User passed arg with wrong type."""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--probes", "blaaaaa"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args(["--probes", "blaaaaa"])
+                self.cmd.run()
 
     def test_arg_renderer_with_wrong_choice(self):
         """User passed arg renderer with unavailable type."""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--renderer", "blaaaaa"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args(["--renderer", "blaaaaa"])
+                self.cmd.run()
 
     def test_arg_renderer_with_valid_choice(self):
         """User passed arg renderer with valid type."""
@@ -67,8 +74,9 @@ class TestReportCommand(unittest.TestCase):
             mock_get.return_value = False, {}
             for choice in Renderer.get_available():
                 with self.assertRaises(RipeAtlasToolsException):
-                    self.cmd.init_args(["--renderer", choice, "1"])
-                    self.cmd.run()
+                    cmd = Command()
+                    cmd.init_args(["--renderer", choice, "1"])
+                    cmd.run()
 
     def test_arg_aggregate_with_valid_choice(self):
         """User passed arg aggregate with valid type."""
@@ -78,26 +86,30 @@ class TestReportCommand(unittest.TestCase):
             mock_get.return_value = False, {}
             for choice in Command.AGGREGATORS.keys():
                 with self.assertRaises(RipeAtlasToolsException):
-                    self.cmd.init_args(["--aggregate-by", choice, "1"])
-                    self.cmd.run()
+                    cmd = Command()
+                    cmd.init_args(["--aggregate-by", choice, "1"])
+                    cmd.run()
 
     def test_arg_aggregate_with_wrong_choice(self):
         """User passed arg aggregate with unavailable type."""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--aggregate-by", "blaaaaa"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args(["--aggregate-by", "blaaaaa"])
+                self.cmd.run()
 
     def test_arg_no_msm_id(self):
         """User passed no measurement id."""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["--aggregate-by", "country"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args(["--aggregate-by", "country"])
+                self.cmd.run()
 
     def test_arg_no_valid_msm_id(self):
         """User passed non valid type of measurement id."""
-        with self.assertRaises(SystemExit):
-            self.cmd.init_args(["blaaa"])
-            self.cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                self.cmd.init_args(["blaaa"])
+                self.cmd.run()
 
     def test_measurement_failure(self):
         """Testcase where given measurement id doesn't exist."""
