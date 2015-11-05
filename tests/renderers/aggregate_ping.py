@@ -1,13 +1,9 @@
-import sys
 import unittest
 from collections import namedtuple
 from ripe.atlas.tools.renderers.aggregate_ping import Renderer
 from ripe.atlas.sagan import Result
 
-try:
-    from cStringIO import StringIO
-except ImportError:  # Python 3
-    from io import StringIO
+from ..base import capture_sys_output
 
 
 class TestAggregatePing(unittest.TestCase):
@@ -37,12 +33,9 @@ class TestAggregatePing(unittest.TestCase):
             "rtt min/med/avg/max = 36.921608/42.406/82.693/218.077484 ms\n\n"
         )
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-        Renderer().additional(self.sagans)
-        self.assertEquals(mystdout.getvalue(), expected_output)
-
-        sys.stdout = old_stdout
+        with capture_sys_output() as (stdout, stderr):
+            Renderer().additional(self.sagans)
+            self.assertEquals(stdout.getvalue(), expected_output)
 
     def test_collect_stats(self):
         """Tests collect stats function."""
