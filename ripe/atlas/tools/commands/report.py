@@ -77,7 +77,7 @@ class Command(BaseCommand):
 
         kwargs = {"msm_id": self.arguments.measurement_id}
         if self.arguments.probes:
-            kwargs["probe_ids"] = ",".join([str(_) for _ in self.arguments.probes])
+            kwargs["probe_ids"] = self.arguments.probes
         if self.arguments.start_time:
             kwargs["start"] = self.arguments.start_time
         if self.arguments.stop_time:
