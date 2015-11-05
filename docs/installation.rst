@@ -87,11 +87,11 @@ Apple OSX
 
 These instructions expect that you've got Python's ``pip`` installed, so if you
 have no idea what that is, or simply don't have it yet, you should be able to
-install pip with one easy command (as root):
+install pip with one easy command:
 
 .. code:: bash
 
-    # easy_install pip
+    # sudo easy_install pip
 
 Outside of that, a few of the Python dependencies require that you have a
 compiler on your system.  For this, you need only get a free copy of `Xcode`_
