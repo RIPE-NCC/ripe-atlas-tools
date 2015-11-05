@@ -662,6 +662,59 @@ Option                        Arguments           Explanation
 ============================  ==================  ==============================
 
 
+.. _use-measure-options-sslcert:
+
+SSL Certificate-Specific Options
+::::::::::::::::::::::::::::::::
+
+============================  ==================  ==============================
+Option                        Arguments           Explanation
+============================  ==================  ==============================
+``--port``                    An integer          The port to query
+============================  ==================  ==============================
+
+
+.. _use-measure-options-http:
+
+HTTP-Specific Options
+:::::::::::::::::::::
+
+============================  ==================  ==============================
+Option                        Arguments           Explanation
+============================  ==================  ==============================
+``--header-bytes``            An integer          The maximum number of bytes to
+                                                  retrieve from the header
+``--version``                 A string            The HTTP version to use
+``--method``                  A string            The HTTP method to use
+``--path``                    A string            The path on the webserver
+``--query-string``            A string            An arbitrary query string
+``--user-agent``              A string            An arbitrary user agent
+``--body-bytes``              An integer          The maximum number of bytes to
+                                                  retrieve from the body
+``--timing-verbosity``        One of: 0, 1, 2     The amount of timing
+                                                  information you want returned.
+                                                  1 returns the time to read, to
+                                                  connect, and to first byte, 2
+                                                  returns timing information per
+                                                  read system call.  0 (default)
+                                                  returns no additional timing
+                                                  information.
+============================  ==================  ==============================
+
+
+.. _use-measure-options-ntp:
+
+NTP-Specific Options
+::::::::::::::::::::
+
+============================  ==================  ==============================
+Option                        Arguments           Explanation
+============================  ==================  ==============================
+``--packets``                 An integer          The number of packets sent
+``--timeout``                 An integer          The timeout per-packet
+============================  ==================  ==============================
+
+
 .. _use-measure-examples:
 
 Examples
