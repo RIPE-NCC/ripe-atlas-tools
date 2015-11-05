@@ -8,7 +8,7 @@ class Renderer(BaseRenderer):
     output from `openssl x509 -in w00t -noout -text`.
     """
 
-    RENDERS = [BaseRenderer.TYPE_TLS]
+    RENDERS = [BaseRenderer.TYPE_SSLCERT]
 
     def on_result(self, result):
         r = ""

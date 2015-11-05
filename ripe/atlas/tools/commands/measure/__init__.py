@@ -7,7 +7,7 @@ from ..base import Factory as BaseFactory
 from .ping import PingMeasureCommand
 from .traceroute import TracerouteMeasureCommand
 from .dns import DnsMeasureCommand
-from .sslcert import SslMeasureCommand
+from .sslcert import SslcertMeasureCommand
 from .http import HttpMeasureCommand
 from .ntp import NtpMeasureCommand
 
@@ -18,7 +18,7 @@ class Factory(BaseFactory):
         "ping": PingMeasureCommand,
         "traceroute": TracerouteMeasureCommand,
         "dns": DnsMeasureCommand,
-        "ssl": SslMeasureCommand,
+        "sslcert": SslcertMeasureCommand,
         "http": HttpMeasureCommand,
         "ntp": NtpMeasureCommand,
     }

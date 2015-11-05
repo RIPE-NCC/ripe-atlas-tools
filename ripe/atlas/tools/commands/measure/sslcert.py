@@ -6,13 +6,13 @@ from ...settings import conf
 from .base import Command
 
 
-class SslMeasureCommand(Command):
+class SslcertMeasureCommand(Command):
 
     def add_arguments(self):
 
         Command.add_arguments(self)
 
-        spec = conf["specification"]["types"]["ssl"]
+        spec = conf["specification"]["types"]["sslcert"]
 
         specific = self.parser.add_argument_group(
             "SSL Certificate-specific Options")

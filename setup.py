@@ -47,7 +47,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as description:
             "scripts/aping",
             "scripts/atraceroute",
             "scripts/adig",
-            "scripts/atls",
+            "scripts/asslcert",
             "scripts/ahttp",
             "scripts/antp",
             "scripts/ripe-atlas",

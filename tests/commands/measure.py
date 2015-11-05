@@ -16,7 +16,7 @@ from ripe.atlas.tools.commands.measure import (
     PingMeasureCommand,
     TracerouteMeasureCommand,
     DnsMeasureCommand,
-    SslMeasureCommand,
+    SslcertMeasureCommand,
     HttpMeasureCommand,
     NtpMeasureCommand,
 )
@@ -33,7 +33,7 @@ class TestMeasureCommand(unittest.TestCase):
         "ping": PingMeasureCommand,
         "traceroute": TracerouteMeasureCommand,
         "dns": DnsMeasureCommand,
-        "ssl": SslMeasureCommand,
+        "sslcert": SslcertMeasureCommand,
         "http": HttpMeasureCommand,
         "ntp": NtpMeasureCommand,
     }
@@ -319,25 +319,25 @@ class TestMeasureCommand(unittest.TestCase):
     @mock.patch(CONF, Configuration.DEFAULT)
     def test_get_measurement_kwargs_sslcert(self):
 
-        spec = Configuration.DEFAULT["specification"]["types"]["ssl"]
+        spec = Configuration.DEFAULT["specification"]["types"]["sslcert"]
 
-        cmd = SslMeasureCommand()
+        cmd = SslcertMeasureCommand()
         cmd.init_args([
-            "ssl", "--target", "ripe.net"
+            "sslcert", "--target", "ripe.net"
         ])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
             {
                 "af": Configuration.DEFAULT["specification"]["af"],
-                "description": "Ssl measurement to ripe.net",
+                "description": "Sslcert measurement to ripe.net",
                 "target": "ripe.net",
                 "port": spec["port"]
             }
         )
 
-        cmd = SslMeasureCommand()
+        cmd = SslcertMeasureCommand()
         cmd.init_args([
-            "ssl",
+            "sslcert",
             "--target", "ripe.net",
             "--af", "6",
             "--description", "This is my description",
@@ -772,7 +772,7 @@ class TestMeasureCommand(unittest.TestCase):
             "port": (
                 (
                     TracerouteMeasureCommand,
-                    SslMeasureCommand,
+                    SslcertMeasureCommand,
                     HttpMeasureCommand
                 ),
                 (0, 2**16 + 1)

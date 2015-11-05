@@ -11,7 +11,7 @@ class Renderer(object):
     TYPE_PING = "ping"
     TYPE_TRACEROUTE = "traceroute"
     TYPE_DNS = "dns"
-    TYPE_TLS = "sslcert"
+    TYPE_SSLCERT = "sslcert"
     TYPE_HTTP = "http"
     TYPE_NTP = "ntp"
 
@@ -45,7 +45,7 @@ class Renderer(object):
             os.path.dirname(__file__), "templates", template)
 
         with open(template) as f:
-            return f.read().format(**kwargs)
+            return str(f.read()).format(**kwargs)
 
     @classmethod
     def get_renderer(cls, name=None, kind=None):

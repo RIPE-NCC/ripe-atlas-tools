@@ -26,7 +26,7 @@ class Command(BaseCommand):
         ("ping", Ping),
         ("traceroute", Traceroute),
         ("dns", Dns),
-        ("ssl", Sslcert),
+        ("sslcert", Sslcert),
         ("http", Http),
         ("ntp", Ntp)
     ))

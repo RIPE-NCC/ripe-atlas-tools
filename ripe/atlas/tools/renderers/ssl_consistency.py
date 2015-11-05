@@ -4,7 +4,7 @@ THRESHOLD = 80  # %
 
 
 class Renderer(BaseRenderer):
-    RENDERS = [BaseRenderer.TYPE_TLS]
+    RENDERS = [BaseRenderer.TYPE_SSLCERT]
 
     def __init__(self):
         self.uniqcerts = {}

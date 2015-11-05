@@ -53,7 +53,7 @@ class Configuration(object):
                     "hop-by-hop-option-size": None,
                     "timeout": 4000
                 },
-                "ssl": {
+                "sslcert": {
                     "port": 443
                 },
                 "ntp": {
@@ -98,7 +98,7 @@ class Configuration(object):
                         "include": [],
                         "exclude": []
                     },
-                    "ssl": {
+                    "sslcert": {
                         "include": [],
                         "exclude": []
                     },
@@ -128,7 +128,7 @@ class Configuration(object):
                         "include": [],
                         "exclude": []
                     },
-                    "ssl": {
+                    "sslcert": {
                         "include": [],
                         "exclude": []
                     },

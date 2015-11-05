@@ -11,7 +11,7 @@ class Renderer(BaseRenderer):
         BaseRenderer.TYPE_PING,
         BaseRenderer.TYPE_TRACEROUTE,
         BaseRenderer.TYPE_DNS,
-        BaseRenderer.TYPE_TLS,
+        BaseRenderer.TYPE_SSLCERT,
         BaseRenderer.TYPE_HTTP,
         BaseRenderer.TYPE_NTP
     ]
