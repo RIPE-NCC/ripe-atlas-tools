@@ -11,8 +11,8 @@ try:
 except ImportError:
     import mock
 
+from ripe.atlas.tools.commands.measure.base import Command
 from ripe.atlas.tools.commands.measure import (
-    Command,
     PingMeasureCommand,
     TracerouteMeasureCommand,
     DnsMeasureCommand,
@@ -28,7 +28,7 @@ from ..base import capture_sys_output
 
 class TestMeasureCommand(unittest.TestCase):
 
-    CONF = "ripe.atlas.tools.commands.measure.conf"
+    CONF = "ripe.atlas.tools.commands.measure.base.conf"
     KINDS = {
         "ping": PingMeasureCommand,
         "traceroute": TracerouteMeasureCommand,
@@ -55,6 +55,7 @@ class TestMeasureCommand(unittest.TestCase):
             self.assertTrue(
                 str(e.exception).startswith("Usage: ripe-atlas measure <"))
 
+    @mock.patch(CONF, Configuration.DEFAULT)
     def test_dry_run(self):
 
         with capture_sys_output() as (stdout, stderr):
@@ -140,7 +141,7 @@ class TestMeasureCommand(unittest.TestCase):
             cmd.init_args(["dns", "--query-argument", "ripe.net"])
             self.assertEqual(cmd.clean_target(), None)
 
-    @mock.patch("ripe.atlas.tools.commands.measure.conf", Configuration.DEFAULT)
+    @mock.patch(CONF, Configuration.DEFAULT)
     def test_get_measurement_kwargs_ping(self):
 
         spec = Configuration.DEFAULT["specification"]["types"]["ping"]
@@ -183,7 +184,7 @@ class TestMeasureCommand(unittest.TestCase):
             }
         )
 
-    @mock.patch("ripe.atlas.tools.commands.measure.conf", Configuration.DEFAULT)
+    @mock.patch(CONF, Configuration.DEFAULT)
     def test_get_measurement_kwargs_traceroute(self):
 
         spec = Configuration.DEFAULT["specification"]["types"]["traceroute"]
@@ -250,7 +251,7 @@ class TestMeasureCommand(unittest.TestCase):
             }
         )
 
-    @mock.patch("ripe.atlas.tools.commands.measure.conf", Configuration.DEFAULT)
+    @mock.patch(CONF, Configuration.DEFAULT)
     def test_get_measurement_kwargs_dns(self):
 
         spec = Configuration.DEFAULT["specification"]["types"]["dns"]
@@ -315,7 +316,145 @@ class TestMeasureCommand(unittest.TestCase):
             }
         )
 
-    @mock.patch("ripe.atlas.tools.commands.measure.conf", Configuration.DEFAULT)
+    @mock.patch(CONF, Configuration.DEFAULT)
+    def test_get_measurement_kwargs_sslcert(self):
+
+        spec = Configuration.DEFAULT["specification"]["types"]["ssl"]
+
+        cmd = SslMeasureCommand()
+        cmd.init_args([
+            "ssl", "--target", "ripe.net"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "Ssl measurement to ripe.net",
+                "target": "ripe.net",
+                "port": spec["port"]
+            }
+        )
+
+        cmd = SslMeasureCommand()
+        cmd.init_args([
+            "ssl",
+            "--target", "ripe.net",
+            "--af", "6",
+            "--description", "This is my description",
+            "--port", "7"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": 6,
+                "description": "This is my description",
+                "target": "ripe.net",
+                "port": 7
+            }
+        )
+
+    @mock.patch(CONF, Configuration.DEFAULT)
+    def test_get_measurement_kwargs_http(self):
+
+        spec = Configuration.DEFAULT["specification"]["types"]["http"]
+
+        cmd = HttpMeasureCommand()
+        cmd.init_args([
+            "http", "--target", "ripe.net"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "Http measurement to ripe.net",
+                "target": "ripe.net",
+                "header_bytes": spec["header-bytes"],
+                "version": spec["version"],
+                "method": spec["method"],
+                "port": spec["port"],
+                "path": spec["path"],
+                "query_string": spec["query-string"],
+                "user_agent": spec["user-agent"],
+                "max_bytes_read": spec["body-bytes"],
+            }
+        )
+
+        cmd = HttpMeasureCommand()
+        cmd.init_args([
+            "http",
+            "--target", "ripe.net",
+            "--af", "6",
+            "--description", "This is my description",
+            "--header-bytes", "100",
+            "--version", "99",
+            "--method", "a-method",
+            "--port", "7",
+            "--path", "/path/to/something",
+            "--query-string", "x=7",
+            "--user-agent", "This is my custom user agent",
+            "--body-bytes", "200",
+            "--timing-verbosity", "2"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": 6,
+                "description": "This is my description",
+                "target": "ripe.net",
+                "header_bytes": 100,
+                "version": "99",
+                "method": "a-method",
+                "port": 7,
+                "path": "/path/to/something",
+                "query_string": "x=7",
+                "user_agent": "This is my custom user agent",
+                "max_bytes_read": 200,
+                "extended_timing": True,
+                "more_extended_timing": True
+            }
+        )
+
+    @mock.patch(CONF, Configuration.DEFAULT)
+    def test_get_measurement_kwargs_ntp(self):
+
+        spec = Configuration.DEFAULT["specification"]["types"]["ntp"]
+
+        cmd = NtpMeasureCommand()
+        cmd.init_args([
+            "ntp", "--target", "ripe.net"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "Ntp measurement to ripe.net",
+                "target": "ripe.net",
+                "packets": spec["packets"],
+                "timeout": spec["timeout"]
+            }
+        )
+
+        cmd = NtpMeasureCommand()
+        cmd.init_args([
+            "ntp",
+            "--target", "ripe.net",
+            "--af", "6",
+            "--description", "This is my description",
+            "--packets", "6",
+            "--timeout", "9000"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": 6,
+                "description": "This is my description",
+                "target": "ripe.net",
+                "packets": 6,
+                "timeout": 9000
+            }
+        )
+
+    @mock.patch(CONF, Configuration.DEFAULT)
     def test_get_source_kwargs(self):
 
         spec = Configuration.DEFAULT["specification"]
@@ -327,11 +466,12 @@ class TestMeasureCommand(unittest.TestCase):
             if kind == "dns":
                 args = ["dns", "--query-argument", "example.com"]
 
-            tags = spec["tags"]["ipv{}".format(spec["af"])]
+            cmd.init_args(list(args))
+
+            tags = spec["tags"]["ipv{}".format(cmd._get_af())]
             includes = tags[kind]["include"] + tags["all"]["include"]
             excludes = tags[kind]["exclude"] + tags["all"]["exclude"]
 
-            cmd.init_args(list(args))
             self.assertEqual(cmd._get_source_kwargs(), {
                 "requested": spec["source"]["requested"],
                 "type": spec["source"]["type"],
@@ -437,11 +577,11 @@ class TestMeasureCommand(unittest.TestCase):
         conf = copy.deepcopy(Configuration.DEFAULT)
         conf["specification"]["af"] = 100
 
-        with mock.patch(self.CONF, conf):
-            for kind, klass in self.KINDS.items():
+        for kind, klass in self.KINDS.items():
+            with mock.patch(self.CONF, conf):
 
                 for af in (4, 6):
-                    cmd = Command()
+                    cmd = klass()
                     cmd.init_args([kind, "--af", str(af)])
                     self.assertEqual(cmd._get_af(), af)
 
@@ -565,10 +705,27 @@ class TestMeasureCommand(unittest.TestCase):
                 "choice: 'invalid' (choose from 'UDP', 'TCP')"
             )
 
+        with capture_sys_output() as (stdout, stderr):
+            with self.assertRaises(SystemExit):
+                HttpMeasureCommand().init_args(
+                    ["http", "--timing-verbosity", "3"])
+            self.assertEqual(
+                stderr.getvalue().split("\n")[-2],
+                "ripe-atlas measure: error: argument --timing-verbosity: "
+                "invalid choice: 3 (choose from 0, 1, 2)"
+            )
+
         min_options = {
             "from-measurement": ((PingMeasureCommand,), 1),
             "probes": ((PingMeasureCommand,), 1),
-            "packets": ((PingMeasureCommand, TracerouteMeasureCommand), 1),
+            "packets": (
+                (
+                    PingMeasureCommand,
+                    TracerouteMeasureCommand,
+                    NtpMeasureCommand
+                ),
+                1
+            ),
             "size": ((PingMeasureCommand, TracerouteMeasureCommand), 1),
             "packet-interval": ((PingMeasureCommand,), 1),
             "timeout": ((TracerouteMeasureCommand, NtpMeasureCommand,), 1),
@@ -613,9 +770,15 @@ class TestMeasureCommand(unittest.TestCase):
                 (0, 256)
             ),
             "port": (
-                (TracerouteMeasureCommand,),
+                (
+                    TracerouteMeasureCommand,
+                    SslMeasureCommand,
+                    HttpMeasureCommand
+                ),
                 (0, 2**16 + 1)
             ),
+            "header-bytes": ((HttpMeasureCommand,), (-1, 2049)),
+            "body-bytes": ((HttpMeasureCommand,), (0, 1020049)),
         }
         for option, (klasses, extremes) in min_max_options.items():
             for klass in klasses:

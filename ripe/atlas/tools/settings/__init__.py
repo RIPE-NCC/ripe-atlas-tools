@@ -1,4 +1,5 @@
 import collections
+import copy
 import os
 import re
 import yaml
@@ -75,13 +76,12 @@ class Configuration(object):
                     "header-bytes": 0,
                     "version": "1.1",
                     "method": "GET",
-                    "port": "80",
+                    "port": 80,
                     "path": "/",
                     "query-string": None,
                     "user-agent": "RIPE ATLAS: https://atlas.ripe.net/",
-                    "max-bytes-read": None,
-                    "extended-timing": None,
-                    "more-extended-timing": None,
+                    "body-bytes": None,
+                    "timing-verbosity": 0,
                 },
             },
             "tags": {
@@ -154,7 +154,7 @@ class Configuration(object):
     }
 
     def get(self):
-        r = self.DEFAULT.copy()
+        r = copy.deepcopy(self.DEFAULT)
         if os.path.exists(self.USER_RC):
             with open(self.USER_RC) as y:
                 custom = yaml.load(y)
