@@ -39,7 +39,7 @@ class RipeAtlas(object):
     def _setup_command(self):
 
         caller = os.path.basename(sys.argv[0])
-        shortcut = re.match('^a(ping|traceroute|dig|ssl|ntp|http)$', caller)
+        shortcut = re.match('^a(ping|traceroute|dig|sslcert|ntp|http)$', caller)
 
         available_commands = self._get_available_commands()
         if shortcut:
@@ -58,8 +58,6 @@ class RipeAtlas(object):
     def _translate_shortcut(shortcut):
         if shortcut == "dig":
             return "dns"
-        if shortcut in ("ssl", "tls"):
-            return "sslcert"
         return shortcut
 
     def main(self):

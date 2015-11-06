@@ -1,4 +1,5 @@
 import collections
+import copy
 import os
 import re
 import yaml
@@ -52,7 +53,7 @@ class Configuration(object):
                     "hop-by-hop-option-size": None,
                     "timeout": 4000
                 },
-                "ssl": {
+                "sslcert": {
                     "port": 443
                 },
                 "ntp": {
@@ -70,7 +71,18 @@ class Configuration(object):
                     "udp-payload-size": 512,
                     "set-rd-bit": True,
                     "retry": 0
-                }
+                },
+                "http": {
+                    "header-bytes": 0,
+                    "version": "1.1",
+                    "method": "GET",
+                    "port": 80,
+                    "path": "/",
+                    "query-string": None,
+                    "user-agent": "RIPE ATLAS: https://atlas.ripe.net/",
+                    "body-bytes": None,
+                    "timing-verbosity": 0,
+                },
             },
             "tags": {
                 "ipv4": {
@@ -86,7 +98,7 @@ class Configuration(object):
                         "include": [],
                         "exclude": []
                     },
-                    "ssl": {
+                    "sslcert": {
                         "include": [],
                         "exclude": []
                     },
@@ -116,7 +128,7 @@ class Configuration(object):
                         "include": [],
                         "exclude": []
                     },
-                    "ssl": {
+                    "sslcert": {
                         "include": [],
                         "exclude": []
                     },
@@ -142,7 +154,7 @@ class Configuration(object):
     }
 
     def get(self):
-        r = self.DEFAULT.copy()
+        r = copy.deepcopy(self.DEFAULT)
         if os.path.exists(self.USER_RC):
             with open(self.USER_RC) as y:
                 custom = yaml.load(y)
