@@ -22,7 +22,7 @@ class Renderer(BaseRenderer):
             else:
                 self.asns['<unknown>'] += 1
                 self.asn2name['<unknown>'] = 'unknown'
-           return ""
+            return ""
         return ""
 
     def additional(self, results):
