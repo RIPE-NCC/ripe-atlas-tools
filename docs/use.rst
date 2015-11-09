@@ -294,6 +294,10 @@ Option              Arguments           Explanation
 ``--probes``        A comma-separated   Limit the report to only results
                     list of probe ids   obtained from specific probes.
 
+``--probe-asns``    A comma-separated   Limit the report to only results
+                    list of probe ids   obtained from probes belonging to
+                                        specific ASNs   .
+
 ``--renderer``      One of: dns, http,  The renderer you want to use. If this
                     ntp, ping, raw,     isn't defined, an appropriate renderer
                     ssl_consistency,    will be selected.
