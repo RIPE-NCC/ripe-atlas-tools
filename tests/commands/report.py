@@ -287,6 +287,6 @@ class TestReportCommand(unittest.TestCase):
                 mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
                 with mock.patch(mpath) as mock_get_many:
                     mock_get_many.return_value = probes
-                    self.cmd.init_args(["1", "--asns", "3334"])
+                    self.cmd.init_args(["1", "--probe-asns", "3334"])
                     self.cmd.run()
                     self.assertEquals(stdout.getvalue(), expected_output)
