@@ -4,24 +4,25 @@ from collections import Counter
 
 from ..ipdetails import IP
 
+
 class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_PING]
 
     def __init__(self):
-        self.asns = Counter() # keys are timestamps, data struct captures ASN membership
+        self.asns = Counter()  # keys are timestamps, data struct captures ASN membership
         self.asn2name = {}
 
     def on_result(self, result):
         dst = result.destination_address
-        if dst != None:
-           ip = IP( dst )
+        if dst is not None:
+           ip = IP(dst)
            if ip.asn:
-               self.asns[ ip.asn ] += 1
-               self.asn2name[ ip.asn ] = ip.holder
+               self.asns[ip.asn] += 1
+               self.asn2name[ip.asn] = ip.holder
            else:
-               self.asns[ '<unknown>' ] += 1
-               self.asn2name[ '<unknown>' ] = 'unknown'
+               self.asns['<unknown>'] += 1
+               self.asn2name['<unknown>'] = 'unknown'
            return ""
         return ""
 
