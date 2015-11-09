@@ -59,7 +59,7 @@ class Command(BaseCommand):
             choices=self.AGGREGATORS.keys(),
             action="append",
             help="Tell the rendering engine to aggregate the results by the "
-                 "selected option.  Note that if you opt for aggregation, no "
+                 "selected option. Note that if you opt for aggregation, no "
                  "output will be generated until all results are received."
         )
         self.parser.add_argument(
