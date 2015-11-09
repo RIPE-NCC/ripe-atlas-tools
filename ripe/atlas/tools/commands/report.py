@@ -69,7 +69,8 @@ class Command(BaseCommand):
                 minimum=1,
                 maximum=50000
             ),
-            help="Filter results based on probe's ASN"
+            help="A comma-separated list of probe ASNs you want to see "
+                 "exclusively."
         )
         self.parser.add_argument(
             "--start-time",
