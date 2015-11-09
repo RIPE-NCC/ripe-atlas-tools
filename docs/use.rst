@@ -757,3 +757,30 @@ complex query::
     $ ripe-atlas measure dns --query-type AAAA --query-argument example.com \
       --set-nsid-bit --set-rd-bit --set-do-bit --set-cd-bit
 
+
+Shortcuts
+---------
+
+If you're creating a lot of measurements in a short time, typing out
+``ripe-atlas measure traceroute`` a whole bunch of times can be tiresome, so
+we've added a few shortcut scripts for you:
+
+=================================  ==========================
+Where you'd typically write        You could use this instead
+=================================  ==========================
+``ripe-atlas measure ping``        ``aping``
+``ripe-atlas measure traceroute``  ``atraceroute``
+``ripe-atlas measure dns``         ``adig``
+``ripe-atlas measure sslcert``     ``asslcert``
+``ripe-atlas measure http``        ``ahttp``
+``ripe-atlas measure ntp``         ``antp``
+=================================  ==========================
+
+So for example, these two commands are the same::
+
+    $ ripe-atlas measure ping --target example.com
+    $ aping --target example.com
+
+If you want to streamline your typing process even more than this, we recommend
+the use of your shell's ``alias`` feature, which is both powerful and
+customisable for your needs.
