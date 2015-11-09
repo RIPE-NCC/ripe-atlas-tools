@@ -140,7 +140,7 @@ class TestReportCommand(unittest.TestCase):
                 self.cmd.run()
 
     def test_valid_case_no_aggr(self):
-        """Test case we we have result no aggregation."""
+        """Test case where we have result no aggregation."""
         expected_output = (
             "\nRIPE Atlas Report for Measurement #1\n"
             "===================================================\n\n"
@@ -191,7 +191,7 @@ class TestReportCommand(unittest.TestCase):
                     self.assertEquals(stdout.getvalue(), expected_output)
 
     def test_valid_case_with_aggr(self):
-        """Test case we we have result with aggregation."""
+        """Test case where we have result with aggregation."""
         expected_output = (
             "\nRIPE Atlas Report for Measurement #1\n"
             "===================================================\n\n"
@@ -246,3 +246,47 @@ class TestReportCommand(unittest.TestCase):
                     expected_set = set(expected_output.split("\n"))
                     returned_set = set(stdout.getvalue().split("\n"))
                     self.assertEquals(returned_set, expected_set)
+
+    def test_asns_filter(self):
+        """Test case where user specified probe asns filters.."""
+        expected_output = (
+            "\nRIPE Atlas Report for Measurement #1\n"
+            "===================================================\n\n"
+            "20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
+            "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
+        )
+
+        probes = [
+            Probe(id=202, meta_data={
+                "country_code": "GR", "asn_v4": 3337, "asn_v6": "4445"}),
+            Probe(id=677, meta_data={
+                "country_code": "DE", "asn_v4": 3333, "asn_v6": "4444"}),
+            Probe(id=2225, meta_data={
+                "country_code": "DE", "asn_v4": 3332, "asn_v6": "4444"}),
+            Probe(id=165, meta_data={
+                "country_code": "NL", "asn_v4": 3334, "asn_v6": "4444"}),
+            Probe(id=1216, meta_data={
+                "country_code": "GR", "asn_v4": 3335, "asn_v6": "4444"}),
+            Probe(id=270, meta_data={
+                "country_code": "GR", "asn_v4": 3340, "asn_v6": "4444"}),
+            Probe(id=579, meta_data={
+                "country_code": "GR", "asn_v4": 3336, "asn_v6": "4444"}),
+            Probe(id=945, meta_data={
+                "country_code": "GR", "asn_v4": 3334, "asn_v6": "4444"}),
+            Probe(id=879, meta_data={
+                "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
+        ]
+
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.cousteau.AtlasRequest.get'
+            with mock.patch(path) as mock_get:
+                mock_get.side_effect = [
+                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
+                    (True, self.mocked_results)
+                ]
+                mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
+                with mock.patch(mpath) as mock_get_many:
+                    mock_get_many.return_value = probes
+                    self.cmd.init_args(["1", "--asns", "3334"])
+                    self.cmd.run()
+                    self.assertEquals(stdout.getvalue(), expected_output)

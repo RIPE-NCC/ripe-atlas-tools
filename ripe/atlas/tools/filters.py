@@ -1,10 +1,13 @@
+from .exceptions import RipeAtlasToolsException
+
+
 class FilterFactory(object):
 
     @staticmethod
-    def create(cls, key, value):
+    def create(key, value):
         """Create new filter class based on the key"""
         if key == "asn":
-            return ASNFilter(key, value)
+            return ASNFilter(value)
         else:
             return Filter(key, value)
 
@@ -25,7 +28,14 @@ class Filter(object):
         Decide if given result should be filtered (False) or remain on the
         pile of results.
         """
-        attr_value = getattr(result.probe, self.key)
+        try:
+            attr_value = getattr(result.probe, self.key)
+        except AttributeError:
+            log = (
+                "Cousteau's Probe class does not have an attribute "
+                "called: <{}>"
+            ).format(self.key)
+            raise RipeAtlasToolsException(log)
         if attr_value == self.value:
             return True
 
@@ -34,6 +44,10 @@ class Filter(object):
 
 class ASNFilter(Filter):
     """Class thar represents filter by probes that belong to given ASN."""
+
+    def __init__(self, value):
+        key = "asn"
+        super(ASNFilter, self).__init__(key, value)
 
     def filter(self, result):
         asn_v4 = getattr(result.probe, "asn_v4")
@@ -46,9 +60,11 @@ class ASNFilter(Filter):
 
 def filter_results(filters, results):
     """docstring for filter"""
-    for result in results[:]:
+    new_results = []
+    for result in results:
         for rfilter in filters:
-            if not rfilter.filter(result):
-                results.remove(result)
+            if rfilter.filter(result):
+                new_results.append(result)
+                break
 
-    return results
+    return new_results
