@@ -26,10 +26,10 @@ class Renderer(BaseRenderer):
         return ""
 
     def additional(self, results):
-        total = sum(self.asns.values()) 
+        total = sum(self.asns.values())
         for asn, count in self.asns.most_common():
             print "AS%s %.2f%% (%s)" % (
-              asn, 
+              asn,
               100.0*count/total,
               self.asn2name[asn]
             )
