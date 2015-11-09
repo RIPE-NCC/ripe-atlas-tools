@@ -1,5 +1,4 @@
 from .base import Renderer as BaseRenderer
-from ripe.atlas.cousteau import ProbeRequest
 from collections import Counter
 
 from ..ipdetails import IP
