@@ -9,6 +9,7 @@ from ..helpers.rendering import SaganSet, Rendering
 from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
 from .base import Command as BaseCommand
+from ..filters import FilterFactory, filter_results
 
 
 class Command(BaseCommand):
@@ -59,8 +60,17 @@ class Command(BaseCommand):
             choices=self.AGGREGATORS.keys(),
             action="append",
             help="Tell the rendering engine to aggregate the results by the "
-                 "selected option.  Note that if you opt for aggregation, no "
+                 "selected option. Note that if you opt for aggregation, no "
                  "output will be generated until all results are received."
+        )
+        self.parser.add_argument(
+            "--probe-asns",
+            type=ArgumentType.comma_separated_integers(
+                minimum=1,
+                maximum=50000
+            ),
+            help="A comma-separated list of probe ASNs you want to see "
+                 "exclusively."
         )
         self.parser.add_argument(
             "--start-time",
@@ -104,6 +114,13 @@ class Command(BaseCommand):
                 "There aren't any results available for that measurement")
 
         results = SaganSet(iterable=results, probes=self.arguments.probes)
+
+        if self.arguments.probe_asns:
+            asn_filters = set([])
+            for asn in self.arguments.probe_asns:
+                asn_filters.add(FilterFactory.create("asn", asn))
+            results = filter_results(asn_filters, list(results))
+
         if self.arguments.aggregate_by:
             results = aggregate(results, self.get_aggregators())
 
