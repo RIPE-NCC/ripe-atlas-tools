@@ -17,6 +17,9 @@ class Renderer(object):
 
     RENDERS = ()
 
+    SHOW_DEFAULT_HEADER = True
+    SHOW_DEFAULT_FOOTER = True
+
     @staticmethod
     def get_available():
         """

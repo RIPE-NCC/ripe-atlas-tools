@@ -153,9 +153,6 @@ class Command(BaseCommand):
         we want nothing.
         """
 
-        if self.arguments.renderer == "raw":
-            return ""
-
         description = measurement.description or ""
         if description:
             description = "\n{}".format(description)
