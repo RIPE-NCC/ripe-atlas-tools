@@ -74,12 +74,14 @@ class Rendering(object):
         self.payload = payload
 
     def render(self):
-        print(self.header, end="")
+        if self.renderer.SHOW_DEFAULT_HEADER:
+            print(self.header, end="")
         self.renderer.header()
         self._smart_render(self.payload)
         self.renderer.additional(self.payload)
         self.renderer.footer()
-        print(self.footer, end="")
+        if self.renderer.SHOW_DEFAULT_FOOTER:
+            print(self.footer, end="")
 
     def _get_rendered_results(self, data):
         for sagan in data:

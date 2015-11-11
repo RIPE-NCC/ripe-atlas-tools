@@ -9,7 +9,8 @@ from .helpers import TestArgumentTypeHelper
 from .renderers import (
     TestPingRenderer,
     TestSSLConsistency,
-    TestAggregatePing
+    TestAggregatePing,
+    TestRawRenderer,
 )
 
 
@@ -23,4 +24,5 @@ __all__ = [
     TestPingRenderer,
     TestSSLConsistency,
     TestAggregatePing,
+    TestRawRenderer,
 ]

@@ -16,5 +16,8 @@ class Renderer(BaseRenderer):
         BaseRenderer.TYPE_NTP
     ]
 
+    SHOW_DEFAULT_HEADER = False
+    SHOW_DEFAULT_FOOTER = False
+
     def on_result(self, result, probes=None):
         return json.dumps(result.raw_data, separators=(",", ":")) + "\n"
