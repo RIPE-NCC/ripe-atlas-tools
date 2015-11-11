@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import importlib
 import os
 import pkgutil
 import re
@@ -66,12 +67,8 @@ class RipeAtlas(object):
 
         try:
 
-            module = __import__(
-                "ripe.atlas.tools.commands." + self.command,
-                globals(),
-                locals(),
-                [self.command]
-            )
+            module = importlib.import_module(
+                "ripe.atlas.tools.commands.{}".format(self.command))
 
             #
             # If the imported module contains a `Factory` class, execute that
