@@ -1,8 +1,8 @@
 Releases History
 ================
 
-1.1.0 (released 2015-11-2)
---------------------------
+1.1.0 (released 2015-11-12)
+---------------------------
 
 New features
 ~~~~~~~~~~~~
@@ -20,6 +20,6 @@ Changes
 - Better testing.
 - Additional documentation
 
-1.0.0 (released 2015-11-2)
---------------------------
+1.0.0 (released 2015-11-02)
+---------------------------
 - Initial release.
