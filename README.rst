@@ -5,12 +5,6 @@ RIPE Atlas Tools (Magellan)
 The official command-line client for RIPE Atlas.
 
 
-Disclaimer
-----------
-
-All of this is super-beta.  If it breaks, you get to keep all the shiny pieces.
-
-
 Full Documentation
 ------------------
 
