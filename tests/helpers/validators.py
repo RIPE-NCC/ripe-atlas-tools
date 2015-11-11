@@ -1,6 +1,12 @@
 import argparse
 import datetime
+import sys
 import unittest
+
+try:
+    from cStringIO import StringIO
+except ImportError:  # Python 3
+    from io import StringIO
 
 from ripe.atlas.tools.helpers.validators import ArgumentType
 
@@ -83,3 +89,29 @@ class TestArgumentTypeHelper(unittest.TestCase):
 
         with self.assertRaises(argparse.ArgumentTypeError):
             ArgumentType.ip_or_domain("Definitely not a host")
+
+    def test_comma_separated_integers_or_file(self):
+
+        with self.assertRaises(argparse.ArgumentTypeError):
+            ArgumentType.comma_separated_integers_or_file("/dev/null/fail")
+
+        with self.assertRaises(argparse.ArgumentTypeError):
+            ArgumentType.comma_separated_integers_or_file("not,a,number")
+
+        with self.assertRaises(argparse.ArgumentTypeError):
+            ArgumentType.comma_separated_integers_or_file("1, 2, 3")
+
+        old = sys.stdin
+        sys.stdin = StringIO("1\n2\n")
+        self.assertEqual(
+            ArgumentType.comma_separated_integers_or_file("-"),
+            [1, 2]
+        )
+        sys.stdin = old
+
+        with open("/tmp/__test_file__", "w") as f:
+            f.write("1\n2\n3\n")
+        self.assertEqual(
+            ArgumentType.comma_separated_integers_or_file("/tmp/__test_file__"),
+            [1, 2, 3]
+        )

@@ -41,12 +41,10 @@ class Command(BaseCommand):
         )
         self.parser.add_argument(
             "--probes",
-            type=ArgumentType.comma_separated_integers(
-                minimum=1,
-                maximum=50000
-            ),
-            help="A comma-separated list of probe ids you want to see "
-                 "exclusively."
+            type=ArgumentType.comma_separated_integers_or_file,
+            help="Either a comma-separated list of probe ids you want to see "
+                 "exclusively, a path to a file containing probe ids (one on "
+                 "each line), or \"-\" for standard input in the same format."
         )
         self.parser.add_argument(
             "--renderer",
