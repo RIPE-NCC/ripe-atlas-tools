@@ -28,3 +28,4 @@ Contents
    use
    contributing
    troubleshooting
+   changelog
