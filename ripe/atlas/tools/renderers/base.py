@@ -50,7 +50,7 @@ class Renderer(object):
     @classmethod
     def get_renderer(cls, name=None, kind=None):
         """
-        Using the name if you've asked for it specificially, or attempting to
+        Using the name if you've asked for it specifically, or attempting to
         guess the appropriate renderer based on the kind of measurement, this
         will return a Renderer subclass or None if nothing can be found.
         """
@@ -100,7 +100,7 @@ class Renderer(object):
     @staticmethod
     def import_renderer(package, name):
         return getattr(
-            importlib.import_module(".{0}".format(name), package=package),
+            importlib.import_module("{}.{}".format(package, name)),
             "Renderer"
         )
 
