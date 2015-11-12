@@ -53,6 +53,10 @@ class ArgumentType(object):
 
     @classmethod
     def comma_separated_integers_or_file(cls, string):
+        """
+        Allow a list of comma-separated integers, or a file containing a
+        newline-separated list of integers, OR "-" which implies standard out.
+        """
 
         if re.match(r"^((\d+,?)+)$", string):
             return cls.comma_separated_integers()(string)

@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import os
 import sys
 import unittest
 
@@ -109,9 +110,11 @@ class TestArgumentTypeHelper(unittest.TestCase):
         )
         sys.stdin = old
 
-        with open("/tmp/__test_file__", "w") as f:
+        in_file = "/tmp/__test_file__"
+        with open(in_file, "w") as f:
             f.write("1\n2\n3\n")
         self.assertEqual(
-            ArgumentType.comma_separated_integers_or_file("/tmp/__test_file__"),
+            ArgumentType.comma_separated_integers_or_file(in_file),
             [1, 2, 3]
         )
+        os.unlink(in_file)
