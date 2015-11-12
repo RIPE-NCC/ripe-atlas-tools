@@ -6,6 +6,7 @@ try:
 except ImportError:  # Python 3
     from io import StringIO
 
+
 @contextmanager
 def capture_sys_output():
     """

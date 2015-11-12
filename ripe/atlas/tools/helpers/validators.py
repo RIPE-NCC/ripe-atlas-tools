@@ -3,6 +3,7 @@ from __future__ import print_function, absolute_import
 import argparse
 import os
 import re
+import sys
 
 from dateutil import parser
 
@@ -49,6 +50,33 @@ class ArgumentType(object):
                 raise argparse.ArgumentTypeError(message)
 
         return string
+
+    @classmethod
+    def comma_separated_integers_or_file(cls, string):
+        """
+        Allow a list of comma-separated integers, or a file containing a
+        newline-separated list of integers, OR "-" which implies standard out.
+        """
+
+        if re.match(r"^((\d+,?)+)$", string):
+            return cls.comma_separated_integers()(string)
+
+        f = sys.stdin
+        if not string == "-":
+            if not os.path.exists(string):
+                raise argparse.ArgumentTypeError("Cannot find file: {}".format(
+                    string
+                ))
+            f = open(string)
+
+        try:
+            return [int(_) for _ in f.readlines()]
+        except ValueError:
+            raise argparse.ArgumentTypeError(
+                "The contents of the file presented does not conform to input "
+                "standards.  Please ensure that every line in the file "
+                "consists of a single integer."
+            )
 
     class integer_range(object):
 
