@@ -2,6 +2,7 @@ import mock
 import unittest
 from ripe.atlas.cousteau import Probe as CProbe
 from ripe.atlas.tools.helpers.rendering import SaganSet
+from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.renderers.ssl_consistency import Renderer
 from ..base import capture_sys_output
 
@@ -76,9 +77,6 @@ class TestSSLConsistency(unittest.TestCase):
             483: CProbe(id=483, meta_data={
                 "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
         }
-
-    def setUp(self):
-        pass
 
     def test_additional(self):
         """Tests whole functionality of additional unit."""
@@ -210,3 +208,38 @@ class TestSSLConsistency(unittest.TestCase):
                 renderer.render_below_threshold("07:52:BE:65:72:BF:02:D4:C9:E2:93:09:A8:E0:BE:3A:EA:D4:30:41:B8:49:FA:C5:F2:12:33:07:37:57:EE:C7"),
                 expected_output
             )
+
+    def test_report_with_ssl_consistency_renderer(self):
+        """Tests the report with the ssl renderer."""
+
+        results = self.results[:2]
+
+        expected_output = (
+            "\nRIPE Atlas Report for Measurement #1\n"
+            "===================================================\n\n"
+            "Certificate:\n"
+            "  Issuer: C=US, O=DigiCert Inc, CN=DigiCert High Assurance CA-3\n"
+            "  Subject: C=US, O=The Tor Project, Inc., CN=*.torproject.org\n"
+            "  SHA256 Fingerprint=36:13:D2:B2:2A:75:00:94:76:0C:41:AD:19:DB:52:A4:F0:5B:DE:A8:01:72:E2:57:87:61:AD:96:7F:7E:D9:AA\n\n"
+            "  Seen by 2 probes\n\n"
+            "Certificate:\n"
+            "  Issuer: C=US, O=DigiCert Inc, CN=DigiCert High Assurance EV Root CA\n"
+            "  Subject: C=US, O=DigiCert Inc, CN=DigiCert High Assurance CA-3\n"
+            "  SHA256 Fingerprint=21:EB:37:AB:4C:F6:EF:89:65:EC:17:66:40:9C:A7:6B:8B:2E:03:F2:D1:A3:88:DF:73:42:08:E8:6D:EE:E6:79\n\n"
+            "  Seen by 2 probes\n\n"
+        )
+
+        with capture_sys_output() as (stdout, stderr):
+            path = 'ripe.atlas.cousteau.AtlasRequest.get'
+            with mock.patch(path) as mock_get:
+                mock_get.side_effect = [
+                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "sslcert"}, "description": ""}),
+                    (True, results)
+                ]
+                mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
+                with mock.patch(mpath) as mock_get_many:
+                    mock_get_many.return_value = [self.probes[1003], self.probes[1004]]
+                    cmd = Command()
+                    cmd.init_args(["1", "--renderer", "ssl_consistency"])
+                    cmd.run()
+                    self.assertEquals(stdout.getvalue(), expected_output)
