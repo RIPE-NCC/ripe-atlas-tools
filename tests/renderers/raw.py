@@ -1,4 +1,5 @@
 import mock
+import json
 import unittest
 
 from ripe.atlas.cousteau import Probe
@@ -26,7 +27,6 @@ class TestRawRenderer(unittest.TestCase):
 
     def test_raw_renderer(self):
         """Test case where user specified report with raw rendering."""
-        import json
         json_results = []
         for result in self.mocked_results:
             json_results.append(json.dumps(result, separators=(",", ":")))
