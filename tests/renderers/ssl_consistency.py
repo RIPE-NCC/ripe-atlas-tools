@@ -242,4 +242,6 @@ class TestSSLConsistency(unittest.TestCase):
                     cmd = Command()
                     cmd.init_args(["1", "--renderer", "ssl_consistency"])
                     cmd.run()
-                    self.assertEquals(stdout.getvalue(), expected_output)
+                    expected_set = set(expected_output.split("\n"))
+                    returned_set = set(stdout.getvalue().split("\n"))
+                    self.assertEquals(returned_set, expected_set)
