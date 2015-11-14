@@ -30,10 +30,26 @@ class Factory(BaseFactory):
             self.build_class = self.TYPES.get(sys.argv[1].lower())
 
         if not self.build_class:
-            raise RipeAtlasToolsException(
-                "The measurement type you requested is invalid.  Please choose "
-                "one of {}.".format(", ".join(self.TYPES.keys()))
+            self.raise_log()
+
+    def raise_log(self):
+        """Depending on the input raise with different log message."""
+        # cases: 1) ripe-atlas measure 2) ripe-atlas measure --help/-h
+        if (
+            len(sys.argv) == 1 or
+            (len(sys.argv) == 2 and sys.argv[1] in ("--help", "-h"))
+        ):
+            log = (
+                "For extended options for a specific measurement type, "
+                "try ripe-atlas measure <type> --help."
             )
+        # cases: ripe-atlas measure bla
+        else:
+            log = (
+                "The measurement type you requested is invalid.  "
+                "Please choose one of {}."
+            ).format(", ".join(self.TYPES.keys()))
+        raise RipeAtlasToolsException(log)
 
     def create(self, *args, **kwargs):
         return self.build_class(*args, **kwargs)
