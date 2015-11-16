@@ -8,7 +8,7 @@ InsecurePlatformWarning
 -----------------------
 
 On older systems (running Python versions <2.7.10), you may be presented with a
-warning message that looks like this:::
+warning message that looks like this::
 
     /path/to/lib/python2.7/site-packages/requests/packages/urllib3/util/ssl_.py:100:
     InsecurePlatformWarning: A true SSLContext object is not available. This
