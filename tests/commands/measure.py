@@ -755,7 +755,7 @@ class TestMeasureCommand(unittest.TestCase):
         min_max_options = {
             "from-asn": (
                 (PingMeasureCommand,),
-                (0, 2**32 + 1)
+                (0, 2 ** 32 - 2 + 1)
             ),
             "paris": (
                 (TracerouteMeasureCommand,),
@@ -775,7 +775,7 @@ class TestMeasureCommand(unittest.TestCase):
                     SslcertMeasureCommand,
                     HttpMeasureCommand
                 ),
-                (0, 2**16 + 1)
+                (0, 2 ** 16 + 1)
             ),
             "header-bytes": ((HttpMeasureCommand,), (-1, 2049)),
             "body-bytes": ((HttpMeasureCommand,), (0, 1020049)),
