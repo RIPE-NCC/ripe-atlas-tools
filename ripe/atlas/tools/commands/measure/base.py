@@ -142,7 +142,7 @@ class Command(BaseCommand):
         )
         origins.add_argument(
             "--from-asn",
-            type=ArgumentType.integer_range(1, 2**32),
+            type=ArgumentType.integer_range(1, 2 ** 32),
             metavar="ASN",
             help="The ASN from which you'd like to select your probes. "
                  "Example: --from-asn=3333"
