@@ -1,6 +1,8 @@
 from .base import Renderer as BaseRenderer
 from .base import Result
 
+from ..helpers.colours import colourise
+
 
 class Renderer(BaseRenderer):
 
@@ -12,19 +14,29 @@ class Renderer(BaseRenderer):
 
         for hop in result.hops:
 
+            if hop.is_error:
+                r += "{}\n".format(colourise(hop.error_message, "red"))
+                continue
+
             name = ""
             rtts = []
             for packet in hop.packets:
-                name = name or packet.origin
-                rtts.append(packet.rtt)
+                name = name or packet.origin or "*"
+                if packet.rtt:
+                    rtts.append("{:8} ms".format(packet.rtt))
+                else:
+                    rtts.append("          *")
 
-            r += "{0:>3} {1:15} {2}ms\n".format(
+            r += "{:>3} {:39} {}\n".format(
                 hop.index,
                 name,
-                "ms  ".join(["{0:8}".format(rtt) for rtt in rtts])
+                "  ".join(rtts)
             )
 
         return Result(
-            "\nProbe #{0}\n\n{1}".format(result.probe_id, r),
+            "\n{}\n\n{}".format(
+                colourise("Probe #{}".format(result.probe_id), "bold"),
+                r
+            ),
             result.probe_id
         )
