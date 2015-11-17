@@ -62,6 +62,11 @@ class IP(object):
                 continue
 
             prefix_details = cache.get(cache_entry)
+
+            # data could exist but expired
+            if not prefix_details:
+                continue
+
             prefix = IPy.IP(prefix_details["Prefix"])
 
             if self.ip_object in prefix:

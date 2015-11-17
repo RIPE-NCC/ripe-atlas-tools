@@ -65,7 +65,7 @@ class Command(BaseCommand):
             "--probe-asns",
             type=ArgumentType.comma_separated_integers(
                 minimum=1,
-                maximum=50000
+                maximum=2 ** 32
             ),
             help="A comma-separated list of probe ASNs you want to see "
                  "exclusively."
