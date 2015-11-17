@@ -1,6 +1,13 @@
 Release History
 ===============
 
+1.1.1
+-----
+
+Bug Fixes
+~~~~~~~~~
+- `#105`_: Measurement report and stream broken on Python3.4
+
 1.1.0 (released 2015-11-12)
 ---------------------------
 
@@ -11,7 +18,7 @@ New features
 - Additional renderer that shows the different destination ASNs and some
   additional stats about them.
 
-Bug fixes
+Bug Fixes
 ~~~~~~~~~
 - Various fixes.
 
@@ -23,3 +30,5 @@ Changes
 1.0.0 (released 2015-11-02)
 ---------------------------
 - Initial release.
+
+.. _#105: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/105
