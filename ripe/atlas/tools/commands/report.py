@@ -65,7 +65,8 @@ class Command(BaseCommand):
             "--probe-asns",
             type=ArgumentType.comma_separated_integers(
                 minimum=1,
-                maximum=2 ** 32
+                # http://www.iana.org/assignments/as-numbers/as-numbers.xhtml
+                maximum=2 ** 32 - 2
             ),
             help="A comma-separated list of probe ASNs you want to see "
                  "exclusively."
