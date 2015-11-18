@@ -796,3 +796,34 @@ class TestMeasureCommand(unittest.TestCase):
                                 option, extremes[0] + 1, extremes[1] - 1
                             )
                         )
+
+    @mock.patch(CONF, Configuration.DEFAULT)
+    def test_account_for_selected_probes(self):
+
+        spec = Configuration.DEFAULT["specification"]
+
+        cmd = PingMeasureCommand()
+        cmd.init_args(["ping", "--target", "ripe.net"])
+        cmd._account_for_selected_probes(),
+        self.assertEqual(cmd.arguments.probes, spec["source"]["requested"])
+
+        cmd = PingMeasureCommand()
+        cmd.init_args(["ping", "--target", "ripe.net", "--probes", "7"])
+        cmd._account_for_selected_probes(),
+        self.assertEqual(cmd.arguments.probes, 7)
+
+        cmd = PingMeasureCommand()
+        cmd.init_args(["ping", "--target", "ripe.net", "--from-probes", "1,2"])
+        cmd._account_for_selected_probes(),
+        self.assertEqual(cmd.arguments.probes, 2)
+
+        cmd = PingMeasureCommand()
+        cmd.init_args([
+            "ping",
+            "--target", "ripe.net",
+            "--from-probes", "1,2",
+            "--probes", "7"
+        ])
+        with capture_sys_output() as (stdout, stderr):
+            with self.assertRaises(RipeAtlasToolsException):
+                cmd._account_for_selected_probes(),

@@ -167,8 +167,10 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--probes",
             type=ArgumentType.integer_range(minimum=1),
-            default=conf["specification"]["source"]["requested"],
-            help="The number of probes you want to use"
+            default=None,
+            help="The number of probes you want to use.  Defaults to {},"
+                 "unless --from-probes is invoked, in which case the number of "
+                 "probes selected is used.".format(conf["specification"]["source"]["requested"])
         )
         self.parser.add_argument(
             "--include-tag",
@@ -188,6 +190,8 @@ class Command(BaseCommand):
         )
 
     def run(self):
+
+        self._account_for_selected_probes()
 
         if self.arguments.dry_run:
             return self.dry_run()
@@ -348,6 +352,26 @@ class Command(BaseCommand):
             if re.match(r"^\d+\.\d+\.\d+\.\d+$", self.arguments.target):
                 return 4
         return conf["specification"]["af"]
+
+    def _account_for_selected_probes(self):
+        """
+        If the user has used --from-probes, there's a little extra magic we
+        need to do.
+        """
+
+        # We can't use argparse's mutually_exclusive_group() method here because
+        # that library doesn't allow partial overlap.
+        if self.arguments.from_probes and self.arguments.probes:
+            raise RipeAtlasToolsException(
+                "Explicit probe selection (--from-probes) in incompatible with "
+                "a --probes argument."
+            )
+
+        configured = conf["specification"]["source"]["requested"]
+        if not self.arguments.probes:
+            self.arguments.probes = configured
+            if self.arguments.from_probes:
+                self.arguments.probes = len(self.arguments.from_probes)
 
     @staticmethod
     def _handle_api_error(response):
