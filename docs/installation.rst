@@ -164,14 +164,14 @@ From GitHub
 If you're feeling a little more daring and want to go bleeding-edge and use
 our ``master`` branch on GitHub, you can have pip install right from there:::
 
-    $ pip install git+https://github.com/RIPE-NCC/ripe.atlas.tools.git
+    $ pip install git+https://github.com/RIPE-NCC/ripe-atlas-tools.git
 
 If you think you'd like to contribute back to the project, we recommend the use
 of pip's ``-e`` flag, which will place the Magellan code in a directory where
 you can edit it, and see the results without having to go through a new install
 procedure every time.  Simply clone the repo on GitHub and install it like so:::
 
-    $ pip install -e git+https://github.com/your-username/ripe.atlas.tools.git
+    $ pip install -e git+https://github.com/your-username/ripe-atlas-tools.git
 
 
 .. _installation-from-tarball:
