@@ -62,7 +62,7 @@ your pull request:
      as soon as possible.
 
 Thank you for considering a contribution to this project!  If you have any
-question or concerns, feel free to reach out the RIPE Atlas team via the
+questions or concerns, feel free to reach out the RIPE Atlas team via the
 `mailing list`_, `GitHub Issue Queue`_, or `messenger pigeon`_ -- if you must.
 
 .. _submit a pull request:  https://github.com/RIPE-NCC/ripe-atlas-tools/compare/
