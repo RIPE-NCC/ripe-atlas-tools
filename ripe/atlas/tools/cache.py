@@ -7,6 +7,7 @@ import datetime
 import dbm
 import functools
 import os
+import sys
 
 
 class LocalCache(object):
@@ -79,10 +80,13 @@ class LocalCache(object):
     @staticmethod
     def _get_or_create_db_path():
 
-        db_path = os.path.join("/", "tmp", "cache.db")
+        v = sys.version_info
+        file_name = "cache-{}.{}.{}.db".format(v.major, v.minor, v.micro)
+
+        db_path = os.path.join("/", "tmp", file_name)
         if "HOME" in os.environ:
             db_path = os.path.join(
-                os.environ["HOME"], ".config", "ripe-atlas-tools", "cache.db")
+                os.environ["HOME"], ".config", "ripe-atlas-tools", file_name)
 
         try:
             os.makedirs(os.path.dirname(db_path))
