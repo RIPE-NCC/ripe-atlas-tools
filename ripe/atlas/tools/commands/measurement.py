@@ -113,6 +113,7 @@ class Command(BaseCommand):
 
     @classmethod
     def render_http(cls, measurement):
+
         cls._render(measurement, (
             ("header_bytes", "Header Bytes"),
             ("version", "Version"),
@@ -123,6 +124,7 @@ class Command(BaseCommand):
             ("user_agent", "User-Agent"),
             ("max_bytes_read", "Body Bytes"),
         ))
+
         timing_verbosity = 0
         if "extended_timing" in measurement.meta_data:
             if measurement.meta_data["extended_timing"]:
