@@ -1,17 +1,14 @@
 from __future__ import print_function, absolute_import
 
-import six
-from datetime import datetime
-
 from ripe.atlas.cousteau import Measurement
 from ripe.atlas.cousteau.exceptions import APIResponseError
 
-from .base import Command as BaseCommand
+from .base import Command as BaseCommand, MetaDataMixin
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
 
 
-class Command(BaseCommand):
+class Command(MetaDataMixin, BaseCommand):
 
     NAME = "measurement"
     DESCRIPTION = (
@@ -156,31 +153,8 @@ class Command(BaseCommand):
         return colourise("Unknown", "red")
 
     @staticmethod
-    def _prettify_time(timestamp):
-        return "{} UTC".format(
-            datetime.fromtimestamp(timestamp).isoformat().replace("T", " "))
-
-    @staticmethod
     def _prettify_query(query):
         return "{} {} {}".format(query["class"], query["type"], query["value"])
-
-    @staticmethod
-    def _prettify_boolean(boolean):
-
-        checkmark = u"\u2714"
-        x = u"\u2718"
-        if six.PY2:
-            checkmark = checkmark.encode("utf-8")
-            x = x.encode("utf-8")
-
-        if boolean:
-            return colourise(checkmark, "green")
-        return colourise(x, "red")
-
-    @staticmethod
-    def _render_line(header, value):
-        print("{}  {}".format(
-            colourise("{:25}".format(header), "bold"), value))
 
     @classmethod
     def _render(cls, measurement, keys):
