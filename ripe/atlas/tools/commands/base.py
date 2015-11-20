@@ -1,6 +1,9 @@
 import argparse
 import re
+import six
 import sys
+
+from datetime import datetime
 
 from ..helpers.colours import colourise
 
@@ -132,6 +135,32 @@ class TabularFieldsMixin(object):
 
     def _get_filter_key_value_pair(self, k, v):
         return k.capitalize().replace("__", " "), v
+
+
+class MetaDataMixin(object):
+
+    @staticmethod
+    def _prettify_boolean(boolean):
+
+        checkmark = u"\u2714"
+        x = u"\u2718"
+        if six.PY2:
+            checkmark = checkmark.encode("utf-8")
+            x = x.encode("utf-8")
+
+        if boolean:
+            return colourise(checkmark, "green")
+        return colourise(x, "red")
+
+    @staticmethod
+    def _prettify_time(timestamp):
+        return "{} UTC".format(
+            datetime.fromtimestamp(timestamp).isoformat().replace("T", " "))
+
+    @staticmethod
+    def _render_line(header, value):
+        print("{}  {}".format(
+            colourise("{:25}".format(header), "bold"), value))
 
 
 class Factory(object):
