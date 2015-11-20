@@ -29,7 +29,7 @@ three options:
 .. _Suppress the warnings: https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 
 Sagan, OpenSSL, and OSX
-=======================
+-----------------------
 
 If you're using Mac OSX, the installation of Sagan, (one of Magellan's
 dependencies) may give you trouble, especially in how Apple handles PyOpenSSL on
