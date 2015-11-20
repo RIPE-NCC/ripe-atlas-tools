@@ -24,6 +24,13 @@ will never be supported because it's old, ugly, and needs to die.
 Distribution Specific Requirements
 ----------------------------------
 
+.. note::
+
+    If you're running OpenBSD, you can skip this whole section.  You can even
+    skip the next one too.  Just skip down to
+    :ref:`Installation:OpenBSD <installation-from-openbsd>` and follow the
+    instructions.  Everything else is taken care of for you.
+
 Debian/Ubuntu
 .............
 
@@ -33,14 +40,14 @@ Debian-based distributions require two system packages to be installed first:
 
 .. code:: bash
 
-    # apt-get install python-dev libffi-dev
+    sudo apt-get install python-dev libffi-dev
 
 You'll also need either ``virtualenv`` (recommended), or if you're not
 comfortable with that, at the very least, you'll need ``pip``:
 
 .. code:: bash
 
-    # apt-get install python-virtualenv python-pip
+    sudo apt-get install python-virtualenv python-pip
 
 CentOS
 ......
@@ -52,20 +59,20 @@ repository:
 
 .. code:: bash
 
-    # yum install epel-release
+    sudo yum install epel-release
 
 You'll also need the following system libraries:
 
 .. code:: bash
 
-    # yum install gcc libffi-devel openssl-devel
+    sudo yum install gcc libffi-devel openssl-devel
 
 Once that's finished, you'll need access to ``virtualenv`` (recommended), or if
 you're not comfortable with that, at the very least, you'll need ``pip``:
 
 .. code:: bash
 
-    # yum install python-virtualenv python-pip
+    sudo yum install python-virtualenv python-pip
 
 Gentoo
 ......
@@ -77,7 +84,7 @@ that git is built with curl support:
 
 .. code:: bash
 
-    # USE="curl" emerge git
+    sudo USE="curl" emerge git
 
 If you're not going bleeding edge, or if you're just going to use SSH to get the
 code from GitHub, then Gentoo will have everything ready for you.
@@ -91,7 +98,7 @@ install pip with one easy command:
 
 .. code:: bash
 
-    # sudo easy_install pip
+    sudo easy_install pip
 
 Outside of that, a few of the Python dependencies require that you have a
 compiler on your system.  For this, you need only get a free copy of `Xcode`_
@@ -127,6 +134,19 @@ Installation
 ============
 
 
+.. _installation-from-openbsd:
+
+OpenBSD
+-------
+
+OpenBSD was the first platform to have a port for Magellan, so installation is
+easy:
+
+.. code:: bash
+
+    sudo pkg_add py-ripe.atlas.tools
+
+
 .. _installation-from-pypi:
 
 From PyPi
@@ -143,10 +163,10 @@ user-based copy in ``${HOME}/.local/``.
 .. code:: bash
 
     # From within a virtualenv
-    $ pip install ripe.atlas.tools
+    pip install ripe.atlas.tools
 
     # In your user's local environment
-    $ pip install --user ripe.atlas.tools
+    pip install --user ripe.atlas.tools
 
 Or if you want to live on the edge and perhaps try submitting a pull request of
 your own:
@@ -162,16 +182,20 @@ From GitHub
 -----------
 
 If you're feeling a little more daring and want to go bleeding-edge and use
-our ``master`` branch on GitHub, you can have pip install right from there:::
+our ``master`` branch on GitHub, you can have pip install right from there:
 
-    $ pip install git+https://github.com/RIPE-NCC/ripe-atlas-tools.git
+.. code:: bash
+
+    pip install git+https://github.com/RIPE-NCC/ripe-atlas-tools.git
 
 If you think you'd like to contribute back to the project, we recommend the use
 of pip's ``-e`` flag, which will place the Magellan code in a directory where
 you can edit it, and see the results without having to go through a new install
-procedure every time.  Simply clone the repo on GitHub and install it like so:::
+procedure every time.  Simply clone the repo on GitHub and install it like so:
 
-    $ pip install -e git+https://github.com/your-username/ripe-atlas-tools.git
+.. code:: bash
+
+    pip install -e git+https://github.com/your-username/ripe-atlas-tools.git
 
 
 .. _installation-from-tarball:
@@ -181,19 +205,11 @@ From a Tarball
 
 If for some reason you want to just download the source and install it manually,
 you can always do that too.  Simply un-tar the file and run the following in the
-same directory as ``setup.py``.::
+same directory as ``setup.py``:
 
-    $ python setup.py install
+.. code:: bash
+
+    python setup.py install
 
 
 .. _installation-troubleshooting:
-
-Troubleshooting
-===============
-
-If you're using Mac OSX, the installation of Sagan, one of Magellan's
-dependencies may give you trouble, especially in how Apple handles PyOpenSSL on
-their machines.  Workarounds and proper fixes for this issue can be found in the
-`Sagan installation documentation`_.
-
-.. _Sagan installation documentation: https://ripe-atlas-sagan.readthedocs.org/en/latest/installation.html#troubleshooting
