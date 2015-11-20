@@ -10,7 +10,7 @@ from ..helpers.colours import colourise
 
 class Command(MetaDataMixin, BaseCommand):
 
-    NAME = "measurement"
+    NAME = "probe"
     DESCRIPTION = "Returns the meta data for one probe"
 
     def add_arguments(self):
