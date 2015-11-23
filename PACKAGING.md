@@ -25,6 +25,8 @@ During the Bucharest hackathon, Florian hacked out a package it's already
 
 Daniel is enthusiastic, but totally new at this.  If you're an experienced
 Gentoo dev, or if you have access to the Portage tree, please get in touch.
+So far, we have [a working overlay](https://github.com/danielquinn/ripe-atlas-overlay),
+but this still requires input from some talented Gentoo devs.
 
 
 ## Other Platforms
