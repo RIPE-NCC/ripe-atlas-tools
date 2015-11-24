@@ -215,8 +215,6 @@ class TestSSLConsistency(unittest.TestCase):
         results = self.results[:2]
 
         expected_output = (
-            "\nRIPE Atlas Report for Measurement #1\n"
-            "===================================================\n\n"
             "Certificate:\n"
             "  Issuer: C=US, O=DigiCert Inc, CN=DigiCert High Assurance CA-3\n"
             "  Subject: C=US, O=The Tor Project, Inc., CN=*.torproject.org\n"

@@ -142,8 +142,6 @@ class TestReportCommand(unittest.TestCase):
     def test_valid_case_no_aggr(self):
         """Test case where we have result no aggregation."""
         expected_output = (
-            "\nRIPE Atlas Report for Measurement #1\n"
-            "===================================================\n\n"
             "20 bytes from probe #1216  109.190.83.40   to hsi.cablecom.ch (62.2.16.24): ttl=54 times:27.429,  25.672,  25.681, \n"
             "20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
             "20 bytes from probe #202   178.190.51.206  to hsi.cablecom.ch (62.2.16.24): ttl=52 times:40.024,  40.399,  39.29,  \n"
@@ -193,8 +191,6 @@ class TestReportCommand(unittest.TestCase):
     def test_valid_case_with_aggr(self):
         """Test case where we have result with aggregation."""
         expected_output = (
-            "\nRIPE Atlas Report for Measurement #1\n"
-            "===================================================\n\n"
             "RTT_MEDIAN: 40-50\n"
             " 20 bytes from probe #202   178.190.51.206  to hsi.cablecom.ch (62.2.16.24): ttl=52 times:40.024,  40.399,  39.29,  \n"
             " 20 bytes from probe #677   78.128.9.202    to hsi.cablecom.ch (62.2.16.24): ttl=54 times:40.715,  40.259,  40.317, \n"
@@ -250,8 +246,6 @@ class TestReportCommand(unittest.TestCase):
     def test_asns_filter(self):
         """Test case where user specified probe asns filters.."""
         expected_output = (
-            "\nRIPE Atlas Report for Measurement #1\n"
-            "===================================================\n\n"
             "20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
             "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
         )
