@@ -57,9 +57,9 @@ class Command(BaseCommand):
         ).format("-" * 79)
 
         for contributor in self.get_contributors():
-            r += "{name:20}  {changes:10}  {url}\n".format(**contributor)
+            r += u"{name:20}  {changes:10}  {url}\n".format(**contributor)
 
-        print("{}{}{}\n".format(
+        print(u"{}{}{}\n".format(
             r,
             colourise(colourise(self.BOAT, "black"), "bold"),
             colourise(self.WATER, "blue")
