@@ -31,10 +31,10 @@ setup(
     maintainer="The RIPE Atlas team",
     maintainer_email="atlas@ripe.net",
     install_requires=[
-        "python-dateutil>=2.4.2",
+        "python-dateutil",
         "requests>=2.7.0",
         "ripe.atlas.cousteau>=1.0.4",
-        "ripe.atlas.sagan>=1.1.4",
+        "ripe.atlas.sagan>=1.1.6",
         "tzlocal",
         "pyyaml",
         "pyOpenSSL>=0.13",
