@@ -6,6 +6,7 @@ Release History
 
 Bug Fixes
 ~~~~~~~~~
+- `#103`_: Removed header from the ``report`` command
 - `#105`_: Measurement report and stream broken on Python3.4
 
 1.1.0 (released 2015-11-12)
