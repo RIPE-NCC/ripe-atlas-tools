@@ -4,9 +4,13 @@ Release History
 1.1.1
 -----
 
+# Output Changes
+~~~~~~~~~~~~~~~~
+- `#103`_: Removed header from the ``report`` command.
+
 Bug Fixes
 ~~~~~~~~~
-- `#105`_: Measurement report and stream broken on Python3.4
+- `#105`_: Measurement report and stream broken on Python3.4.
 
 1.1.0 (released 2015-11-12)
 ---------------------------
@@ -25,10 +29,11 @@ Bug Fixes
 Changes
 ~~~~~~~
 - Better testing.
-- Additional documentation
+- Additional documentation.
 
 1.0.0 (released 2015-11-02)
 ---------------------------
 - Initial release.
 
+.. _#103: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/103
 .. _#105: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/105
