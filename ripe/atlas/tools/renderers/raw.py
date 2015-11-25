@@ -3,6 +3,7 @@ from __future__ import print_function
 import json
 
 from .base import Renderer as BaseRenderer
+from ..helpers.sanitisers import sanitise
 
 
 class Renderer(BaseRenderer):
@@ -20,4 +21,5 @@ class Renderer(BaseRenderer):
     SHOW_DEFAULT_FOOTER = False
 
     def on_result(self, result, probes=None):
-        return json.dumps(result.raw_data, separators=(",", ":")) + "\n"
+        return sanitise(
+            json.dumps(result.raw_data, separators=(",", ":"))) + "\n"

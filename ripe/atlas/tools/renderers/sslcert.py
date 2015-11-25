@@ -1,12 +1,10 @@
-from .base import Renderer as BaseRenderer
 import OpenSSL
+
+from ..helpers.sanitisers import sanitise
+from .base import Renderer as BaseRenderer
 
 
 class Renderer(BaseRenderer):
-    """
-    Somehow, we need to figure out how to make an SSL result look like the the
-    output from `openssl x509 -in w00t -noout -text`.
-    """
 
     RENDERS = [BaseRenderer.TYPE_SSLCERT]
 
@@ -33,14 +31,14 @@ class Renderer(BaseRenderer):
 
         return cls.render(
             "reports/sslcert.txt",
-            issuer_c=certificate.issuer_c,
-            issuer_o=certificate.issuer_o,
-            issuer_cn=certificate.issuer_cn,
+            issuer_c=sanitise(certificate.issuer_c),
+            issuer_o=sanitise(certificate.issuer_o),
+            issuer_cn=sanitise(certificate.issuer_cn),
             not_before=certificate.valid_from,
             not_after=certificate.valid_until,
-            subject_c=certificate.subject_c,
-            subject_o=certificate.subject_o,
-            subject_cn=certificate.subject_cn,
+            subject_c=sanitise(certificate.subject_c),
+            subject_o=sanitise(certificate.subject_o),
+            subject_cn=sanitise(certificate.subject_cn),
             version=x509.get_version(),
             serial_number=x509.get_serial_number(),
             signature_algorithm=x509.get_signature_algorithm(),

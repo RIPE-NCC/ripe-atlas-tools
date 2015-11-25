@@ -1,3 +1,4 @@
+from ..helpers.sanitisers import sanitise
 from .base import Renderer as BaseRenderer
 
 THRESHOLD = 80  # %
@@ -15,7 +16,7 @@ class Renderer(BaseRenderer):
         most_seen_cert = self.get_nprobes_ofpopular_cert()
         for cert_id in sorted(
             self.uniqcerts,
-            key=lambda id: self.uniqcerts[id]["cnt"],
+            key=lambda pk: self.uniqcerts[pk]["cnt"],
             reverse=True
         ):
             self.blob_list.append(self.render_certificate(cert_id))
@@ -54,28 +55,28 @@ class Renderer(BaseRenderer):
         """Renders the specific certificate"""
         certificate = self.uniqcerts[cert_id]["cert"]
 
-        rstring = self.render(
+        return self.render(
             "reports/ssl_consistency.txt",
-            issuer_c=certificate.issuer_c,
-            issuer_o=certificate.issuer_o,
-            issuer_cn=certificate.issuer_cn,
-            subject_c=certificate.subject_c,
-            subject_o=certificate.subject_o,
-            subject_cn=certificate.subject_cn,
+            issuer_c=sanitise(certificate.issuer_c),
+            issuer_o=sanitise(certificate.issuer_o),
+            issuer_cn=sanitise(certificate.issuer_cn),
+            subject_c=sanitise(certificate.subject_c),
+            subject_o=sanitise(certificate.subject_o),
+            subject_cn=sanitise(certificate.subject_cn),
             sha256fp=certificate.checksum_sha256,
             seenby=self.uniqcerts[cert_id]["cnt"],
             s="s" if self.uniqcerts[cert_id]["cnt"] > 1 else ""
         )
-        return rstring
 
     def render_below_threshold(self, cert_id):
         """
         Print information about the given cert that is below our threshold
         of visibility.
         """
-        blob_list = []
-        blob_list.append("  Below the threshold ({0}%)".format(THRESHOLD))
-        blob_list.append("  Probes that saw it: ")
+        blob_list = [
+            "  Below the threshold ({0}%)".format(THRESHOLD),
+            "  Probes that saw it: ",
+        ]
 
         for probe in self.uniqcerts[cert_id]["probes"]:
             log = (

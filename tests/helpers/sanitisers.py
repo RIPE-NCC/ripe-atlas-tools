@@ -11,6 +11,9 @@ class TestSanitisersHelper(unittest.TestCase):
         for i in list(range(0, 32)) + [127]:
             self.assertEqual("unclean", sanitise("unclean" + chr(i)))
 
+        self.assertEqual(None, sanitise(None))
+        self.assertEqual(7, sanitise(7))
+
     def test_sanitise_with_newline_exception(self):
         self.assertEqual(
             "unc\nlean", sanitise("unc\nlean", strip_newlines=False))

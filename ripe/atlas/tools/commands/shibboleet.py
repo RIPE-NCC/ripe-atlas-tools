@@ -5,6 +5,7 @@ import requests
 
 from ..cache import cache
 from ..helpers.colours import colourise
+from ..helpers.sanitisers import sanitise
 from .base import Command as BaseCommand
 
 
@@ -77,7 +78,11 @@ class Command(BaseCommand):
 
         r = []
         for k, v in self.statistics.items():
-            r.append({"name": k, "changes": v["changes"], "url": v["url"]})
+            r.append({
+                "name": sanitise(k),
+                "changes": v["changes"],
+                "url": v["url"]
+            })
 
         random.shuffle(r)
 

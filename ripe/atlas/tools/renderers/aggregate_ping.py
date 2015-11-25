@@ -1,3 +1,4 @@
+from ..helpers.sanitisers import sanitise
 from .base import Renderer as BaseRenderer
 
 
@@ -31,7 +32,7 @@ class Renderer(BaseRenderer):
         self.packet_loss = self.calculate_loss()
         print(self.render(
             "reports/aggregate_ping.txt",
-            target=self.target,
+            target=sanitise(self.target),
             sent=self.sent_packets,
             received=self.received_packets,
             packet_loss=self.packet_loss,

@@ -1,5 +1,7 @@
 from tzlocal import get_localzone
+
 from ..helpers.colours import colourise
+from ..helpers.sanitisers import sanitise
 from .base import Renderer as BaseRenderer
 
 
@@ -55,7 +57,7 @@ class Renderer(BaseRenderer):
 
             probe=probe_id,
 
-            question_name=question,
+            question_name=sanitise(question),
             header_opcode=response.abuf.header.opcode,
             header_return_code=response.abuf.header.return_code,
             header_id=response.abuf.header.id,
@@ -67,19 +69,19 @@ class Renderer(BaseRenderer):
             authority_count=len(response.abuf.authorities),
             additional_count=len(response.abuf.additionals),
 
-            question=cls.get_section(
-                "question", response.abuf.questions),
-            answers=cls.get_section(
-                "answer", response.abuf.answers),
-            authorities=cls.get_section(
-                "authority", response.abuf.authorities),
-            additionals=cls.get_section(
-                "additional", response.abuf.additionals),
+            question=sanitise(cls.get_section(
+                "question", response.abuf.questions), strip_newlines=False),
+            answers=sanitise(cls.get_section(
+                "answer", response.abuf.answers), strip_newlines=False),
+            authorities=sanitise(cls.get_section(
+                "authority", response.abuf.authorities), strip_newlines=False),
+            additionals=sanitise(cls.get_section(
+                "additional", response.abuf.additionals), strip_newlines=False),
 
             response_time=response.response_time,
             response_size=response.response_size,
             created=created.strftime(cls.TIME_FORMAT),
-            destination_address=response.destination_address,
+            destination_address=sanitise(response.destination_address),
 
         ))
 

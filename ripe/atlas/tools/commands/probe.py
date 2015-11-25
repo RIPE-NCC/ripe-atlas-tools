@@ -6,6 +6,7 @@ from ripe.atlas.cousteau.exceptions import APIResponseError
 from .base import Command as BaseCommand, MetaDataMixin
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
+from ..helpers.sanitisers import sanitise
 
 
 class Command(MetaDataMixin, BaseCommand):
@@ -31,7 +32,7 @@ class Command(MetaDataMixin, BaseCommand):
             ("is_public", "Public?", self._prettify_boolean),
             ("is_anchor", "Anchor?", self._prettify_boolean),
             ("country_code", "Country"),
-            ("description", "Description"),
+            ("description", "Description", sanitise),
             ("asn_v4", "ASN (IPv4)"),
             ("asn_v6", "ASN (IPv6)"),
             ("address_v4", "Address (IPv4)"),
@@ -39,7 +40,6 @@ class Command(MetaDataMixin, BaseCommand):
             ("prefix_v4", "Prefix (IPv4)"),
             ("prefix_v6", "Prefix (IPv6)"),
             ("geometry", "Coordinates", self._prettify_coordinates),
-            # ("tags", "Tags"),
             ("status", "Status"),
         )
         for key in keys:

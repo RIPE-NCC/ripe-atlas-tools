@@ -6,6 +6,7 @@ from ripe.atlas.cousteau.exceptions import APIResponseError
 from .base import Command as BaseCommand, MetaDataMixin
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
+from ..helpers.sanitisers import sanitise
 
 
 class Command(MetaDataMixin, BaseCommand):
@@ -37,12 +38,12 @@ class Command(MetaDataMixin, BaseCommand):
             ("id", "URL", lambda _: colourise(url_template.format(_), "cyan")),
             ("type", "Type", lambda _: cls._prettify_type(_["name"])),
             ("status", "Status", lambda _: _["name"]),
-            ("description", "Description"),
+            ("description", "Description", sanitise),
             ("af", "Address Family"),
             ("is_public", "Public?", cls._prettify_boolean),
             ("is_oneoff", "One-off?", cls._prettify_boolean),
-            ("destination_name", "Destination Name"),
-            ("destination_address", "Destination Address"),
+            ("destination_name", "Destination Name", sanitise),
+            ("destination_address", "Destination Address", sanitise),
             ("destination_asn", "Destination ASN"),
             ("interval", "Interval"),
             ("spread", "Spread"),
@@ -116,8 +117,8 @@ class Command(MetaDataMixin, BaseCommand):
             ("version", "Version"),
             ("method", "Method"),
             ("port", "Port"),
-            ("path", "Path"),
-            ("query_string", "Query String"),
+            ("path", "Path", sanitise),
+            ("query_string", "Query String", sanitise),
             ("user_agent", "User-Agent"),
             ("max_bytes_read", "Body Bytes"),
         ))
@@ -154,10 +155,12 @@ class Command(MetaDataMixin, BaseCommand):
 
     @staticmethod
     def _prettify_query(query):
-        return "{} {} {}".format(query["class"], query["type"], query["value"])
+        return sanitise(
+            "{} {} {}".format(query["class"], query["type"], query["value"]))
 
     @classmethod
     def _render(cls, measurement, keys):
+
         for prop in keys:
 
             value = None
