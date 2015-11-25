@@ -4,8 +4,8 @@ Release History
 1.1.1
 -----
 
-# Output Changes
-~~~~~~~~~~~~~~~~
+Output Changes
+~~~~~~~~~~~~~~
 - `#103`_: Removed header from the ``report`` command.
 
 Bug Fixes
