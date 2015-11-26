@@ -6,6 +6,7 @@ from ripe.atlas.cousteau import MeasurementRequest
 
 from .base import Command as BaseCommand, TabularFieldsMixin
 from ..helpers.colours import colourise
+from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
 
 
@@ -37,7 +38,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         "id": ("<", 7),
         "type": ("<", 10),
         "description": ("<", 45),
-        "status": (">", 14),
+        "status": (">", 18),
         "target": ("<", 45),
         "url": ("<", 45),
     }
@@ -157,16 +158,16 @@ class Command(TabularFieldsMixin, BaseCommand):
                 r.append(measurement.type.lower())
                 continue
             elif field == "target":
-                r.append((
+                r.append(sanitise(
                     measurement.destination_name or
                     measurement.destination_address or
                     "-"
                 )[:self.COLUMNS["target"][1]])
             elif field == "description":
-                description = measurement.description or ""
+                description = sanitise(measurement.description) or ""
                 r.append(description[:self.COLUMNS["description"][1]])
             else:
-                r.append(getattr(measurement, field))
+                r.append(sanitise(getattr(measurement, field)))
 
         return r
 

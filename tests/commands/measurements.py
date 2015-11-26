@@ -81,15 +81,15 @@ class TestMeasurementsCommand(unittest.TestCase):
 
         expected_content = (
             "\n"
-            "Id      Type       Description                                           Status\n"
-            "===============================================================================\n"
-            "1       ping       Description 1                                        Ongoing\n"
-            "2       ping       Description 2                                        Ongoing\n"
-            "3       ping       Description 3                                        Ongoing\n"
-            "4       ping       Description 4                                        Ongoing\n"
-            "5       ping       Description 5                                        Ongoing\n"
-            "===============================================================================\n"
-            "                                              Showing 5 of 5 total measurements\n"
+            "Id      Type       Description                                               Status\n"
+            "===================================================================================\n"
+            "1       ping       Description 1                                            Ongoing\n"
+            "2       ping       Description 2                                            Ongoing\n"
+            "3       ping       Description 3                                            Ongoing\n"
+            "4       ping       Description 4                                            Ongoing\n"
+            "5       ping       Description 5                                            Ongoing\n"
+            "===================================================================================\n"
+            "                                                  Showing 5 of 5 total measurements\n"
             "\n"
         )
         self.assertEqual(

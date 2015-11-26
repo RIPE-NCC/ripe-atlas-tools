@@ -10,6 +10,7 @@ from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
 from .base import Command as BaseCommand, TabularFieldsMixin
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
+from ..helpers.sanitisers import sanitise
 
 
 class Command(TabularFieldsMixin, BaseCommand):
@@ -27,7 +28,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         "asn_v4": ("<", 6),
         "asn_v6": ("<", 6),
         "country": ("^", 7),
-        "status": ("<", 12),
+        "status": ("<", 15),
         "prefix_v4": ("<", 18),
         "prefix_v6": ("<", 18),
         "coordinates": ("<", 19),
@@ -157,6 +158,9 @@ class Command(TabularFieldsMixin, BaseCommand):
             self.arguments.field = (
                 "id", "asn_v4", "asn_v6", "country", "status")
 
+        if self.arguments.all:
+            self.arguments.limit = None
+
         filters = self.build_request_args()
 
         if not filters and not self.arguments.all:
@@ -170,8 +174,10 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         self.set_aggregators()
         probes = ProbeRequest(return_objects=True, **filters)
-        truncated_probes = itertools.islice(
-            probes, self.arguments.limit)
+        if self.arguments.limit:
+            truncated_probes = itertools.islice(probes, self.arguments.limit)
+        else:
+            truncated_probes = probes
 
         if self.arguments.ids_only:
             for probe in truncated_probes:
@@ -199,7 +205,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         # Print total count of found measurements
         print(("{:>" + str(len(hr)) + "}\n").format(
             "Showing {} of {} total probes".format(
-                min(self.arguments.limit, probes.total_count),
+                min(self.arguments.limit, probes.total_count) or "all",
                 probes.total_count
             )
         ))
@@ -405,11 +411,11 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         for field in self.arguments.field:
             if field == "country":
-                r.append(probe.country_code.lower())
+                r.append((probe.country_code or "").lower())
             elif field in ("asn_v4", "asn_v6"):
                 r.append(getattr(probe, field) or "")
             elif field == "description":
-                description = probe.description or ""
+                description = sanitise(probe.description) or ""
                 r.append(description[:self.COLUMNS["description"][1]])
             elif field == "coordinates":
                 r.append(u"{},{}".format(
@@ -422,7 +428,7 @@ class Command(TabularFieldsMixin, BaseCommand):
                 else:
                     r.append(u"\u2718")  # X
             else:
-                r.append(getattr(probe, field))
+                r.append(sanitise(getattr(probe, field)))
 
         return r
 

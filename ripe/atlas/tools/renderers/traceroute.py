@@ -2,6 +2,7 @@ from .base import Renderer as BaseRenderer
 from .base import Result
 
 from ..helpers.colours import colourise
+from ..helpers.sanitisers import sanitise
 
 
 class Renderer(BaseRenderer):
@@ -15,7 +16,8 @@ class Renderer(BaseRenderer):
         for hop in result.hops:
 
             if hop.is_error:
-                r += "{}\n".format(colourise(hop.error_message, "red"))
+                r += "{}\n".format(
+                    colourise(sanitise(hop.error_message), "red"))
                 continue
 
             name = ""
@@ -29,7 +31,7 @@ class Renderer(BaseRenderer):
 
             r += "{:>3} {:39} {}\n".format(
                 hop.index,
-                name,
+                sanitise(name),
                 "  ".join(rtts)
             )
 

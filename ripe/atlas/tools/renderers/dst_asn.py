@@ -1,6 +1,7 @@
 from .base import Renderer as BaseRenderer
 from collections import Counter
 
+from ..helpers.sanitisers import sanitise
 from ..ipdetails import IP
 
 
@@ -12,7 +13,8 @@ class Renderer(BaseRenderer):
     SHOW_DEFAULT_FOOTER = False
 
     def __init__(self):
-        self.asns = Counter()  # keys are timestamps, data struct captures ASN membership
+        # Keys are timestamps, data struct captures ASN membership
+        self.asns = Counter()
         self.asn2name = {}
 
     def on_result(self, result):
@@ -21,7 +23,7 @@ class Renderer(BaseRenderer):
             ip = IP(dst)
             if ip.asn:
                 self.asns[ip.asn] += 1
-                self.asn2name[ip.asn] = ip.holder
+                self.asn2name[ip.asn] = sanitise(ip.holder)
             else:
                 self.asns['<unknown>'] += 1
                 self.asn2name['<unknown>'] = 'unknown'
