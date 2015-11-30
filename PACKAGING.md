@@ -33,10 +33,12 @@ they are awaiting approval for inclusion into the ports tree.
 
 ### Status
 
-Daniel is enthusiastic, but totally new at this.  If you're an experienced
-Gentoo dev, or if you have access to the Portage tree, please get in touch.
-So far, we have [a working overlay](https://github.com/danielquinn/ripe-atlas-overlay),
-but this still requires input from some talented Gentoo devs.
+Daniel has created [a working overlay](https://github.com/danielquinn/ripe-atlas-overlay)
+and has created an issue in [Gentoo's Bugzilla](https://bugs.gentoo.org/show_bug.cgi?id=566818)
+to have the relevant ebuilds added to the Portage tree.  If you're a Gentoo
+dev that can expedite the process, or a user that would like to see this
+happen faster, please direct your efforts to the bug in question.  Until then
+you can always just use Daniel's overlay right from GitHub.
 
 
 ## Other Platforms
