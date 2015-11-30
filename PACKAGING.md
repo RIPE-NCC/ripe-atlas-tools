@@ -17,6 +17,16 @@ During the Bucharest hackathon, Florian hacked out a package it's already
 [in the ports tree](http://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/net/py-ripe.atlas.tools/).
 
 
+## FreeBSD
+
+* [Max Stucchi](https://github.com/stucchimax)
+
+### Status
+
+Max set aside an hour and has built the few required ports to support Magellan
+they are awaiting approval for inclusion into the ports tree.
+
+
 ## Gentoo
 
 * [Daniel Quinn](https://github.com/danielquinn)
