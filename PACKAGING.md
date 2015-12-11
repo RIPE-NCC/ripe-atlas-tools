@@ -23,8 +23,7 @@ During the Bucharest hackathon, Florian hacked out a package it's already
 
 ### Status
 
-Max set aside an hour and has built the few required ports to support Magellan
-they are awaiting approval for inclusion into the ports tree.
+Max has submitted the new ports and [they have been accepted](https://svnweb.freebsd.org/ports?view=revision&revision=403526).
 
 
 ## Gentoo
