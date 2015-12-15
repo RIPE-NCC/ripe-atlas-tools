@@ -36,11 +36,11 @@ Debian/Ubuntu
 
 The following has been tested on Debian Jessie.
 
-Debian-based distributions require two system packages to be installed first:
+Debian-based distributions require three system packages to be installed first:
 
 .. code:: bash
 
-    sudo apt-get install python-dev libffi-dev
+    sudo apt-get install python-dev libffi-dev libssl-dev
 
 You'll also need either ``virtualenv`` (recommended), or if you're not
 comfortable with that, at the very least, you'll need ``pip``:
