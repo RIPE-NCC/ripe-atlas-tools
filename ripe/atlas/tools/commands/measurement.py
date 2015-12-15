@@ -22,7 +22,8 @@ class Command(MetaDataMixin, BaseCommand):
     def run(self):
 
         try:
-            measurement = Measurement(id=self.arguments.id)
+            measurement = Measurement(
+                id=self.arguments.id, user_agent=self.user_agent)
         except APIResponseError:
             raise RipeAtlasToolsException(
                 "That measurement does not appear to exist")
