@@ -1,6 +1,15 @@
 Release History
 ===============
 
+1.2.0 (released 2015-12-15)
+---------------------------
+
+Output Changes
+~~~~~~~~~~~~~~
+- `#119`_: Support HTTP results.
+- `#122`_: Allow packagers to set the user agent.
+
+
 1.1.1 (released 2015-11-25)
 ---------------------------
 
@@ -37,3 +46,5 @@ Changes
 
 .. _#103: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/103
 .. _#105: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/105
+.. _#119: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/119
+.. _#122: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/122

@@ -33,8 +33,8 @@ setup(
     install_requires=[
         "python-dateutil",
         "requests>=2.7.0",
-        "ripe.atlas.cousteau>=1.0.4",
-        "ripe.atlas.sagan>=1.1.6",
+        "ripe.atlas.cousteau>=1.0.6",
+        "ripe.atlas.sagan>=1.1.8",
         "tzlocal",
         "pyyaml",
         "pyOpenSSL>=0.13",
