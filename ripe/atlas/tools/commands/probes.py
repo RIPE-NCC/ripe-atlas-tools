@@ -173,7 +173,8 @@ class Command(TabularFieldsMixin, BaseCommand):
             ))
 
         self.set_aggregators()
-        probes = ProbeRequest(return_objects=True, **filters)
+        probes = ProbeRequest(
+            return_objects=True, user_agent=self.user_agent, **filters)
         if self.arguments.limit:
             truncated_probes = itertools.islice(probes, self.arguments.limit)
         else:

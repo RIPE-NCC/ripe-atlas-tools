@@ -238,6 +238,7 @@ class Command(BaseCommand):
         return AtlasCreateRequest(
             server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
             key=self.arguments.auth,
+            user_agent=self.user_agent,
             measurements=[creation_class(**self._get_measurement_kwargs())],
             sources=[AtlasSource(**self._get_source_kwargs())],
             is_oneoff=self._is_oneoff

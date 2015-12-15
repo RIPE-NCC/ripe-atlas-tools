@@ -115,7 +115,8 @@ class Command(TabularFieldsMixin, BaseCommand):
             self.arguments.field = ("id", "type", "description", "status")
 
         filters = self._get_filters()
-        measurements = MeasurementRequest(return_objects=True, **filters)
+        measurements = MeasurementRequest(
+            return_objects=True, user_agent=self.user_agent, **filters)
         truncated_measurements = itertools.islice(
             measurements, self.arguments.limit)
 

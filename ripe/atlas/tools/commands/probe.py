@@ -20,7 +20,7 @@ class Command(MetaDataMixin, BaseCommand):
     def run(self):
 
         try:
-            probe = Probe(id=self.arguments.id)
+            probe = Probe(id=self.arguments.id, user_agent=self.user_agent)
         except APIResponseError:
             raise RipeAtlasToolsException(
                 "That probe does not appear to exist")
