@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
+import os
 import re
 import six
 import sys
@@ -21,6 +22,7 @@ import sys
 from datetime import datetime
 
 from ..helpers.colours import colourise
+from ..version import __version__
 
 
 class RipeHelpFormatter(argparse.RawTextHelpFormatter):
@@ -44,6 +46,7 @@ class Command(object):
             description=self.DESCRIPTION,
             prog="ripe-atlas {}".format(self.NAME)
         )
+        self.user_agent = self._get_user_agent()
 
     def init_args(self, args=None):
         """
@@ -88,6 +91,23 @@ class Command(object):
 
     def ok(self, message):
         sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
+
+    @staticmethod
+    def _get_user_agent():
+        """
+        Allow packagers to change the user-agent to whatever they like by
+        placing a file called `user-agent` into the `tools` directory.  If no
+        file is found, we go with a sensible default + the version.
+        """
+
+        try:
+            custom = os.path.join(os.path.dirname(__file__), "..", "user-agent")
+            with open(custom) as f:
+                return f.readline().strip()[:128]
+        except IOError:
+            pass  # We go with the default
+
+        return "RIPE Atlas Tools (Magellan) {}".format(__version__)
 
 
 class TabularFieldsMixin(object):

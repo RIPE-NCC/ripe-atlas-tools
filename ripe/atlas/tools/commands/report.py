@@ -99,7 +99,10 @@ class Command(BaseCommand):
 
     def _get_request(self):
 
-        kwargs = {"msm_id": self.arguments.measurement_id}
+        kwargs = {
+            "msm_id": self.arguments.measurement_id,
+            "user_agent": self.user_agent
+        }
         if self.arguments.probes:
             kwargs["probe_ids"] = self.arguments.probes
         if self.arguments.start_time:
@@ -114,7 +117,8 @@ class Command(BaseCommand):
     def run(self):
 
         try:
-            measurement = Measurement(id=self.arguments.measurement_id)
+            measurement = Measurement(
+                id=self.arguments.measurement_id, user_agent=self.user_agent)
         except APIResponseError:
             raise RipeAtlasToolsException("That measurement does not exist")
 

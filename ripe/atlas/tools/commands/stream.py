@@ -53,7 +53,8 @@ class Command(BaseCommand):
     def run(self):
 
         try:
-            measurement = Measurement(id=self.arguments.measurement_id)
+            measurement = Measurement(
+                id=self.arguments.measurement_id, user_agent=self.user_agent)
         except APIResponseError:
             raise RipeAtlasToolsException("That measurement does not exist")
 
