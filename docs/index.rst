@@ -27,5 +27,6 @@ Contents
    installation
    use
    contributing
+   packaging
    troubleshooting
    changelog
