@@ -23,6 +23,7 @@ from .commands import (
 from .helpers import TestArgumentTypeHelper
 from .renderers import (
     TestPingRenderer,
+    TestHttpRenderer,
     TestSSLConsistency,
     TestAggregatePing,
     TestRawRenderer,
@@ -37,6 +38,7 @@ __all__ = [
     TestReportCommand,
     TestArgumentTypeHelper,
     TestPingRenderer,
+    TestHttpRenderer,
     TestSSLConsistency,
     TestAggregatePing,
     TestRawRenderer,
