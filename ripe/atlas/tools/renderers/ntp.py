@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .base import Renderer as BaseRenderer
+from .base import Result
 
 
 class Renderer(BaseRenderer):
@@ -21,4 +22,4 @@ class Renderer(BaseRenderer):
     RENDERS = [BaseRenderer.TYPE_NTP]
 
     def on_result(self, result, probes=None):
-        print("Not ready yet\n")
+        return Result("Not ready yet\n", result.probe_id)
