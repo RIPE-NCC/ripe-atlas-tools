@@ -1,6 +1,14 @@
 Release History
 ===============
 
+1.2.1 (released 2015-12-15)
+---------------------------
+
+Bug Fixes
+~~~~~~~~~
+- Restored some required template files.
+
+
 1.2.0 (released 2015-12-15)
 ---------------------------
 
