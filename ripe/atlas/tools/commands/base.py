@@ -88,7 +88,7 @@ class Command(object):
         try:
             custom = os.path.join(os.path.dirname(__file__), "..", "user-agent")
             with open(custom) as f:
-                return f.read().strip()
+                return f.readline().strip()[:128]
         except IOError:
             pass  # We go with the default
 

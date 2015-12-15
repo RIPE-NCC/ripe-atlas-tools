@@ -290,15 +290,17 @@ class TestReportCommand(unittest.TestCase):
 
     def test_user_agent(self):
         standard = "RIPE Atlas Tools (Magellan) {}".format(__version__)
-        tests = [
-            standard,
-            "Some custom agent",
-            "Αυτό είναι ένας παράγοντας δοκιμή",
-            "이것은 테스트 요원",
-        ]
+        tests = {
+            standard: standard,
+            "Some custom agent": "Some custom agent",
+            "Some custom agent\nwith a second line": "Some custom agent",
+            "x" * 3000: "x" * 128,
+            "Πράκτορας χρήστη": "Πράκτορας χρήστη",
+            "이것은 테스트 요원": "이것은 테스트 요원",
+        }
         self.assertEqual(self.cmd.user_agent, standard)
-        for agent in tests:
+        for in_string, out_string in tests.items():
             path = "ripe.atlas.tools.commands.base.open"
-            content = mock.mock_open(read_data=agent)
+            content = mock.mock_open(read_data=in_string)
             with mock.patch(path, content):
-                self.assertEqual(Command().user_agent, agent)
+                self.assertEqual(Command().user_agent, out_string)
