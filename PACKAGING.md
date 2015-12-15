@@ -40,6 +40,16 @@ happen faster, please direct your efforts to the bug in question.  Until then
 you can always just use Daniel's overlay right from GitHub.
 
 
+## Debian
+
+* Apollon Oikonomopoulos
+
+### Status
+
+Apollon is working with the RIPE Atlas team to ensure that the package conforms
+to Debian standards and has volunteered to submit everything once it's ready.
+
+
 ## Other Platforms
 
 We've been talking with members of the community about expanding the package
@@ -47,13 +57,11 @@ support for Magellan, but so far no one has officially volunteered. The RIPE
 Atlas team is happy to assist anyone interested in porting this toolkit to any
 platform, but we're especially keen on at least getting into:
 
-* Debian
 * Ubuntu
 * Red Hat
 * Fedora
 * CentOS
 * Arch
-* FreeBSD
 
 If you'd like to try your hand, or would simply like to offer some advice, feel
 free to add your name here or contact us directly via *atlas at ripe dot net*.
