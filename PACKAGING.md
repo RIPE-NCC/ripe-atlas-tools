@@ -45,6 +45,15 @@ Apollon is working with the RIPE Atlas team to ensure that the package conforms
 to Debian standards and has volunteered to submit everything once it's ready.
 
 
+## Arch
+
+* Wouter de Vries
+
+### Status
+
+Wouter has added this project to [Arch's AUR repository](https://aur.archlinux.org/packages/ripe-atlas-tools).
+
+
 ## Other Platforms
 
 We've been talking with members of the community about expanding the package
@@ -56,7 +65,6 @@ platform, but we're especially keen on at least getting into:
 * Red Hat
 * Fedora
 * CentOS
-* Arch
 
 If you'd like to try your hand, or would simply like to offer some advice, feel
 free to add your name here or contact us directly via *atlas at ripe dot net*.
