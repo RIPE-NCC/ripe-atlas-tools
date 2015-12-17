@@ -32,7 +32,7 @@ Max has submitted the new ports and [they have been accepted](https://svnweb.fre
 
 ### Status
 
-After a great deal of help from #gentoo-proxy-maint, Daniel has issued a [pull request](https://github.com/gentoo/gentoo/pull/482) to the Gentoo portage tree.
+After a great deal of help from #gentoo-proxy-maint, Daniel's pull requests were accepted into the Gentoo portage tree.  You can now install it with `emerge ripe-atlas-tools`.
 
 
 ## Debian
