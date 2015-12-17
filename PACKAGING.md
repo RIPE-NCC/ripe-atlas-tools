@@ -47,7 +47,7 @@ to Debian standards and has volunteered to submit everything once it's ready.
 
 ## Arch
 
-* Wouter de Vries
+* [Wouter de Vries](https://github.com/woutifier)
 
 ### Status
 
