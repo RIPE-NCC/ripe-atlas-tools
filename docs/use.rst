@@ -247,6 +247,9 @@ Option                        Arguments           Explanation
                               ISO country code    probes are located.
 ============================  ==================  ==============================
 
+
+.. _use-probes-examples:
+
 Examples
 --------
 
@@ -761,6 +764,8 @@ complex query::
     $ ripe-atlas measure dns --query-type AAAA --query-argument example.com \
       --set-nsid-bit --set-rd-bit --set-do-bit --set-cd-bit
 
+
+.. _use-shortcuts:
 
 Shortcuts
 ---------

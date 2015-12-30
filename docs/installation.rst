@@ -9,6 +9,9 @@ only Python's package manager (``pip``) is currently supported, and the
 installation process may require some system packages to be installed in order
 for everything to work.
 
+
+.. _requirements-and-installation-system-requirements:
+
 System Requirements
 ===================
 
@@ -21,6 +24,9 @@ slightly differently.
 The most important thing to know is that you need Python 2.7 or 3. Python 2.6
 will never be supported because it's old, ugly, and needs to die.
 
+
+.. _requirements-and-installation-distribution-specific-requirements:
+
 Distribution Specific Requirements
 ----------------------------------
 
@@ -30,6 +36,9 @@ Distribution Specific Requirements
     skip the next one too.  Just skip down to
     :ref:`Installation:OpenBSD <installation-from-openbsd>` and follow the
     instructions.  Everything else is taken care of for you.
+
+
+.. _requirements-and-installation-distribution-specific-requirements-debian:
 
 Debian/Ubuntu
 .............
@@ -48,6 +57,9 @@ comfortable with that, at the very least, you'll need ``pip``:
 .. code:: bash
 
     sudo apt-get install python-virtualenv python-pip
+
+
+.. _requirements-and-installation-distribution-specific-requirements-centos:
 
 CentOS
 ......
@@ -74,6 +86,9 @@ you're not comfortable with that, at the very least, you'll need ``pip``:
 
     sudo yum install python-virtualenv python-pip
 
+
+.. _requirements-and-installation-distribution-specific-requirements-gentoo:
+
 Gentoo
 ......
 
@@ -88,6 +103,9 @@ that git is built with curl support:
 
 If you're not going bleeding edge, or if you're just going to use SSH to get the
 code from GitHub, then Gentoo will have everything ready for you.
+
+
+.. _requirements-and-installation-distribution-specific-requirements-apple:
 
 Apple OSX
 .........
@@ -145,6 +163,32 @@ easy:
 .. code:: bash
 
     sudo pkg_add py-ripe.atlas.tools
+
+
+.. _installation-from-freebsd:
+
+FreeBSD
+-------
+
+FreeBSD has a port ready for you:
+
+.. code:: bash
+
+cd /usr/ports/net/py-ripe.atlas.tools
+make install
+
+
+.. _installation-from-gentoo:
+
+Gentoo
+------
+
+There's an ebuild for Magellan in Portage, so installation is as any other
+package:
+
+.. code:: bash
+
+    sudo emerge ripe-atlas-tools
 
 
 .. _installation-from-pypi:
@@ -210,6 +254,3 @@ same directory as ``setup.py``:
 .. code:: bash
 
     python setup.py install
-
-
-.. _installation-troubleshooting:

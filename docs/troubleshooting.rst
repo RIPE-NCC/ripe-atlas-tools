@@ -1,8 +1,13 @@
+.. _troubleshooting:
+
 Troubleshooting
 ===============
 
 Sometimes things don't go as planned.  In these cases, this page is here to
 help.
+
+
+.. _troubleshooting-insecureplatformwarning:
 
 InsecurePlatformWarning
 -----------------------
@@ -28,6 +33,9 @@ three options:
 
 .. _Suppress the warnings: https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 
+
+.. _troubleshooting-saganopensslosx:
+
 Sagan, OpenSSL, and OSX
 -----------------------
 
@@ -37,6 +45,9 @@ their machines.  Workarounds and proper fixes for this issue can be found in the
 `Sagan installation documentation`_.
 
 .. _Sagan installation documentation: https://ripe-atlas-sagan.readthedocs.org/en/latest/installation.html#troubleshooting
+
+
+.. _troubleshooting-libyaml:
 
 Complaints from libyaml
 -----------------------
