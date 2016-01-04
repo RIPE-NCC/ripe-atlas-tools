@@ -15,9 +15,11 @@
 
 from __future__ import print_function
 
-from ripe.atlas.sagan import Result, ResultParseError
+from ripe.atlas.sagan import Result as SaganResult
+from ripe.atlas.sagan import ResultParseError
 
 from ..probes import Probe
+from ..renderers.base import Result as MagellanResult
 
 
 class SaganSet(object):
@@ -46,10 +48,10 @@ class SaganSet(object):
                 break
 
             try:
-                sagan = Result.get(
+                sagan = SaganResult.get(
                     line,
-                    on_error=Result.ACTION_IGNORE,
-                    on_warning=Result.ACTION_IGNORE
+                    on_error=SaganResult.ACTION_IGNORE,
+                    on_warning=SaganResult.ACTION_IGNORE
                 )
                 if not self._probes or sagan.probe_id in self._probes:
                     sagans.append(sagan)
@@ -89,18 +91,24 @@ class Rendering(object):
         self.payload = payload
 
     def render(self):
+
         if self.renderer.SHOW_DEFAULT_HEADER:
             print(self.header, end="")
-        self.renderer.header()
+
+        print(self.renderer.header(), end="")
+
         self._smart_render(self.payload)
-        self.renderer.additional(self.payload)
-        self.renderer.footer()
+
+        print(self.renderer.additional(self.payload), end="")
+
+        print(self.renderer.footer(), end="")
+
         if self.renderer.SHOW_DEFAULT_FOOTER:
             print(self.footer, end="")
 
     def _get_rendered_results(self, data):
         for sagan in data:
-            yield self.renderer.on_result(sagan)
+            yield MagellanResult(self.renderer.on_result(sagan), sagan.probe_id)
 
     def _smart_render(self, data, indent=""):
         """

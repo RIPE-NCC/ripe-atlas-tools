@@ -35,6 +35,9 @@ class Renderer(object):
     SHOW_DEFAULT_HEADER = True
     SHOW_DEFAULT_FOOTER = True
 
+    def __init__(self, *args, **kwargs):
+        pass
+
     @staticmethod
     def get_available():
         """
@@ -122,26 +125,23 @@ class Renderer(object):
             "Renderer"
         )
 
-    @staticmethod
-    def header(*args, **kwargs):
+    def header(self):
         """
         Override this to add an additional header.
         """
-        pass
+        return ""
 
-    @staticmethod
-    def additional(*args, **kwargs):
+    def additional(self, results):
         """
         Override this for summary logic.
         """
-        pass
+        return ""
 
-    @staticmethod
-    def footer(*args, **kwargs):
+    def footer(self):
         """
         Override this to add an additional footer.
         """
-        pass
+        return ""
 
     @staticmethod
     def _test_renderer_accepts_kind(renderer, kind):

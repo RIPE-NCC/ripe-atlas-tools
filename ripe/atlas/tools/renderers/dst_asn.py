@@ -27,7 +27,10 @@ class Renderer(BaseRenderer):
     SHOW_DEFAULT_HEADER = False
     SHOW_DEFAULT_FOOTER = False
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+
+        BaseRenderer.__init__(self, *args, **kwargs)
+
         # Keys are timestamps, data struct captures ASN membership
         self.asns = Counter()
         self.asn2name = {}
@@ -46,10 +49,15 @@ class Renderer(BaseRenderer):
         return ""
 
     def additional(self, results):
+
         total = sum(self.asns.values())
+
+        r = ""
         for asn, count in self.asns.most_common():
-            print("AS%s %.2f%% (%s)" % (
+            r += "AS%s %.2f%% (%s)" % (
                 asn,
                 100.0 * count / total,
                 self.asn2name[asn]
-            ))
+            )
+
+        return r

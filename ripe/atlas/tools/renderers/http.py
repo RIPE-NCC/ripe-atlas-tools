@@ -16,7 +16,6 @@
 from ..helpers.colours import colourise
 
 from .base import Renderer as BaseRenderer
-from .base import Result
 
 
 class Renderer(BaseRenderer):
@@ -57,7 +56,7 @@ class Renderer(BaseRenderer):
                 response.code
             )
 
-        return Result(r + "\n", result.probe_id)
+        return r + "\n"
 
     def _colourise_by_status(self, output, status):
         try:

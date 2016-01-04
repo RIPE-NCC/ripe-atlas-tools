@@ -34,7 +34,6 @@ class TestHttpRenderer(unittest.TestCase):
             'GET http://at-vie-as1120.anchors.atlas.ripe.net:80/4096 217.13.64.36 193.171.255.2 200 45.953289 1.1 131 1668618\n\n'
         )
         self.assertEqual(Renderer().on_result(self.basic), expected)
-        self.assertEqual(Renderer().on_result(self.basic).probe_id, 1)
 
     def test_multiple(self):
         expected = (
@@ -45,4 +44,3 @@ class TestHttpRenderer(unittest.TestCase):
             'GET http://at-vie-as1120.anchors.atlas.ripe.net:80/4096 217.13.64.36 193.171.255.2 200 45.953289 1.1 131 1668618\n\n'
         )
         self.assertEqual(Renderer().on_result(self.multiple), expected)
-        self.assertEqual(Renderer().on_result(self.basic).probe_id, 1)

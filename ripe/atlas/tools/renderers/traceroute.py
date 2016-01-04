@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .base import Renderer as BaseRenderer
-from .base import Result
 
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
@@ -50,10 +49,7 @@ class Renderer(BaseRenderer):
                 "  ".join(rtts)
             )
 
-        return Result(
-            "\n{}\n\n{}".format(
-                colourise("Probe #{}".format(result.probe_id), "bold"),
-                r
-            ),
-            result.probe_id
+        return "\n{}\n\n{}".format(
+            colourise("Probe #{}".format(result.probe_id), "bold"),
+            r
         )
