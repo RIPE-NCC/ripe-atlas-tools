@@ -1,3 +1,4 @@
 -- {target} ping statistics ---
 {sent} packets transmitted, {received} received, {packet_loss}% loss
 rtt min/med/avg/max = {min}/{median}/{mean}/{max} ms
+

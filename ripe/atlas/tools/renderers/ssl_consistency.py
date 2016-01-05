@@ -20,9 +20,11 @@ THRESHOLD = 80  # %
 
 
 class Renderer(BaseRenderer):
+
     RENDERS = [BaseRenderer.TYPE_SSLCERT]
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        BaseRenderer.__init__(self, *args, **kwargs)
         self.uniqcerts = {}
         self.blob_list = []
 
@@ -38,7 +40,7 @@ class Renderer(BaseRenderer):
             if self.uniqcerts[cert_id]["cnt"] < most_seen_cert * THRESHOLD / 100:
                 self.blob_list.extend(self.render_below_threshold(cert_id))
 
-        print("\n".join(self.blob_list))
+        return "\n".join(self.blob_list)
 
     def gather_unique_certs(self, results):
         for result in results:

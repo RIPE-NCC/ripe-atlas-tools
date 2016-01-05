@@ -124,15 +124,13 @@ class TestSSLConsistency(unittest.TestCase):
             "    ID: 2844, country code: GR, ASN (v4/v6): 3333/4444\n"
         )
 
-        with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
-            with mock.patch(path) as mock_get_many:
-                mock_get_many.return_value = self.probes.values()
-                sagans = SaganSet(self.results)
-                Renderer().additional(sagans)
-                expected_set = set(expected_output.split("\n"))
-                returned_set = set(stdout.getvalue().split("\n"))
-                self.assertEquals(returned_set, expected_set)
+        path = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
+        with mock.patch(path) as mock_get_many:
+            mock_get_many.return_value = self.probes.values()
+            self.assertEquals(
+                set(Renderer().additional(SaganSet(self.results)).split("\n")),
+                set(expected_output.split("\n"))
+            )
 
     def test_gather_unique_certs(self):
         """Test gathering of the unique certs in sagans set"""

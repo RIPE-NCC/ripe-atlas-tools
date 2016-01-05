@@ -26,6 +26,7 @@ Contents
    quickstart
    installation
    use
+   plugins
    contributing
    packaging
    troubleshooting

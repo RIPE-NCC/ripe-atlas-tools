@@ -1,6 +1,15 @@
 Release History
 ===============
 
+1.2.2 (released 2016-??-??)
+---------------------------
+
+New Features
+~~~~~~~~~~~~
+- Cleaner and more consistent implementation of the renderer plugable
+  architecture.
+
+
 1.2.1 (released 2015-12-15)
 ---------------------------
 

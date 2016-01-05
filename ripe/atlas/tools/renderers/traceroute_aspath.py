@@ -15,14 +15,14 @@
 
 from ..ipdetails import IP
 from .base import Renderer as BaseRenderer
-from .base import Result
 
 
 class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_TRACEROUTE]
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        BaseRenderer.__init__(self, *args, **kwargs)
         self.paths = {}
 
         # Number of different ASs starting from the end of the traceroute path.
@@ -73,14 +73,12 @@ class Renderer(BaseRenderer):
         if result.destination_ip_responded:
             self.paths[as_path]['responded'] += 1
 
-        return Result(
-            "Probe #{:<5}: {}, {}completed\n".format(
-                result.probe_id, as_path,
-                "NOT " if not result.destination_ip_responded else ""
-            ), result.probe_id
+        return "Probe #{:<5}: {}, {}completed\n".format(
+            result.probe_id, as_path,
+            "NOT " if not result.destination_ip_responded else ""
         )
 
-    def on_finish(self):
+    def additional(self, results):
         s = "\nNumber of probes for each AS path:\n\n"
 
         for as_path in self.paths:

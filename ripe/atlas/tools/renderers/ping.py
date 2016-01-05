@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .base import Renderer as BaseRenderer
-from .base import Result
 
 
 class Renderer(BaseRenderer):
@@ -35,7 +34,7 @@ class Renderer(BaseRenderer):
             origin = packets[0].source_address
 
         line = "{} bytes from probe #{:<5} {:15} to {} ({}): ttl={} times:{}\n"
-        return Result(line.format(
+        return line.format(
             result.packet_size,
             result.probe_id,
             origin,
@@ -43,4 +42,4 @@ class Renderer(BaseRenderer):
             result.destination_address,
             packets[0].ttl,
             " ".join(["{:8}".format(str(_.rtt) + ",") for _ in packets])
-        ), result.probe_id)
+        )

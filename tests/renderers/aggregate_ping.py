@@ -48,9 +48,7 @@ class TestAggregatePing(unittest.TestCase):
             "rtt min/med/avg/max = 36.921608/42.406/82.693/218.077484 ms\n\n"
         )
 
-        with capture_sys_output() as (stdout, stderr):
-            Renderer().additional(self.sagans)
-            self.assertEquals(stdout.getvalue(), expected_output)
+        self.assertEquals(Renderer().additional(self.sagans), expected_output)
 
     def test_collect_stats(self):
         """Tests collect stats function."""

@@ -31,7 +31,6 @@ class TestPingRenderer(unittest.TestCase):
             Renderer().on_result(self.basic),
             "20 bytes from probe #1     1.2.3.4         to my.name.ca (3.4.5.6): ttl=20 times:10.001,  10.002,  10.003, \n"
         )
-        self.assertEqual(Renderer().on_result(self.basic).probe_id, 1)
 
     def test_no_packets(self):
         self.assertEqual(

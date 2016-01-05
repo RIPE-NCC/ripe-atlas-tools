@@ -40,12 +40,12 @@ class Renderer(BaseRenderer):
         }
 
     def header(self):
-        print("Collecting results...\n")
+        return "Collecting results...\n"
 
     def additional(self, results):
         self.collect_stats(results)
         self.packet_loss = self.calculate_loss()
-        print(self.render(
+        return self.render(
             "reports/aggregate_ping.txt",
             target=sanitise(self.target),
             sent=self.sent_packets,
@@ -55,7 +55,7 @@ class Renderer(BaseRenderer):
             median=self.median(),
             mean=self.mean(),
             max=max(self.rtts_max)
-        ))
+        )
 
     def collect_stats(self, results):
         """
