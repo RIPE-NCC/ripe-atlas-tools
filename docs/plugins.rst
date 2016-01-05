@@ -4,10 +4,11 @@ How to Create Your Own Plugins
 ==============================
 
 We built this toolkit for the community, and we knew going in that we couldn't
-possibly build every feature that every user could want, built this thing to be
-pluggable.  You can write your own renderer(s) and use them seamlessly within
-your own environment, and if you think that others might benefit from your work,
-you can share your renderer as easy as posting a file online.
+possibly build every feature that every user could want, so we built this
+thing to be pluggable.  You can write your own renderer(s) and use them
+seamlessly within your own environment, and if you think that others might
+benefit from your work, you can share your renderer as easy as posting a file
+online.
 
 Ready?
 
@@ -133,9 +134,8 @@ makes use of ``on_result()``.
 header()
 ........
 
-By default this returns ``None``, but if you define this method and have it
-return a string, that string will be printed to standard out before any results
-are captured.
+The value returned from this method is printed to standard out before any
+results are captured.  By default it returns an empty string.
 
 
 .. _plugins-write-anatomy-additional-additional:
@@ -179,8 +179,8 @@ things with that.
 footer()
 ........
 
-Much the same as the ``header()``, this should return a string, but unlike the
-header, the output of this method is rendered after everything else.
+Much the same as ``header()``, this should return a string, but unlike
+``header()``, the output of this method is rendered after everything else.
 
 
 .. _plugins-run:
