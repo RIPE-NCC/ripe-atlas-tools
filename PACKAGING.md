@@ -53,6 +53,16 @@ to Debian standards and has volunteered to submit everything once it's ready.
 
 Wouter has added this project to [Arch's AUR repository](https://aur.archlinux.org/packages/ripe-atlas-tools).
 
+## Fedora 
+
+* * [Jan Včelák](https://github.com/vcelda)
+
+### Status 
+
+In progress: https://github.com/fcelda/fedora-ripe-atlas-tools
+
+Jan is currently building the binary packages in COPR (which will take some time as there is a lot of other packages in the queue):
+https://copr.fedoraproject.org/coprs/jvcelak/ripe-atlas-tools/
 
 ## Other Platforms
 
@@ -63,7 +73,6 @@ platform, but we're especially keen on at least getting into:
 
 * Ubuntu
 * Red Hat
-* Fedora
 * CentOS
 
 If you'd like to try your hand, or would simply like to offer some advice, feel
