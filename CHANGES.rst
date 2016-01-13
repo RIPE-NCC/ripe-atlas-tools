@@ -1,13 +1,14 @@
 Release History
 ===============
 
-1.2.2 (released 2016-??-??)
+1.2.2 (released 2016-01-13)
 ---------------------------
 
 New Features
 ~~~~~~~~~~~~
 - Cleaner and more consistent implementation of the renderer plugable
   architecture.
+- Usage of newest Cousteau library.
 
 
 1.2.1 (released 2015-12-15)
