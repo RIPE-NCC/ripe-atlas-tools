@@ -16,7 +16,8 @@
 from __future__ import print_function
 
 from ripe.atlas.cousteau import (
-    AtlasLatestRequest, AtlasResultsRequest, Measurement, APIResponseError)
+    AtlasLatestRequest, AtlasResultsRequest, Measurement)
+from ripe.atlas.cousteau.exceptions import APIResponseError
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
@@ -25,6 +26,7 @@ from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
 from .base import Command as BaseCommand
 from ..filters import FilterFactory, filter_results
+from ..settings import conf
 
 
 class Command(BaseCommand):
@@ -53,6 +55,12 @@ class Command(BaseCommand):
             "measurement_id",
             type=int,
             help="The measurement id you want reported."
+        )
+        self.parser.add_argument(
+            "--auth",
+            type=str,
+            default=conf["authorisation"]["fetch"],
+            help="The API key you want to use to fetch the measurement"
         )
         self.parser.add_argument(
             "--probes",
@@ -103,6 +111,8 @@ class Command(BaseCommand):
             "msm_id": self.arguments.measurement_id,
             "user_agent": self.user_agent
         }
+        if self.arguments.auth:
+            kwargs["key"] = self.arguments.auth
         if self.arguments.probes:
             kwargs["probe_ids"] = self.arguments.probes
         if self.arguments.start_time:
@@ -118,8 +128,12 @@ class Command(BaseCommand):
 
         try:
             measurement = Measurement(
-                id=self.arguments.measurement_id, user_agent=self.user_agent)
-        except APIResponseError:
+                id=self.arguments.measurement_id, user_agent=self.user_agent,
+                key=self.arguments.auth)
+        except APIResponseError as e:
+            if "error" in e.message:
+                if "detail" in e.message["error"]:
+                    raise RipeAtlasToolsException(e.message["error"]["detail"])
             raise RipeAtlasToolsException("That measurement does not exist")
 
         renderer = Renderer.get_renderer(

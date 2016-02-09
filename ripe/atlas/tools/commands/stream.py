@@ -15,12 +15,14 @@
 
 from __future__ import print_function, absolute_import
 
-from ripe.atlas.cousteau import Measurement, APIResponseError
+from ripe.atlas.cousteau import Measurement
+from ripe.atlas.cousteau.exceptions import APIResponseError
 
 from ..exceptions import RipeAtlasToolsException
 from ..renderers import Renderer
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
+from ..settings import conf
 
 
 class Command(BaseCommand):
@@ -39,6 +41,12 @@ class Command(BaseCommand):
             help="The measurement id you want streamed"
         )
         self.parser.add_argument(
+            "--auth",
+            type=str,
+            default=conf["authorisation"]["fetch"],
+            help="The API key you want to use to fetch the measurement"
+        )
+        self.parser.add_argument(
             "--limit",
             type=int,
             help="The maximum number of results you want to stream"
@@ -54,8 +62,12 @@ class Command(BaseCommand):
 
         try:
             measurement = Measurement(
-                id=self.arguments.measurement_id, user_agent=self.user_agent)
-        except APIResponseError:
+                id=self.arguments.measurement_id, user_agent=self.user_agent,
+                key=self.arguments.auth)
+        except APIResponseError as e:
+            if "error" in e.message:
+                if "detail" in e.message["error"]:
+                    raise RipeAtlasToolsException(e.message["error"]["detail"])
             raise RipeAtlasToolsException("That measurement does not exist")
 
         try:
