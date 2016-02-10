@@ -131,9 +131,9 @@ class Command(BaseCommand):
                 id=self.arguments.measurement_id, user_agent=self.user_agent,
                 key=self.arguments.auth)
         except APIResponseError as e:
-            if "error" in e.message:
-                if "detail" in e.message["error"]:
-                    raise RipeAtlasToolsException(e.message["error"]["detail"])
+            if "error" in e.args[0]:
+                if "detail" in e.args[0]["error"]:
+                    raise RipeAtlasToolsException(e.args[0]["error"]["detail"])
             raise RipeAtlasToolsException("That measurement does not exist")
 
         renderer = Renderer.get_renderer(
