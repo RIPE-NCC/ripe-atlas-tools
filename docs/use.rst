@@ -294,6 +294,9 @@ Options
 ==================  ==================  ========================================
 Option              Arguments           Explanation
 ==================  ==================  ========================================
+``--auth``          RIPE Atlas key      One of the RIPE Atlas key alias 
+                    alias               configured for results fetching.
+
 ``--probes``        A comma-separated   Limit the report to only results
                     list of probe ids   obtained from specific probes.
 
@@ -367,6 +370,9 @@ Options
 ==================  ==================  ========================================
 Option              Arguments           Explanation
 ==================  ==================  ========================================
+``--auth``          RIPE Atlas key      One of the RIPE Atlas key alias 
+                    alias               configured for results fetching.
+
 ``--limit``         A number < 1000     The maximum number of results you want
                                         to stream.  The default is to stream
                                         forever until you hit ``Ctrl+C``.

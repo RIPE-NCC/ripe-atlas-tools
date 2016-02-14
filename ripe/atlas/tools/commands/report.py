@@ -59,8 +59,11 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--auth",
             type=str,
-            default=conf["authorisation"]["fetch"],
-            help="The API key you want to use to fetch the measurement"
+            choices=conf["authorisation"]["fetch_aliases"].keys(),
+            help="The API key alias you want to use to fetch the measurement. "
+                 "To configure an API key alias, use "
+                 "ripe-atlas configure --set authorisation.fetch_aliases."
+                 "ALIAS_NAME=YOUR_KEY"
         )
         self.parser.add_argument(
             "--probes",
@@ -105,14 +108,19 @@ class Command(BaseCommand):
             help="The stop time of the report."
         )
 
+    def _get_request_auth(self):
+        if self.arguments.auth:
+            return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
+        else:
+            return conf["authorisation"]["fetch"]
+
     def _get_request(self):
 
         kwargs = {
             "msm_id": self.arguments.measurement_id,
             "user_agent": self.user_agent
         }
-        if self.arguments.auth:
-            kwargs["key"] = self.arguments.auth
+        kwargs["key"] = self._get_request_auth()
         if self.arguments.probes:
             kwargs["probe_ids"] = self.arguments.probes
         if self.arguments.start_time:
@@ -129,7 +137,7 @@ class Command(BaseCommand):
         try:
             measurement = Measurement(
                 id=self.arguments.measurement_id, user_agent=self.user_agent,
-                key=self.arguments.auth)
+                key=self._get_request_auth())
         except APIResponseError as e:
             if "error" in e.args[0]:
                 if "detail" in e.args[0]["error"]:

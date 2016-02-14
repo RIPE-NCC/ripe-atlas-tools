@@ -43,8 +43,13 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--auth",
             type=str,
+            choices=conf["authorisation"]["fetch_aliases"].keys(),
             default=conf["authorisation"]["fetch"],
-            help="The API key you want to use to fetch the measurement"
+            help="The API key alias you want to use to fetch the measurement. "
+                 "To configure an API key alias, use "
+                 "ripe-atlas configure --set authorisation.fetch_aliases."
+                 "ALIAS_NAME=YOUR_KEY"
+
         )
         self.parser.add_argument(
             "--limit",
@@ -58,12 +63,18 @@ class Command(BaseCommand):
                  "appropriate renderer will be selected."
         )
 
+    def _get_request_auth(self):
+        if self.arguments.auth:
+            return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
+        else:
+            return conf["authorisation"]["fetch"]
+
     def run(self):
 
         try:
             measurement = Measurement(
                 id=self.arguments.measurement_id, user_agent=self.user_agent,
-                key=self.arguments.auth)
+                key=self._get_request_auth)
         except APIResponseError as e:
             if "error" in e.args[0]:
                 if "detail" in e.args[0]["error"]:

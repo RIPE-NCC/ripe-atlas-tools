@@ -33,6 +33,7 @@ class Configuration(object):
     DEFAULT = {
         "authorisation": {
             "fetch": "",
+            "fetch_aliases": {},
             "create": "",
         },
         "specification": {
