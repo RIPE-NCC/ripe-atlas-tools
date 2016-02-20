@@ -31,6 +31,7 @@ setup(
     maintainer="The RIPE Atlas team",
     maintainer_email="atlas@ripe.net",
     install_requires=[
+        "IPy",
         "python-dateutil",
         "requests>=2.7.0",
         "ripe.atlas.cousteau==1.0.7",

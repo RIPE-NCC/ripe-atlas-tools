@@ -16,7 +16,8 @@
 from __future__ import print_function
 
 from ripe.atlas.cousteau import (
-    AtlasLatestRequest, AtlasResultsRequest, Measurement, APIResponseError)
+    AtlasLatestRequest, AtlasResultsRequest, Measurement)
+from ripe.atlas.cousteau.exceptions import APIResponseError
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
@@ -25,6 +26,7 @@ from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
 from .base import Command as BaseCommand
 from ..filters import FilterFactory, filter_results
+from ..settings import conf
 
 
 class Command(BaseCommand):
@@ -53,6 +55,15 @@ class Command(BaseCommand):
             "measurement_id",
             type=int,
             help="The measurement id you want reported."
+        )
+        self.parser.add_argument(
+            "--auth",
+            type=str,
+            choices=conf["authorisation"]["fetch_aliases"].keys(),
+            help="The API key alias you want to use to fetch the measurement. "
+                 "To configure an API key alias, use "
+                 "ripe-atlas configure --set authorisation.fetch_aliases."
+                 "ALIAS_NAME=YOUR_KEY"
         )
         self.parser.add_argument(
             "--probes",
@@ -97,12 +108,19 @@ class Command(BaseCommand):
             help="The stop time of the report."
         )
 
+    def _get_request_auth(self):
+        if self.arguments.auth:
+            return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
+        else:
+            return conf["authorisation"]["fetch"]
+
     def _get_request(self):
 
         kwargs = {
             "msm_id": self.arguments.measurement_id,
             "user_agent": self.user_agent
         }
+        kwargs["key"] = self._get_request_auth()
         if self.arguments.probes:
             kwargs["probe_ids"] = self.arguments.probes
         if self.arguments.start_time:
@@ -118,9 +136,10 @@ class Command(BaseCommand):
 
         try:
             measurement = Measurement(
-                id=self.arguments.measurement_id, user_agent=self.user_agent)
-        except APIResponseError:
-            raise RipeAtlasToolsException("That measurement does not exist")
+                id=self.arguments.measurement_id, user_agent=self.user_agent,
+                key=self._get_request_auth())
+        except APIResponseError as e:
+            raise RipeAtlasToolsException(e.args[0])
 
         renderer = Renderer.get_renderer(
             self.arguments.renderer, measurement.type.lower())()

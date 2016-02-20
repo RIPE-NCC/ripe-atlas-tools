@@ -15,12 +15,14 @@
 
 from __future__ import print_function, absolute_import
 
-from ripe.atlas.cousteau import Measurement, APIResponseError
+from ripe.atlas.cousteau import Measurement
+from ripe.atlas.cousteau.exceptions import APIResponseError
 
 from ..exceptions import RipeAtlasToolsException
 from ..renderers import Renderer
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
+from ..settings import conf
 
 
 class Command(BaseCommand):
@@ -39,6 +41,17 @@ class Command(BaseCommand):
             help="The measurement id you want streamed"
         )
         self.parser.add_argument(
+            "--auth",
+            type=str,
+            choices=conf["authorisation"]["fetch_aliases"].keys(),
+            default=conf["authorisation"]["fetch"],
+            help="The API key alias you want to use to fetch the measurement. "
+                 "To configure an API key alias, use "
+                 "ripe-atlas configure --set authorisation.fetch_aliases."
+                 "ALIAS_NAME=YOUR_KEY"
+
+        )
+        self.parser.add_argument(
             "--limit",
             type=int,
             help="The maximum number of results you want to stream"
@@ -50,13 +63,20 @@ class Command(BaseCommand):
                  "appropriate renderer will be selected."
         )
 
+    def _get_request_auth(self):
+        if self.arguments.auth:
+            return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
+        else:
+            return conf["authorisation"]["fetch"]
+
     def run(self):
 
         try:
             measurement = Measurement(
-                id=self.arguments.measurement_id, user_agent=self.user_agent)
-        except APIResponseError:
-            raise RipeAtlasToolsException("That measurement does not exist")
+                id=self.arguments.measurement_id, user_agent=self.user_agent,
+                key=self._get_request_auth)
+        except APIResponseError as e:
+            raise RipeAtlasToolsException(e.args[0])
 
         try:
             Stream(capture_limit=self.arguments.limit).stream(

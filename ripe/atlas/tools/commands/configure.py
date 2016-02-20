@@ -74,12 +74,29 @@ class Command(BaseCommand):
             self.set(path.split("."), value)
 
     def set(self, path, value):
+        if path[:2] == ['authorisation', 'fetch_aliases']:
+            if len(path) > 3:
+                raise RipeAtlasToolsException(
+                    'Invalid alias for a fetch API key: it must be in the '
+                    'format authorisation.fetch.some-alias=MY_API_KEY')
 
-        try:
-            required_type = type(self._get_from_dict(conf, path))
-        except KeyError:
-            raise RipeAtlasToolsException(
-                'Invalid configuration key: "{}"'.format(".".join(path)))
+            if 'fetch_aliases' not in conf['authorisation']:
+                conf['authorisation']['fetch_aliases'] = {}
+            if conf['authorisation']['fetch_aliases'] is None:
+                conf['authorisation']['fetch_aliases'] = {}
+
+            alias = path[2]
+
+            if alias not in conf['authorisation']['fetch_aliases']:
+                conf['authorisation']['fetch_aliases'][alias] = None
+
+            required_type = str
+        else:
+            try:
+                required_type = type(self._get_from_dict(conf, path))
+            except KeyError:
+                raise RipeAtlasToolsException(
+                    'Invalid configuration key: "{}"'.format(".".join(path)))
 
         if value.isdigit():
             value = int(value)
