@@ -32,7 +32,6 @@ class TracerouteMeasureCommand(Command):
         """
         return s.upper()
 
-
     def add_arguments(self):
 
         Command.add_arguments(self)
