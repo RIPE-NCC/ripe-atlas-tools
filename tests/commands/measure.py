@@ -266,6 +266,31 @@ class TestMeasureCommand(unittest.TestCase):
             }
         )
 
+        """Tests for the protocol provided in lower case"""
+        cmd = TracerouteMeasureCommand()
+        cmd.init_args([
+            "traceroute", "--target", "ripe.net", "--protocol", "icmp"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "Traceroute measurement to ripe.net",
+                "target": "ripe.net",
+                "packets": spec["packets"],
+                "size": spec["size"],
+                "destination_option_size": spec["destination-option-size"],
+                "hop_by_hop_option_size": spec["hop-by-hop-option-size"],
+                "dont_fragment": spec["dont-fragment"],
+                "first_hop": spec["first-hop"],
+                "max_hops": spec["max-hops"],
+                "paris": spec["paris"],
+                "port": spec["port"],
+                "protocol": "ICMP",
+                "timeout": spec["timeout"]
+            }
+        )
+
     @mock.patch(CONF, Configuration.DEFAULT)
     def test_get_measurement_kwargs_dns(self):
 
@@ -328,6 +353,78 @@ class TestMeasureCommand(unittest.TestCase):
                 "retry": 2,
                 "udp_payload_size": 5,
                 "use_probe_resolver": False
+            }
+        )
+
+        """Testing for protocol argument in lower case"""
+        cmd = DnsMeasureCommand()
+        cmd.init_args([
+            "dns", "--query-argument", "ripe.net", "--protocol", "tcp"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "DNS measurement for ripe.net",
+                "query_class": spec["query-class"],
+                "query_type": spec["query-type"],
+                "query_argument": "ripe.net",
+                "set_cd_bit": spec["set-cd-bit"],
+                "set_do_bit": spec["set-do-bit"],
+                "set_rd_bit": spec["set-rd-bit"],
+                "set_nsid_bit": spec["set-nsid-bit"],
+                "protocol": "TCP",
+                "retry": spec["retry"],
+                "udp_payload_size": spec["udp-payload-size"],
+                "use_probe_resolver": True,
+            }
+        )
+
+        """Testing for query class in lower case"""
+        cmd = DnsMeasureCommand()
+        cmd.init_args([
+            "dns", "--query-argument", "ripe.net", "--query-class", "in"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "DNS measurement for ripe.net",
+                "query_class": "IN",
+                "query_type": spec["query-type"],
+                "query_argument": "ripe.net",
+                "set_cd_bit": spec["set-cd-bit"],
+                "set_do_bit": spec["set-do-bit"],
+                "set_rd_bit": spec["set-rd-bit"],
+                "set_nsid_bit": spec["set-nsid-bit"],
+                "protocol": spec["protocol"],
+                "retry": spec["retry"],
+                "udp_payload_size": spec["udp-payload-size"],
+                "use_probe_resolver": True,
+            }
+        )
+
+        """Testing for query type in lower case"""
+        cmd = DnsMeasureCommand()
+        cmd.init_args([
+            "dns", "--query-argument", "ripe.net", "--query-type", "txt"
+        ])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "DNS measurement for ripe.net",
+                "query_class": spec["query-class"],
+                "query_type": "TXT",
+                "query_argument": "ripe.net",
+                "set_cd_bit": spec["set-cd-bit"],
+                "set_do_bit": spec["set-do-bit"],
+                "set_rd_bit": spec["set-rd-bit"],
+                "set_nsid_bit": spec["set-nsid-bit"],
+                "protocol": spec["protocol"],
+                "retry": spec["retry"],
+                "udp_payload_size": spec["udp-payload-size"],
+                "use_probe_resolver": True,
             }
         )
 
@@ -708,7 +805,7 @@ class TestMeasureCommand(unittest.TestCase):
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --protocol: invalid "
-                "choice: 'invalid' (choose from 'ICMP', 'UDP', 'TCP')"
+                "choice: 'INVALID' (choose from 'ICMP', 'UDP', 'TCP')"
             )
 
         with capture_sys_output() as (stdout, stderr):
@@ -717,7 +814,7 @@ class TestMeasureCommand(unittest.TestCase):
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --protocol: invalid "
-                "choice: 'invalid' (choose from 'UDP', 'TCP')"
+                "choice: 'INVALID' (choose from 'UDP', 'TCP')"
             )
 
         with capture_sys_output() as (stdout, stderr):
