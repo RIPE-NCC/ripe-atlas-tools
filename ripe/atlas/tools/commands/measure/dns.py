@@ -26,6 +26,15 @@ from .base import Command
 
 class DnsMeasureCommand(Command):
 
+    def _upper_str(self, s):
+        """
+        Private method to validate specific command line arguments that
+        should be provided in upper or lower case
+        :param s: string
+        :return: string in upper case
+        """
+        return s.upper()
+
     def add_arguments(self):
 
         Command.add_arguments(self)
@@ -33,14 +42,14 @@ class DnsMeasureCommand(Command):
         specific = self.parser.add_argument_group("DNS-specific Options")
         specific.add_argument(
             "--protocol",
-            type=str,
+            type=self._upper_str,
             choices=("UDP", "TCP"),
             default=conf["specification"]["types"]["dns"]["protocol"],
             help="The protocol used."
         )
         specific.add_argument(
             "--query-class",
-            type=str,
+            type=self._upper_str,
             choices=("IN", "CHAOS"),
             default=conf["specification"]["types"]["dns"]["query-class"],
             help='The query class.  The default is "{}"'.format(
@@ -49,7 +58,7 @@ class DnsMeasureCommand(Command):
         )
         specific.add_argument(
             "--query-type",
-            type=str,
+            type=self._upper_str,
             choices=list(Message.ANSWER_CLASSES.keys()) + ["ANY"],  # The only ones we can parse
             default=conf["specification"]["types"]["dns"]["query-type"],
             help='The query type.  The default is "{}"'.format(

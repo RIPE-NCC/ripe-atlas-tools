@@ -23,6 +23,15 @@ from .base import Command
 
 class TracerouteMeasureCommand(Command):
 
+    def _upper_str(self, s):
+        """
+        Private method to validate specific command line arguments that
+        should be provided in upper or lower case
+        :param s: string
+        :return: string in upper case
+        """
+        return s.upper()
+
     def add_arguments(self):
 
         Command.add_arguments(self)
@@ -45,7 +54,7 @@ class TracerouteMeasureCommand(Command):
         )
         specific.add_argument(
             "--protocol",
-            type=str,
+            type=self._upper_str,
             choices=("ICMP", "UDP", "TCP"),
             default=spec["protocol"],
             help="The protocol used."
