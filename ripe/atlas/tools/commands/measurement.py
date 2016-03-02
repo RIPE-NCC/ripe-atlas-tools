@@ -52,8 +52,8 @@ class Command(MetaDataMixin, BaseCommand):
         cls._render(measurement, (
             ("id", "ID"),
             ("id", "URL", lambda _: colourise(url_template.format(_), "cyan")),
-            ("type", "Type", lambda _: cls._prettify_type(_["name"])),
-            ("status", "Status", lambda _: _["name"]),
+            ("type", "Type", cls._prettify_type),
+            ("status", "Status"),
             ("description", "Description", sanitise),
             ("af", "Address Family"),
             ("is_public", "Public?", cls._prettify_boolean),
@@ -176,16 +176,23 @@ class Command(MetaDataMixin, BaseCommand):
 
     @classmethod
     def _render(cls, measurement, keys):
-
         for prop in keys:
 
-            value = None
-            if prop[0] in measurement.meta_data:
-                value = measurement.meta_data[prop[0]]
+            value = cls._get_measurement_property(measurement, prop[0])
 
-            if value is None:
-                value = "-"
-            elif len(prop) == 3:
+            if value != "-" and len(prop) == 3:
                 value = prop[2](value)
 
             cls._render_line(prop[1], value)
+
+    @classmethod
+    def _get_measurement_property(cls, measurement, property_name):
+        value = getattr(measurement, property_name, None)
+
+        if value is None and property_name in measurement.meta_data:
+            value = measurement.meta_data[property_name]
+
+        if value is None:
+            value = "-"
+
+        return value
