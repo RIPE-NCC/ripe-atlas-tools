@@ -13,12 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse
 import os
 import re
 import six
 import sys
-
+import argparse
 from datetime import datetime
 
 from ..helpers.colours import colourise
