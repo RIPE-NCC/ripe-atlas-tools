@@ -34,7 +34,7 @@ class FakeGen(object):
     """
 
     Measurement = collections.namedtuple("Measurement", (
-        "id", "type", "status", "status_id", "meta_data", "destination_name",
+        "id", "type", "status", "status_id", "meta_data", "target",
         "description"
     ))
 
@@ -43,27 +43,27 @@ class FakeGen(object):
             self.Measurement(
                 id=1, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                destination_name="Name 1", description="Description 1",
+                target="Name 1", description="Description 1",
             ),
             self.Measurement(
                 id=2, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                destination_name="Name 2", description="Description 2",
+                target="Name 2", description="Description 2",
             ),
             self.Measurement(
                 id=3, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                destination_name="Name 3", description="Description 3",
+                target="Name 3", description="Description 3",
             ),
             self.Measurement(
                 id=4, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                destination_name="Name 4", description="Description 4",
+                target="Name 4", description="Description 4",
             ),
             self.Measurement(
                 id=5, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                destination_name="Name 5", description="Description 5",
+                target="Name 5", description="Description 5",
             ),
         ]
         self.total_count = 5
@@ -125,7 +125,7 @@ class TestMeasurementsCommand(unittest.TestCase):
             cmd._get_line_items(FakeGen.Measurement(
                 id=1, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                destination_name="Name 1", description="Description 1",
+                target="Name 1", description="Description 1",
             )),
             [1, "ping", "Description 1", "Ongoing"]
         )
@@ -139,7 +139,7 @@ class TestMeasurementsCommand(unittest.TestCase):
             cmd._get_line_items(FakeGen.Measurement(
                 id=1, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                destination_name="Name 1", description="Description 1",
+                target="Name 1", description="Description 1",
             )),
             [1, "Ongoing"]
         )
@@ -152,7 +152,7 @@ class TestMeasurementsCommand(unittest.TestCase):
             cmd._get_line_items(FakeGen.Measurement(
                 id=1, type="ping", status="Ongoing", status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                destination_name="Name 1", description="Description 1",
+                target="Name 1", description="Description 1",
             )),
             ["https://atlas.ripe.net/measurements/1/"]
         )
