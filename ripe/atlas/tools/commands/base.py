@@ -187,9 +187,12 @@ class MetaDataMixin(object):
         return colourise(x, "red")
 
     @staticmethod
-    def _prettify_time(timestamp):
-        return "{} UTC".format(
-            datetime.fromtimestamp(timestamp).isoformat().replace("T", " "))
+    def _prettify_time(dtime):
+        if isinstance(dtime, datetime):
+            return "{} UTC".format(
+                dtime.isoformat().replace("T", " "))
+
+        return str(dtime)
 
     @staticmethod
     def _render_line(header, value):
