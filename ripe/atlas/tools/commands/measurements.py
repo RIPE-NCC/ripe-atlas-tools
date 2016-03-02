@@ -175,8 +175,8 @@ class Command(TabularFieldsMixin, BaseCommand):
                 continue
             elif field == "target":
                 r.append(sanitise(
-                    measurement.destination_name or
-                    measurement.destination_address or
+                    measurement.target or
+                    measurement.target_ip or
                     "-"
                 )[:self.COLUMNS["target"][1]])
             elif field == "description":

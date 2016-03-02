@@ -13,12 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse
 import os
 import re
 import six
 import sys
-
+import argparse
 from datetime import datetime
 
 from ..helpers.colours import colourise
@@ -188,9 +187,12 @@ class MetaDataMixin(object):
         return colourise(x, "red")
 
     @staticmethod
-    def _prettify_time(timestamp):
-        return "{} UTC".format(
-            datetime.fromtimestamp(timestamp).isoformat().replace("T", " "))
+    def _prettify_time(dtime):
+        if isinstance(dtime, datetime):
+            return "{} UTC".format(
+                dtime.isoformat().replace("T", " "))
+
+        return str(dtime)
 
     @staticmethod
     def _render_line(header, value):
