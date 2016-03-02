@@ -166,6 +166,15 @@ class Command(TabularFieldsMixin, BaseCommand):
                 "command."
             )
         )
+        self.parser.add_argument(
+            "--status",
+            type=int,
+            choices=[0, 1, 2, 3],
+            help=(
+                "Probe's connection status [0 - Never Connected, "
+                "1 - Connected, 2 - Disconnected, 3 - Abandoned]"
+            )
+        )
 
     def run(self):
 
@@ -287,6 +296,9 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         if self.arguments.country:
             args.update(self._clean_country_code())
+
+        if self.arguments.status is not None:
+            args.update({"status": self.arguments.status})
 
         return args
 
