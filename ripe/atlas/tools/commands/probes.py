@@ -115,7 +115,8 @@ class Command(TabularFieldsMixin, BaseCommand):
         area.add_argument(
             "--radius",
             type=int,
-            help="Radius in km from specified center/point."
+            default=15,
+            help="Radius in km from specified center/point. Default is 15."
         )
 
         self.parser.add_argument(
