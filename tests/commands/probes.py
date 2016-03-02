@@ -233,6 +233,20 @@ class TestProbesCommand(unittest.TestCase):
         cmd.init_args(["--country", "GR", "--radius", "4"])
         self.assertEquals(cmd.build_request_args(), {"country_code": "GR"})
 
+    def test_status_arg(self):
+        """User passed valid status arg."""
+        for status in range(0, 3):
+            cmd = Command()
+            cmd.init_args(["--status", str(status)])
+            self.assertEquals(cmd.build_request_args(), {"status": status})
+
+    def test_status_arg_wrong_value(self):
+        """User passed status arg with wrong value"""
+        with self.assertRaises(SystemExit):
+            cmd = Command()
+            cmd.init_args(["--status", "4"])
+            cmd.run()
+
     def test_sane_args1(self):
         """User passed several arguments (1)"""
         cmd = Command()
