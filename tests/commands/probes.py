@@ -241,10 +241,11 @@ class TestProbesCommand(unittest.TestCase):
 
     def test_status_arg_wrong_value(self):
         """User passed status arg with wrong value"""
-        with self.assertRaises(SystemExit):
-            cmd = Command()
-            cmd.init_args(["--status", "4"])
-            cmd.run()
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--status", "4"])
+                cmd.run()
 
     def test_sane_args1(self):
         """User passed several arguments (1)"""
