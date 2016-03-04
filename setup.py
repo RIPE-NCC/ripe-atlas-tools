@@ -35,7 +35,7 @@ setup(
         "python-dateutil",
         "requests>=2.7.0",
         "ripe.atlas.cousteau==1.2",
-        "ripe.atlas.sagan==1.1.8",
+        "ripe.atlas.sagan==1.1.10",
         "tzlocal",
         "pyyaml",
         "pyOpenSSL>=0.13",
