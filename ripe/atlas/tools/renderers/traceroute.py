@@ -43,7 +43,7 @@ class Renderer(BaseRenderer):
                 else:
                     rtts.append("          *")
 
-            r += "{:>3} {:39} {}\n".format(
+            r += "{:>3} {:37} {}\n".format(
                 hop.index,
                 sanitise(name),
                 "  ".join(rtts)

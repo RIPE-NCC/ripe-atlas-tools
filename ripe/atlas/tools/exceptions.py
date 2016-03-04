@@ -13,16 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from ripe.atlas.tools.helpers.colours import colourise
+
 import sys
 
 
 class RipeAtlasToolsException(Exception):
 
-    RED = "\033[1;31m"
-    RESET = "\033[0m"
-
     def write(self):
         r = str(self)
-        if sys.stderr.isatty():
-            r = self.RED + r + self.RESET
-        sys.stderr.write("\n{0}\n\n".format(r))
+        sys.stderr.write("\n{0}\n\n".format(
+            colourise(r, "red", fileobj=sys.stderr))
+        )

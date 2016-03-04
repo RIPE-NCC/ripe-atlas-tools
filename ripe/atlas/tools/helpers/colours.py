@@ -14,6 +14,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+COLOURS_AVAILABLE = False
+try:
+    # We use curses to detect ANSI colour support
+    import curses
+except ImportError:
+    # Curses isn't available on all platforms
+    try:
+        import colorama  # Colorama wraps stdout/stderr on Windows
+    except ImportError:
+        pass
+    else:
+        colorama.init()
+        COLOURS_AVAILABLE = True
+else:
+    if sys.stdout.isatty():
+        curses.setupterm()
+        COLOURS_AVAILABLE = curses.tigetnum("colors") >= 8
 
 
 class Colour(object):
@@ -59,7 +76,14 @@ class Colour(object):
         return cls._colourise(text, 1)
 
 
-def colourise(text, colour):
-    if sys.stdout.isatty():
+def colourise(text, colour, fileobj=sys.stdout):
+    """
+    Return an ANSI escaped string of the specified content and colour, or
+    the input text if colour support is not available or not appropriate.
+
+    `fileobj` is used to determine whether the output is a terminal.
+    """
+    if COLOURS_AVAILABLE and fileobj.isatty():
         return getattr(Colour, colour)(text)
-    return text
+    else:
+        return text
