@@ -145,8 +145,7 @@ class TestProbesCommand(unittest.TestCase):
                     {"geometry": {"location": {"lat": 1, "lng": 2}}}]}
                 cmd = Command()
                 cmd.init_args(["--location", "blaaaa"])
-                self.assertEquals(cmd.build_request_args(), {
-                    "latitude": '1', "longitude": '2'})
+                self.assertEquals(cmd.build_request_args(), {'radius': '1,2:15'})
 
     def test_location_arg_with_radius(self):
         """User passed location arg"""
@@ -212,7 +211,7 @@ class TestProbesCommand(unittest.TestCase):
         cmd.init_args(["--center", "1,2"])
         self.assertEquals(
             cmd.build_request_args(),
-            {"latitude": "1", "longitude": "2"}
+            {"radius": "1,2:15"}
         )
 
     def test_center_arg_with_radius(self):
@@ -277,8 +276,7 @@ class TestProbesCommand(unittest.TestCase):
             self.assertEquals(cmd.build_request_args(), {
                 'asn': 3333,
                 'prefix_v4': '193.0.0.0/21',
-                'latitude': 1,
-                'longitude': 2
+                'radius': '1,2:15'
             })
 
     def test_sane_args3(self):
@@ -293,8 +291,7 @@ class TestProbesCommand(unittest.TestCase):
         self.assertEquals(cmd.build_request_args(), {
             'asn_v6': 3333,
             'prefix_v6': '2001:67c:2e8::/48',
-            'latitude': '1',
-            'longitude': '2'
+            'radius': '1,2:15'
         })
 
     def test_render_ids_only(self):
