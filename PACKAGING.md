@@ -41,9 +41,13 @@ After a great deal of help from #gentoo-proxy-maint, Daniel's pull requests were
 
 ### Status
 
-Apollon is working with the RIPE Atlas team to ensure that the package conforms
-to Debian standards and has volunteered to submit everything once it's ready.
+Apollon has imported the project to [debian tree](https://tracker.debian.org/pkg/ripe-atlas-tools).
 
+## Ubuntu
+
+### Status
+
+Apollon's work in debian has made it also to Ubuntu.
 
 ## Arch
 
@@ -71,7 +75,6 @@ support for Magellan, but so far no one has officially volunteered. The RIPE
 Atlas team is happy to assist anyone interested in porting this toolkit to any
 platform, but we're especially keen on at least getting into:
 
-* Ubuntu
 * Red Hat
 * CentOS
 
