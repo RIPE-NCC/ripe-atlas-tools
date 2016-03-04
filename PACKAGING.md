@@ -59,7 +59,7 @@ Wouter has added this project to [Arch's AUR repository](https://aur.archlinux.o
 
 ## Fedora 
 
-* * [Jan Včelák](https://github.com/vcelda)
+* [Jan Včelák](https://github.com/vcelda)
 
 ### Status 
 
