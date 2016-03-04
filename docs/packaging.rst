@@ -9,17 +9,17 @@ Currently Supported
 
 * OpenBSD
 * FreeBSD
+* Gentoo
+* Debian
+* Ubuntu
 
 In Progress
 -----------
 
-* `Gentoo Linux`_: Daniel Quinn has an `overlay`_ in development.
-* `Debian Linux`_: Apollon Oikonomopoulos is working with the RIPE Atlas team to
-  ensure that everything conforms to Debian standards.
+* Fedora: Jan Včelák is currently building the binary packages in `COPR`_ (which 
+will take some time as there is a lot of other packages in the queue)
 
-.. _`Gentoo Linux`: https://gentoo.org/
-.. _`overlay`: https://github.com/danielquinn/ripe-atlas-overlay
-.. _`Debian Linux`: https://www.debian.org/
+.. _`COPR`: https://copr.fedoraproject.org/coprs/jvcelak/ripe-atlas-tools/
 
 Additional Distributions
 ------------------------
