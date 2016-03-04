@@ -16,8 +16,7 @@ Currently Supported
 In Progress
 -----------
 
-* Fedora: Jan Včelák is currently building the binary packages in `COPR`_ (which 
-will take some time as there is a lot of other packages in the queue)
+* Fedora: Jan Včelák is currently building the binary packages in `COPR`_ (which will take some time as there is a lot of other packages in the queue)
 
 .. _`COPR`: https://copr.fedoraproject.org/coprs/jvcelak/ripe-atlas-tools/
 
