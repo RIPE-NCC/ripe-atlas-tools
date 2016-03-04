@@ -52,9 +52,10 @@ class Command(object):
     def get_available_commands():
         """
         Get a list of commands that we can execute.  By default, we have a
-        fixed that we make available in this directory, but the user can create
-        her own plugins and store them at ~/.config/ripe-atlas-tools/commands/.
-        If we find any files there, we add them to the list here.
+        fixed list that we make available in this directory, but the user can
+        create her own plugins and store them at
+        ~/.config/ripe-atlas-tools/commands/.  If we find any files there, we
+        add them to the list here.
         """
 
         paths = [os.path.dirname(__file__)]
