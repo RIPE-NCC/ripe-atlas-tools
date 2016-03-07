@@ -52,7 +52,7 @@ class Command(TabularFieldsMixin, BaseCommand):
     COLUMNS = {
         "id": ("<", 7),
         "type": ("<", 10),
-        "description": ("<", 45),
+        "description": ("<", 42),
         "status": (">", 18),
         "target": ("<", 45),
         "url": ("<", 45),
