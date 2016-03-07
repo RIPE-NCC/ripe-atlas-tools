@@ -2,11 +2,10 @@
 
 import importlib
 import os
-import pkgutil
 import re
 import sys
 
-from ripe.atlas.tools import commands
+from ripe.atlas.tools.commands.base import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 
 
@@ -17,32 +16,12 @@ class RipeAtlas(object):
         self.args = []
         self.kwargs = {}
 
-    @staticmethod
-    def _get_available_commands():
-        """
-        Get a list of commands that we can execute.  By default, we have a fixed
-        that we make available in this directory, but the user can create her
-        own plugins and store them at ~/.config/ripe-atlas-tools/commands/.  If
-        we find any files there, we add them to the list here.
-        """
-
-        paths = [os.path.dirname(commands.__file__)]
-
-        if "HOME" in os.environ:
-            paths += [os.path.join(
-                os.environ["HOME"], ".config", "ripe-atlas-tools", "commands")]
-
-        r = [package_name for _, package_name, _ in pkgutil.iter_modules(paths)]
-        r.remove("base")
-
-        return r
-
     def _setup_command(self):
 
         caller = os.path.basename(sys.argv[0])
         shortcut = re.match('^a(ping|traceroute|dig|sslcert|ntp|http)$', caller)
 
-        available_commands = self._get_available_commands()
+        available_commands = Command.get_available_commands()
         if shortcut:
             self.command = "measure"
             sys.argv.insert(1, self._translate_shortcut(shortcut.group(1)))
@@ -66,27 +45,25 @@ class RipeAtlas(object):
         self._setup_command()
 
         try:
-
             module = importlib.import_module(
                 "ripe.atlas.tools.commands.{}".format(self.command))
 
-            #
-            # If the imported module contains a `Factory` class, execute that
-            # to get the `cmd` we're going to use.  Otherwise, we expect there
-            # to be a `Command` class in there.
-            #
-
-            if hasattr(module, "Factory"):
-                cmd = module.Factory(*self.args, **self.kwargs).create()
-            else:
-                cmd = module.Command(*self.args, **self.kwargs)
-
-            cmd.init_args()
-            cmd.run()
-
         except ImportError:
-
             raise RipeAtlasToolsException("No such command.")
+
+        #
+        # If the imported module contains a `Factory` class, execute that
+        # to get the `cmd` we're going to use.  Otherwise, we expect there
+        # to be a `Command` class in there.
+        #
+
+        if hasattr(module, "Factory"):
+            cmd = module.Factory(*self.args, **self.kwargs).create()
+        else:
+            cmd = module.Command(*self.args, **self.kwargs)
+
+        cmd.init_args()
+        cmd.run()
 
 
 if __name__ == '__main__':

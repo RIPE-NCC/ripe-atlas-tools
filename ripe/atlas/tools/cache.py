@@ -19,7 +19,10 @@ except ImportError:
     import pickle
 
 import datetime
-import dbm
+try:
+    import anydbm as dbm  # anydbm py2.7 will use the best available dbm
+except ImportError:
+    import dbm  # ... and on Python3 dbm does the same
 import functools
 import os
 import sys

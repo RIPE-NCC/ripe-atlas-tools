@@ -27,7 +27,7 @@ class Configuration(object):
     """
 
     USER_CONFIG_DIR = os.path.join(
-        os.environ["HOME"], ".config", "ripe-atlas-tools")
+        os.path.expanduser("~"), ".config", "ripe-atlas-tools")
     USER_RC = os.path.join(USER_CONFIG_DIR, "rc")
 
     DEFAULT = {

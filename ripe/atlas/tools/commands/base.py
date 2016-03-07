@@ -13,12 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import datetime
+import argparse
 import os
+import pkgutil
 import re
 import six
 import sys
-import argparse
-from datetime import datetime
 
 from ..helpers.colours import colourise
 from ..version import __version__
@@ -46,6 +47,29 @@ class Command(object):
             prog="ripe-atlas {}".format(self.NAME)
         )
         self.user_agent = self._get_user_agent()
+
+    @staticmethod
+    def get_available_commands():
+        """
+        Get a list of commands that we can execute.  By default, we have a
+        fixed list that we make available in this directory, but the user can
+        create her own plugins and store them at
+        ~/.config/ripe-atlas-tools/commands/.  If we find any files there, we
+        add them to the list here.
+        """
+
+        paths = [os.path.dirname(__file__)]
+
+        paths += [os.path.join(
+            os.path.expanduser("~"), ".config", "ripe-atlas-tools", "commands"
+        )]
+
+        r = [
+            package_name for _, package_name, _ in pkgutil.iter_modules(paths)
+        ]
+        r.remove("base")
+
+        return r
 
     def init_args(self, args=None):
         """
@@ -89,7 +113,8 @@ class Command(object):
         return args
 
     def ok(self, message):
-        sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
+        if sys.stdout.isatty():
+            sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
 
     @staticmethod
     def _get_user_agent():
