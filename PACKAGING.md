@@ -68,6 +68,14 @@ In progress: https://github.com/fcelda/fedora-ripe-atlas-tools
 Jan is currently building the binary packages in COPR (which will take some time as there is a lot of other packages in the queue):
 https://copr.fedoraproject.org/coprs/jvcelak/ripe-atlas-tools/
 
+## Windows
+
+* [Chris Amin](https://github.com/chrisamin)
+
+### Status
+
+A highly experimental self-contained installer is available at https://github.com/chrisamin/ripe-atlas-tools-win32/. This installer doesn't require the presence of a system Python installation.
+
 ## Other Platforms
 
 We've been talking with members of the community about expanding the package
