@@ -4,7 +4,7 @@ Requirements & Installation
 ***************************
 
 This is a Linux-based tool, though it should work just fine in a BSD variant.
-Windows is definitely not supported.  In terms of the actual installation,
+Windows is experimentally supported.  In terms of the actual installation,
 only Python's package manager (``pip``) is currently supported, and the
 installation process may require some system packages to be installed in order
 for everything to work.
