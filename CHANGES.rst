@@ -1,6 +1,17 @@
 Release History
 ===============
 
+1.2.3 (released 2016-03-08)
+---------------------------
+
+Changes
+~~~~~~~
+- Usage of newest Cousteau/Sagan library.
+- Support of API keys for fetching results on report command.
+- Default radius for probes filtering is changed to 15.
+- Several changes for supporting Windows.
+
+
 1.2.2 (released 2016-01-13)
 ---------------------------
 
