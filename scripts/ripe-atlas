@@ -44,13 +44,23 @@ class RipeAtlas(object):
 
         self._setup_command()
 
+        module_name = "ripe.atlas.tools.commands.{}".format(self.command)
+
         try:
-            module = importlib.import_module(
-                "ripe.atlas.tools.commands.{}".format(self.command))
+            module = importlib.import_module(module_name)
 
-        except ImportError:
-            raise RipeAtlasToolsException("No such command.")
-
+        except ImportError as exc:
+            if hasattr(exc, "name"):
+                # Python 3.3+, exc.name will be the full module path
+                is_command_module = exc.name == module_name
+            else:
+                # Python 2.7, message will contain the final part of the path
+                is_command_module = exc.args[0].rsplit(
+                    " ", 1)[-1] == self.command
+            if is_command_module:
+                raise RipeAtlasToolsException("No such command.")
+            else:
+                raise  # We're missing a dependency
         #
         # If the imported module contains a `Factory` class, execute that
         # to get the `cmd` we're going to use.  Otherwise, we expect there
