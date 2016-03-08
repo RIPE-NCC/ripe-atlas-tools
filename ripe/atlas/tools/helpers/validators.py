@@ -93,6 +93,16 @@ class ArgumentType(object):
                 "consists of a single integer."
             )
 
+    @staticmethod
+    def tag(string):
+        pattern = re.compile("^[a-z_\-0-9]+$")
+
+        if not pattern.match(string):
+            raise argparse.ArgumentTypeError(
+                '"{}" does not appear to be a valid tag.'.format(string))
+
+        return string
+
     class integer_range(object):
 
         def __init__(self, minimum=float("-inf"), maximum=float("inf")):

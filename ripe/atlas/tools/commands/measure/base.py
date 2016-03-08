@@ -189,7 +189,7 @@ class Command(BaseCommand):
         )
         self.parser.add_argument(
             "--include-tag",
-            type=ArgumentType.regex(r"^[a-z_\-]+$"),
+            type=ArgumentType.tag,
             action="append",
             metavar="TAG",
             help="Include only probes that are marked with these tags. "
@@ -197,7 +197,7 @@ class Command(BaseCommand):
         )
         self.parser.add_argument(
             "--exclude-tag",
-            type=ArgumentType.regex(r"^[a-z_\-]+$"),
+            type=ArgumentType.tag,
             action="append",
             metavar="TAG",
             help="Exclude probes that are marked with these tags. "

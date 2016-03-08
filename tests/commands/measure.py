@@ -796,7 +796,7 @@ class TestMeasureCommand(unittest.TestCase):
                     self.assertEqual(
                         stderr.getvalue().split("\n")[-2],
                         'ripe-atlas measure: error: argument --{}clude-tag: '
-                        '"{}" does not appear to be valid.'.format(clude, tag)
+                        '"{}" does not appear to be a valid tag.'.format(clude, tag)
                     )
 
         with capture_sys_output() as (stdout, stderr):
