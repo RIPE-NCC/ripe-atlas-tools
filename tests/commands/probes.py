@@ -106,6 +106,10 @@ class TestProbesCommand(unittest.TestCase):
                 cmd = Command()
                 cmd.init_args(["--radius", "blaaaaa"])
                 cmd.run()
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--tag", "inv@lid"])
+                cmd.run()
 
     def test_location_google_breaks(self):
         """User passed location arg but google api gave error"""
@@ -246,6 +250,22 @@ class TestProbesCommand(unittest.TestCase):
                 cmd = Command()
                 cmd.init_args(["--status", "4"])
                 cmd.run()
+
+    def test_sane_tags(self):
+        """Sane tags"""
+        cmd = Command()
+        cmd.init_args(["--tag", "native-ipv6"])
+        self.assertEquals(
+            cmd.build_request_args(),
+            {"tags": "native-ipv6"}
+        )
+
+        cmd = Command()
+        cmd.init_args(["--tag", "native-ipv6", "--tag", "system-ipv4-works"])
+        self.assertEquals(
+            cmd.build_request_args(),
+            {"tags": "native-ipv6,system-ipv4-works"}
+        )
 
     def test_sane_args1(self):
         """User passed several arguments (1)"""

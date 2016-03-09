@@ -26,6 +26,7 @@ from .base import Command as BaseCommand, TabularFieldsMixin
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
+from ..helpers.validators import ArgumentType
 
 
 class Command(TabularFieldsMixin, BaseCommand):
@@ -117,6 +118,18 @@ class Command(TabularFieldsMixin, BaseCommand):
             type=int,
             default=15,
             help="Radius in km from specified center/point. Default is 15."
+        )
+
+        self.parser.add_argument(
+            "--tag",
+            type=ArgumentType.tag,
+            action="append",
+            metavar="TAG",
+            help="Include only probes that are marked with these tags. "
+                 "Use --tag multiple times to filter on the basis of more "
+                 "than one tag. "
+                 "Example: --tag system-ipv6-works --tag system-ipv4-works",
+            dest="tags"
         )
 
         self.parser.add_argument(
@@ -300,6 +313,9 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         if self.arguments.status is not None:
             args.update({"status": self.arguments.status})
+
+        if self.arguments.tags:
+            args.update({"tags": ",".join(self.arguments.tags)})
 
         return args
 
