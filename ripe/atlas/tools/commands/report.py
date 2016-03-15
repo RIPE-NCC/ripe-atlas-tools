@@ -33,8 +33,11 @@ class Command(BaseCommand):
 
     NAME = "report"
 
-    DESCRIPTION = "Report the results of a measurement.\n\nExample:\n" \
-                  "  ripe-atlas report 1001 --probes 157,10006\n"
+    DESCRIPTION = "Report the results of an already created measurement"
+    EXTRA_DESCRIPTION = (
+        "Example:\n"
+        "  ripe-atlas report 1001 --probes 157,10006"
+    )
 
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],

@@ -31,11 +31,11 @@ from ..helpers.validators import ArgumentType
 
 class Command(TabularFieldsMixin, BaseCommand):
 
-    NAME = "probes"
+    NAME = "probe-search"
 
     DESCRIPTION = (
-        "Fetches and prints probes fulfilling specified criteria based on "
-        "given filters."
+        "Fetch and print probes fulfilling specified criteria based on "
+        "given filters"
     )
 
     # Column name: (alignment, width)

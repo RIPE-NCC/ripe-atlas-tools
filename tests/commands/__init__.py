@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .measure import TestMeasureCommand
-from .measurements import TestMeasurementsCommand
-from .probes import TestProbesCommand
+from .measurement_search import TestMeasurementsCommand
+from .probe_search import TestProbesCommand
 from .report import TestReportCommand
 
 __all__ = [

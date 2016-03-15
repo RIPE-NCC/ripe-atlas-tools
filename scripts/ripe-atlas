@@ -1,38 +1,75 @@
 #!/usr/bin/env python
 
-import importlib
 import os
 import re
 import sys
 
-from ripe.atlas.tools.commands.base import Command
+from ripe.atlas.tools.commands.base import Command, Factory
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
+from ripe.atlas.tools.helpers.colours import colourise
 
 
 class RipeAtlas(object):
+
+    DEPRECATED_ALIASES = {
+        "measurement": "measurement-info",
+        "measurements": "measurement-search",
+        "probe": "probe-info",
+        "probes": "probe-search",
+    }
 
     def __init__(self):
         self.command = None
         self.args = []
         self.kwargs = {}
 
+    def _show_usage(self):
+        usage = "Usage: ripe-atlas <command> [arguments]\n\n"
+        usage += "Commands:\n"
+        longest_command = 0
+        classes = []
+        for c in Command.get_available_commands():
+            if c == "shibboleet":
+                continue
+            cmd_class = Command.load_command_class(c)
+            classes.append(cmd_class)
+            cmd_name = cmd_class.get_name()
+            if len(cmd_name) > longest_command:
+                longest_command = len(cmd_name)
+        for cmd_cls in classes:
+            usage += "\t{} {}\n".format(
+                cmd_cls.get_name().ljust(longest_command + 1),
+                cmd_cls.DESCRIPTION,
+            )
+        usage += (
+            "\nFor help on a particular command, try "
+            "ripe-atlas <command> --help"
+        )
+        raise RipeAtlasToolsException(usage)
+
     def _setup_command(self):
 
         caller = os.path.basename(sys.argv[0])
         shortcut = re.match('^a(ping|traceroute|dig|sslcert|ntp|http)$', caller)
 
-        available_commands = Command.get_available_commands()
         if shortcut:
             self.command = "measure"
             sys.argv.insert(1, self._translate_shortcut(shortcut.group(1)))
         else:
             if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
-                raise RipeAtlasToolsException(
-                    "Usage: ripe-atlas <{}> [arguments]".format(
-                        "|".join(set(available_commands) - {"shibboleet"})
-                    )
-                )
-            self.command = sys.argv.pop(1)
+                self._show_usage()
+            cmd_name = sys.argv.pop(1)
+            if cmd_name in self.DEPRECATED_ALIASES:
+                alias = cmd_name
+                self.command = self.DEPRECATED_ALIASES[alias]
+                sys.stderr.write(colourise(
+                    "Warning: {} is a deprecated alias for {}\n\n".format(
+                        alias, self.command,
+                    ),
+                    "yellow"
+                ))
+            else:
+                self.command = cmd_name
 
     @staticmethod
     def _translate_shortcut(shortcut):
@@ -44,33 +81,22 @@ class RipeAtlas(object):
 
         self._setup_command()
 
-        module_name = "ripe.atlas.tools.commands.{}".format(self.command)
+        cmd_cls = Command.load_command_class(self.command)
 
-        try:
-            module = importlib.import_module(module_name)
+        if cmd_cls is None:
+            # Module containing the command class wasn't found
+            raise RipeAtlasToolsException("No such command")
 
-        except ImportError as exc:
-            if hasattr(exc, "name"):
-                # Python 3.3+, exc.name will be the full module path
-                is_command_module = exc.name == module_name
-            else:
-                # Python 2.7, message will contain the final part of the path
-                is_command_module = exc.args[0].rsplit(
-                    " ", 1)[-1] == self.command
-            if is_command_module:
-                raise RipeAtlasToolsException("No such command.")
-            else:
-                raise  # We're missing a dependency
         #
         # If the imported module contains a `Factory` class, execute that
         # to get the `cmd` we're going to use.  Otherwise, we expect there
         # to be a `Command` class in there.
         #
 
-        if hasattr(module, "Factory"):
-            cmd = module.Factory(*self.args, **self.kwargs).create()
+        if issubclass(cmd_cls, Factory):
+            cmd = cmd_cls(*self.args, **self.kwargs).create()
         else:
-            cmd = module.Command(*self.args, **self.kwargs)
+            cmd = cmd_cls(*self.args, **self.kwargs)
 
         cmd.init_args()
         cmd.run()
