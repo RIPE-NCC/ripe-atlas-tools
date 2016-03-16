@@ -23,7 +23,7 @@ class RipeAtlas(object):
         self.args = []
         self.kwargs = {}
 
-    def _show_usage(self):
+    def _generate_usage(self):
         usage = "Usage: ripe-atlas <command> [arguments]\n\n"
         usage += "Commands:\n"
         longest_command = 0
@@ -45,7 +45,7 @@ class RipeAtlas(object):
             "\nFor help on a particular command, try "
             "ripe-atlas <command> --help"
         )
-        raise RipeAtlasToolsException(usage)
+        return usage
 
     def _setup_command(self):
 
@@ -57,7 +57,7 @@ class RipeAtlas(object):
             sys.argv.insert(1, self._translate_shortcut(shortcut.group(1)))
         else:
             if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
-                self._show_usage()
+                raise RipeAtlasToolsException(self._generate_usage())
             cmd_name = sys.argv.pop(1)
             if cmd_name in self.DEPRECATED_ALIASES:
                 alias = cmd_name
