@@ -27,8 +27,10 @@ class Command(BaseCommand):
 
     EDITOR = os.environ.get("EDITOR", "/usr/bin/vim")
     DESCRIPTION = "Adjust or initialize configuration options"
-    EXTRA_DESCRIPTION = "As an alternative to this command, you " \
-                  "can just create/edit {}".format(Configuration.USER_RC)
+    EXTRA_DESCRIPTION = (
+        "As an alternative to this command, you can just create/edit {}"
+        .format(Configuration.USER_RC)
+    )
 
     def add_arguments(self):
         self.parser.add_argument(
