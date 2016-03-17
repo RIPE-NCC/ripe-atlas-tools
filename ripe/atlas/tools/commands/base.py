@@ -46,6 +46,13 @@ class Command(object):
     DESCRIPTION = ""  # Define this in the subclass
     _commands = None
 
+    DEPRECATED_ALIASES = {
+        "measurement": "measurement-info",
+        "measurements": "measurement-search",
+        "probe": "probe-info",
+        "probes": "probe-search",
+    }
+
     def __init__(self, *args, **kwargs):
 
         self.arguments = None
@@ -63,25 +70,38 @@ class Command(object):
     def get_name(cls):
         return _get_command_name(cls)
 
+    @staticmethod
+    def _get_packages_for_paths(paths):
+        """
+        Yield path, package_name for all of the packages found in `paths`.
+        """
+        for loader, package_name, _ in pkgutil.iter_modules(paths):
+            yield loader.path, package_name
+
     @classmethod
-    def _load_commands(cls):
-        builtin_path = os.path.dirname(__file__)
+    def _get_user_command_path(cls):
         user_base_path = os.path.join(
             os.path.expanduser("~"), ".config", "ripe-atlas-tools",
         )
-        user_command_path = os.path.join(user_base_path, "commands")
+        return os.path.join(user_base_path, "commands")
+
+    @classmethod
+    def _load_commands(cls):
+        """
+        Scan for available commands and store a map of command names to module
+        paths.
+        """
+        builtin_path = os.path.dirname(__file__)
+        user_command_path = cls._get_user_command_path()
 
         cls._commands = {}
 
-        for loader, package_name, _ in pkgutil.iter_modules(
-                [builtin_path, user_command_path]
-        ):
+        paths = [builtin_path, user_command_path]
+        for path, package_name in cls._get_packages_for_paths(paths):
             if package_name == "base":
                 continue
-            if loader.path == builtin_path:
-                module = "ripe.atlas.tools.commands.{}".format(
-                    package_name
-                )
+            if path == builtin_path:
+                module = "ripe.atlas.tools.commands.{}".format(package_name)
             else:
                 module = package_name
                 if user_command_path not in sys.path:
@@ -93,8 +113,19 @@ class Command(object):
         """
         Get the Command or Factory with the given command name.
         """
+        if command_name in cls.DEPRECATED_ALIASES:
+            alias = command_name
+            command_name = cls.DEPRECATED_ALIASES[alias]
+            sys.stderr.write(colourise(
+                "Warning: {} is a deprecated alias for {}\n\n".format(
+                    alias, command_name,
+                ),
+                "yellow"
+            ))
+
         if cls._commands is None:
             cls._load_commands()
+
         try:
             module_name = cls._commands[command_name.replace("-", "_")]
         except KeyError:

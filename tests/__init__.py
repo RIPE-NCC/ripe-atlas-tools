@@ -18,7 +18,8 @@ from .commands import (
     TestProbesCommand,
     TestMeasureCommand,
     TestMeasurementsCommand,
-    TestReportCommand
+    TestReportCommand,
+    TestCommandLoading,
 )
 from .helpers import TestArgumentTypeHelper
 from .renderers import (
@@ -36,6 +37,7 @@ __all__ = [
     TestMeasureCommand,
     TestMeasurementsCommand,
     TestReportCommand,
+    TestCommandLoading,
     TestArgumentTypeHelper,
     TestPingRenderer,
     TestHttpRenderer,

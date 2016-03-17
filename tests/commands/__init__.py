@@ -17,10 +17,12 @@ from .measure import TestMeasureCommand
 from .measurement_search import TestMeasurementsCommand
 from .probe_search import TestProbesCommand
 from .report import TestReportCommand
+from .loading import TestCommandLoading
 
 __all__ = [
     TestMeasureCommand,
     TestMeasurementsCommand,
     TestProbesCommand,
-    TestReportCommand
+    TestReportCommand,
+    TestCommandLoading,
 ]

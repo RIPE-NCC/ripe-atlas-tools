@@ -11,13 +11,6 @@ from ripe.atlas.tools.helpers.colours import colourise
 
 class RipeAtlas(object):
 
-    DEPRECATED_ALIASES = {
-        "measurement": "measurement-info",
-        "measurements": "measurement-search",
-        "probe": "probe-info",
-        "probes": "probe-search",
-    }
-
     def __init__(self):
         self.command = None
         self.args = []
@@ -58,18 +51,7 @@ class RipeAtlas(object):
         else:
             if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
                 raise RipeAtlasToolsException(self._generate_usage())
-            cmd_name = sys.argv.pop(1)
-            if cmd_name in self.DEPRECATED_ALIASES:
-                alias = cmd_name
-                self.command = self.DEPRECATED_ALIASES[alias]
-                sys.stderr.write(colourise(
-                    "Warning: {} is a deprecated alias for {}\n\n".format(
-                        alias, self.command,
-                    ),
-                    "yellow"
-                ))
-            else:
-                self.command = cmd_name
+            self.command = sys.argv.pop(1)
 
     @staticmethod
     def _translate_shortcut(shortcut):
