@@ -7,7 +7,6 @@ import sys
 import StringIO
 
 from ripe.atlas.tools.commands.base import Command
-import ripe.atlas.tools.commands
 
 
 USER_COMMAND = """
@@ -19,11 +18,6 @@ class Command(BaseCommand):
 
 
 class TestCommandLoading(unittest.TestCase):
-    user_dir = os.path.join(
-        os.path.expanduser("~"), ".config", "ripe-atlas-tools", "commands"
-    )
-    command_dir = os.path.dirname(ripe.atlas.tools.commands.__file__)
-
     expected_builtins = [
         "configure",
         "go",
