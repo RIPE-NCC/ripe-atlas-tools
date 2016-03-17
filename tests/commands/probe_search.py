@@ -17,12 +17,15 @@ import mock
 import unittest
 import requests
 
-from ripe.atlas.tools.commands.probes import Command
+from ripe.atlas.tools.commands.probe_search import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.cousteau import Probe
 from ripe.atlas.tools.aggregators import ValueKeyAggregator
 
 from ..base import capture_sys_output
+
+
+COMMAND_MODULE = "ripe.atlas.tools.commands.probe_search"
 
 
 class FakeGen(object):
@@ -291,7 +294,7 @@ class TestProbesCommand(unittest.TestCase):
             "--prefixv4", "193.0.0.0/21"
         ])
 
-        path = 'ripe.atlas.tools.commands.probes.Command.location2degrees'
+        path = '{}.Command.location2degrees'.format(COMMAND_MODULE)
         with mock.patch(path) as mock_get:
             mock_get.return_value = (1, 2)
             self.assertEquals(cmd.build_request_args(), {
@@ -324,7 +327,7 @@ class TestProbesCommand(unittest.TestCase):
         ])
 
         with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            path = '{}.ProbeRequest'.format(COMMAND_MODULE)
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
@@ -340,7 +343,7 @@ class TestProbesCommand(unittest.TestCase):
         ])
 
         with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            path = '{}.ProbeRequest'.format(COMMAND_MODULE)
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
@@ -358,7 +361,7 @@ class TestProbesCommand(unittest.TestCase):
         ])
 
         with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            path = '{}.ProbeRequest'.format(COMMAND_MODULE)
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
@@ -393,7 +396,7 @@ class TestProbesCommand(unittest.TestCase):
         ])
 
         with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            path = '{}.ProbeRequest'.format(COMMAND_MODULE)
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
@@ -424,7 +427,7 @@ class TestProbesCommand(unittest.TestCase):
         ])
 
         with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            path = 'ripe.atlas.tools.commands.probe_search.ProbeRequest'
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
@@ -454,7 +457,7 @@ class TestProbesCommand(unittest.TestCase):
         ])
 
         with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            path = '{}.ProbeRequest'.format(COMMAND_MODULE)
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
@@ -503,7 +506,7 @@ class TestProbesCommand(unittest.TestCase):
         ])
 
         with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            path = '{}.ProbeRequest'.format(COMMAND_MODULE)
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
@@ -540,7 +543,7 @@ class TestProbesCommand(unittest.TestCase):
         ])
 
         with capture_sys_output() as (stdout, stderr):
-            path = 'ripe.atlas.tools.commands.probes.ProbeRequest'
+            path = '{}.ProbeRequest'.format(COMMAND_MODULE)
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()

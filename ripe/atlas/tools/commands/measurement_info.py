@@ -26,9 +26,9 @@ from ..helpers.sanitisers import sanitise
 
 class Command(MetaDataMixin, BaseCommand):
 
-    NAME = "measurement"
+    NAME = "measurement-info"
     DESCRIPTION = (
-        "Returns the meta data for one measurement"
+        "Return the meta data for one measurement"
     )
 
     def add_arguments(self):

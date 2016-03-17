@@ -29,7 +29,9 @@ class Command(BaseCommand):
 
     NAME = "stream"
 
-    DESCRIPTION = "Report the results of a measurement"
+    DESCRIPTION = (
+        "Output the results of a measurement as they become available"
+    )
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
     }

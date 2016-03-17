@@ -37,8 +37,14 @@ class Command(BaseCommand):
 
     NAME = "render"
 
-    DESCRIPTION = "Render the contents of an arbitrary file.\n\nExample:\n" \
-                  "  cat /my/file | ripe-atlas render\n"
+    DESCRIPTION = (
+        "Render measurement results from a file or standard input"
+    )
+
+    EXTRA_DESCRIPTION = (
+        "Example:\n"
+        "  cat /my/file | ripe-atlas render\n"
+    )
 
     AGGREGATORS = {
         "country": ["probe.country_code", ValueKeyAggregator],

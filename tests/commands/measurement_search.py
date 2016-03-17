@@ -23,9 +23,11 @@ try:
 except ImportError:
     import mock
 
-from ripe.atlas.tools.commands.measurements import Command
+from ripe.atlas.tools.commands.measurement_search import Command
 
 from ..base import capture_sys_output
+
+COMMAND_MODULE = "ripe.atlas.tools.commands.measurement_search"
 
 
 class FakeGen(object):
@@ -84,7 +86,7 @@ class FakeGen(object):
 
 class TestMeasurementsCommand(unittest.TestCase):
 
-    @mock.patch("ripe.atlas.tools.commands.measurements.MeasurementRequest")
+    @mock.patch("{}.MeasurementRequest".format(COMMAND_MODULE))
     def test_with_empty_args(self, mock_request):
 
         mock_request.return_value = FakeGen()
@@ -114,7 +116,7 @@ class TestMeasurementsCommand(unittest.TestCase):
         self.assertEqual(
             cmd.arguments.field, ("id", "type", "description", "status"))
 
-    @mock.patch("ripe.atlas.tools.commands.measurements.MeasurementRequest")
+    @mock.patch("{}.MeasurementRequest".format(COMMAND_MODULE))
     def test_get_line_items(self, mock_request):
 
         mock_request.return_value = FakeGen()

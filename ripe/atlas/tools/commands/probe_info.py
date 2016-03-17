@@ -26,8 +26,8 @@ from ..helpers.sanitisers import sanitise
 
 class Command(MetaDataMixin, BaseCommand):
 
-    NAME = "probe"
-    DESCRIPTION = "Returns the meta data for one probe"
+    NAME = "probe-info"
+    DESCRIPTION = "Return the meta data for one probe"
 
     def add_arguments(self):
         self.parser.add_argument("id", type=int, help="The probe id")

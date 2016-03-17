@@ -37,6 +37,7 @@ class Factory(BaseFactory):
         "http": HttpMeasureCommand,
         "ntp": NtpMeasureCommand,
     }
+    DESCRIPTION = "Create a measurement and wait for the results"
 
     def __init__(self):
 
@@ -55,7 +56,13 @@ class Factory(BaseFactory):
             (len(sys.argv) == 2 and sys.argv[1] in ("--help", "-h"))
         ):
             log = (
-                "For extended options for a specific measurement type, "
+                "Usage: ripe-atlas measure <type> [arguments]\n\n"
+                "Types:\n"
+            )
+            for type_ in sorted(self.TYPES):
+                log += "\t{}\n".format(type_)
+            log += (
+                "\nFor extended options for a specific measurement type, "
                 "try ripe-atlas measure <type> --help."
             )
         # cases: ripe-atlas measure bla

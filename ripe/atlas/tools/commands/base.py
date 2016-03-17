@@ -15,6 +15,7 @@
 
 from datetime import datetime
 import argparse
+import importlib
 import os
 import pkgutil
 import re
@@ -33,23 +34,114 @@ class RipeHelpFormatter(argparse.RawTextHelpFormatter):
         return "\n\n{}\n".format(r)
 
 
-class Command(object):
+def _get_command_name(cmd_or_factory):
+    return cmd_or_factory.NAME if cmd_or_factory.NAME else \
+        cmd_or_factory.__module__.rsplit(".", 1)[-1]
 
-    NAME = ""
+
+class Command(object):
+    # If NAME isn't defined then the module name is used
+    # It exists basically to allow hyphens in the command names
+    NAME = None
     DESCRIPTION = ""  # Define this in the subclass
+    _commands = None
+
+    DEPRECATED_ALIASES = {
+        "measurement": "measurement-info",
+        "measurements": "measurement-search",
+        "probe": "probe-info",
+        "probes": "probe-search",
+    }
 
     def __init__(self, *args, **kwargs):
 
         self.arguments = None
         self.parser = argparse.ArgumentParser(
             formatter_class=RipeHelpFormatter,
-            description=self.DESCRIPTION,
-            prog="ripe-atlas {}".format(self.NAME)
+            description="\n\n".join([
+                self.DESCRIPTION + ".",
+                getattr(self, "EXTRA_DESCRIPTION", ""),
+            ]),
+            prog="ripe-atlas {}".format(self.get_name())
         )
         self.user_agent = self._get_user_agent()
 
+    @classmethod
+    def get_name(cls):
+        return _get_command_name(cls)
+
     @staticmethod
-    def get_available_commands():
+    def _get_packages_for_paths(paths):
+        """
+        Yield path, package_name for all of the packages found in `paths`.
+        """
+        for loader, package_name, _ in pkgutil.iter_modules(paths):
+            yield loader.path, package_name
+
+    @classmethod
+    def _get_user_command_path(cls):
+        user_base_path = os.path.join(
+            os.path.expanduser("~"), ".config", "ripe-atlas-tools",
+        )
+        return os.path.join(user_base_path, "commands")
+
+    @classmethod
+    def _load_commands(cls):
+        """
+        Scan for available commands and store a map of command names to module
+        paths.
+        """
+        builtin_path = os.path.dirname(__file__)
+        user_command_path = cls._get_user_command_path()
+
+        cls._commands = {}
+
+        paths = [builtin_path, user_command_path]
+        for path, package_name in cls._get_packages_for_paths(paths):
+            if package_name == "base":
+                continue
+            if path == builtin_path:
+                module = "ripe.atlas.tools.commands.{}".format(package_name)
+            else:
+                module = package_name
+                if user_command_path not in sys.path:
+                    sys.path.append(user_command_path)
+            cls._commands[package_name] = module
+
+    @classmethod
+    def load_command_class(cls, command_name):
+        """
+        Get the Command or Factory with the given command name.
+        """
+        if command_name in cls.DEPRECATED_ALIASES:
+            alias = command_name
+            command_name = cls.DEPRECATED_ALIASES[alias]
+            sys.stderr.write(colourise(
+                "Warning: {} is a deprecated alias for {}\n\n".format(
+                    alias, command_name,
+                ),
+                "yellow"
+            ))
+
+        if cls._commands is None:
+            cls._load_commands()
+
+        try:
+            module_name = cls._commands[command_name.replace("-", "_")]
+        except KeyError:
+            return
+
+        module = importlib.import_module(module_name)
+
+        if hasattr(module, "Factory"):
+            cmd = module.Factory
+        else:
+            cmd = module.Command
+
+        return cmd
+
+    @classmethod
+    def get_available_commands(cls):
         """
         Get a list of commands that we can execute.  By default, we have a
         fixed list that we make available in this directory, but the user can
@@ -57,19 +149,10 @@ class Command(object):
         ~/.config/ripe-atlas-tools/commands/.  If we find any files there, we
         add them to the list here.
         """
+        if not cls._commands:
+            cls._load_commands()
 
-        paths = [os.path.dirname(__file__)]
-
-        paths += [os.path.join(
-            os.path.expanduser("~"), ".config", "ripe-atlas-tools", "commands"
-        )]
-
-        r = [
-            package_name for _, package_name, _ in pkgutil.iter_modules(paths)
-        ]
-        r.remove("base")
-
-        return r
+        return sorted(cls._commands.keys())
 
     def init_args(self, args=None):
         """
@@ -226,7 +309,12 @@ class MetaDataMixin(object):
 
 
 class Factory(object):
+    NAME = None
 
     @classmethod
     def build(cls, *args, **kwargs):
         return object()
+
+    @classmethod
+    def get_name(cls):
+        return _get_command_name(cls)

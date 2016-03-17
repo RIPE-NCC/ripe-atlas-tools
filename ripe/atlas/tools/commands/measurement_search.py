@@ -27,7 +27,7 @@ from ..helpers.validators import ArgumentType
 
 class Command(TabularFieldsMixin, BaseCommand):
 
-    NAME = "measurements"
+    NAME = "measurement-search"
     LIMITS = (1, 1000)
 
     STATUS_SPECIFIED = 0
@@ -59,8 +59,8 @@ class Command(TabularFieldsMixin, BaseCommand):
     }
 
     DESCRIPTION = (
-        "Fetches and prints measurements fulfilling specified criteria based "
-        "on given filters."
+        "Fetch and print measurements fulfilling specified criteria based "
+        "on given filters"
     )
 
     def add_arguments(self):
