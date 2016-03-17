@@ -4,7 +4,12 @@ import unittest
 import tempfile
 import shutil
 import sys
-import StringIO
+# Python 2.7 does have io.StringIO but StringIO. is more liberal regarding str
+# versus unicode inputs to write()
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from ripe.atlas.tools.commands.base import Command
 
@@ -89,7 +94,7 @@ class TestCommandLoading(unittest.TestCase):
 
         # Check that each alias is loaded correctly and outputs a warning
         stderr = sys.stderr
-        sys.stderr = StringIO.StringIO()
+        sys.stderr = StringIO()
         try:
             for alias, cmd_name in aliases:
                 sys.stderr.truncate()
