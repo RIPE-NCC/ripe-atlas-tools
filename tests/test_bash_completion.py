@@ -31,7 +31,7 @@ class BashCompletionTests(unittest.TestCase):
             cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=envs
         )
         output, error = process.communicate()
-        return output, error
+        return output.decode("utf-8"), error.decode("utf-8")
 
     def test_commands_completion(self):
         """Tests autocompletion of commands."""
