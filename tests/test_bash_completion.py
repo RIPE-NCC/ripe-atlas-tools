@@ -67,4 +67,4 @@ class BashCompletionTests(unittest.TestCase):
         """Tests autocompletion of specific option of a command."""
         input_str = " report --h"
         output, _ = self._autocomplete(input_str)
-        self.assertEquals(output, "--help")
+        self.assertEqual(output, "--help")
