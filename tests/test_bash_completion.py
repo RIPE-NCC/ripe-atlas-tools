@@ -58,7 +58,8 @@ class BashCompletionTests(unittest.TestCase):
     def test_options_completion(self):
         """Tests autocompletion of existing options for a command."""
         input_str = " report "
-        output, _ = self._autocomplete(input_str)
+        output, error = self._autocomplete(input_str)
+        print output, error
         output = output.strip().split('\n')
         for item in output:
             self.assertTrue(item.startswith('--'))
@@ -66,5 +67,6 @@ class BashCompletionTests(unittest.TestCase):
     def test_option_completion(self):
         """Tests autocompletion of specific option of a command."""
         input_str = " report --h"
-        output, _ = self._autocomplete(input_str)
+        output, error = self._autocomplete(input_str)
+        print output, error
         self.assertEqual(output, "--help")
