@@ -15,8 +15,6 @@
 
 from __future__ import print_function, absolute_import
 
-import sys
-
 from ...exceptions import RipeAtlasToolsException
 from ..base import Factory as BaseFactory
 from .ping import PingMeasureCommand
@@ -39,11 +37,12 @@ class Factory(BaseFactory):
     }
     DESCRIPTION = "Create a measurement and wait for the results"
 
-    def __init__(self):
+    def __init__(self, sys_args):
 
         self.build_class = None
-        if len(sys.argv) >= 2:
-            self.build_class = self.TYPES.get(sys.argv[1].lower())
+        self.sys_args = sys_args
+        if len(self.sys_args) >= 2:
+            self.build_class = self.TYPES.get(self.sys_args[1].lower())
 
         if not self.build_class:
             self.raise_log()
@@ -52,8 +51,8 @@ class Factory(BaseFactory):
         """Depending on the input raise with different log message."""
         # cases: 1) ripe-atlas measure 2) ripe-atlas measure --help/-h
         if (
-            len(sys.argv) == 1 or
-            (len(sys.argv) == 2 and sys.argv[1] in ("--help", "-h"))
+            len(self.sys_args) == 1 or
+            (len(self.sys_args) == 2 and self.sys_args[1] in ("--help", "-h"))
         ):
             log = (
                 "Usage: ripe-atlas measure <type> [arguments]\n\n"
