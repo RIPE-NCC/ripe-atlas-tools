@@ -67,7 +67,7 @@ class RipeAtlas(object):
 
     def autocomplete(self):
         """
-        This function and it's is highly inspired from Django's own autocomplete
+        This function is highly inspired from Django's own autocomplete
         manage.py. For more documentation check
         https://github.com/django/django/blob/1.9.4/django/core/management/__init__.py#L198-L270
         """
