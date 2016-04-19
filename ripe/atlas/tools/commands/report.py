@@ -16,13 +16,16 @@
 from __future__ import print_function
 
 import sys
-import json
+try:
+    import usjon as json
+except ImportError:
+    import json
 import itertools
 
 from ripe.atlas.sagan import Result
 from ripe.atlas.cousteau import (
-    AtlasLatestRequest, AtlasResultsRequest, Measurement)
-from ripe.atlas.cousteau.exceptions import APIResponseError
+    AtlasLatestRequest, AtlasResultsRequest
+)
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
@@ -161,7 +164,7 @@ class Command(BaseCommand):
                 "measurement_id, not both."
             )
         if self.arguments.measurement_id:
-            results, measurement_type = self._get_results_from_api(
+            results, sample = self._get_results_from_api(
                 self.arguments.measurement_id
             )
             use_regular_file = False
@@ -174,10 +177,11 @@ class Command(BaseCommand):
             else:
                 use_regular_file = False
 
-            results, measurement_type = self._get_results_from_file(
+            results, sample = self._get_results_from_file(
                 use_regular_file
             )
 
+        measurement_type = Result.get(sample).type.lower()
         renderer = Renderer.get_renderer(
             self.arguments.renderer, measurement_type
         )()
@@ -199,18 +203,24 @@ class Command(BaseCommand):
             self.file.close()
 
     def _get_results_from_api(self, measurement_id):
-        try:
-            measurement = Measurement(
-                id=measurement_id, user_agent=self.user_agent,
-                key=self._get_request_auth())
-        except APIResponseError as e:
-            raise RipeAtlasToolsException(e.args[0])
 
         results = self._get_request().get()[1]
-        if not results:
-            raise RipeAtlasToolsException(
-                "There aren't any results available for that measurement")
-        return results, measurement.type.lower()
+        if isinstance(results, list):
+            if not results:
+                raise RipeAtlasToolsException(
+                    "There aren't any results for your request.")
+        else:
+            error = results.get("error")
+            msg = "Error fetching measurement results"
+            if error:
+                msg += ": [{status} {title}] {detail}".format(
+                    **error
+                )
+            else:
+                msg = "Error fetching measurement results"
+            raise RipeAtlasToolsException(msg)
+        sample = results[0]
+        return results, sample
 
     def _get_results_from_file(self, using_regular_file):
         """
@@ -237,7 +247,7 @@ class Command(BaseCommand):
             results = json.loads("".join(results))
             sample = results[0]  # Reassign sample to an actual result
 
-        return results, Result.get(sample).type
+        return results, sample
 
     def get_aggregators(self):
         """Return aggregators list based on user input"""
