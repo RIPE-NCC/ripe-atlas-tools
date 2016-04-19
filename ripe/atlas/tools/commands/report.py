@@ -181,7 +181,10 @@ class Command(BaseCommand):
                 use_regular_file
             )
 
-        measurement_type = Result.get(sample).type.lower()
+        # Sagan calls measurements "ssl" when they are actually "sslcert"
+        # so we use .raw_data once we have verified and parsed the sample.
+        measurement_type = Result.get(sample).raw_data["type"].lower()
+
         renderer = Renderer.get_renderer(
             self.arguments.renderer, measurement_type
         )()
@@ -217,7 +220,7 @@ class Command(BaseCommand):
                     **error
                 )
             else:
-                msg = "Error fetching measurement results"
+                msg = "{} Error fetching measurement results".format(error)
             raise RipeAtlasToolsException(msg)
         sample = results[0]
         return results, sample

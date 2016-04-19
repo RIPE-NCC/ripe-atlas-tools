@@ -183,7 +183,6 @@ class TestReportCommand(unittest.TestCase):
         path = 'ripe.atlas.cousteau.AtlasRequest.get'
         with mock.patch(path) as mock_get:
             mock_get.side_effect = [
-                (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}}),
                 (True, {})
             ]
             with self.assertRaises(RipeAtlasToolsException):
@@ -195,7 +194,6 @@ class TestReportCommand(unittest.TestCase):
         path = 'ripe.atlas.cousteau.AtlasRequest.get'
         with mock.patch(path) as mock_get:
             mock_get.side_effect = [
-                (True, {"creation_time": 1, "start_time": 1, "type": {"name": "shit"}}),
                 (True, {})
             ]
             with self.assertRaises(RipeAtlasToolsException):
@@ -229,7 +227,6 @@ class TestReportCommand(unittest.TestCase):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
@@ -284,7 +281,6 @@ class TestReportCommand(unittest.TestCase):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
@@ -328,7 +324,6 @@ class TestReportCommand(unittest.TestCase):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
