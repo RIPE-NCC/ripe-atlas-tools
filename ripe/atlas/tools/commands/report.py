@@ -17,7 +17,7 @@ from __future__ import print_function
 
 import sys
 try:
-    import usjon as json
+    import ujson as json
 except ImportError:
     import json
 import itertools
