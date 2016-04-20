@@ -1,6 +1,15 @@
 Release History
 ===============
 
+2.0.1 (released 2016-04-20)
+---------------------------
+
+Changes
+~~~~~~~
+- Corrected references in the docs to obsolete command names.
+- Fixed broken 2.0.0 egg.
+
+
 2.0.0 (released 2016-04-20)
 ---------------------------
 
