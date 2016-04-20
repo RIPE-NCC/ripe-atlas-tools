@@ -22,8 +22,22 @@ except ImportError:  # Python 3
     from io import StringIO
 
 
+class FakeTTY(object):
+    """
+    Basic simulation of a user terminal.
+    """
+    def __init__(self, file_obj):
+        self.file_obj = file_obj
+
+    def __getattr__(self, name):
+        return getattr(self.file_obj, name)
+
+    def isatty(self):
+        return True
+
+
 @contextmanager
-def capture_sys_output():
+def capture_sys_output(use_fake_tty=False):
     """
     Wrap a block with this, and it'll capture standard out and standard error
     into handy variables:
@@ -36,8 +50,12 @@ def capture_sys_output():
 
     capture_out, capture_err = StringIO(), StringIO()
     current_out, current_err = sys.stdout, sys.stderr
+    current_in = sys.stdin
     try:
+        if use_fake_tty:
+            sys.stdin = FakeTTY(current_in)
         sys.stdout, sys.stderr = capture_out, capture_err
         yield capture_out, capture_err
     finally:
         sys.stdout, sys.stderr = current_out, current_err
+        sys.stdin = current_in
