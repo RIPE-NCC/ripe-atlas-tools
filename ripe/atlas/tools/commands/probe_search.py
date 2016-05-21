@@ -29,6 +29,10 @@ from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
 
 
+# Unknown latitude-longitude coordinates.
+UNK_COORDS = -1111.0, -1111.0
+
+
 class Command(TabularFieldsMixin, BaseCommand):
 
     NAME = "probe-search"
@@ -463,10 +467,11 @@ class Command(TabularFieldsMixin, BaseCommand):
                 description = sanitise(probe.description) or ""
                 r.append(description[:self.COLUMNS["description"][1]])
             elif field == "coordinates":
-                r.append(u"{},{}".format(
-                    probe.geometry["coordinates"][1],
-                    probe.geometry["coordinates"][0],
-                ))
+                if probe.geometry and probe.geometry["coordinates"]:
+                    lng, lat = probe.geometry["coordinates"]
+                else:
+                    lng, lat = UNK_COORDS
+                r.append(u"{},{}".format(lat, lng))
             elif field in ("is_public", "is_anchor"):
                 if getattr(probe, field):
                     r.append(u"\u2714")  # Check mark
