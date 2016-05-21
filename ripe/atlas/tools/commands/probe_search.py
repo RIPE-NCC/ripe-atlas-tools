@@ -18,6 +18,7 @@ from __future__ import print_function, absolute_import
 import itertools
 import six
 import requests
+import sys
 
 from ripe.atlas.cousteau import ProbeRequest
 from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
@@ -201,7 +202,7 @@ class Command(TabularFieldsMixin, BaseCommand):
                 "id", "asn_v4", "asn_v6", "country", "status")
 
         if self.arguments.all:
-            self.arguments.limit = None
+            self.arguments.limit = sys.maxsize if six.PY3 else sys.maxint
 
         filters = self.build_request_args()
 
@@ -217,10 +218,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         self.set_aggregators()
         probes = ProbeRequest(
             return_objects=True, user_agent=self.user_agent, **filters)
-        if self.arguments.limit:
-            truncated_probes = itertools.islice(probes, self.arguments.limit)
-        else:
-            truncated_probes = probes
+        truncated_probes = itertools.islice(probes, self.arguments.limit)
 
         if self.arguments.ids_only:
             for probe in truncated_probes:
