@@ -65,6 +65,8 @@ class Command(BaseCommand):
                  "appropriate renderer will be selected."
         )
 
+        Renderer.add_arguments_for_available_renderers(self.parser)
+
     def _get_request_auth(self):
         if self.arguments.auth:
             return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
@@ -83,6 +85,7 @@ class Command(BaseCommand):
         try:
             Stream(capture_limit=self.arguments.limit).stream(
                 self.arguments.renderer,
+                self.arguments,
                 measurement.type.lower(),
                 self.arguments.measurement_id
             )

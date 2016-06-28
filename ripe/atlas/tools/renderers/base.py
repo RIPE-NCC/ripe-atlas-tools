@@ -36,6 +36,11 @@ class Renderer(object):
     SHOW_DEFAULT_FOOTER = True
 
     def __init__(self, *args, **kwargs):
+        """
+        If "arguments" is in kwargs it can be used to gather renderer's
+        optional arguments which have been passed via CLI.
+        See also add_arguments().
+        """
         pass
 
     @staticmethod
@@ -55,6 +60,12 @@ class Renderer(object):
         r.remove("base")
 
         return r
+
+    @staticmethod
+    def add_arguments_for_available_renderers(parser):
+        for renderer_name in Renderer.get_available():
+            renderer_cls = Renderer.get_renderer_by_name(renderer_name)
+            renderer_cls.add_arguments(parser)
 
     @staticmethod
     def render(template, **kwargs):
@@ -124,6 +135,22 @@ class Renderer(object):
             importlib.import_module("{}.{}".format(package, name)),
             "Renderer"
         )
+
+    @staticmethod
+    def add_arguments(parser):
+        """
+        Add renderer's optional arguments here.
+
+        Suggested format:
+
+        group = parser.add_argument_group(
+            title="Optional arguments for XXX renderer"
+        )
+        group.add_argument(
+            ...
+        )
+        """
+        pass
 
     def header(self):
         """

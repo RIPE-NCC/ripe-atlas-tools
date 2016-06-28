@@ -133,6 +133,8 @@ class Command(BaseCommand):
             '(Conflicts with specifying measurement_id)',
         )
 
+        Renderer.add_arguments_for_available_renderers(self.parser)
+
     def _get_request_auth(self):
         if self.arguments.auth:
             return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
@@ -187,7 +189,7 @@ class Command(BaseCommand):
 
         renderer = Renderer.get_renderer(
             self.arguments.renderer, measurement_type
-        )()
+        )(arguments=self.arguments)
 
         results = SaganSet(iterable=results, probes=self.arguments.probes)
 
