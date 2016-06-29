@@ -18,6 +18,7 @@ from __future__ import print_function, absolute_import
 import itertools
 import six
 import requests
+import sys
 
 from ripe.atlas.cousteau import ProbeRequest
 from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
@@ -27,6 +28,10 @@ from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
+
+
+# Unknown latitude-longitude coordinates.
+UNK_COORDS = -1111.0, -1111.0
 
 
 class Command(TabularFieldsMixin, BaseCommand):
@@ -197,7 +202,7 @@ class Command(TabularFieldsMixin, BaseCommand):
                 "id", "asn_v4", "asn_v6", "country", "status")
 
         if self.arguments.all:
-            self.arguments.limit = None
+            self.arguments.limit = sys.maxsize if six.PY3 else sys.maxint
 
         filters = self.build_request_args()
 
@@ -213,10 +218,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         self.set_aggregators()
         probes = ProbeRequest(
             return_objects=True, user_agent=self.user_agent, **filters)
-        if self.arguments.limit:
-            truncated_probes = itertools.islice(probes, self.arguments.limit)
-        else:
-            truncated_probes = probes
+        truncated_probes = itertools.islice(probes, self.arguments.limit)
 
         if self.arguments.ids_only:
             for probe in truncated_probes:
@@ -463,10 +465,11 @@ class Command(TabularFieldsMixin, BaseCommand):
                 description = sanitise(probe.description) or ""
                 r.append(description[:self.COLUMNS["description"][1]])
             elif field == "coordinates":
-                r.append(u"{},{}".format(
-                    probe.geometry["coordinates"][1],
-                    probe.geometry["coordinates"][0],
-                ))
+                if probe.geometry and probe.geometry["coordinates"]:
+                    lng, lat = probe.geometry["coordinates"]
+                else:
+                    lng, lat = UNK_COORDS
+                r.append(u"{},{}".format(lat, lng))
             elif field in ("is_public", "is_anchor"):
                 if getattr(probe, field):
                     r.append(u"\u2714")  # Check mark
