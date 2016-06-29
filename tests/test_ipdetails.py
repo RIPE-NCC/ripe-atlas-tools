@@ -14,10 +14,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import mock
+import os
 import unittest
 import requests
+import shutil
+import tempfile
 
 from ripe.atlas.tools.ipdetails import IP
+from ripe.atlas.tools.cache import LocalCache
+
+
+TEMP_DB_DIR = tempfile.mkdtemp()
+
+
+class FakeCache(LocalCache):
+
+    @staticmethod
+    def _get_or_create_db_path():
+        temp_db_path = os.path.join(TEMP_DB_DIR, "ripe.atlas.tool.unittest")
+        return temp_db_path
+
+
+fake_cache = FakeCache()
 
 
 class FakeResponse(object):
@@ -51,24 +69,11 @@ class TestIPDetails(unittest.TestCase):
     }
 
     def setUp(self):
-        # the poor man's fake cache
-        self.db = {}
-
-        def db_get(k):
-            return self.db.get(k)
-
-        def db_set(k, v, e):
-            self.db[k] = v
-
-        def db_keys():
-            return self.db.keys()
+        fake_cache.clear()
 
         self.mock_cache = mock.patch(
-            "ripe.atlas.tools.ipdetails.cache"
+            "ripe.atlas.tools.ipdetails.cache", wraps=fake_cache
         ).start()
-        self.mock_cache.get.side_effect = db_get
-        self.mock_cache.set.side_effect = db_set
-        self.mock_cache.keys.side_effect = db_keys
         self.mock_get = mock.patch(
             'ripe.atlas.tools.ipdetails.requests.get'
         ).start()
@@ -78,6 +83,13 @@ class TestIPDetails(unittest.TestCase):
 
     def tearDown(self):
         mock.patch.stopall()
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            fake_cache._db.close()
+        finally:
+            shutil.rmtree(TEMP_DB_DIR, ignore_errors=True)
 
     def test_loopback4(self):
         """IPv4 loopback address"""
@@ -294,7 +306,7 @@ class TestIPDetails(unittest.TestCase):
         """Test case where we dont' have a matching prefix in cache"""
         ip = IP(self.IP)
         # clear out db to test specific function
-        self.db = {}
+        self.mock_cache.clear()
         self.assertFalse(ip.cached_prefix_found)
         self.assertEquals(ip.get_from_cached_prefix(), None)
 

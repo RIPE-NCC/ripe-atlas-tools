@@ -73,7 +73,7 @@ class IP(object):
         details = None
 
         for cache_entry in cache.keys():
-            if not cache_entry.startswith("IPDetailsPrefix:"):
+            if not cache_entry.decode().startswith("IPDetailsPrefix:"):
                 continue
 
             prefix_details = cache.get(cache_entry)

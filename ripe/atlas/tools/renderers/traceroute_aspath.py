@@ -85,7 +85,7 @@ class Renderer(BaseRenderer):
             s += "  {}: {} probe{}, {} completed\n".format(
                 as_path,
                 self.paths[as_path]['cnt'],
-                "s" if self.paths[as_path] > 1 else "",
+                "s" if self.paths[as_path]['cnt'] > 1 else "",
                 self.paths[as_path]['responded']
             )
 
