@@ -350,5 +350,5 @@ class TestReportCommand(unittest.TestCase):
         for in_string, out_string in tests.items():
             path = "ripe.atlas.tools.commands.base.open"
             content = mock.mock_open(read_data=in_string)
-            with mock.patch(path, content):
+            with mock.patch(path, content, create=True):
                 self.assertEqual(Command().user_agent, out_string)
