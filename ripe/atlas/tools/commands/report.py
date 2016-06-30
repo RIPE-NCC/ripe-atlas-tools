@@ -15,9 +15,17 @@
 
 from __future__ import print_function
 
+import sys
+try:
+    import ujson as json
+except ImportError:
+    import json
+import itertools
+
+from ripe.atlas.sagan import Result
 from ripe.atlas.cousteau import (
-    AtlasLatestRequest, AtlasResultsRequest, Measurement)
-from ripe.atlas.cousteau.exceptions import APIResponseError
+    AtlasLatestRequest, AtlasResultsRequest
+)
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
@@ -33,10 +41,15 @@ class Command(BaseCommand):
 
     NAME = "report"
 
-    DESCRIPTION = "Report the results of an already created measurement"
+    DESCRIPTION = (
+        "Report the results of an existing measurement from the API, "
+        "a file or standard input"
+    )
     EXTRA_DESCRIPTION = (
-        "Example:\n"
-        "  ripe-atlas report 1001 --probes 157,10006"
+        "Examples:\n"
+        "  ripe-atlas report 1001 --probes 157,10006\n"
+        "  ripe-atlas report --from-file results.json\n"
+        "  cat results.json | ripe-atlas report --aggregate-by prefix_v4\n"
     )
 
     AGGREGATORS = {
@@ -57,7 +70,9 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=int,
-            help="The measurement id you want reported."
+            help="The measurement ID to fetch from the results API. "
+            "(Conflicts with the --from-file option)",
+            nargs="?",
         )
         self.parser.add_argument(
             "--auth",
@@ -111,6 +126,13 @@ class Command(BaseCommand):
             help="The stop time of the report."
         )
 
+        self.parser.add_argument(
+            "--from-file",
+            type=ArgumentType.path,
+            help='The source of the data to be rendered. '
+            '(Conflicts with specifying measurement_id)',
+        )
+
     def _get_request_auth(self):
         if self.arguments.auth:
             return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
@@ -136,22 +158,36 @@ class Command(BaseCommand):
         return AtlasLatestRequest(**kwargs)
 
     def run(self):
+        if self.arguments.measurement_id and self.arguments.from_file:
+            raise RipeAtlasToolsException(
+                "You can only specify one of --from-file or "
+                "measurement_id, not both."
+            )
+        if self.arguments.measurement_id:
+            results, sample = self._get_results_from_api(
+                self.arguments.measurement_id
+            )
+            use_regular_file = False
+        else:
+            if self.arguments.from_file:
+                use_regular_file = self.arguments.from_file != "-"
+            elif sys.stdin.isatty():
+                self.parser.print_help()
+                sys.exit(1)
+            else:
+                use_regular_file = False
 
-        try:
-            measurement = Measurement(
-                id=self.arguments.measurement_id, user_agent=self.user_agent,
-                key=self._get_request_auth())
-        except APIResponseError as e:
-            raise RipeAtlasToolsException(e.args[0])
+            results, sample = self._get_results_from_file(
+                use_regular_file
+            )
+
+        # Sagan calls measurements "ssl" when they are actually "sslcert"
+        # so we use .raw_data once we have verified and parsed the sample.
+        measurement_type = Result.get(sample).raw_data["type"].lower()
 
         renderer = Renderer.get_renderer(
-            self.arguments.renderer, measurement.type.lower())()
-
-        results = self._get_request().get()[1]
-
-        if not results:
-            raise RipeAtlasToolsException(
-                "There aren't any results available for that measurement")
+            self.arguments.renderer, measurement_type
+        )()
 
         results = SaganSet(iterable=results, probes=self.arguments.probes)
 
@@ -165,6 +201,56 @@ class Command(BaseCommand):
             results = aggregate(results, self.get_aggregators())
 
         Rendering(renderer=renderer, payload=results).render()
+
+        if use_regular_file:
+            self.file.close()
+
+    def _get_results_from_api(self, measurement_id):
+
+        results = self._get_request().get()[1]
+        if isinstance(results, list):
+            if not results:
+                raise RipeAtlasToolsException(
+                    "There aren't any results for your request.")
+        else:
+            error = results.get("error")
+            msg = "Error fetching measurement results"
+            if error:
+                msg += ": [{status} {title}] {detail}".format(
+                    **error
+                )
+            else:
+                msg = "{} Error fetching measurement results".format(error)
+            raise RipeAtlasToolsException(msg)
+        sample = results[0]
+        return results, sample
+
+    def _get_results_from_file(self, using_regular_file):
+        """
+        We need to get the first result from the source in order to detect the
+        type.  Additionally, if the source is actually one great big JSON list,
+        then we need to parse it so we iterate over the results since there's no
+        newline characters.
+        """
+
+        self.file = sys.stdin
+        if using_regular_file:
+            self.file = open(self.arguments.from_file)
+
+        # Pop the first line off the source stack.  This may very well be a Very
+        # Large String and cause a memory explosion, but we like to let our
+        # users shoot themselves in the foot.
+        sample = next(self.file)
+
+        # Re-attach the line back onto the iterable so we don't lose anything
+        results = itertools.chain([sample], self.file)
+
+        # In the case of the Very Large String, we parse out the JSON here
+        if sample.startswith("["):
+            results = json.loads("".join(results))
+            sample = results[0]  # Reassign sample to an actual result
+
+        return results, sample
 
     def get_aggregators(self):
         """Return aggregators list based on user input"""

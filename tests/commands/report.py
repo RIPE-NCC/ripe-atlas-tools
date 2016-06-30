@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
+import os
+import sys
+import tempfile
 import unittest
 
 try:
@@ -28,7 +32,7 @@ from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
 from ripe.atlas.tools.version import __version__
-from ..base import capture_sys_output
+from ..base import capture_sys_output, StringIO
 
 
 class TestReportCommand(unittest.TestCase):
@@ -44,6 +48,17 @@ class TestReportCommand(unittest.TestCase):
         {'af': 4, 'prb_id': 879, 'result': [{'rtt': 34.319623}, {'rtt': 34.445575}, {'rtt': 34.376455}], 'ttl': 53, 'avg': 34.380551, 'size': 20, 'from': '94.254.125.2', 'proto': 'ICMP', 'timestamp': 1445025223, 'dup': 0, 'type': 'ping', 'sent': 3, 'msm_id': 1000192, 'fw': 4720, 'max': 34.445575, 'step': 360, 'src_addr': '192.168.8.130', 'rcvd': 3, 'msm_name': 'Ping', 'lts': 189, 'dst_name': 'hsi.cablecom.ch', 'min': 34.319623, 'dst_addr': '62.2.16.24'},
         {'af': 4, 'prb_id': 945, 'result': [{'rtt': 61.665036}, {'rtt': 23.833349}, {'rtt': 23.268868}], 'ttl': 56, 'avg': 36.255751, 'size': 20, 'from': '92.111.237.94', 'proto': 'ICMP', 'timestamp': 1445025494, 'dup': 0, 'type': 'ping', 'sent': 3, 'msm_id': 1000192, 'fw': 4720, 'max': 61.665036, 'step': 360, 'src_addr': '92.111.237.94', 'rcvd': 3, 'msm_name': 'Ping', 'lts': 746, 'dst_name': 'hsi.cablecom.ch', 'min': 23.268868, 'dst_addr': '62.2.16.24'}
     ]
+    expected_output_no_aggr = (
+        "20 bytes from probe #1216  109.190.83.40   to hsi.cablecom.ch (62.2.16.24): ttl=54 times:27.429,  25.672,  25.681, \n"
+        "20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
+        "20 bytes from probe #202   178.190.51.206  to hsi.cablecom.ch (62.2.16.24): ttl=52 times:40.024,  40.399,  39.29,  \n"
+        "20 bytes from probe #2225  46.126.90.165   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:10.858,  12.632,  20.53,   32.775,  47.509,  62.745,  78.54,   93.272,  109.738,\n"
+        "20 bytes from probe #270   188.192.110.111 to hsi.cablecom.ch (62.2.16.24): ttl=51 times:28.527,  26.586,  26.393, \n"
+        "20 bytes from probe #579   195.88.195.170  to hsi.cablecom.ch (62.2.16.24): ttl=51 times:23.201,  22.981,  22.863, \n"
+        "20 bytes from probe #677   78.128.9.202    to hsi.cablecom.ch (62.2.16.24): ttl=54 times:40.715,  40.259,  40.317, \n"
+        "20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n"
+        "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
+    )
 
     def setUp(self):
         self.cmd = Command()
@@ -114,12 +129,41 @@ class TestReportCommand(unittest.TestCase):
                 self.cmd.init_args(["--aggregate-by", "blaaaaa"])
                 self.cmd.run()
 
-    def test_arg_no_msm_id(self):
-        """User passed no measurement id."""
-        with capture_sys_output():
+    def test_arg_no_source(self):
+        """User passed no measurement id and no file name."""
+        with capture_sys_output(use_fake_tty=True):
             with self.assertRaises(SystemExit):
                 self.cmd.init_args(["--aggregate-by", "country"])
                 self.cmd.run()
+
+    def test_arg_from_file(self):
+        """User passed a valid filename"""
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        try:
+            temp_file.write(
+                json.dumps(self.mocked_results).encode("utf-8")
+            )
+            temp_file.close()
+            with capture_sys_output() as (stdout, stderr):
+                self.cmd.init_args([
+                    "--from-file", temp_file.name,
+                ])
+                self.cmd.run()
+                assert self.expected_output_no_aggr == stdout.getvalue()
+        finally:
+            os.unlink(temp_file.name)
+
+    def test_arg_from_stdin(self):
+        """User passes results into standard input"""
+        try:
+            current_stdin = sys.stdin
+            sys.stdin = StringIO(json.dumps(self.mocked_results))
+            with capture_sys_output() as (stdout, stderr):
+                self.cmd.init_args([])
+                self.cmd.run()
+                assert self.expected_output_no_aggr == stdout.getvalue()
+        finally:
+            sys.stdin = current_stdin
 
     def test_arg_no_valid_msm_id(self):
         """User passed non valid type of measurement id."""
@@ -142,7 +186,6 @@ class TestReportCommand(unittest.TestCase):
         path = 'ripe.atlas.cousteau.AtlasRequest.get'
         with mock.patch(path) as mock_get:
             mock_get.side_effect = [
-                (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}}),
                 (True, {})
             ]
             with self.assertRaises(RipeAtlasToolsException):
@@ -154,7 +197,6 @@ class TestReportCommand(unittest.TestCase):
         path = 'ripe.atlas.cousteau.AtlasRequest.get'
         with mock.patch(path) as mock_get:
             mock_get.side_effect = [
-                (True, {"creation_time": 1, "start_time": 1, "type": {"name": "shit"}}),
                 (True, {})
             ]
             with self.assertRaises(RipeAtlasToolsException):
@@ -163,18 +205,6 @@ class TestReportCommand(unittest.TestCase):
 
     def test_valid_case_no_aggr(self):
         """Test case where we have result no aggregation."""
-        expected_output = (
-            "20 bytes from probe #1216  109.190.83.40   to hsi.cablecom.ch (62.2.16.24): ttl=54 times:27.429,  25.672,  25.681, \n"
-            "20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
-            "20 bytes from probe #202   178.190.51.206  to hsi.cablecom.ch (62.2.16.24): ttl=52 times:40.024,  40.399,  39.29,  \n"
-            "20 bytes from probe #2225  46.126.90.165   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:10.858,  12.632,  20.53,   32.775,  47.509,  62.745,  78.54,   93.272,  109.738,\n"
-            "20 bytes from probe #270   188.192.110.111 to hsi.cablecom.ch (62.2.16.24): ttl=51 times:28.527,  26.586,  26.393, \n"
-            "20 bytes from probe #579   195.88.195.170  to hsi.cablecom.ch (62.2.16.24): ttl=51 times:23.201,  22.981,  22.863, \n"
-            "20 bytes from probe #677   78.128.9.202    to hsi.cablecom.ch (62.2.16.24): ttl=54 times:40.715,  40.259,  40.317, \n"
-            "20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n"
-            "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
-        )
-
         probes = [
             Probe(id=202, meta_data={
                 "country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"}),
@@ -200,7 +230,6 @@ class TestReportCommand(unittest.TestCase):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
@@ -208,7 +237,9 @@ class TestReportCommand(unittest.TestCase):
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["1"])
                     self.cmd.run()
-                    self.assertEquals(stdout.getvalue(), expected_output)
+                    self.assertEquals(
+                        stdout.getvalue(), self.expected_output_no_aggr
+                    )
 
     def test_valid_case_with_aggr(self):
         """Test case where we have result with aggregation."""
@@ -253,7 +284,6 @@ class TestReportCommand(unittest.TestCase):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
@@ -297,7 +327,6 @@ class TestReportCommand(unittest.TestCase):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'

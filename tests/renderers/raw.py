@@ -76,7 +76,6 @@ class TestRawRenderer(unittest.TestCase):
             path = 'ripe.atlas.cousteau.AtlasRequest.get'
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [
-                    (True, {"creation_time": 1, "start_time": 1, "type": {"name": "ping"}, "description": ""}),
                     (True, self.mocked_results)
                 ]
                 mpath = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'

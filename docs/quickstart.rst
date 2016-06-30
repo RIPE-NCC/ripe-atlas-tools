@@ -12,8 +12,8 @@ Viewing Public Data
 2. View help with: ``ripe-atlas --help``
 3. View a basic report for a public measurement: ``ripe-atlas report <measurement_id>``
 4. View the live stream for a measurement: ``ripe-atlas stream <measurement_id>``
-5. Get a list of probes in ASN 3333: ``ripe-atlas probes --asn 3333``
-6. Get a list of measurements with the word "wikipedia" in them: ``ripe-atlas measurements --search wikipedia``
+5. Get a list of probes in ASN 3333: ``ripe-atlas probe-search --asn 3333``
+6. Get a list of measurements with the word "wikipedia" in them: ``ripe-atlas measurement-search --search wikipedia``
 
 Creating a Measurement
 ----------------------

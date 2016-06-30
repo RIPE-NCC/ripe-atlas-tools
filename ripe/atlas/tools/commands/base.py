@@ -51,6 +51,7 @@ class Command(object):
         "measurements": "measurement-search",
         "probe": "probe-info",
         "probes": "probe-search",
+        "render": "report",
     }
 
     def __init__(self, *args, **kwargs):

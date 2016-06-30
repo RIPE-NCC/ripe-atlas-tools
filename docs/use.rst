@@ -145,32 +145,32 @@ Examples
 
 Get a list of measurements::
 
-    $ ripe-atlas measurements
+    $ ripe-atlas measurement-search
 
 Filter that list by ``status=ongoing``::
 
-    $ ripe-atlas measurements --status ongoing
+    $ ripe-atlas measurement-search --status ongoing
 
 Further filter it by getting measurements that conform to IPv6::
 
-    $ ripe-atlas measurements --status ongoing --af 6
+    $ ripe-atlas measurement-search --status ongoing --af 6
 
 Get that same list, but strip out everything but the measurement ids::
 
-    $ ripe-atlas measurements --status ongoing --af 6 --ids-only
+    $ ripe-atlas measurement-search --status ongoing --af 6 --ids-only
 
 Limit that list to 200 entries::
 
-    $ ripe-atlas measurements --status ongoing --af 6 --limit 200
+    $ ripe-atlas measurement-search --status ongoing --af 6 --limit 200
 
 Get that list, but show only the id, url and target fields:
 
-    $ ripe-atlas measurements --status ongoing --af 6 \
+    $ ripe-atlas measurement-search --status ongoing --af 6 \
       --field id --field url --field target
 
 Filter for measurements of type ``dns`` that started after January 1, 2015::
 
-    $ ripe-atlas measurements --type dns --started-after 2015-01-01
+    $ ripe-atlas measurement-search --type dns --started-after 2015-01-01
 
 
 .. _use-probes:
@@ -178,7 +178,7 @@ Filter for measurements of type ``dns`` that started after January 1, 2015::
 Probe Querying
 ==============
 
-Just like the ``measurements`` command, but for probes, and a lot more powerful.
+Just like the ``measurement-search`` command, but for probes, and a lot more powerful.
 You can use this command to find probes within an ASN, prefix, or geographical
 region, and then aggregate by country, ASN, and/or prefix.
 
@@ -255,23 +255,23 @@ Examples
 
 Get a list of probes within ASN 3333::
 
-    $ ripe-atlas probes --asn 3333
+    $ ripe-atlas probe-search --asn 3333
 
 Further filter that list to show only probes in ASN 3333 from the Netherlands::
 
-    $ ripe-atlas probes --asn 3333 --country nl
+    $ ripe-atlas probe-search --asn 3333 --country nl
 
 Change the limit from the default of 25 to 200::
 
-    $ ripe-atlas probes --asn 3333 --limit 200
+    $ ripe-atlas probe-search --asn 3333 --limit 200
 
 Aggregate the probes by country, and then by ASN::
 
-    $ ripe-atlas probes --asn 3333 --aggregate-by country --aggregate-by asn
+    $ ripe-atlas probe-search --asn 3333 --aggregate-by country --aggregate-by asn
 
 Show the id, url, target, description, and whether the probe is public or not::
 
-    $ ripe-atlas probes --asn 3333 --field id --field url --field description \
+    $ ripe-atlas probe-search --asn 3333 --field id --field url --field description \
       --field is_public
 
 
@@ -283,7 +283,7 @@ Result Reporting
 A means to generate a simple text-based report based on the results from a
 measurement.  Typically, this is used to get the latest results of a measurement
 in a human-readable format, but with the ``--start-time`` and ``--stop-time``
-options, you can get results from any time range you like.
+options, you can get results from any time range you like. It's possible to generate the report by automatically fetching the results from the API, by reading a local file, or by reading standard input.
 
 
 .. _use-report-options:
@@ -311,6 +311,11 @@ Option              Arguments           Explanation
                     traceroute,
                     traceroute_aspath,
                     aggregate_ping
+
+``--from-file``     A file path         The source of the data to be
+                                        rendered. Conflicts with
+                                        specifying a measurement_id to
+                                        fetch from the API.
 
 ``--aggregate-by``  One of: status,     Tell the rendering engine to aggregate
                     prefix_v4,          the results by the selected option. Note
@@ -352,6 +357,15 @@ of 2015::
 Get results from the first day of 2015 until right now::
 
     $ ripe-atlas report 1001 --start-time 2015-01-01
+
+Pipe the contents of an arbitrary file into the renderer.  The rendering
+engine will be guessed from the first line of input::
+
+    $ cat /path/to/file/full/of/results | ripe-atlas report
+
+The same, but point Magellan to a file deliberately rather than using a pipe::
+
+    $ ripe-atlas report --from-file /path/to/file/full/of/results
 
 
 .. _use-stream:
@@ -407,74 +421,6 @@ Specify a renderer::
 Combine for fun and profit::
 
     $ ripe-atlas stream 1001 --renderer ping --limit 500
-
-
-.. _use-render:
-
-Result Rendering
-================
-
-Sometimes you already have a large collection of measurement results and you
-just want Magellan to render them nicely for you.  In these cases, ``render`` is
-your friend.
-
-You can use the ``--renderer`` flag to target specific renderers too if the
-default isn't enough for you.
-
-
-.. _use-render-options:
-
-Options
--------
-
-==================  ==================  ========================================
-Option              Arguments           Explanation
-==================  ==================  ========================================
-``--renderer``      One of: dns, http,  The renderer you want to use. If this
-                    ntp, ping, raw,     isn't defined, an appropriate renderer
-                    ssl_consistency,    will be selected.
-                    sslcert,
-                    traceroute,
-                    traceroute_aspath,
-                    aggregate_ping
-
-``--probes``        A comma-separated   Limit the results to those returned from
-                    list of probe ids   specific probes
-
-``--from-file``     A file path         The source of the data to be rendered.
-                                        If nothing is specified, we assume "-"
-                                        or, standard in (the default).
-
-``--aggregate-by``  One of: country,    Tell the rendering engine to aggregate
-                    asn_v4, asn_v6,     the results by the selected option. Note
-                    prefix_v4,          that if you opt for aggregation, no
-                    prefix_v6           output will be generated until all
-                                        results are received, and if large data
-                                        sets may explode your system.
-==================  ==================  ========================================
-
-
-.. _use-render-examples:
-
-Examples
---------
-
-Pipe the contents of an arbitrary file file into the renderer.  The rendering
-engine will be guessed from the first line of input::
-
-    $ cat /path/to/file/full/of/results | ripe-atlas render
-
-The same, but point Magellan to a file deliberately rather than using a pipe::
-
-    $ ripe-atlas render --from-file /path/to/file/full/of/results
-
-Specify a particular renderer::
-
-    $ cat /path/to/file/full/of/results | ripe-atlas render --renderer ping
-
-Aggregate the output by country::
-
-    $ cat /path/to/file/full/of/results | ripe-atlas render --aggregate-by country
 
 
 .. _use-measure:

@@ -1,6 +1,25 @@
 Release History
 ===============
 
+2.0.1 (released 2016-04-20)
+---------------------------
+
+Changes
+~~~~~~~
+- Corrected references in the docs to obsolete command names.
+- Fixed broken 2.0.0 egg.
+
+
+2.0.0 (released 2016-04-20)
+---------------------------
+
+Changes
+~~~~~~~
+- Renamed and merged some commands for clarity, preserving the old names as deprecated aliases.
+- Improved help text and usage output.
+- Support for bash auto-completion.
+
+
 1.2.3 (released 2016-03-08)
 ---------------------------
 

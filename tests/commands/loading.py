@@ -36,7 +36,6 @@ class TestCommandLoading(unittest.TestCase):
         "measurement-search",
         "probe-info",
         "probe-search",
-        "render",
         "report",
         "shibboleet",
         "stream",
