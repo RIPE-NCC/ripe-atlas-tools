@@ -107,6 +107,30 @@ class TestReportCommand(unittest.TestCase):
                     cmd.init_args(["--renderer", choice, "1"])
                     cmd.run()
 
+    def test_arg_renderer_traceroute_aspath_with_valid_radius_arg(self):
+        """User passed arg --traceroute-aspath-radius to traceroute_aspath renderer"""
+        # Mock AtlasRequest to fail run fast and test args validity.
+        path = 'ripe.atlas.cousteau.AtlasRequest.get'
+        with mock.patch(path) as mock_get:
+            mock_get.return_value = False, {}
+            with self.assertRaises(RipeAtlasToolsException):
+                cmd = Command()
+                cmd.init_args(["--renderer", "traceroute_aspath",
+                               "--traceroute-aspath-radius", "3",
+                               "1"])
+                cmd.run()
+
+    def test_arg_renderer_traceroute_aspath_with_invalid_radius_arg(self):
+        """User passed arg --traceroute-aspath-radius to traceroute_aspath renderer with invalid value"""
+        # Mock AtlasRequest to fail run fast and test args validity.
+        with capture_sys_output():
+            with self.assertRaises(SystemExit):
+                cmd = Command()
+                cmd.init_args(["--renderer", "traceroute_aspath",
+                               "--traceroute-aspath-radius", "blaaaaa",
+                               "1"])
+                cmd.run()
+
     def test_arg_aggregate_with_valid_choice(self):
         """User passed arg aggregate with valid type."""
         # Mock AtlasRequest to fail run fast and test args validity.
