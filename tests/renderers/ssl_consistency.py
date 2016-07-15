@@ -13,8 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import mock
 import unittest
+
+try:
+    from unittest import mock  # Python 3.4+
+except ImportError:
+    import mock
+
 from ripe.atlas.cousteau import Probe as CProbe
 from ripe.atlas.tools.helpers.rendering import SaganSet
 from ripe.atlas.tools.commands.report import Command

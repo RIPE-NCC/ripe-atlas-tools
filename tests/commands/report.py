@@ -16,11 +16,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-import mock
 import os
 import sys
 import tempfile
 import unittest
+
+try:
+    from unittest import mock  # Python 3.4+
+except ImportError:
+    import mock
 
 from ripe.atlas.cousteau import Probe
 
@@ -55,7 +59,6 @@ class TestReportCommand(unittest.TestCase):
         "20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n"
         "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
     )
-
 
     def setUp(self):
         self.cmd = Command()
@@ -347,5 +350,5 @@ class TestReportCommand(unittest.TestCase):
         for in_string, out_string in tests.items():
             path = "ripe.atlas.tools.commands.base.open"
             content = mock.mock_open(read_data=in_string)
-            with mock.patch(path, content):
+            with mock.patch(path, content, create=True):
                 self.assertEqual(Command().user_agent, out_string)

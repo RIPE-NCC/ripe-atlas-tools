@@ -1,9 +1,14 @@
-import mock
 import os.path
 import unittest
 import tempfile
 import shutil
 import sys
+
+try:
+    from unittest import mock  # Python 3.4+
+except ImportError:
+    import mock
+
 # Python 2.7 does have io.StringIO but StringIO. is more liberal regarding str
 # versus unicode inputs to write()
 try:
