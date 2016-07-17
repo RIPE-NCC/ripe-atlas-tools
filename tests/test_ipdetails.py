@@ -13,12 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import mock
 import os
+
 import unittest
 import requests
 import shutil
 import tempfile
+
+try:
+    from unittest import mock  # Python 3.4+
+except ImportError:
+    import mock
 
 from ripe.atlas.tools.ipdetails import IP
 from ripe.atlas.tools.cache import LocalCache

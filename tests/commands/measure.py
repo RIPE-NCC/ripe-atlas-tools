@@ -20,9 +20,8 @@ import unittest
 
 from random import randint
 
-# Python 3.4+ comes with mock in unittest
 try:
-    from unittest import mock
+    from unittest import mock  # Python 3.4+
 except ImportError:
     import mock
 
