@@ -36,9 +36,11 @@ class Stream(object):
 
         self.timeout = timeout
 
-    def stream(self, renderer_name, kind, pk):
+    def stream(self, renderer_name, arguments, kind, pk):
 
-        renderer = Renderer.get_renderer(name=renderer_name, kind=kind)()
+        renderer = Renderer.get_renderer(name=renderer_name, kind=kind)(
+            arguments=arguments
+        )
 
         def on_result_response(result, *args):
             sys.stdout.write(renderer.on_result(Result.get(

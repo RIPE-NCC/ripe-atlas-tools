@@ -204,6 +204,8 @@ class Command(BaseCommand):
                  "Example: --exclude-tag=system-ipv6-works"
         )
 
+        Renderer.add_arguments_for_available_renderers(self.parser)
+
     def run(self):
 
         self._account_for_selected_probes()
@@ -263,7 +265,7 @@ class Command(BaseCommand):
         self.ok("Connecting to stream...")
         try:
             Stream(capture_limit=self.arguments.probes, timeout=300).stream(
-                self.arguments.renderer, self._type, pk)
+                self.arguments.renderer, self.arguments, self._type, pk)
         except (KeyboardInterrupt, CaptureLimitExceeded):
             pass  # User said stop, so we fall through to the finally block.
         finally:

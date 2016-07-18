@@ -21,15 +21,32 @@ class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_TRACEROUTE]
 
+    DEFAULT_RADIUS = 2
+
+    @staticmethod
+    def add_arguments(parser):
+        group = parser.add_argument_group(
+            title="Optional arguments for traceroute_aspath renderer"
+        )
+        group.add_argument(
+            "--traceroute-aspath-radius",
+            type=int,
+            help="Number of different ASs starting from the end of the "
+                 "traceroute path. "
+                 "Default: {}.".format(Renderer.DEFAULT_RADIUS),
+            metavar="RADIUS",
+            default=Renderer.DEFAULT_RADIUS
+        )
+
     def __init__(self, *args, **kwargs):
         BaseRenderer.__init__(self, *args, **kwargs)
         self.paths = {}
 
         # Number of different ASs starting from the end of the traceroute path.
-        #
-        # TODO: if a method to pass options to renderers will be defined
-        # this could be set by user input.
-        self.RADIUS = 2
+        if "arguments" in kwargs:
+            self.RADIUS = kwargs["arguments"].traceroute_aspath_radius
+        else:
+            self.RADIUS = Renderer.DEFAULT_RADIUS
 
     @staticmethod
     def _get_asns_for_output(asns, radius):
@@ -85,7 +102,7 @@ class Renderer(BaseRenderer):
             s += "  {}: {} probe{}, {} completed\n".format(
                 as_path,
                 self.paths[as_path]['cnt'],
-                "s" if self.paths[as_path] > 1 else "",
+                "s" if self.paths[as_path]['cnt'] > 1 else "",
                 self.paths[as_path]['responded']
             )
 

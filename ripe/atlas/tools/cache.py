@@ -37,7 +37,13 @@ class LocalCache(object):
 
     def __init__(self):
         self._now = datetime.datetime.now()
-        self._db = dbm.open(self._get_or_create_db_path(), "c")
+        self._db_file = None
+
+    @property
+    def _db(self):
+        if not self._db_file:
+            self._db_file = dbm.open(self._get_or_create_db_path(), "c")
+        return self._db_file
 
     def __contains__(self, key):
         return key in self._db
