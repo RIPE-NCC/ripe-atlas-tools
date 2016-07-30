@@ -29,15 +29,21 @@ from ripe.atlas.tools.ipdetails import IP
 from ripe.atlas.tools.cache import LocalCache
 
 
-TEMP_DB_DIR = tempfile.mkdtemp()
-
-
 class FakeCache(LocalCache):
 
-    @staticmethod
-    def _get_or_create_db_path():
-        temp_db_path = os.path.join(TEMP_DB_DIR, "ripe.atlas.tool.unittest")
-        return temp_db_path
+
+    def __init__(self):
+        self.paths = []
+        LocalCache.__init__(self)
+
+    def _get_or_create_db_path(self):
+        path = os.path.join(tempfile.mkdtemp(), "ripe.atlas.tool.unittest")
+        self.paths.append(path)
+        return path
+
+    def test_cleanup(self):
+        for path in self.paths:
+            shutil.rmtree(os.path.dirname(path))
 
 
 fake_cache = FakeCache()
@@ -91,10 +97,8 @@ class TestIPDetails(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        try:
-            fake_cache._db.close()
-        finally:
-            shutil.rmtree(TEMP_DB_DIR, ignore_errors=True)
+        fake_cache._db.close()
+        fake_cache.test_cleanup()
 
     def test_loopback4(self):
         """IPv4 loopback address"""
