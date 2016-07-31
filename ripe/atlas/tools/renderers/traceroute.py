@@ -17,11 +17,35 @@ from .base import Renderer as BaseRenderer
 
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
+from ..ipdetails import IP
 
 
 class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_TRACEROUTE]
+
+    DEFAULT_SHOW_ASNS = False
+
+    @staticmethod
+    def add_arguments(parser):
+        group = parser.add_argument_group(
+            title="Optional arguments for traceroute renderer"
+        )
+        group.add_argument(
+            "--traceroute-show-asns",
+            help="Show Autonomous System Numbers (ASNs) in the traceroute "
+                 "results.",
+            action="store_true",
+            default=Renderer.DEFAULT_SHOW_ASNS
+        )
+
+    def __init__(self, *args, **kwargs):
+        BaseRenderer.__init__(self, *args, **kwargs)
+
+        if "arguments" in kwargs:
+            self.show_asns = kwargs["arguments"].traceroute_show_asns
+        else:
+            self.show_asns = Renderer.DEFAULT_SHOW_ASNS
 
     def on_result(self, result):
 
@@ -35,18 +59,28 @@ class Renderer(BaseRenderer):
                 continue
 
             name = ""
+            asn = ""
             rtts = []
             for packet in hop.packets:
                 name = name or packet.origin or "*"
+                if self.show_asns:
+                    if packet.origin and not asn:
+                        asn = IP(packet.origin).asn
                 if packet.rtt:
                     rtts.append("{:8} ms".format(packet.rtt))
                 else:
                     rtts.append("          *")
 
-            r += "{:>3} {:37} {}\n".format(
-                hop.index,
-                sanitise(name),
-                "  ".join(rtts)
+            if not asn:
+                tpl = "{hop:>3} {name:37} {rtts}\n"
+            else:
+                tpl = "{hop:>3} {name:28} {asn:>8} {rtts}\n"
+
+            r += tpl.format(
+                hop=hop.index,
+                name=sanitise(name),
+                asn="AS{}".format(asn) if asn else "",
+                rtts="  ".join(rtts)
             )
 
         return "\n{}\n\n{}".format(
