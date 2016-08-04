@@ -740,6 +740,18 @@ class TestMeasureCommand(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 PingMeasureCommand().init_args([
                     "ping",
+                    "--set-alias", ".invalid"
+                ])
+            self.assertEqual(
+                stderr.getvalue().split("\n")[-2],
+                'ripe-atlas measure: error: argument --set-alias: '
+                '".invalid" does not appear to be a valid measurement alias.'
+            )
+
+        with capture_sys_output() as (stdout, stderr):
+            with self.assertRaises(SystemExit):
+                PingMeasureCommand().init_args([
+                    "ping",
                     "--renderer", "not-a-renderer"
                 ])
             self.assertTrue(stderr.getvalue().split("\n")[-2].startswith(

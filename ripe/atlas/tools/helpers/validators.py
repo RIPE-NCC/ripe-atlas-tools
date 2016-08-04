@@ -22,6 +22,8 @@ import sys
 
 from dateutil import parser
 
+from ..settings import conf
+
 
 class ArgumentType(object):
 
@@ -177,3 +179,40 @@ class ArgumentType(object):
                     '"{}" does not appear to be valid.'.format(string))
 
             return string
+
+    class msm_id_or_name(object):
+
+        @staticmethod
+        def alias_is_valid(string):
+            ret = None
+
+            if string and not string.isdigit():
+                pattern = re.compile("^[a-z_\-0-9]+$")
+
+                if pattern.match(string):
+                    ret = string
+
+            if not ret:
+                raise argparse.ArgumentTypeError(
+                    '"{}" does not appear to be a valid '
+                    'measurement alias.'.format(string))
+
+            return ret
+
+        def __init__(self):
+            self.aliases = {}
+            if 'measurement' in conf:
+                if 'alias' in conf['measurement']:
+                    self.aliases = conf['measurement']['alias']
+
+        def __call__(self, string):
+            if string.isdigit():
+                return int(string)
+
+            if string in self.aliases:
+                return int(self.aliases[string])
+            else:
+                raise argparse.ArgumentTypeError(
+                    '"{}" does not appear to be an existent '
+                    'measurement alias.'.format(string)
+                )

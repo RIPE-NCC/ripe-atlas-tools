@@ -133,3 +133,20 @@ class TestArgumentTypeHelper(unittest.TestCase):
             [1, 2, 3]
         )
         os.unlink(in_file)
+
+    def test_measurement_alias(self):
+
+        tests = ["", ".invalid", "\\invalid", "+invalid",
+                 ":invalid", "12345"]
+        for test in tests:
+            with self.assertRaises(argparse.ArgumentTypeError):
+                ArgumentType.msm_id_or_name.alias_is_valid(test)
+
+        tests = ["valid", "123valid", "valid123", "_valid",
+                 "valid_", "-valid", "valid-"]
+
+        for test in tests:
+            self.assertEqual(
+                ArgumentType.msm_id_or_name.alias_is_valid(test),
+                test
+            )

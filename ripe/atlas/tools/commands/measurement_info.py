@@ -22,6 +22,7 @@ from .base import Command as BaseCommand, MetaDataMixin
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
+from ..helpers.validators import ArgumentType
 
 
 class Command(MetaDataMixin, BaseCommand):
@@ -32,7 +33,8 @@ class Command(MetaDataMixin, BaseCommand):
     )
 
     def add_arguments(self):
-        self.parser.add_argument("id", type=int, help="The measurement id")
+        self.parser.add_argument("id", type=ArgumentType.msm_id_or_name(),
+                                 help="The measurement id or alias")
 
     def run(self):
 

@@ -15,6 +15,7 @@
 
 import webbrowser
 from .base import Command as BaseCommand
+from ..helpers.validators import ArgumentType
 
 
 class Command(BaseCommand):
@@ -27,8 +28,8 @@ class Command(BaseCommand):
     def add_arguments(self):
         self.parser.add_argument(
             "measurement_id",
-            type=int,
-            help="The measurement id you want reported"
+            type=ArgumentType.msm_id_or_name(),
+            help="The measurement id or alias you want reported"
         )
 
     def run(self):

@@ -36,6 +36,9 @@ class Configuration(object):
             "fetch_aliases": {},
             "create": "",
         },
+        "measurement": {
+            "alias": {}
+        },
         "specification": {
             "af": 4,
             "description": "",
