@@ -22,7 +22,7 @@ import sys
 
 from dateutil import parser
 
-from ..settings import conf
+from ..settings import aliases
 
 
 class ArgumentType(object):
@@ -180,39 +180,40 @@ class ArgumentType(object):
 
             return string
 
-    class msm_id_or_name(object):
+    @staticmethod
+    def alias_is_valid(string):
+        ret = None
 
-        @staticmethod
-        def alias_is_valid(string):
-            ret = None
+        if string and not string.isdigit():
+            pattern = re.compile("^[a-zA-Z\._\-0-9]+$")
 
-            if string and not string.isdigit():
-                pattern = re.compile("^[a-z_\-0-9]+$")
+            if pattern.match(string):
+                ret = string
 
-                if pattern.match(string):
-                    ret = string
+        if not ret:
+            raise argparse.ArgumentTypeError(
+                '"{}" does not appear to be a valid '
+                'alias.'.format(string))
 
-            if not ret:
-                raise argparse.ArgumentTypeError(
-                    '"{}" does not appear to be a valid '
-                    'measurement alias.'.format(string))
+        return ret
 
-            return ret
-
-        def __init__(self):
-            self.aliases = {}
-            if 'measurement' in conf:
-                if 'alias' in conf['measurement']:
-                    self.aliases = conf['measurement']['alias']
+    class id_or_alias(object):
+        TYPE = None
 
         def __call__(self, string):
             if string.isdigit():
                 return int(string)
 
-            if string in self.aliases:
-                return int(self.aliases[string])
+            if string in aliases[self.TYPE]:
+                return int(aliases[self.TYPE][string])
             else:
                 raise argparse.ArgumentTypeError(
                     '"{}" does not appear to be an existent '
-                    'measurement alias.'.format(string)
+                    '{} alias.'.format(string, self.TYPE)
                 )
+
+    class msm_id_or_name(id_or_alias):
+        TYPE = "measurement"
+
+    class probe_id_or_name(id_or_alias):
+        TYPE = "probe"

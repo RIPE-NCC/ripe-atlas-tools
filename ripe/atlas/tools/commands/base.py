@@ -200,6 +200,10 @@ class Command(object):
         if sys.stdout.isatty():
             sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
 
+    def ko(self, message):
+        if sys.stdout.isatty():
+            sys.stdout.write("\n{}\n\n".format(colourise(message, "red")))
+
     @staticmethod
     def _get_user_agent():
         """

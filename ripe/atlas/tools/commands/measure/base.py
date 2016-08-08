@@ -26,7 +26,7 @@ from ...exceptions import RipeAtlasToolsException
 from ...helpers.colours import colourise
 from ...helpers.validators import ArgumentType
 from ...renderers import Renderer
-from ...settings import conf, Configuration
+from ...settings import conf, aliases, Aliases
 from ...streaming import Stream, CaptureLimitExceeded
 from ..base import Command as BaseCommand
 
@@ -126,7 +126,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--set-alias",
             help="After creating the measurement, register an alias for it.",
-            type=ArgumentType.msm_id_or_name.alias_is_valid,
+            type=ArgumentType.alias_is_valid,
             metavar="ALIAS"
         )
 
@@ -232,8 +232,8 @@ class Command(BaseCommand):
 
         if self.arguments.set_alias:
             alias = self.arguments.set_alias
-            conf["measurement"]["alias"][alias] = pk
-            Configuration.write(conf)
+            aliases["measurement"][alias] = pk
+            Aliases.write(aliases)
 
         if not self.arguments.no_report:
             self.stream(pk, url)

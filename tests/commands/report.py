@@ -28,7 +28,7 @@ from ripe.atlas.cousteau import Probe
 from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
-from ripe.atlas.tools.settings import Configuration
+from ripe.atlas.tools.settings import Aliases
 from ripe.atlas.tools.version import __version__
 from ..base import capture_sys_output, StringIO
 
@@ -179,10 +179,10 @@ class TestReportCommand(unittest.TestCase):
 
     def test_arg_valid_msm_alias(self):
         """User passed a valid measurement alias."""
-        path_conf = "ripe.atlas.tools.helpers.validators.conf"
-        new_conf = copy.deepcopy(Configuration.DEFAULT)
-        new_conf['measurement']['alias']['UNITTEST_ALIAS'] = 1234
-        with mock.patch(path_conf, new_conf):
+        path_aliases = "ripe.atlas.tools.helpers.validators.aliases"
+        new_aliases = copy.deepcopy(Aliases.DEFAULT)
+        new_aliases['measurement']['UNITTEST_ALIAS'] = 1234
+        with mock.patch(path_aliases, new_aliases):
             path_get = 'ripe.atlas.tools.commands.report.Command._get_results_from_api'
             with mock.patch(path_get) as mock_get:
                 mock_get.side_effect = RipeAtlasToolsException

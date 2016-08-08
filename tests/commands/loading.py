@@ -25,6 +25,7 @@ class Command(BaseCommand):
 class TestCommandLoading(unittest.TestCase):
     expected_builtins = [
         "configure",
+        "alias",
         "go",
         "measure",
         "measurement-info",

@@ -17,7 +17,6 @@ import functools
 import os
 
 from ..exceptions import RipeAtlasToolsException
-from ..helpers.validators import ArgumentType
 from ..settings import Configuration, conf
 from .base import Command as BaseCommand
 
@@ -95,32 +94,6 @@ class Command(BaseCommand):
                 conf['authorisation']['fetch_aliases'][alias] = None
 
             required_type = str
-
-        elif path[:2] == ['measurement', 'alias']:
-            if len(path) > 3:
-                raise RipeAtlasToolsException(
-                    'Invalid alias for a measurement ID: it must be in the '
-                    'format measurement.alias.some-alias=MEASUREMENT_ID')
-
-            if 'measurement' not in conf:
-                conf['measurement'] = {}
-            if 'alias' not in conf['measurement']:
-                conf['measurement']['alias'] = {}
-            if conf['measurement']['alias'] is None:
-                conf['measurement']['alias'] = {}
-
-            alias = path[2]
-
-            try:
-                ArgumentType.msm_id_or_name.alias_is_valid(alias)
-            except Exception as e:
-                raise RipeAtlasToolsException(str(e))
-
-            if alias not in conf['measurement']['alias']:
-                conf['measurement']['alias'][alias] = None
-
-            required_type = int
-
         else:
             try:
                 required_type = type(self._get_from_dict(conf, path))

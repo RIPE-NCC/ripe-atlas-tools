@@ -36,9 +36,6 @@ class Configuration(object):
             "fetch_aliases": {},
             "create": "",
         },
-        "measurement": {
-            "alias": {}
-        },
         "specification": {
             "af": 4,
             "description": "",
@@ -244,4 +241,28 @@ class Configuration(object):
             rc.write(payload)
 
 
+class Aliases(Configuration):
+    """
+    A singleton class to manage user aliases
+    """
+
+    USER_RC = os.path.join(Configuration.USER_CONFIG_DIR, "aliases")
+
+    DEFAULT = {
+        "measurement": {},
+        "probe": {}
+    }
+
+    @staticmethod
+    def write(aliases):
+        payload = yaml.dump(
+            aliases,
+            default_flow_style=False
+        )
+
+        with open(Aliases.USER_RC, "w") as rc:
+            rc.write(payload)
+
+
 conf = Configuration().get()
+aliases = Aliases().get()

@@ -36,7 +36,7 @@ from ripe.atlas.tools.commands.measure import (
     NtpMeasureCommand,
 )
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
-from ripe.atlas.tools.settings import Configuration
+from ripe.atlas.tools.settings import Configuration, Aliases
 
 from ..base import capture_sys_output
 
@@ -740,12 +740,12 @@ class TestMeasureCommand(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 PingMeasureCommand().init_args([
                     "ping",
-                    "--set-alias", ".invalid"
+                    "--set-alias", "\\invalid"
                 ])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 'ripe-atlas measure: error: argument --set-alias: '
-                '".invalid" does not appear to be a valid measurement alias.'
+                '"\\invalid" does not appear to be a valid alias.'
             )
 
         with capture_sys_output() as (stdout, stderr):
@@ -951,3 +951,29 @@ class TestMeasureCommand(unittest.TestCase):
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(RipeAtlasToolsException):
                 cmd._account_for_selected_probes(),
+
+    def test_set_alias(self):
+        path_aliases = "ripe.atlas.tools.commands.measure.base.aliases"
+        new_aliases = copy.deepcopy(Aliases.DEFAULT)
+
+        with mock.patch(path_aliases, new_aliases):
+            path_create = "ripe.atlas.tools.commands.measure.base.Command.create"
+            with mock.patch(path_create) as mock_create:
+                mock_create.return_value = (
+                    True,
+                    {"measurements": [1234]}
+                )
+                cmd = PingMeasureCommand()
+                cmd.init_args([
+                    "ping",
+                    "--target",
+                    "www.ripe.net",
+                    "--no-report",
+                    "--set-alias",
+                    "PING_RIPE"
+                ])
+                cmd.run()
+                self.assertEqual(
+                    new_aliases["measurement"]["PING_RIPE"],
+                    1234
+                )
