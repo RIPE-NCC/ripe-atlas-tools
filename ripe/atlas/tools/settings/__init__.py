@@ -255,6 +255,9 @@ class Aliases(Configuration):
 
     @staticmethod
     def write(aliases):
+        if not os.path.exists(Aliases.USER_CONFIG_DIR):
+            os.makedirs(Aliases.USER_CONFIG_DIR)
+
         payload = yaml.dump(
             aliases,
             default_flow_style=False

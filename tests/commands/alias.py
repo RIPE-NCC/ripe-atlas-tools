@@ -24,9 +24,16 @@ except ImportError:
 
 from ripe.atlas.tools.commands.alias import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
+from ripe.atlas.tools.settings import Aliases
 
 from ..base import capture_sys_output
 
+
+class FakeAliases(Aliases):
+
+    @staticmethod
+    def write(aliases):
+        pass
 
 class TestAliasCommand(unittest.TestCase):
 
@@ -39,10 +46,15 @@ class TestAliasCommand(unittest.TestCase):
             "prb1": 1
         }
     }
+    ALIASES_CLASS_PATH = "ripe.atlas.tools.commands.alias.Aliases"
 
     def setUp(self):
         self.cmd = Command()
         self.aliases = copy.deepcopy(TestAliasCommand.ALIASES)
+        mock.patch(self.ALIASES_CLASS_PATH, FakeAliases).start()
+
+    def tearDown(self):
+        mock.patch.stopall()
 
     def test_no_arguments(self):
         with capture_sys_output():

@@ -957,23 +957,27 @@ class TestMeasureCommand(unittest.TestCase):
         new_aliases = copy.deepcopy(Aliases.DEFAULT)
 
         with mock.patch(path_aliases, new_aliases):
-            path_create = "ripe.atlas.tools.commands.measure.base.Command.create"
-            with mock.patch(path_create) as mock_create:
-                mock_create.return_value = (
-                    True,
-                    {"measurements": [1234]}
-                )
-                cmd = PingMeasureCommand()
-                cmd.init_args([
-                    "ping",
-                    "--target",
-                    "www.ripe.net",
-                    "--no-report",
-                    "--set-alias",
-                    "PING_RIPE"
-                ])
-                cmd.run()
-                self.assertEqual(
-                    new_aliases["measurement"]["PING_RIPE"],
-                    1234
-                )
+            path_Aliases = "ripe.atlas.tools.commands.measure.base.Aliases"
+            with mock.patch(path_Aliases, autospec=True) as new_Aliases:
+                new_Aliases.write.return_value = True
+
+                path_create = "ripe.atlas.tools.commands.measure.base.Command.create"
+                with mock.patch(path_create) as mock_create:
+                    mock_create.return_value = (
+                        True,
+                        {"measurements": [1234]}
+                    )
+                    cmd = PingMeasureCommand()
+                    cmd.init_args([
+                        "ping",
+                        "--target",
+                        "www.ripe.net",
+                        "--no-report",
+                        "--set-alias",
+                        "PING_RIPE"
+                    ])
+                    cmd.run()
+                    self.assertEqual(
+                        new_aliases["measurement"]["PING_RIPE"],
+                        1234
+                    )

@@ -116,8 +116,6 @@ class Command(BaseCommand):
 
     def run(self):
 
-        self._create_if_necessary()
-
         if not self.arguments.action:
             raise RipeAtlasToolsException(
                 "Action not given. Use --help for more information.")
@@ -170,14 +168,3 @@ class Command(BaseCommand):
                         alias_name, aliases[alias_type][alias_name]
                     )
                 self.ok(res)
-
-    @staticmethod
-    def _create_if_necessary():
-
-        if os.path.exists(Aliases.USER_RC):
-            return
-
-        if not os.path.exists(Aliases.USER_CONFIG_DIR):
-            os.makedirs(Aliases.USER_CONFIG_DIR)
-
-        Aliases.write(aliases)
