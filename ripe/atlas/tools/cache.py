@@ -13,19 +13,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+import functools
+import os
+import sys
+
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-import datetime
 try:
     import anydbm as dbm  # anydbm py2.7 will use the best available dbm
 except ImportError:
     import dbm  # ... and on Python3 dbm does the same
-import functools
-import os
-import sys
 
 
 class LocalCache(object):
