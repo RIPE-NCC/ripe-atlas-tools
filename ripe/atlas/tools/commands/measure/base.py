@@ -26,7 +26,7 @@ from ...exceptions import RipeAtlasToolsException
 from ...helpers.colours import colourise
 from ...helpers.validators import ArgumentType
 from ...renderers import Renderer
-from ...settings import conf, aliases, Aliases
+from ...settings import conf, aliases, AliasesDB
 from ...streaming import Stream, CaptureLimitExceeded
 from ..base import Command as BaseCommand
 
@@ -233,7 +233,7 @@ class Command(BaseCommand):
         if self.arguments.set_alias:
             alias = self.arguments.set_alias
             aliases["measurement"][alias] = pk
-            Aliases.write(aliases)
+            AliasesDB.write(aliases)
 
         if not self.arguments.no_report:
             self.stream(pk, url)

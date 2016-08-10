@@ -36,7 +36,7 @@ from ripe.atlas.tools.commands.measure import (
     NtpMeasureCommand,
 )
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
-from ripe.atlas.tools.settings import Configuration, Aliases
+from ripe.atlas.tools.settings import Configuration, AliasesDB
 
 from ..base import capture_sys_output
 
@@ -954,12 +954,12 @@ class TestMeasureCommand(unittest.TestCase):
 
     def test_set_alias(self):
         path_aliases = "ripe.atlas.tools.commands.measure.base.aliases"
-        new_aliases = copy.deepcopy(Aliases.DEFAULT)
+        new_aliases = copy.deepcopy(AliasesDB.DEFAULT)
 
         with mock.patch(path_aliases, new_aliases):
-            path_Aliases = "ripe.atlas.tools.commands.measure.base.Aliases"
-            with mock.patch(path_Aliases, autospec=True) as new_Aliases:
-                new_Aliases.write.return_value = True
+            path_AliasesDB = "ripe.atlas.tools.commands.measure.base.AliasesDB"
+            with mock.patch(path_AliasesDB, autospec=True) as new_AliasesDB:
+                new_AliasesDB.write.return_value = True
 
                 path_create = "ripe.atlas.tools.commands.measure.base.Command.create"
                 with mock.patch(path_create) as mock_create:

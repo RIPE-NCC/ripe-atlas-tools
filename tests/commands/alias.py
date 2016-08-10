@@ -1,4 +1,4 @@
-# Copyright (c) 2015 RIPE NCC
+# Copyright (c) 2016 RIPE NCC
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@ except ImportError:
 
 from ripe.atlas.tools.commands.alias import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
-from ripe.atlas.tools.settings import Aliases
+from ripe.atlas.tools.settings import AliasesDB
 
 from ..base import capture_sys_output
 
 
-class FakeAliases(Aliases):
+class FakeAliasesDB(AliasesDB):
 
     @staticmethod
     def write(aliases):
@@ -46,12 +46,12 @@ class TestAliasCommand(unittest.TestCase):
             "prb1": 1
         }
     }
-    ALIASES_CLASS_PATH = "ripe.atlas.tools.commands.alias.Aliases"
+    ALIASES_CLASS_PATH = "ripe.atlas.tools.commands.alias.AliasesDB"
 
     def setUp(self):
         self.cmd = Command()
         self.aliases = copy.deepcopy(TestAliasCommand.ALIASES)
-        mock.patch(self.ALIASES_CLASS_PATH, FakeAliases).start()
+        mock.patch(self.ALIASES_CLASS_PATH, FakeAliasesDB).start()
 
     def tearDown(self):
         mock.patch.stopall()
@@ -137,7 +137,7 @@ class TestAliasCommand(unittest.TestCase):
         mock_ok.assert_called_once()
 
     def test_show_msm_ko(self):
-        path = "ripe.atlas.tools.commands.alias.Command.ko"
+        path = "ripe.atlas.tools.commands.alias.Command.not_ok"
         with mock.patch(path) as mock_ko:
             with mock.patch(self.ALIASES_PATH, self.aliases):
                 self.cmd.init_args("show measurement msm2".split())

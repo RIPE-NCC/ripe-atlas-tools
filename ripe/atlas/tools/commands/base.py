@@ -200,7 +200,7 @@ class Command(object):
         if sys.stdout.isatty():
             sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
 
-    def ko(self, message):
+    def not_ok(self, message):
         if sys.stdout.isatty():
             sys.stdout.write("\n{}\n\n".format(colourise(message, "red")))
 

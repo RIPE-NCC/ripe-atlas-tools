@@ -17,7 +17,7 @@ import os
 
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.validators import ArgumentType
-from ..settings import Aliases, aliases
+from ..settings import AliasesDB, aliases
 from .base import Command as BaseCommand
 
 
@@ -29,7 +29,7 @@ class Command(BaseCommand):
     DESCRIPTION = "Manage measurements' and probes' aliases"
     EXTRA_DESCRIPTION = (
         "As an alternative to this command, you can just create/edit {}"
-        .format(Aliases.USER_RC)
+        .format(AliasesDB.USER_RC)
     )
 
     def add_arguments(self):
@@ -40,75 +40,75 @@ class Command(BaseCommand):
                  "Run 'ripe-atlas alias <action> --help' for more details."
         )
 
-        parser = subparsers.add_parser(
+        add_parser = subparsers.add_parser(
             "add",
             help="Add/modify an alias."
         )
-        parser.add_argument(
+        add_parser.add_argument(
             "type",
             action="store",
             choices=["measurement", "probe"],
             help="Type of target object.",
         )
-        parser.add_argument(
+        add_parser.add_argument(
             "target",
             action="store",
             type=int,
             help="Target's ID.",
         )
-        parser.add_argument(
+        add_parser.add_argument(
             "alias",
             action="store",
             type=ArgumentType.alias_is_valid,
             help="Alias name.",
         )
 
-        parser = subparsers.add_parser(
+        del_parser = subparsers.add_parser(
             "del",
             help="Remove an alias."
         )
-        parser.add_argument(
+        del_parser.add_argument(
             "type",
             action="store",
             choices=["measurement", "probe"],
             help="Type of target object.",
         )
-        parser.add_argument(
+        del_parser.add_argument(
             "alias",
             action="store",
             type=ArgumentType.alias_is_valid,
             help="Alias name.",
         )
 
-        parser = subparsers.add_parser(
+        show_parser = subparsers.add_parser(
             "show",
             help="Show target's ID."
         )
-        parser.add_argument(
+        show_parser.add_argument(
             "type",
             action="store",
             choices=["measurement", "probe"],
             help="Type of target object.",
         )
-        parser.add_argument(
+        show_parser.add_argument(
             "alias",
             action="store",
             type=ArgumentType.alias_is_valid,
             help="Alias name.",
         )
 
-        parser = subparsers.add_parser(
+        list_parser = subparsers.add_parser(
             "list",
             help="List configured aliases."
         )
-        parser.add_argument(
+        list_parser.add_argument(
             "type",
             action="store",
             choices=["measurement", "probe"],
             help="Type of target object.",
         )
 
-        parser = subparsers.add_parser(
+        editor_parser = subparsers.add_parser(
             "editor",
             help="Invoke {0} to edit the configuration directly".format(
                 self.EDITOR)
@@ -121,9 +121,9 @@ class Command(BaseCommand):
                 "Action not given. Use --help for more information.")
 
         if self.arguments.action == "editor":
-            os.system("{0} {1}".format(self.EDITOR, Aliases.USER_RC))
+            os.system("{0} {1}".format(self.EDITOR, AliasesDB.USER_RC))
             return self.ok(
-                "Aliases file writen to {}".format(Aliases.USER_RC))
+                "Aliases file writen to {}".format(AliasesDB.USER_RC))
 
         else:
             alias_type = self.arguments.type
@@ -138,12 +138,12 @@ class Command(BaseCommand):
                     raise RipeAtlasToolsException(str(e))
 
                 aliases[alias_type][alias_name] = target_id
-                Aliases.write(aliases)
+                AliasesDB.write(aliases)
 
             elif self.arguments.action == "del":
                 alias_name = self.arguments.alias
                 del aliases[alias_type][alias_name]
-                Aliases.write(aliases)
+                AliasesDB.write(aliases)
 
             elif self.arguments.action == "show":
                 alias_name = self.arguments.alias
@@ -155,7 +155,7 @@ class Command(BaseCommand):
                         )
                     )
                 else:
-                    self.ko(
+                    self.not_ok(
                         "'{}' alias does not exist".format(
                             alias_name
                         )

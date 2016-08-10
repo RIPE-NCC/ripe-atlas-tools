@@ -20,15 +20,48 @@ import re
 import yaml
 
 
-class Configuration(object):
+class UserSettingsParser(object):
+
+    USER_CONFIG_DIR = os.path.join(
+        os.path.expanduser("~"), ".config", "ripe-atlas-tools")
+
+    USER_RC = None
+
+    def get(self):
+        r = copy.deepcopy(self.DEFAULT)
+        if os.path.exists(self.USER_RC):
+            with open(self.USER_RC) as y:
+                custom = yaml.load(y)
+                if custom:
+                    r = self.deep_update(r, custom)
+        return r
+
+    @classmethod
+    def deep_update(cls, d, u):
+        """
+        Updates a dictionary with another dictionary, only it goes deep.
+        Stolen from http://stackoverflow.com/questions/3232943/
+        """
+        for k, v in u.items():
+            if isinstance(v, collections.Mapping):
+                r = cls.deep_update(d.get(k, {}), v)
+                d[k] = r
+            else:
+                d[k] = u[k]
+        return d
+
+    @staticmethod
+    def write(data):
+        raise NotImplementedError()
+
+
+class Configuration(UserSettingsParser):
     """
     A singleton configuration class that's smart enough to create a config
     out of defaults + yaml
     """
 
-    USER_CONFIG_DIR = os.path.join(
-        os.path.expanduser("~"), ".config", "ripe-atlas-tools")
-    USER_RC = os.path.join(USER_CONFIG_DIR, "rc")
+    USER_RC = os.path.join(UserSettingsParser.USER_CONFIG_DIR, "rc")
 
     DEFAULT = {
         "authorisation": {
@@ -169,29 +202,6 @@ class Configuration(object):
         }
     }
 
-    def get(self):
-        r = copy.deepcopy(self.DEFAULT)
-        if os.path.exists(self.USER_RC):
-            with open(self.USER_RC) as y:
-                custom = yaml.load(y)
-                if custom:
-                    r = self.deep_update(r, custom)
-        return r
-
-    @classmethod
-    def deep_update(cls, d, u):
-        """
-        Updates a dictionary with another dictionary, only it goes deep.
-        Stolen from http://stackoverflow.com/questions/3232943/
-        """
-        for k, v in u.items():
-            if isinstance(v, collections.Mapping):
-                r = cls.deep_update(d.get(k, {}), v)
-                d[k] = r
-            else:
-                d[k] = u[k]
-        return d
-
     @staticmethod
     def write(config):
         """
@@ -241,12 +251,12 @@ class Configuration(object):
             rc.write(payload)
 
 
-class Aliases(Configuration):
+class AliasesDB(UserSettingsParser):
     """
     A singleton class to manage user aliases
     """
 
-    USER_RC = os.path.join(Configuration.USER_CONFIG_DIR, "aliases")
+    USER_RC = os.path.join(UserSettingsParser.USER_CONFIG_DIR, "aliases")
 
     DEFAULT = {
         "measurement": {},
@@ -255,17 +265,17 @@ class Aliases(Configuration):
 
     @staticmethod
     def write(aliases):
-        if not os.path.exists(Aliases.USER_CONFIG_DIR):
-            os.makedirs(Aliases.USER_CONFIG_DIR)
+        if not os.path.exists(AliasesDB.USER_CONFIG_DIR):
+            os.makedirs(AliasesDB.USER_CONFIG_DIR)
 
         payload = yaml.dump(
             aliases,
             default_flow_style=False
         )
 
-        with open(Aliases.USER_RC, "w") as rc:
+        with open(AliasesDB.USER_RC, "w") as rc:
             rc.write(payload)
 
 
 conf = Configuration().get()
-aliases = Aliases().get()
+aliases = AliasesDB().get()
