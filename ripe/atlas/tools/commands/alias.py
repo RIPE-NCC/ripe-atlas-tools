@@ -108,7 +108,7 @@ class Command(BaseCommand):
             help="Type of target object.",
         )
 
-        editor_parser = subparsers.add_parser(
+        subparsers.add_parser(
             "editor",
             help="Invoke {0} to edit the configuration directly".format(
                 self.EDITOR)
