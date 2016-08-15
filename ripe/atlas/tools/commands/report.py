@@ -69,8 +69,8 @@ class Command(BaseCommand):
     def add_arguments(self):
         self.parser.add_argument(
             "measurement_id",
-            type=int,
-            help="The measurement ID to fetch from the results API. "
+            type=ArgumentType.msm_id_or_name(),
+            help="The measurement ID or alias to fetch from the results API. "
             "(Conflicts with the --from-file option)",
             nargs="?",
         )

@@ -23,6 +23,7 @@ from ..renderers import Renderer
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
 from ..settings import conf
+from ..helpers.validators import ArgumentType
 
 
 class Command(BaseCommand):
@@ -39,8 +40,8 @@ class Command(BaseCommand):
     def add_arguments(self):
         self.parser.add_argument(
             "measurement_id",
-            type=int,
-            help="The measurement id you want streamed"
+            type=ArgumentType.msm_id_or_name(),
+            help="The measurement id or alias you want streamed"
         )
         self.parser.add_argument(
             "--auth",

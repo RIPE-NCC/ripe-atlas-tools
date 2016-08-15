@@ -22,6 +22,8 @@ import sys
 
 from dateutil import parser
 
+from ..settings import aliases
+
 
 class ArgumentType(object):
 
@@ -177,3 +179,41 @@ class ArgumentType(object):
                     '"{}" does not appear to be valid.'.format(string))
 
             return string
+
+    @staticmethod
+    def alias_is_valid(string):
+        ret = None
+
+        if string and not string.isdigit():
+            pattern = re.compile("^[a-zA-Z\._\-0-9]+$")
+
+            if pattern.match(string):
+                ret = string
+
+        if not ret:
+            raise argparse.ArgumentTypeError(
+                '"{}" does not appear to be a valid '
+                'alias.'.format(string))
+
+        return ret
+
+    class id_or_alias(object):
+        TYPE = None
+
+        def __call__(self, string):
+            if string.isdigit():
+                return int(string)
+
+            if string in aliases[self.TYPE]:
+                return int(aliases[self.TYPE][string])
+            else:
+                raise argparse.ArgumentTypeError(
+                    '"{}" does not appear to be an existent '
+                    '{} alias.'.format(string, self.TYPE)
+                )
+
+    class msm_id_or_name(id_or_alias):
+        TYPE = "measurement"
+
+    class probe_id_or_name(id_or_alias):
+        TYPE = "probe"

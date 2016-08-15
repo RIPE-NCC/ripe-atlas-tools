@@ -22,6 +22,7 @@ from .base import Command as BaseCommand, MetaDataMixin
 from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
+from ..helpers.validators import ArgumentType
 
 
 class Command(MetaDataMixin, BaseCommand):
@@ -30,7 +31,8 @@ class Command(MetaDataMixin, BaseCommand):
     DESCRIPTION = "Return the meta data for one probe"
 
     def add_arguments(self):
-        self.parser.add_argument("id", type=int, help="The probe id")
+        self.parser.add_argument("id", type=ArgumentType.probe_id_or_name(),
+                                 help="The probe id or alias")
 
     def run(self):
 

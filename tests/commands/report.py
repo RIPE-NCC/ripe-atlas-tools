@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import copy
 import json
 import os
 import sys
@@ -31,6 +32,7 @@ from ripe.atlas.cousteau import Probe
 from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
+from ripe.atlas.tools.settings import AliasesDB
 from ripe.atlas.tools.version import __version__
 from ..base import capture_sys_output, StringIO
 
@@ -191,10 +193,30 @@ class TestReportCommand(unittest.TestCase):
 
     def test_arg_no_valid_msm_id(self):
         """User passed non valid type of measurement id."""
-        with capture_sys_output():
+        with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
                 self.cmd.init_args(["blaaa"])
                 self.cmd.run()
+            err = stderr.getvalue().split("\n")[-2]
+        self.assertEqual(
+            err,
+            'ripe-atlas report: error: argument measurement_id: "blaaa" '
+            'does not appear to be an existent measurement alias.'
+        )
+
+    def test_arg_valid_msm_alias(self):
+        """User passed a valid measurement alias."""
+        path_aliases = "ripe.atlas.tools.helpers.validators.aliases"
+        new_aliases = copy.deepcopy(AliasesDB.DEFAULT)
+        new_aliases['measurement']['UNITTEST_ALIAS'] = 1234
+        with mock.patch(path_aliases, new_aliases):
+            path_get = 'ripe.atlas.tools.commands.report.Command._get_results_from_api'
+            with mock.patch(path_get) as mock_get:
+                mock_get.side_effect = RipeAtlasToolsException
+                with self.assertRaises(RipeAtlasToolsException):
+                    self.cmd.init_args(["UNITTEST_ALIAS"])
+                    self.cmd.run()
+                mock_get.assert_called_once_with(1234)
 
     def test_measurement_failure(self):
         """Testcase where given measurement id doesn't exist."""
