@@ -22,7 +22,6 @@ from ..exceptions import RipeAtlasToolsException
 from ..renderers import Renderer
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
-from ..settings import conf
 from ..helpers.validators import ArgumentType
 
 
@@ -31,8 +30,9 @@ class Command(BaseCommand):
     NAME = "stream"
 
     DESCRIPTION = (
-        "Output the results of a measurement as they become available"
+        "Output the results of a public measurement as they become available"
     )
+    EXTRA_DESCRIPTION = "Streaming of non-public measurements is not supported."
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
     }
@@ -42,17 +42,6 @@ class Command(BaseCommand):
             "measurement_id",
             type=ArgumentType.msm_id_or_name(),
             help="The measurement id or alias you want streamed"
-        )
-        self.parser.add_argument(
-            "--auth",
-            type=str,
-            choices=conf["authorisation"]["fetch_aliases"].keys(),
-            default=conf["authorisation"]["fetch"],
-            help="The API key alias you want to use to fetch the measurement. "
-                 "To configure an API key alias, use "
-                 "ripe-atlas configure --set authorisation.fetch_aliases."
-                 "ALIAS_NAME=YOUR_KEY"
-
         )
         self.parser.add_argument(
             "--limit",
@@ -68,18 +57,12 @@ class Command(BaseCommand):
 
         Renderer.add_arguments_for_available_renderers(self.parser)
 
-    def _get_request_auth(self):
-        if self.arguments.auth:
-            return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
-        else:
-            return conf["authorisation"]["fetch"]
-
     def run(self):
 
         try:
             measurement = Measurement(
                 id=self.arguments.measurement_id, user_agent=self.user_agent,
-                key=self._get_request_auth)
+            )
         except APIResponseError as e:
             raise RipeAtlasToolsException(e.args[0])
 
