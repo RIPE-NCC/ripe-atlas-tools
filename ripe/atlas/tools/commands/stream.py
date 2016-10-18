@@ -31,8 +31,9 @@ class Command(BaseCommand):
     NAME = "stream"
 
     DESCRIPTION = (
-        "Output the results of a measurement as they become available"
+        "Output the results of a public measurement as they become available"
     )
+    EXTRA_DESCRIPTION = "Streaming of non-public measurements is not supported."
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
     }
