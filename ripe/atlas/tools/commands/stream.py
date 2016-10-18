@@ -68,18 +68,12 @@ class Command(BaseCommand):
 
         Renderer.add_arguments_for_available_renderers(self.parser)
 
-    def _get_request_auth(self):
-        if self.arguments.auth:
-            return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
-        else:
-            return conf["authorisation"]["fetch"]
-
     def run(self):
 
         try:
             measurement = Measurement(
                 id=self.arguments.measurement_id, user_agent=self.user_agent,
-                key=self._get_request_auth)
+            )
         except APIResponseError as e:
             raise RipeAtlasToolsException(e.args[0])
 
