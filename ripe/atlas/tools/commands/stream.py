@@ -22,7 +22,6 @@ from ..exceptions import RipeAtlasToolsException
 from ..renderers import Renderer
 from ..streaming import Stream, CaptureLimitExceeded
 from .base import Command as BaseCommand
-from ..settings import conf
 from ..helpers.validators import ArgumentType
 
 
@@ -43,17 +42,6 @@ class Command(BaseCommand):
             "measurement_id",
             type=ArgumentType.msm_id_or_name(),
             help="The measurement id or alias you want streamed"
-        )
-        self.parser.add_argument(
-            "--auth",
-            type=str,
-            choices=conf["authorisation"]["fetch_aliases"].keys(),
-            default=conf["authorisation"]["fetch"],
-            help="The API key alias you want to use to fetch the measurement. "
-                 "To configure an API key alias, use "
-                 "ripe-atlas configure --set authorisation.fetch_aliases."
-                 "ALIAS_NAME=YOUR_KEY"
-
         )
         self.parser.add_argument(
             "--limit",
