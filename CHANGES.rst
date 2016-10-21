@@ -1,6 +1,21 @@
 Release History
 ===============
 
+2.0.2 (released 2016-10-21)
+---------------------------
+
+New Features
+~~~~~~~~~~~~
+- Add aliases to measurements IDs
+- Add --traceroute-show-asns to traceroute renderer
+
+Bug Fixes
+~~~~~~~~~
+- Stream command was not passing the correct API key. After API became stricter this command started failing.
+- Handle missing geometry for probes.
+- Fix issues for AS-paths with only 1 probe
+- Various fixes for tests
+
 2.0.1 (released 2016-04-20)
 ---------------------------
 
