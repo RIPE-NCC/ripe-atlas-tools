@@ -68,6 +68,14 @@ In progress: https://github.com/fcelda/fedora-ripe-atlas-tools
 Jan is currently building the binary packages in COPR (which will take some time as there is a lot of other packages in the queue):
 https://copr.fedoraproject.org/coprs/jvcelak/ripe-atlas-tools/
 
+## Voidlinux
+
+* [jnbr](https://github.com/jnbr)
+
+### Status
+
+With a lot of help from the Voidlinux maintainers, it got merged into the [XBPS source packages collection](https://github.com/voidlinux/void-packages/srcpkgs/ripe-atlas-tools). You can install it with `xbps-install ripe-atlas-tools`.
+
 ## Windows
 
 * [Chris Amin](https://github.com/chrisamin)
