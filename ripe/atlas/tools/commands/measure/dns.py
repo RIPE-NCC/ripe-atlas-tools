@@ -139,5 +139,7 @@ class DnsMeasureCommand(Command):
         r["retry"] = self.arguments.retry
         r["udp_payload_size"] = self.arguments.udp_payload_size
         r["use_probe_resolver"] = "target" not in r
+        r["resolve_on_probe"] = "target" not in r # renamed for v2?
+        r["target"] = r["target"] if "target" in r else None # v2: expects emptyor target
 
         return r
