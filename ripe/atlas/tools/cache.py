@@ -42,7 +42,7 @@ class LocalCache(object):
 
     @property
     def _db(self):
-        if not self._db_file:
+        if self._db_file is None:
             self._db_file = dbm.open(self._get_or_create_db_path(), "c")
         return self._db_file
 
