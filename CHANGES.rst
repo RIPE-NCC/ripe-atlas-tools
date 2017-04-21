@@ -1,6 +1,22 @@
 Release History
 ===============
 
+2.1 (released 2016-04-21)
+---------------------------
+
+New Features
+~~~~~~~~~~~~
+- Add a simple NTP renderer
+
+Changes
+~~~~~~~
+- Use new cousteau (1.4) & sagan(1.2) versions.
+
+Bug Fixes
+~~~~~~~~~
+- Fix for some unicode problems when using colors
+- Fix issue #177, with `gdbm` problem.
+
 2.0.2 (released 2016-10-21)
 ---------------------------
 
