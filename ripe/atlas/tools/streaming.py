@@ -55,7 +55,7 @@ class Stream(object):
         stream = AtlasStream()
         stream.connect()
 
-        stream.bind_channel("result", on_result_response)
+        stream.bind_channel("atlas_result", on_result_response)
         try:
             stream.start_stream(stream_type="result", msm=pk)
             stream.timeout(self.timeout)
