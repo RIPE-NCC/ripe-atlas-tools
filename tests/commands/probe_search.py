@@ -404,23 +404,23 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_output = (
-                    "\n"
-                    "Filters:\n"
-                    "  Country: GR\n"
-                    "\n"
-                    "ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "===========================================\n"
-                    "1     3333            gr    None           \n"
-                    "2     3333            de    None           \n"
-                    "3     3332            de    None           \n"
-                    "4     3333            nl    None           \n"
-                    "5     3333            gr    None           \n"
-                    "===========================================\n"
-                    "                Showing 4 of 4 total probes\n"
-                    "\n"
-                )
-                self.assertEquals(stdout.getvalue(), expected_output)
+                expected_output = [
+                    "",
+                    "Filters:",
+                    "  Country: GR",
+                    "",
+                    "ID    Asn_v4 Asn_v6 Country Status         ",
+                    "===========================================",
+                    str(b"1     3333            gr    None           "),
+                    str(b"2     3333            de    None           "),
+                    str(b"3     3332            de    None           "),
+                    str(b"4     3333            nl    None           "),
+                    str(b"5     3333            gr    None           "),
+                    "===========================================",
+                    "                Showing 4 of 4 total probes",
+                    "",
+                ]
+                self.assertEquals(set(stdout.getvalue().split("\n")), set(expected_output))
 
     def test_render_without_aggregation_with_limit(self):
         """Tests rendering of results without aggregation but with limit"""
@@ -435,20 +435,21 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_output = (
-                    "\n"
-                    "Filters:\n"
-                    "  Country: GR\n"
-                    "\n"
-                    "ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "===========================================\n"
-                    "1     3333            gr    None           \n"
-                    "2     3333            de    None           \n"
-                    "===========================================\n"
-                    "                Showing 2 of 4 total probes\n"
-                    "\n"
-                )
-                self.assertEquals(stdout.getvalue(), expected_output)
+                self.maxDiff = None
+                expected_output = [
+                    "",
+                    "Filters:",
+                    "  Country: GR",
+                    "",
+                    "ID    Asn_v4 Asn_v6 Country Status         ",
+                    "===========================================",
+                    str(b"1     3333            gr    None           "),
+                    str(b"2     3333            de    None           "),
+                    "===========================================",
+                    "                Showing 2 of 4 total probes",
+                    ""
+                ]
+                self.assertEquals(set(stdout.getvalue().split("\n")), set(expected_output))
 
     def test_render_with_aggregation(self):
         """Tests rendering of results with aggregation"""
@@ -465,37 +466,39 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_blob = (
-                    "\n"
-                    "Filters:\n"
-                    "  Country: GR\n"
-                    "\n"
-                    "   ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "==============================================\n"
-                    "Country: DE\n"
-                    " ASN_V4: 3332\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   3     3332            de    None           \n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   2     3333            de    None           \n"
-                    "\n"
-                    "Country: GR\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   1     3333            gr    None           \n"
-                    "   5     3333            gr    None           \n"
-                    "\n"
-                    "Country: NL\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   4     3333            nl    None           \n"
-                    "==============================================\n"
-                    "                   Showing 4 of 4 total probes\n"
-                    "\n"
-                )
-                expected_set = set(expected_blob.split("\n"))
-                returned_set = set(stdout.getvalue().split("\n"))
+                expected_blob = [
+                    "",
+                    "Filters:",
+                    "  Country: GR",
+                    "",
+                    "   ID    Asn_v4 Asn_v6 Country Status         ",
+                    "==============================================",
+                    "Country: DE",
+                    " ASN_V4: 3332",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   3     3332            de    None           "),
+                    " ASN_V4: 3333",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   2     3333            de    None           "),
+                    "",
+                    "Country: GR",
+                    " ASN_V4: 3333",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   1     3333            gr    None           "),
+                    str(b"   5     3333            gr    None           "),
+                    "",
+                    "Country: NL",
+                    " ASN_V4: 3333",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   4     3333            nl    None           "),
+                    "==============================================",
+                    "                   Showing 4 of 4 total probes",
+                    ""
+                ]
+                self.maxDiff = None
+                out = stdout.getvalue()
+                expected_set = set(expected_blob)
+                returned_set = set(out.split("\n"))
                 self.assertEquals(returned_set, expected_set)
 
     def test_render_with_aggregation_with_limit(self):
@@ -514,22 +517,22 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_output = (
-                    "\n"
-                    "Filters:\n"
-                    "  Country: GR\n"
-                    "\n"
-                    "   ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "==============================================\n"
-                    "Country: GR\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   1     3333            gr    None           \n"
-                    "==============================================\n"
-                    "                   Showing 1 of 4 total probes\n"
-                    "\n"
-                )
-                expected_set = set(expected_output.split("\n"))
+                expected_output = [
+                    "",
+                    "Filters:",
+                    "  Country: GR",
+                    "",
+                    "   ID    Asn_v4 Asn_v6 Country Status         ",
+                    "==============================================",
+                    "Country: GR",
+                    " ASN_V4: 3333",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   1     3333            gr    None           "),
+                    "==============================================",
+                    "                   Showing 1 of 4 total probes",
+                    "",
+                ]
+                expected_set = set(expected_output)
                 returned_set = set(stdout.getvalue().split("\n"))
                 self.assertEquals(returned_set, expected_set)
 
@@ -551,34 +554,34 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_output = (
-                    "\n"
-                    "Filters:\n  "
-                    "Country: GR\n"
-                    "\n"
-                    "   ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "==============================================\n"
-                    "Country: DE\n"
-                    " ASN_V4: 3332\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   3     3332            de    None           \n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   2     3333            de    None           \n"
-                    "\n"
-                    "Country: GR\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   1     3333            gr    None           \n"
-                    "\n"
-                    "Country: NL\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   4     3333            nl    None           \n"
-                    "==============================================\n"
-                    "                   Showing 4 of 4 total probes\n"
-                    "\n"
-                )
-                expected_set = set(expected_output.split("\n"))
+                expected_output = [
+                    "",
+                    "Filters:",
+                    "  Country: GR",
+                    "",
+                    "   ID    Asn_v4 Asn_v6 Country Status         ",
+                    "==============================================",
+                    "Country: DE",
+                    " ASN_V4: 3332",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   3     3332            de    None           "),
+                    " ASN_V4: 3333",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   2     3333            de    None           "),
+                    "",
+                    "Country: GR",
+                    " ASN_V4: 3333",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   1     3333            gr    None           "),
+                    "",
+                    "Country: NL",
+                    " ASN_V4: 3333",
+                    "  PREFIX_V4: 193.0/22",
+                    str(b"   4     3333            nl    None           "),
+                    "==============================================",
+                    "                   Showing 4 of 4 total probes",
+                    "",
+                ]
+                expected_set = set(expected_output)
                 returned_set = set(stdout.getvalue().split("\n"))
                 self.assertEquals(returned_set, expected_set)
