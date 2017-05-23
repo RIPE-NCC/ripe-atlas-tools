@@ -147,9 +147,10 @@ class Command(TabularFieldsMixin, BaseCommand):
         print(colourise(hr, "bold"))
 
         for measurement in truncated_measurements:
-            print(colourise(self._get_line_format().format(
-                *self._get_line_items(measurement)
-            ), self._get_colour_from_status(measurement.status_id)))
+            lformat = self._get_line_format().format(*self._get_line_items(measurement))
+            lcolour = self._get_colour_from_status(measurement.status_id)
+            log = colourise(lformat, lcolour).encode("utf8")
+            print(log)
 
         print(colourise(hr, "bold"))
 
