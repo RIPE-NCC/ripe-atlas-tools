@@ -18,10 +18,12 @@ from .http import TestHttpRenderer
 from .aggregate_ping import TestAggregatePing
 from .ssl_consistency import TestSSLConsistency
 from .raw import TestRawRenderer
+from .dns_compact import TestDnsCompact
 
 __all__ = [
     TestPingRenderer,
     TestHttpRenderer,
     TestAggregatePing,
-    TestSSLConsistency
+    TestSSLConsistency,
+    TestDnsCompact,
 ]
