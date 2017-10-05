@@ -849,7 +849,8 @@ class TestMeasureCommand(unittest.TestCase):
                 ),
                 1
             ),
-            "size": ((PingMeasureCommand, TracerouteMeasureCommand), 1),
+            "size": ((PingMeasureCommand,), 1),
+            "size": ((TracerouteMeasureCommand,), 0),
             "packet-interval": ((PingMeasureCommand,), 1),
             "timeout": ((TracerouteMeasureCommand, NtpMeasureCommand,), 1),
             "destination-option-size": ((TracerouteMeasureCommand,), 1),
