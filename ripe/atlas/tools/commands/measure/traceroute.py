@@ -48,7 +48,7 @@ class TracerouteMeasureCommand(Command):
         )
         specific.add_argument(
             "--size",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=0),
             default=spec["size"],
             help="The size of packets sent"
         )
