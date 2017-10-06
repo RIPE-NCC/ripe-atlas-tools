@@ -24,6 +24,12 @@ class BashCompletionTests(unittest.TestCase):
         self._setup_env(substring)
         cmd_parts = "ripe-atlas" + substring
         envs = os.environ.copy()
+
+        # Add path for scripts in case it's not installed yet
+        # https://github.com/RIPE-NCC/ripe-atlas-tools/issues/163
+        cwd = os.getcwd()
+        envs["PATH"] = "{}:{}/scripts".format(envs["PATH"], cwd)
+
         process = subprocess.Popen(
             cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=envs, shell=True
         )
