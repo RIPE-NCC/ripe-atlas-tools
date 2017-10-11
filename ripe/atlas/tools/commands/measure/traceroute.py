@@ -112,7 +112,8 @@ class TracerouteMeasureCommand(Command):
             "--duplicate-timeout",
             default=spec["duplicate-timeout"],
             type=int,
-            help="Time to wait (in milliseconds) for a duplicate response after receiving the first response",
+            help="Time to wait (in milliseconds) for a duplicate response "
+            "after receiving the first response",
         )
         specific.add_argument(
             "--response-timeout",
