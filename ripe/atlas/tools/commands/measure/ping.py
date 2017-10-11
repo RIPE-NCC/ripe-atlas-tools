@@ -31,20 +31,26 @@ class PingMeasureCommand(Command):
         specific = self.parser.add_argument_group("Ping-specific Options")
         specific.add_argument(
             "--packets",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=1, maximum=16),
             default=spec["packets"],
             help="The number of packets sent"
         )
         specific.add_argument(
             "--size",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=1, maximum=2048),
             default=spec["size"],
             help="The size of packets sent"
         )
         specific.add_argument(
             "--packet-interval",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=2, maximum=30000),
             default=spec["packet-interval"],
+        )
+        specific.add_argument(
+            "--include-probe-id",
+            default=spec["include_probe_id"],
+            action="store_true",
+            help="Include the ASCII-encoded probe ID in the ping packets",
         )
 
     def _get_measurement_kwargs(self):
@@ -54,5 +60,7 @@ class PingMeasureCommand(Command):
         r["packets"] = self.arguments.packets
         r["packet_interval"] = self.arguments.packet_interval
         r["size"] = self.arguments.size
+        if self.arguments.include_probe_id:
+            r["include_probe_id"] = True
 
         return r

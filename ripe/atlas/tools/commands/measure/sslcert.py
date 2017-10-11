@@ -33,14 +33,22 @@ class SslcertMeasureCommand(Command):
             "SSL Certificate-specific Options")
         specific.add_argument(
             "--port",
-            type=ArgumentType.integer_range(minimum=1, maximum=2**16),
+            type=ArgumentType.integer_range(minimum=1, maximum=65535),
             default=spec["port"],
             help="Destination port"
+        )
+        specific.add_argument(
+            "--hostname",
+            default=spec["hostname"],
+            type=str,
+            help="SNI Hostname",
         )
 
     def _get_measurement_kwargs(self):
 
         r = Command._get_measurement_kwargs(self)
         r["port"] = self.arguments.port
+        if self.arguments.hostname:
+            r["hostname"] = self.arguments.hostname
 
         return r
