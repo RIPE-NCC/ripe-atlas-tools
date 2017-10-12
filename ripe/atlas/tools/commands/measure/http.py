@@ -50,7 +50,7 @@ class HttpMeasureCommand(Command):
         )
         specific.add_argument(
             "--port",
-            type=ArgumentType.integer_range(minimum=1, maximum=2**16),
+            type=ArgumentType.integer_range(minimum=1, maximum=65535),
             default=spec["port"],
             help="Destination port"
         )

@@ -62,6 +62,12 @@ class TestCommandLoading(unittest.TestCase):
     def test_command_loading(self, _get_user_command_path):
         _get_user_command_path.return_value = self.user_command_path
 
+        # For some reason the command classes are initialized in some envs
+        # but not in others at this point
+        if Command._commands:
+            Command._commands.clear()
+        Command._load_commands()
+
         available_commands = Command.get_available_commands()
 
         # Check that we have the command list that we expect

@@ -184,7 +184,11 @@ class TestMeasureCommand(unittest.TestCase):
             "--description", "This is my description",
             "--packets", "7",
             "--packet-interval", "200",
-            "--size", "24"
+            "--size", "24",
+            "--group-id", "1000001",
+            "--include-probe-id",
+            "--spread", "60",
+            "--resolve-on-probe",
         ])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
@@ -194,7 +198,11 @@ class TestMeasureCommand(unittest.TestCase):
                 "target": "ripe.net",
                 "packets": 7,
                 "packet_interval": 200,
-                "size": 24
+                "size": 24,
+                "group_id": 1000001,
+                "include_probe_id": True,
+                "spread": 60,
+                "resolve_on_probe": True,
             }
         )
 
@@ -243,7 +251,9 @@ class TestMeasureCommand(unittest.TestCase):
             "--paris", "8",
             "--port", "123",
             "--protocol", "TCP",
-            "--timeout", "1500"
+            "--timeout", "1500",
+            "--duplicate-timeout", "500",
+            "--response-timeout", "500",
         ])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
@@ -261,7 +271,9 @@ class TestMeasureCommand(unittest.TestCase):
                 "paris": 8,
                 "port": 123,
                 "protocol": "TCP",
-                "timeout": 1500
+                "timeout": 1500,
+                "duplicate_timeout": 500,
+                "response_timeout": 500,
             }
         )
 
@@ -333,7 +345,8 @@ class TestMeasureCommand(unittest.TestCase):
             "--set-nsid-bit",
             "--protocol", "TCP",
             "--retry", "2",
-            "--udp-payload-size", "5"
+            "--udp-payload-size", "512",
+            "--timeout", "500",
         ])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
@@ -350,8 +363,9 @@ class TestMeasureCommand(unittest.TestCase):
                 "set_nsid_bit": True,
                 "protocol": "TCP",
                 "retry": 2,
-                "udp_payload_size": 5,
-                "use_probe_resolver": False
+                "udp_payload_size": 512,
+                "use_probe_resolver": False,
+                "timeout": 500,
             }
         )
 
@@ -406,7 +420,7 @@ class TestMeasureCommand(unittest.TestCase):
         """Testing for query type in lower case"""
         cmd = DnsMeasureCommand()
         cmd.init_args([
-            "dns", "--query-argument", "ripe.net", "--query-type", "txt"
+            "dns", "--query-argument", "ripe.net", "--query-type", "txt",
         ])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
@@ -452,7 +466,8 @@ class TestMeasureCommand(unittest.TestCase):
             "--target", "ripe.net",
             "--af", "6",
             "--description", "This is my description",
-            "--port", "7"
+            "--port", "7",
+            "--hostname", "ripe.net",
         ])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
@@ -460,7 +475,8 @@ class TestMeasureCommand(unittest.TestCase):
                 "af": 6,
                 "description": "This is my description",
                 "target": "ripe.net",
-                "port": 7
+                "port": 7,
+                "hostname": "ripe.net",
             }
         )
 
@@ -561,7 +577,7 @@ class TestMeasureCommand(unittest.TestCase):
                 "description": "This is my description",
                 "target": "ripe.net",
                 "packets": 6,
-                "timeout": 9000
+                "timeout": 9000,
             }
         )
 
@@ -838,27 +854,12 @@ class TestMeasureCommand(unittest.TestCase):
                 "invalid choice: 3 (choose from 0, 1, 2)"
             )
 
-        min_options = {
-            "from-measurement": ((PingMeasureCommand,), 1),
-            "probes": ((PingMeasureCommand,), 1),
-            "packets": (
-                (
-                    PingMeasureCommand,
-                    TracerouteMeasureCommand,
-                    NtpMeasureCommand
-                ),
-                1
-            ),
-            "size": ((PingMeasureCommand,), 1),
-            "size": ((TracerouteMeasureCommand,), 0),
-            "packet-interval": ((PingMeasureCommand,), 1),
-            "timeout": ((TracerouteMeasureCommand, NtpMeasureCommand,), 1),
-            "destination-option-size": ((TracerouteMeasureCommand,), 1),
-            "hop-by-hop-option-size": ((TracerouteMeasureCommand,), 1),
-            "retry": ((DnsMeasureCommand,), 1),
-            "udp-payload-size": ((DnsMeasureCommand,), 1),
-        }
-        for option, (klasses, minimum) in min_options.items():
+        min_options = [
+            ("from-measurement", ((PingMeasureCommand,), 1)),
+            ("probes", ((PingMeasureCommand,), 1)),
+            ("timeout", ((TracerouteMeasureCommand,), 1)),
+        ]
+        for option, (klasses, minimum) in min_options:
             for klass in klasses:
                 with capture_sys_output() as (stdout, stderr):
                     test_value = minimum - 1
@@ -876,48 +877,70 @@ class TestMeasureCommand(unittest.TestCase):
                         )
                     )
 
-        min_max_options = {
-            "from-asn": (
+        min_max_options = [
+            ("from-asn", (
                 (PingMeasureCommand,),
-                (0, 2 ** 32 - 2 + 1)
-            ),
-            "paris": (
+                (1, 2 ** 32 - 2)
+            )),
+            ("paris", (
                 (TracerouteMeasureCommand,),
-                (-1, 65)
-            ),
-            "first-hop": (
+                (0, 64)
+            )),
+            ("first-hop", (
                 (TracerouteMeasureCommand,),
-                (0, 256)
-            ),
-            "max-hops": (
+                (1, 255)
+            )),
+            ("max-hops", (
                 (TracerouteMeasureCommand,),
-                (0, 256)
-            ),
-            "port": (
+                (1, 255)
+            )),
+            ("port", (
                 (
                     TracerouteMeasureCommand,
                     SslcertMeasureCommand,
                     HttpMeasureCommand
                 ),
-                (0, 2 ** 16 + 1)
-            ),
-            "header-bytes": ((HttpMeasureCommand,), (-1, 2049)),
-            "body-bytes": ((HttpMeasureCommand,), (0, 1020049)),
-        }
-        for option, (klasses, extremes) in min_max_options.items():
+                (1, 65535)
+            )),
+            ("header-bytes", ((HttpMeasureCommand,), (0, 2048))),
+            ("body-bytes", ((HttpMeasureCommand,), (1, 1020048))),
+            ("size", ((PingMeasureCommand,), (1, 2048))),
+            ("size", ((TracerouteMeasureCommand,), (0, 2048))),
+            ("packets", (
+                (
+                    PingMeasureCommand,
+                    TracerouteMeasureCommand,
+                    NtpMeasureCommand,
+                ), (1, 16))),
+            ("packet-interval", ((PingMeasureCommand,), (2, 30000))),
+            ("timeout", ((NtpMeasureCommand,), (1, 60000))),
+            ("destination-option-size", ((TracerouteMeasureCommand,), (0, 1024))),
+            ("hop-by-hop-option-size", ((TracerouteMeasureCommand,), (0, 2048))),
+            ("retry", ((DnsMeasureCommand,), (0, 10))),
+            ("udp-payload-size", ((DnsMeasureCommand,), (512, 4096))),
+        ]
+        for option, (klasses, extremes) in min_max_options:
             for klass in klasses:
-                for val in extremes:
+                lower = extremes[0] - 1
+                upper = extremes[1] + 1
+                for invalid in lower, upper:
                     with capture_sys_output() as (stdout, stderr):
-                        with self.assertRaises(SystemExit):
+                        try:
                             klass().init_args([
                                 klass.__name__.replace("MeasureCommand", "").lower(),
-                                "--{}".format(option), str(val)
+                                "--{}".format(option), str(invalid)
                             ])
+                        except SystemExit:
+                            pass
+                        else:
+                            self.fail("--{} for {} should fail for value {}".format(
+                                option, klass.__name__, invalid
+                            ))
                         self.assertEqual(
                             stderr.getvalue().split("\n")[-2],
                             "ripe-atlas measure: error: argument --{}: The "
                             "integer must be between {} and {}.".format(
-                                option, extremes[0] + 1, extremes[1] - 1
+                                option, extremes[0], extremes[1]
                             )
                         )
 

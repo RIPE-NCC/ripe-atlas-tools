@@ -97,15 +97,21 @@ class DnsMeasureCommand(Command):
         )
         specific.add_argument(
             "--retry",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=0, maximum=10),
             default=conf["specification"]["types"]["dns"]["retry"],
             help="Number of times to retry"
         )
         specific.add_argument(
             "--udp-payload-size",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=512, maximum=4096),
             default=conf["specification"]["types"]["dns"]["udp-payload-size"],
             help="May be any integer between 512 and 4096 inclusive"
+        )
+        specific.add_argument(
+            "--timeout",
+            default=conf["specification"]["types"]["dns"]["timeout"],
+            type=ArgumentType.integer_range(minimum=100, maximum=30000),
+            help="Per packet timeout in milliseconds",
         )
 
     def clean_target(self):
@@ -139,5 +145,7 @@ class DnsMeasureCommand(Command):
         r["retry"] = self.arguments.retry
         r["udp_payload_size"] = self.arguments.udp_payload_size
         r["use_probe_resolver"] = "target" not in r
+        if self.arguments.timeout is not None:
+            r["timeout"] = self.arguments.timeout
 
         return r

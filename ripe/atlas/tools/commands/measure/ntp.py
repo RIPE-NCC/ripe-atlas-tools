@@ -32,13 +32,13 @@ class NtpMeasureCommand(Command):
         specific = self.parser.add_argument_group("NTP-specific Options")
         specific.add_argument(
             "--packets",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=1, maximum=16),
             default=spec["packets"],
             help="The number of packets sent"
         )
         specific.add_argument(
             "--timeout",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=1, maximum=60000),
             default=spec["timeout"],
             help="The timeout per-packet"
         )

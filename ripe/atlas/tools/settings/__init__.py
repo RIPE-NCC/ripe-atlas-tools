@@ -77,6 +77,8 @@ class Configuration(UserSettingsParser):
                 "value": "WW",
                 "requested": 50,
             },
+            "spread": None,
+            "resolve_on_probe": None,
             "times": {
                 "one-off": True,
                 "interval": None,
@@ -87,7 +89,8 @@ class Configuration(UserSettingsParser):
                 "ping": {
                     "packets": 3,
                     "packet-interval": 1000,
-                    "size": 48
+                    "size": 48,
+                    "include_probe_id": None,
                 },
                 "traceroute": {
                     "packets": 3,
@@ -100,10 +103,13 @@ class Configuration(UserSettingsParser):
                     "port": 80,
                     "destination-option-size": None,
                     "hop-by-hop-option-size": None,
-                    "timeout": 4000
+                    "timeout": 4000,
+                    "response-timeout": None,
+                    "duplicate-timeout": None,
                 },
                 "sslcert": {
-                    "port": 443
+                    "port": 443,
+                    "hostname": None,
                 },
                 "ntp": {
                     "packets": 3,
@@ -119,7 +125,8 @@ class Configuration(UserSettingsParser):
                     "set-nsid-bit": False,
                     "udp-payload-size": 512,
                     "set-rd-bit": True,
-                    "retry": 0
+                    "retry": 0,
+                    "timeout": None,
                 },
                 "http": {
                     "header-bytes": 0,
@@ -128,7 +135,7 @@ class Configuration(UserSettingsParser):
                     "port": 80,
                     "path": "/",
                     "query-string": None,
-                    "user-agent": "RIPE ATLAS: https://atlas.ripe.net/",
+                    "user-agent": "RIPE Atlas: https://atlas.ripe.net/",
                     "body-bytes": None,
                     "timing-verbosity": 0,
                 },

@@ -210,6 +210,27 @@ class Command(BaseCommand):
                  "Example: --exclude-tag=system-ipv6-works"
         )
 
+        self.parser.add_argument(
+            "--group-id",
+            type=int,
+            help="Add newly created measurement to a group that you own",
+        )
+
+        # Validation is too complex because it's based on the interval, so
+        # we just accept the round-trip for server-side validation
+        self.parser.add_argument(
+            "--spread",
+            type=int,
+            default=conf["specification"]["spread"],
+            help="Specify the spread of probes within a single measurement interval",
+        )
+        self.parser.add_argument(
+            "--resolve-on-probe",
+            action="store_true",
+            default=conf["specification"]["resolve_on_probe"],
+            help="Causes the target to be resolved by each probe rather than once by the server",
+        )
+
         Renderer.add_arguments_for_available_renderers(self.parser)
 
     def run(self):
@@ -325,6 +346,15 @@ class Command(BaseCommand):
 
         if target:
             r["target"] = target
+
+        if self.arguments.group_id:
+            r["group_id"] = self.arguments.group_id
+
+        if self.arguments.spread is not None:
+            r["spread"] = self.arguments.spread
+
+        if self.arguments.resolve_on_probe is not None:
+            r["resolve_on_probe"] = self.arguments.resolve_on_probe
 
         return r
 

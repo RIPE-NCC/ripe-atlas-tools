@@ -42,13 +42,13 @@ class TracerouteMeasureCommand(Command):
             "Traceroute-specific Options")
         specific.add_argument(
             "--packets",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=1, maximum=16),
             default=spec["packets"],
             help="The number of packets sent"
         )
         specific.add_argument(
             "--size",
-            type=ArgumentType.integer_range(minimum=0),
+            type=ArgumentType.integer_range(minimum=0, maximum=2048),
             default=spec["size"],
             help="The size of packets sent"
         )
@@ -92,21 +92,34 @@ class TracerouteMeasureCommand(Command):
         )
         specific.add_argument(
             "--port",
-            type=ArgumentType.integer_range(minimum=1, maximum=2**16),
+            type=ArgumentType.integer_range(minimum=1, maximum=65535),
             default=spec["port"],
             help="Destination port, valid for TCP only"
         )
         specific.add_argument(
             "--destination-option-size",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=0, maximum=1024),
             default=spec["destination-option-size"],
             help="IPv6 destination option header"
         )
         specific.add_argument(
             "--hop-by-hop-option-size",
-            type=ArgumentType.integer_range(minimum=1),
+            type=ArgumentType.integer_range(minimum=0, maximum=2048),
             default=spec["hop-by-hop-option-size"],
             help=" IPv6 hop by hop option header"
+        )
+        specific.add_argument(
+            "--duplicate-timeout",
+            default=spec["duplicate-timeout"],
+            type=int,
+            help="Time to wait (in milliseconds) for a duplicate response "
+            "after receiving the first response",
+        )
+        specific.add_argument(
+            "--response-timeout",
+            default=spec["response-timeout"],
+            type=ArgumentType.integer_range(minimum=1, maximum=60000),
+            help="Response timeout for one packet",
         )
 
     def _get_measurement_kwargs(self):
@@ -120,5 +133,12 @@ class TracerouteMeasureCommand(Command):
         )
         for key in keys:
             r[key] = getattr(self.arguments, key)
+        optional_keys = [
+            "duplicate_timeout", "response_timeout"
+        ]
+        for key in optional_keys:
+            val = getattr(self.arguments, key)
+            if val is not None:
+                r[key] = val
 
         return r
