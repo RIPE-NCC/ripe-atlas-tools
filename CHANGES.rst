@@ -1,5 +1,14 @@
 Release History
 ===============
+2.2 (released 2017-10-12)
+---------------------------
+
+Features and changes
+~~~~~~~~~~~~
+- Align various option defaults, minimums and maximums with API reality, including...
+- ... allow the set of options necessary for "TCP ping" measurements https://labs.ripe.net/Members/wilhelm/measuring-your-web-server-reachability-with-tcp-ping 
+- Add compact DNS results renderer
+- Fix some unicode output issues
 
 2.1 (released 2016-04-21)
 ---------------------------
