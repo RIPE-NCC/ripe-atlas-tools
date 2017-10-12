@@ -188,6 +188,7 @@ class TestMeasureCommand(unittest.TestCase):
             "--group-id", "1000001",
             "--include-probe-id",
             "--spread", "60",
+            "--resolve-on-probe",
         ])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
@@ -201,6 +202,7 @@ class TestMeasureCommand(unittest.TestCase):
                 "group_id": 1000001,
                 "include_probe_id": True,
                 "spread": 60,
+                "resolve_on_probe": True,
             }
         )
 

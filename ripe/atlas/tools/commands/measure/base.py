@@ -224,6 +224,12 @@ class Command(BaseCommand):
             default=conf["specification"]["spread"],
             help="Specify the spread of probes within a single measurement interval",
         )
+        self.parser.add_argument(
+            "--resolve-on-probe",
+            action="store_true",
+            default=conf["specification"]["resolve_on_probe"],
+            help="Causes the target to be resolved by each probe rather than once by the server",
+        )
 
         Renderer.add_arguments_for_available_renderers(self.parser)
 
@@ -346,6 +352,9 @@ class Command(BaseCommand):
 
         if self.arguments.spread is not None:
             r["spread"] = self.arguments.spread
+
+        if self.arguments.resolve_on_probe is not None:
+            r["resolve_on_probe"] = self.arguments.resolve_on_probe
 
         return r
 

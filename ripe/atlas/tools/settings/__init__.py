@@ -78,6 +78,7 @@ class Configuration(UserSettingsParser):
                 "requested": 50,
             },
             "spread": None,
+            "resolve_on_probe": None,
             "times": {
                 "one-off": True,
                 "interval": None,

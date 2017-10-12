@@ -28,18 +28,17 @@ types = [
 
 common_differences = {
     "is_oneoff": None,  # implied by lack of --interval
-    "resolve_on_probe": None,  # implied by lack of --target
     "type": None,  # set as the subcommand
     "start_time": None,  # deliberately unsupported
     "stop_time": None,  # deliberately unsupported
     "is_public": None,  # deliberately unsupported
-
     "description": {
         "default": "",
     },
     "interval": {
         "default": None,
-    }
+    },
+    "resolve_on_probe": None,  # Not sent explicitly to preserve behaviour
 }
 
 type_expected_differences = {
