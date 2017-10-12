@@ -291,9 +291,6 @@ class MetaDataMixin(object):
 
         checkmark = u"\u2714"
         x = u"\u2718"
-        if six.PY2:
-            checkmark = checkmark.encode("utf-8")
-            x = x.encode("utf-8")
 
         if boolean:
             return colourise(checkmark, "green")
@@ -309,8 +306,12 @@ class MetaDataMixin(object):
 
     @staticmethod
     def _render_line(header, value):
-        print("{}  {}".format(
-            colourise("{:25}".format(header), "bold"), value))
+        # Make sure we don't mix unicode and strings
+        if six.PY2 and isinstance(value, six.string_types):
+            value = unicode(value)
+
+        log = u"{}  {}".format(colourise("{:25}".format(header), "bold"), value).encode("utf-8")
+        print(log)
 
 
 class Factory(object):
