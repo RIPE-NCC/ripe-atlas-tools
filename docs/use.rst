@@ -479,6 +479,11 @@ Option                  Arguments           Explanation
                                             which you can later get information
                                             about the measurement.
 
+``--resolve-on-probe``                      Flag that indicates that a name 
+                                            should be resolved (using DNS) on 
+                                            the probe. Otherwise it will be 
+                                            resolved on the RIPE Atlas servers.
+
 ``--interval``          An integer          Rather than run this measurement as
                                             a one-off (the default), create this
                                             measurement as a recurring one, with
