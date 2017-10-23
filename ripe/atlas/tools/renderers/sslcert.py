@@ -13,8 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from tzlocal import get_localzone
 import OpenSSL
 
+from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
 from .base import Renderer as BaseRenderer
 
@@ -22,12 +24,18 @@ from .base import Renderer as BaseRenderer
 class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_SSLCERT]
+    TIME_FORMAT = "%a %b %d %H:%M:%S %Z %Y"
 
     def on_result(self, result):
         r = ""
         for certificate in result.certificates:
             r += self.get_formatted_response(certificate)
-        return "\nProbe #{0}\n{1}\n".format(result.probe_id, r)
+        created = result.created.astimezone(get_localzone())
+        return "\n{}\n{}\n{}\n".format(
+            colourise("Probe #{}".format(result.probe_id), "bold"),
+            colourise(created.strftime(self.TIME_FORMAT), "bold"),
+            r
+        )
 
     @classmethod
     def get_formatted_response(cls, certificate):
