@@ -25,8 +25,7 @@ class Renderer(BaseRenderer):
 
     def on_result(self, result):
         created = result.created.astimezone(get_localzone())
-        probe_id = result.probe_id
-        r = self.get_formatted_response(probe_id, created, result)
+        r = self.get_formatted_response(result)
         if not r:
             r = colourise('No results\n', 'red')
         return "\n{}\n{}\n\n{}".format(
@@ -35,7 +34,8 @@ class Renderer(BaseRenderer):
             r
         )
 
-    def get_formatted_response(self, probe_id, created, result):
+    @staticmethod
+    def get_formatted_response(result):
         leap = result.leap_second_indicator
         stratum = result.stratum
         v = result.version
