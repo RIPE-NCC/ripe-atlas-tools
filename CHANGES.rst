@@ -1,5 +1,12 @@
 Release History
 ===============
+2.2.3 (released 2017-01-17)
+---------------------------
+
+Bug Fixes
+~~~~~~~~~
+- Fix for distribution issues that prevented the command-line scripts from working
+
 2.2.2 (released 2017-10-12)
 ---------------------------
 
