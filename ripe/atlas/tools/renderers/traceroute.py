@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from tzlocal import get_localzone
 from .base import Renderer as BaseRenderer
 
 from ..helpers.colours import colourise
@@ -23,7 +24,7 @@ from ..ipdetails import IP
 class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_TRACEROUTE]
-
+    TIME_FORMAT = "%a %b %d %H:%M:%S %Z %Y"
     DEFAULT_SHOW_ASNS = False
 
     @staticmethod
@@ -83,7 +84,9 @@ class Renderer(BaseRenderer):
                 rtts="  ".join(rtts)
             )
 
-        return "\n{}\n\n{}".format(
+        created = result.created.astimezone(get_localzone())
+        return "\n{}\n{}\n\n{}".format(
             colourise("Probe #{}".format(result.probe_id), "bold"),
+            colourise(created.strftime(self.TIME_FORMAT), "bold"),
             r
         )
