@@ -230,6 +230,10 @@ class Command(BaseCommand):
             default=conf["specification"]["resolve_on_probe"],
             help="Causes the target to be resolved by each probe rather than once by the server",
         )
+        self.parser.add_argument(
+            "--measurement-tags",
+            help="Comma-separated list of tags to apply to the newly created measurement",
+        )
 
         Renderer.add_arguments_for_available_renderers(self.parser)
 
@@ -343,6 +347,10 @@ class Command(BaseCommand):
                 "one-offs, but also offers no interval value.  Without one of "
                 "these, a measurement cannot be created."
             )
+
+        if self.arguments.measurement_tags:
+            tags = self.arguments.measurement_tags.split(",")
+            r["tags"] = tags
 
         if target:
             r["target"] = target
