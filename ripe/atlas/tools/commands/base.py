@@ -167,7 +167,7 @@ class Command(object):
             self._modify_parser_args(args))
 
     def run(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def add_arguments(self):
         """
