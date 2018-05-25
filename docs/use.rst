@@ -526,6 +526,9 @@ Option                  Arguments           Explanation
 ``--exclude-tag``       A tag name          Exclude probes that are marked with
                                             this tag. Note that this option may
                                             be repeated.
+``--measurement-tags``  A comma-separated   Measurement tags to be applied to
+                        list of             the newly created measurement.
+                        measurement tags
 ======================  ==================  ====================================
 
 .. _use-measure-options-ping:
