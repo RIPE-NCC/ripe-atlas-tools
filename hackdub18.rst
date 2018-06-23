@@ -10,6 +10,24 @@ API key, beginning:
 11febf03-5190-47e5-882a-.........
 
 
+Get started
+===========
+
+Install Python Pip, then:
+
+git clone https://github.com/kramse/ripe-atlas-tools/
+cd ripe-atlas-tools
+
+pip install pipenv
+pipenv --python 3
+pipenv install -e .
+
+
+When this is done, you can do
+pipenv shell
+
+That activates the environment, and is the command to use when doing work on this project.
+
 Original Project idea and description
 ===================================
 
@@ -30,4 +48,4 @@ Already existing stuff
 ======================
 - https://labs.ripe.net/Members/annika_wickert/using-ripe-atlas-to-monitor-game-service-connectivity
 - https://github.com/RIPE-Atlas-Community/ripe-atlas-community-contrib
-- https://github.com/emileaben/eyeballtrace                                                                                                - https://framagit.org/bortzmeyer/blaeu   
+- https://github.com/emileaben/eyeballtrace                                                                                                - https://framagit.org/bortzmeyer/blaeu
