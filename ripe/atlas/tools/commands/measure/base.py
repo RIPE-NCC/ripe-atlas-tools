@@ -15,13 +15,15 @@
 
 from __future__ import print_function, absolute_import
 
+import itertools
 import re
 import webbrowser
 
 from collections import OrderedDict
 
 from ripe.atlas.cousteau import (
-    Ping, Traceroute, Dns, Sslcert, Http, Ntp, AtlasSource, AtlasCreateRequest)
+    Ping, Traceroute, Dns, Sslcert, Http, Ntp, AtlasSource, AtlasCreateRequest,
+    ProbeRequest)
 
 from ...exceptions import RipeAtlasToolsException
 from ...helpers.colours import colourise
@@ -383,31 +385,57 @@ class Command(BaseCommand):
         return r
 
     def _get_source_kwargs(self):
+        # Check if more than one criterion has been given. We need to do a
+        # probe search so that we can get the intersection of the criteria.
+        #
+        # This initial version is a tad hacky. ¯\_(ツ)_/¯
+        criteria = itertools.takewhile(lambda x: x,
+                                       [self.arguments.from_country,
+                                        self.arguments.from_prefix,
+                                        self.arguments.from_asn,
+                                        self.arguments.from_probes])
+        if len(criteria) > 1:
+            probes = []
+            filters = {}
+            if self.arguments.from_country:
+                filters["country_code"] = self.arguments.from_country
+            if self.arguments.from_prefix:
+                # XXX Support IPv6.
+                filters["prefix_v4"] = self.arguments.from_prefix
+            if self.arguments.from_asn:
+                # XXX Support ANSv6.
+                filters["asn_v4"] = self.arguments.from_asn
+            if self.arguments.from_probes:
+                for probe in self.arguments.from_probes:
+                    probes.append(str(probe))
+            for probe in ProbeRequest(**filters):
+                probes.append(probe["id"])
+            self.arguments.from_country = False
+            self.arguments.from_prefix = False
+            self.arguments.from_asn = False
+            self.arguments.from_probes = probes
 
         r = conf["specification"]["source"]
 
         r["requested"] = self.arguments.probes
-        for param in self.arguments.__dict__:
-            if "from" in param:
-                if self.arguments.from_country:
-                    r["type"] = "country"
-                    r["value"] = self.arguments.from_country
-                elif self.arguments.from_area:
-                    r["type"] = "area"
-                    r["value"] = self.arguments.from_area
-                elif self.arguments.from_prefix:
-                    r["type"] = "prefix"
-                    r["value"] = self.arguments.from_prefix
-                elif self.arguments.from_asn:
-                    r["type"] = "asn"
-                    r["value"] = self.arguments.from_asn
-                elif self.arguments.from_probes:
-                    r["type"] = "probes"
-                    r["value"] = ",".join([str(_) for _ in self.arguments.from_probes])
-                elif self.arguments.from_measurement:
-                    r["type"] = "msm"
-                    r["value"] = self.arguments.from_measurement
-
+        if self.arguments.from_country:
+            r["type"] = "country"
+            r["value"] = self.arguments.from_country
+        elif self.arguments.from_area:
+            r["type"] = "area"
+            r["value"] = self.arguments.from_area
+        elif self.arguments.from_prefix:
+            r["type"] = "prefix"
+            r["value"] = self.arguments.from_prefix
+        elif self.arguments.from_asn:
+            r["type"] = "asn"
+            r["value"] = self.arguments.from_asn
+        elif self.arguments.from_probes:
+            r["type"] = "probes"
+            r["value"] = ",".join([str(_) for _ in self.arguments.from_probes])
+        elif self.arguments.from_measurement:
+            r["type"] = "msm"
+            r["value"] = self.arguments.from_measurement
 
         r["tags"] = {
             "include": self.arguments.include_tag or [],
