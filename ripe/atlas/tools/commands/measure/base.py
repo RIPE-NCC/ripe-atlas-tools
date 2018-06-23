@@ -16,6 +16,7 @@
 from __future__ import print_function, absolute_import
 
 import re
+import webbrowser
 
 from collections import OrderedDict
 
@@ -122,6 +123,11 @@ class Command(BaseCommand):
             help="Don't wait for a response from the measurement, just return "
                  "the URL at which you can later get information about the "
                  "measurement."
+        )
+        self.parser.add_argument(
+            "--go-web",
+            action="store_true",
+            help="Open the measurement in a webbrowser immediately."
         )
         self.parser.add_argument(
             "--set-alias",
@@ -256,6 +262,16 @@ class Command(BaseCommand):
             "Looking good!  Your measurement was created and details about "
             "it can be found here:\n\n  {0}".format(url)
         )
+        if self.arguments.go_web:
+            self.ok(
+                "Opening the url in the browser\n\n "
+            )
+            if not webbrowser.open(url):
+                self.ok(
+                    "It looks like your system doesn't have a web browser "
+                    "available.  You'll have to go there manually: {0}".format(url)
+                    )
+
 
         if self.arguments.set_alias:
             alias = self.arguments.set_alias
