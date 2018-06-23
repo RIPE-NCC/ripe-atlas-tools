@@ -455,13 +455,14 @@ class Command(BaseCommand):
 
         if response["error"]["status"] == 403:
             message = (
-            "There was a problem communicating with the RIPE Atlas "
-            "infrastructure. \nStatus is 403 so you probably need an API key. "
-            "Register and create API Keys at https://atlas.ripe.net/\n"
-            "Create the new key with the permission Create a new user "
-            "defined measurement and install using:\n\n"
-            "   ripe-atlas configure --set authorisation.create=MY_API_KEY\n\n"
-            "The message given was:\n\n  {}"
+                "There was a problem communicating with the RIPE Atlas "
+                "infrastructure. \nStatus is 403 so you probably need an API "
+                "key. Register and create API Keys at "
+                "https://atlas.ripe.net/\n"
+                "Create the new key with the permission Create a new user "
+                "defined measurement and install using:\n\n"
+                "   ripe-atlas configure --set authorisation.create=MY_API_KEY\n\n"
+                "The message given was:\n\n  {}"
             ).format(error_detail)
 
         raise RipeAtlasToolsException(message)
