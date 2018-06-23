@@ -294,7 +294,7 @@ Options
 ==================  ==================  ========================================
 Option              Arguments           Explanation
 ==================  ==================  ========================================
-``--auth``          RIPE Atlas key      One of the RIPE Atlas key alias 
+``--auth``          RIPE Atlas key      One of the RIPE Atlas key alias
                     alias               configured for results fetching.
 
 ``--probes``        A comma-separated   Limit the report to only results
@@ -384,7 +384,7 @@ Options
 ==================  ==================  ========================================
 Option              Arguments           Explanation
 ==================  ==================  ========================================
-``--auth``          RIPE Atlas key      One of the RIPE Atlas key alias 
+``--auth``          RIPE Atlas key      One of the RIPE Atlas key alias
                     alias               configured for results fetching.
 
 ``--limit``         A number < 1000     The maximum number of results you want
@@ -479,9 +479,12 @@ Option                  Arguments           Explanation
                                             which you can later get information
                                             about the measurement.
 
-``--resolve-on-probe``                      Flag that indicates that a name 
-                                            should be resolved (using DNS) on 
-                                            the probe. Otherwise it will be 
+``--go-web``                                Don't wait for a response from the
+                                            measurement, just immediately open the measurement URL in the default web browser.
+
+``--resolve-on-probe``                      Flag that indicates that a name
+                                            should be resolved (using DNS) on
+                                            the probe. Otherwise it will be
                                             resolved on the RIPE Atlas servers.
 
 ``--interval``          An integer          Rather than run this measurement as
