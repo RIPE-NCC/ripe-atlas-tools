@@ -389,11 +389,11 @@ class Command(BaseCommand):
         # probe search so that we can get the intersection of the criteria.
         #
         # This initial version is a tad hacky.
-        criteria = itertools.takewhile(lambda x: x,
-                                       [self.arguments.from_country,
-                                        self.arguments.from_prefix,
-                                        self.arguments.from_asn,
-                                        self.arguments.from_probes])
+        criteria = list(itertools.takewhile(lambda x: x,
+                                            [self.arguments.from_country,
+                                             self.arguments.from_prefix,
+                                             self.arguments.from_asn,
+                                             self.arguments.from_probes]))
         if len(criteria) > 1:
             probes = []
             filters = {}
