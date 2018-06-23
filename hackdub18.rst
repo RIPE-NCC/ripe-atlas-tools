@@ -6,6 +6,8 @@ Dublin Hackathon 2018
 * Make the three step pocess into a 1 step - run now process
 * awlx has a use-case with country select probes in region in as
 
+API key, beginning:
+11febf03-5190-47e5-882a-.........
 
 
 Original Project idea and description
@@ -28,3 +30,4 @@ Already existing stuff
 ======================
 - https://labs.ripe.net/Members/annika_wickert/using-ripe-atlas-to-monitor-game-service-connectivity
 - https://github.com/RIPE-Atlas-Community/ripe-atlas-community-contrib
+- https://github.com/emileaben/eyeballtrace                                                                                                - https://framagit.org/bortzmeyer/blaeu   
