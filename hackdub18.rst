@@ -6,6 +6,8 @@ Dublin Hackathon 2018
 * Make the three step pocess into a 1 step - run now process
 * awlx has a use-case with country select probes in region in as
 
+API key, beginning:
+11febf03-5190-47e5-882a-.........
 
 
 Original Project idea and description
