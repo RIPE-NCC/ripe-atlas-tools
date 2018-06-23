@@ -139,7 +139,7 @@ class Command(BaseCommand):
                  "implies --no-report."
         )
 
-        origins = self.parser.add_mutually_exclusive_group()
+        origins = self.parser.add_argument_group()
         origins.add_argument(
             "--from-area",
             type=str,
@@ -371,24 +371,27 @@ class Command(BaseCommand):
         r = conf["specification"]["source"]
 
         r["requested"] = self.arguments.probes
-        if self.arguments.from_country:
-            r["type"] = "country"
-            r["value"] = self.arguments.from_country
-        elif self.arguments.from_area:
-            r["type"] = "area"
-            r["value"] = self.arguments.from_area
-        elif self.arguments.from_prefix:
-            r["type"] = "prefix"
-            r["value"] = self.arguments.from_prefix
-        elif self.arguments.from_asn:
-            r["type"] = "asn"
-            r["value"] = self.arguments.from_asn
-        elif self.arguments.from_probes:
-            r["type"] = "probes"
-            r["value"] = ",".join([str(_) for _ in self.arguments.from_probes])
-        elif self.arguments.from_measurement:
-            r["type"] = "msm"
-            r["value"] = self.arguments.from_measurement
+        for param in self.arguments.__dict__:
+            if "from" in param:
+                if self.arguments.from_country:
+                    r["type"] = "country"
+                    r["value"] = self.arguments.from_country
+                elif self.arguments.from_area:
+                    r["type"] = "area"
+                    r["value"] = self.arguments.from_area
+                elif self.arguments.from_prefix:
+                    r["type"] = "prefix"
+                    r["value"] = self.arguments.from_prefix
+                elif self.arguments.from_asn:
+                    r["type"] = "asn"
+                    r["value"] = self.arguments.from_asn
+                elif self.arguments.from_probes:
+                    r["type"] = "probes"
+                    r["value"] = ",".join([str(_) for _ in self.arguments.from_probes])
+                elif self.arguments.from_measurement:
+                    r["type"] = "msm"
+                    r["value"] = self.arguments.from_measurement
+
 
         r["tags"] = {
             "include": self.arguments.include_tag or [],
