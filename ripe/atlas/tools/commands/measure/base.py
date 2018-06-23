@@ -272,7 +272,6 @@ class Command(BaseCommand):
                     "available.  You'll have to go there manually: {0}".format(url)
                     )
 
-
         if self.arguments.set_alias:
             alias = self.arguments.set_alias
             aliases["measurement"][alias] = pk
