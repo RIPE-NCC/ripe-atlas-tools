@@ -24,3 +24,9 @@ to minimise the amount of thinking you need to do to maximise the result of meas
    - tweak measurement parameters for fast results (1 probing per hop, reduce timeout vals?)
    - commandline results that are 'enriched' (show ASN, location, weirdnesses, nice short asn-names)
    - steal good parts from https://github.com/emileaben/eyeballtrace ? / use/extend bleau? https://labs.ripe.net/Members/stephane_bortzmeyer/creating-ripe-atlas-one-off-measurements-with-blaeu
+
+
+Already existing stuff
+======================
+- https://labs.ripe.net/Members/annika_wickert/using-ripe-atlas-to-monitor-game-service-connectivity
+- https://github.com/RIPE-Atlas-Community/ripe-atlas-community-contrib
