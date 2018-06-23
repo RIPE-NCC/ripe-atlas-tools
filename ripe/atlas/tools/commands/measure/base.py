@@ -15,7 +15,6 @@
 
 from __future__ import print_function, absolute_import
 
-import itertools
 import re
 import webbrowser
 
@@ -385,16 +384,20 @@ class Command(BaseCommand):
         return r
 
     def _get_source_kwargs(self):
+        r = conf["specification"]["source"]
+        r["requested"] = self.arguments.probes
+
         # Check if more than one criterion has been given. We need to do a
         # probe search so that we can get the intersection of the criteria.
-        #
-        # This initial version is a tad hacky.
-        criteria = list(itertools.takewhile(lambda x: x,
-                                            [self.arguments.from_country,
-                                             self.arguments.from_prefix,
-                                             self.arguments.from_asn,
-                                             self.arguments.from_probes]))
-        if len(criteria) > 1:
+        n_criteria = 0
+        for x in [self.arguments.from_country,
+                  self.arguments.from_prefix,
+                  self.arguments.from_asn,
+                  self.arguments.from_probes]:
+            if x is not None:
+                n_criteria += 1
+
+        if n_criteria > 1:
             probes = []
             filters = {}
             if self.arguments.from_country:
@@ -403,22 +406,16 @@ class Command(BaseCommand):
                 # XXX Support IPv6.
                 filters["prefix_v4"] = self.arguments.from_prefix
             if self.arguments.from_asn:
-                # XXX Support ANSv6.
-                filters["asn_v4"] = self.arguments.from_asn
+                filters["asn"] = str(self.arguments.from_asn)
             if self.arguments.from_probes:
                 for probe in self.arguments.from_probes:
                     probes.append(str(probe))
             for probe in ProbeRequest(**filters):
                 probes.append(probe["id"])
-            self.arguments.from_country = False
-            self.arguments.from_prefix = False
-            self.arguments.from_asn = False
-            self.arguments.from_probes = probes
-
-        r = conf["specification"]["source"]
-
-        r["requested"] = self.arguments.probes
-        if self.arguments.from_country:
+            if len(probes) > 0:
+                r["type"] = "probes"
+                r["value"] = ",".join(str(_) for _ in probes)
+        elif self.arguments.from_country:
             r["type"] = "country"
             r["value"] = self.arguments.from_country
         elif self.arguments.from_area:
