@@ -388,7 +388,7 @@ class Command(BaseCommand):
         # Check if more than one criterion has been given. We need to do a
         # probe search so that we can get the intersection of the criteria.
         #
-        # This initial version is a tad hacky. ¯\_(ツ)_/¯
+        # This initial version is a tad hacky.
         criteria = itertools.takewhile(lambda x: x,
                                        [self.arguments.from_country,
                                         self.arguments.from_prefix,
