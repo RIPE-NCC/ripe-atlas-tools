@@ -349,7 +349,7 @@ class Command(BaseCommand):
         target = self.clean_target()
 
         r = {
-            "af": self._get_af(),
+            "af": self._get_af(self.arguments.target),
             "description": self.clean_description(),
         }
 
@@ -403,8 +403,8 @@ class Command(BaseCommand):
             if self.arguments.from_country:
                 filters["country_code"] = self.arguments.from_country
             if self.arguments.from_prefix:
-                # XXX Support IPv6.
-                filters["prefix_v4"] = self.arguments.from_prefix
+                af = self._get_af(self.arguments.from_prefix)
+                filters["prefix_v{}".format(af)] = self.arguments.from_prefix
             if self.arguments.from_asn:
                 filters["asn"] = str(self.arguments.from_asn)
             if self.arguments.from_probes:
@@ -441,7 +441,7 @@ class Command(BaseCommand):
             "exclude": self.arguments.exclude_tag or []
         }
 
-        af = "ipv{}".format(self._get_af())
+        af = "ipv{}".format(self._get_af(self.arguments.target))
         kind = self._type
         spec = conf["specification"]
         for clude in ("in", "ex"):
@@ -452,17 +452,17 @@ class Command(BaseCommand):
 
         return r
 
-    def _get_af(self):
+    def _get_af(self, addr):
         """
         Returns the specified af, or a guessed one, or the configured one.  In
         that order.
         """
         if self.arguments.af:
             return self.arguments.af
-        if self.arguments.target:
-            if ":" in self.arguments.target:
+        if addr:
+            if ":" in addr:
                 return 6
-            if re.match(r"^\d+\.\d+\.\d+\.\d+$", self.arguments.target):
+            if re.match(r"^\d+\.\d+\.\d+\.\d+$", addr):
                 return 4
         return conf["specification"]["af"]
 
