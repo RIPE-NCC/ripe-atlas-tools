@@ -24,6 +24,7 @@ Contents
    :maxdepth: 2
 
    quickstart
+   healthcheck
    installation
    use
    plugins
