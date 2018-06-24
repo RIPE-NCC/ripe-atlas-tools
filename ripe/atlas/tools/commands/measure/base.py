@@ -16,11 +16,13 @@
 from __future__ import print_function, absolute_import
 
 import re
+import webbrowser
 
 from collections import OrderedDict
 
 from ripe.atlas.cousteau import (
-    Ping, Traceroute, Dns, Sslcert, Http, Ntp, AtlasSource, AtlasCreateRequest)
+    Ping, Traceroute, Dns, Sslcert, Http, Ntp, AtlasSource, AtlasCreateRequest,
+    ProbeRequest)
 
 from ...exceptions import RipeAtlasToolsException
 from ...helpers.colours import colourise
@@ -124,6 +126,11 @@ class Command(BaseCommand):
                  "measurement."
         )
         self.parser.add_argument(
+            "--go-web",
+            action="store_true",
+            help="Open the measurement in a webbrowser immediately."
+        )
+        self.parser.add_argument(
             "--set-alias",
             help="After creating the measurement, register an alias for it.",
             type=ArgumentType.alias_is_valid,
@@ -139,7 +146,7 @@ class Command(BaseCommand):
                  "implies --no-report."
         )
 
-        origins = self.parser.add_mutually_exclusive_group()
+        origins = self.parser.add_argument_group()
         origins.add_argument(
             "--from-area",
             type=str,
@@ -256,6 +263,16 @@ class Command(BaseCommand):
             "Looking good!  Your measurement was created and details about "
             "it can be found here:\n\n  {0}".format(url)
         )
+        if self.arguments.go_web:
+            self.ok(
+                "Opening the url in the browser\n\n "
+            )
+            if not webbrowser.open(url):
+                self.ok(
+                    "It looks like your system doesn't have a web browser "
+                    "available.  You'll have to go there manually: {0}".format(url)
+                    )
+
 
         if self.arguments.set_alias:
             alias = self.arguments.set_alias
@@ -332,7 +349,7 @@ class Command(BaseCommand):
         target = self.clean_target()
 
         r = {
-            "af": self._get_af(),
+            "af": self._get_af(self.arguments.target),
             "description": self.clean_description(),
         }
 
@@ -367,11 +384,40 @@ class Command(BaseCommand):
         return r
 
     def _get_source_kwargs(self):
-
         r = conf["specification"]["source"]
-
         r["requested"] = self.arguments.probes
-        if self.arguments.from_country:
+
+        # Check if more than one criterion has been given. We need to do a
+        # probe search so that we can get the intersection of the criteria.
+        n_criteria = 0
+        for x in [self.arguments.from_country,
+                  self.arguments.from_prefix,
+                  self.arguments.from_asn,
+                  self.arguments.from_probes]:
+            if x is not None:
+                n_criteria += 1
+
+        if n_criteria > 1:
+            probes = []
+            filters = {}
+            if self.arguments.from_country:
+                filters["country_code"] = self.arguments.from_country
+            if self.arguments.from_prefix:
+                af = self._get_af(self.arguments.from_prefix)
+                filters["prefix_v{}".format(af)] = self.arguments.from_prefix
+            if self.arguments.from_asn:
+                filters["asn"] = str(self.arguments.from_asn)
+            if self.arguments.from_probes:
+                for probe in self.arguments.from_probes:
+                    probes.append(str(probe))
+            for probe in ProbeRequest(**filters):
+                probes.append(probe["id"])
+            if len(probes) > 0:
+                if len(probes) > self.arguments.probes:
+                    del probes[self.arguments.probes-1:len(probes)-1]                    
+                r["type"] = "probes"
+                r["value"] = ",".join(str(_) for _ in probes)
+        elif self.arguments.from_country:
             r["type"] = "country"
             r["value"] = self.arguments.from_country
         elif self.arguments.from_area:
@@ -395,7 +441,7 @@ class Command(BaseCommand):
             "exclude": self.arguments.exclude_tag or []
         }
 
-        af = "ipv{}".format(self._get_af())
+        af = "ipv{}".format(self._get_af(self.arguments.target))
         kind = self._type
         spec = conf["specification"]
         for clude in ("in", "ex"):
@@ -406,17 +452,17 @@ class Command(BaseCommand):
 
         return r
 
-    def _get_af(self):
+    def _get_af(self, addr):
         """
         Returns the specified af, or a guessed one, or the configured one.  In
         that order.
         """
         if self.arguments.af:
             return self.arguments.af
-        if self.arguments.target:
-            if ":" in self.arguments.target:
+        if addr:
+            if ":" in addr:
                 return 6
-            if re.match(r"^\d+\.\d+\.\d+\.\d+$", self.arguments.target):
+            if re.match(r"^\d+\.\d+\.\d+\.\d+$", addr):
                 return 4
         return conf["specification"]["af"]
 
