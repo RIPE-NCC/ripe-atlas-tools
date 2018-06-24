@@ -22,6 +22,7 @@ import re
 import six
 import sys
 
+from ..helpers import xdg
 from ..helpers.colours import colourise
 from ..version import __version__
 
@@ -81,10 +82,7 @@ class Command(object):
 
     @classmethod
     def _get_user_command_path(cls):
-        user_base_path = os.path.join(
-            os.path.expanduser("~"), ".config", "ripe-atlas-tools",
-        )
-        return os.path.join(user_base_path, "commands")
+        return os.path.join(xdg.get_config_home(), "commands")
 
     @classmethod
     def _load_commands(cls):

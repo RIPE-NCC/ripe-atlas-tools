@@ -19,6 +19,7 @@ import pkgutil
 import sys
 
 from ..exceptions import RipeAtlasToolsException
+from ..helpers import xdg
 
 
 class Renderer(object):
@@ -51,8 +52,7 @@ class Renderer(object):
 
         paths = [os.path.dirname(__file__)]
         if "HOME" in os.environ:
-            path = os.path.join(
-                os.environ["HOME"], ".config", "ripe-atlas-tools")
+            path = xdg.get_config_home()
             sys.path.append(path)
             paths += [os.path.join(path, "renderers")]
 

@@ -19,11 +19,12 @@ import os
 import re
 import yaml
 
+from ..helpers import xdg
+
 
 class UserSettingsParser(object):
 
-    USER_CONFIG_DIR = os.path.join(
-        os.path.expanduser("~"), ".config", "ripe-atlas-tools")
+    USER_CONFIG_DIR = xdg.get_config_home()
 
     USER_RC = None
 
