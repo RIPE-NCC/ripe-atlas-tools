@@ -413,6 +413,8 @@ class Command(BaseCommand):
             for probe in ProbeRequest(**filters):
                 probes.append(probe["id"])
             if len(probes) > 0:
+                if len(probes) > self.arguments.probes:
+                    del probes[self.arguments.probes-1:len(probes)-1]                    
                 r["type"] = "probes"
                 r["value"] = ",".join(str(_) for _ in probes)
         elif self.arguments.from_country:
