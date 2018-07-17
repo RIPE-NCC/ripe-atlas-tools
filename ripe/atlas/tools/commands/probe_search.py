@@ -510,20 +510,6 @@ class Command(TabularFieldsMixin, BaseCommand):
         return r
 
     def _get_line(self, probe):
-        """
-        Python 2 and 3 differ on how to render strings with non-ascii characters
-        in them, so we have to accommodate both here.
-        """
-
-        if six.PY2:
-
-            return colourise(
-                self._get_line_format().format(
-                    *self._get_line_items(probe)
-                ).encode("utf-8"),
-                self._get_colour_from_status(probe.status)
-            )
-
         return colourise(
             self._get_line_format().format(*self._get_line_items(probe)),
             self._get_colour_from_status(probe.status)

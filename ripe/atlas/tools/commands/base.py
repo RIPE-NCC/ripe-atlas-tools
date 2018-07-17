@@ -19,7 +19,6 @@ import importlib
 import os
 import pkgutil
 import re
-import six
 import sys
 
 from ..helpers.colours import colourise
@@ -291,9 +290,6 @@ class MetaDataMixin(object):
 
         checkmark = u"\u2714"
         x = u"\u2718"
-        if six.PY2:
-            checkmark = checkmark.encode("utf-8")
-            x = x.encode("utf-8")
 
         if boolean:
             return colourise(checkmark, "green")
@@ -302,15 +298,15 @@ class MetaDataMixin(object):
     @staticmethod
     def _prettify_time(dtime):
         if isinstance(dtime, datetime):
-            return "{} UTC".format(
+            return u"{} UTC".format(
                 dtime.isoformat().replace("T", " "))
 
         return str(dtime)
 
     @staticmethod
     def _render_line(header, value):
-        print("{}  {}".format(
-            colourise("{:25}".format(header), "bold"), value))
+        print(u"{}  {}".format(
+            colourise(u"{:25}".format(header), "bold"), value))
 
 
 class Factory(object):
