@@ -239,7 +239,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         else:
 
             for probe in truncated_probes:
-                print(self._get_line(probe).encode("utf8"))
+                print(self._get_line(probe))
 
         print(colourise(hr, "bold"))
 
@@ -272,7 +272,8 @@ class Command(TabularFieldsMixin, BaseCommand):
         elif isinstance(aggregation_data, list):
 
             for index, probe in enumerate(aggregation_data):
-                print(" {}".format(self._get_line(probe)).encode("utf8"))
+                print(" ", end="")
+                print(self._get_line(probe))
                 if self.arguments.max_per_aggregation:
                     if index >= self.arguments.max_per_aggregation - 1:
                         break
@@ -510,15 +511,23 @@ class Command(TabularFieldsMixin, BaseCommand):
 
     def _get_line(self, probe):
         """
-        Returns a utf8 encode string safe for printing and outputing
-        to files.
+        Python 2 and 3 differ on how to render strings with non-ascii characters
+        in them, so we have to accommodate both here.
         """
-        log = colourise(
+
+        if six.PY2:
+
+            return colourise(
+                self._get_line_format().format(
+                    *self._get_line_items(probe)
+                ).encode("utf-8"),
+                self._get_colour_from_status(probe.status)
+            )
+
+        return colourise(
             self._get_line_format().format(*self._get_line_items(probe)),
             self._get_colour_from_status(probe.status)
         )
-
-        return log
 
     def _get_filter_key_value_pair(self, k, v):
         if k == "country_code":
