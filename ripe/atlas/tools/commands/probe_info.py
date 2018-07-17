@@ -72,8 +72,7 @@ class Command(MetaDataMixin, BaseCommand):
 
         print(colourise("Tags", "bold"))
         for tag in probe.tags:
-            log_tag = "  {}".format(tag["slug"])
-            print(log_tag.encode("utf8"))
+            print("  {}".format(tag["slug"]))
 
     @staticmethod
     def _prettify_coordinates(geometry):
