@@ -1,5 +1,21 @@
 Release History
 ===============
+2.3.0 (released 2018-11-23)
+---------------------------
+
+Features and changes
+~~~~~~~~~~~~~~~~~~~~
+- Add result date and time to traceroute, NTP and SSL renderers
+- Add support for specifying measurement tags on measurement creation
+- Add option (--go-web) to open measurement URL in browser
+- Nicer presentation of 403 errors from the API
+- Official supported Python versions changed to 2.7, 3.4, 3.5, 3.6 and 3.7
+
+Bug Fixes
+~~~~~~~~~
+- Fix cousteau/sagan dependencies
+
+
 2.2.3 (released 2017-01-17)
 ---------------------------
 
