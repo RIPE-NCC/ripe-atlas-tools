@@ -127,6 +127,7 @@ class Configuration(UserSettingsParser):
                     "set-rd-bit": True,
                     "retry": 0,
                     "timeout": None,
+		    "tls": False,
                 },
                 "http": {
                     "header-bytes": 0,

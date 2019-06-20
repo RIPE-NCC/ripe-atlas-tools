@@ -113,6 +113,12 @@ class DnsMeasureCommand(Command):
             type=ArgumentType.integer_range(minimum=100, maximum=30000),
             help="Per packet timeout in milliseconds",
         )
+        specific.add_argument(
+            "--tls",
+            action="store_true",
+            default=conf["specification"]["types"]["dns"]["tls"],
+            help="Send query using DNS-over-TLS"
+        )
 
     def clean_target(self):
         """
@@ -145,6 +151,7 @@ class DnsMeasureCommand(Command):
         r["retry"] = self.arguments.retry
         r["udp_payload_size"] = self.arguments.udp_payload_size
         r["use_probe_resolver"] = "target" not in r
+	r["tls"] = self.arguments.tls
         if self.arguments.timeout is not None:
             r["timeout"] = self.arguments.timeout
 
