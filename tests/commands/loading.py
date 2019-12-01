@@ -71,7 +71,7 @@ class TestCommandLoading(unittest.TestCase):
         available_commands = Command.get_available_commands()
 
         # Check that we have the command list that we expect
-        self.assertEquals(
+        self.assertEqual(
             sorted(available_commands),
             sorted(
                 [b.replace('-', '_') for b in self.expected_builtins] +
@@ -84,12 +84,12 @@ class TestCommandLoading(unittest.TestCase):
             self.assertIn(expected_builtin.replace("-", "_"), available_commands)
             cmd_cls = Command.load_command_class(expected_builtin)
             self.assertIsNotNone(cmd_cls)
-            self.assertEquals(cmd_cls.get_name(), expected_builtin)
+            self.assertEqual(cmd_cls.get_name(), expected_builtin)
 
         # Check that we can load the user command
         user_cmd_cls = Command.load_command_class("user-command-1")
         self.assertIsNotNone(user_cmd_cls)
-        self.assertEquals(user_cmd_cls.get_name(), "user-command-1")
+        self.assertEqual(user_cmd_cls.get_name(), "user-command-1")
 
         # Check that load_command_class() returns None for junk commands
         unexpected_cmd = Command.load_command_class("no-such-command")
@@ -115,6 +115,6 @@ class TestCommandLoading(unittest.TestCase):
                     sys.stderr.getvalue(),
                 )
                 self.assertIsNotNone(cmd_cls)
-                self.assertEquals(cmd_cls.get_name(), cmd_name)
+                self.assertEqual(cmd_cls.get_name(), cmd_name)
         finally:
             sys.stderr = stderr

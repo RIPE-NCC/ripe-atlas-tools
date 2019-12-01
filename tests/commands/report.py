@@ -283,7 +283,7 @@ class TestReportCommand(unittest.TestCase):
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["1"])
                     self.cmd.run()
-                    self.assertEquals(
+                    self.assertEqual(
                         stdout.getvalue(), self.expected_output_no_aggr
                     )
 
@@ -339,7 +339,7 @@ class TestReportCommand(unittest.TestCase):
                     self.cmd.run()
                     expected_set = set(expected_output.split("\n"))
                     returned_set = set(stdout.getvalue().split("\n"))
-                    self.assertEquals(returned_set, expected_set)
+                    self.assertEqual(returned_set, expected_set)
 
     def test_asns_filter(self):
         """Test case where user specified probe asns filters.."""
@@ -380,7 +380,7 @@ class TestReportCommand(unittest.TestCase):
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["1", "--probe-asns", "3334"])
                     self.cmd.run()
-                    self.assertEquals(stdout.getvalue(), expected_output)
+                    self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_user_agent(self):
         standard = "RIPE Atlas Tools (Magellan) {}".format(__version__)

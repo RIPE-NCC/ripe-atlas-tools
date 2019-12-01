@@ -48,28 +48,28 @@ class TestAggregatePing(unittest.TestCase):
             "rtt min/med/avg/max = 36.921608/42.406/82.693/218.077484 ms\n\n"
         )
 
-        self.assertEquals(Renderer().additional(self.sagans), expected_output)
+        self.assertEqual(Renderer().additional(self.sagans), expected_output)
 
     def test_collect_stats(self):
         """Tests collect stats function."""
 
         renderer = Renderer()
         renderer.collect_stats(self.sagans)
-        self.assertEquals(
+        self.assertEqual(
             renderer.rtts,
             [
                 42.343, 42.22, 42.406, 76.611, 76.39, 76.474, 154.118, 154.197,
                 154.845, 42.264, 42.196, 42.343, 218.077, 36.922, 38.994
             ]
         )
-        self.assertEquals(renderer.target, "194.88.241.228")
-        self.assertEquals(renderer.sent_packets, 15)
-        self.assertEquals(renderer.received_packets, 15)
-        self.assertEquals(
+        self.assertEqual(renderer.target, "194.88.241.228")
+        self.assertEqual(renderer.sent_packets, 15)
+        self.assertEqual(renderer.received_packets, 15)
+        self.assertEqual(
             renderer.rtts_min,
             [42.220215, 76.38997, 154.118, 42.196233, 36.921608]
         )
-        self.assertEquals(
+        self.assertEqual(
             renderer.rtts_max,
             [42.40614, 76.61127, 154.845, 42.342921, 218.077484]
         )
@@ -78,14 +78,14 @@ class TestAggregatePing(unittest.TestCase):
         """Test use cases for collecting min max rtts."""
         renderer = Renderer()
         renderer.collect_min_max_rtts("min", 3)
-        self.assertEquals(renderer.rtts_min, [3])
+        self.assertEqual(renderer.rtts_min, [3])
         renderer.collect_min_max_rtts("min", None)
-        self.assertEquals(renderer.rtts_min, [3, 0])
+        self.assertEqual(renderer.rtts_min, [3, 0])
 
         renderer.collect_min_max_rtts("max", 3)
-        self.assertEquals(renderer.rtts_max, [3])
+        self.assertEqual(renderer.rtts_max, [3])
         renderer.collect_min_max_rtts("max", None)
-        self.assertEquals(renderer.rtts_max, [3, 0])
+        self.assertEqual(renderer.rtts_max, [3, 0])
 
     def test_collect_packets_rtt(self):
         """Test use cases for collecting rtts."""
@@ -93,12 +93,12 @@ class TestAggregatePing(unittest.TestCase):
         packets = [Packet(rtt=2), Packet(rtt=3.2), Packet(rtt=5.0)]
         renderer = Renderer()
         renderer.collect_packets_rtt(packets)
-        self.assertEquals(renderer.rtts, [2, 3.2, 5.0])
+        self.assertEqual(renderer.rtts, [2, 3.2, 5.0])
 
         packets = [Packet(rtt=None), Packet(rtt=3.2), Packet(rtt=5.0)]
         renderer = Renderer()
         renderer.collect_packets_rtt(packets)
-        self.assertEquals(renderer.rtts, [0, 3.2, 5.0])
+        self.assertEqual(renderer.rtts, [0, 3.2, 5.0])
 
     def test_set_target(self):
         """Tests setting the target."""
@@ -106,41 +106,41 @@ class TestAggregatePing(unittest.TestCase):
         renderer = Renderer()
         sagan = Sagan(destination_name="1")
         renderer.set_target(sagan)
-        self.assertEquals(renderer.target, "1")
+        self.assertEqual(renderer.target, "1")
         sagan = Sagan(destination_name="2")
         renderer.set_target(sagan)
-        self.assertEquals(renderer.target, "1")
+        self.assertEqual(renderer.target, "1")
 
     def test_calculate_loss(self):
         """Test use cases for calculating loss."""
         renderer = Renderer()
         renderer.sent_packets = 10
         renderer.received_packets = 9
-        self.assertEquals(renderer.calculate_loss(), 9.999999999999998)
+        self.assertEqual(renderer.calculate_loss(), 9.999999999999998)
         renderer.sent_packets = 0
-        self.assertEquals(renderer.calculate_loss(), 0)
+        self.assertEqual(renderer.calculate_loss(), 0)
         renderer.received_packets = 0
         renderer.sent_packets = 10
-        self.assertEquals(renderer.calculate_loss(), 100)
+        self.assertEqual(renderer.calculate_loss(), 100)
         renderer.received_packets = 5
-        self.assertEquals(renderer.calculate_loss(), 50)
+        self.assertEqual(renderer.calculate_loss(), 50)
 
     def test_mean(self):
         """Test use cases for calculating mean."""
         renderer = Renderer()
         renderer.rtts = [0, 2.0, 5.0, 20]
-        self.assertEquals(renderer.mean(), 6.75)
+        self.assertEqual(renderer.mean(), 6.75)
         renderer.rtts = [0, 2.0, 7.5, 5.0, 20]
-        self.assertEquals(renderer.mean(), 6.9)
+        self.assertEqual(renderer.mean(), 6.9)
         renderer.rtts = [0, 2.0, 7.5, 5.0, 20, 50]
-        self.assertEquals(renderer.mean(), 14.083)
+        self.assertEqual(renderer.mean(), 14.083)
 
     def test_median(self):
         """Test use cases for calculating median."""
         renderer = Renderer()
         renderer.rtts = [0, 2.0, 5.0, 20]
-        self.assertEquals(renderer.median(), 3.5)
+        self.assertEqual(renderer.median(), 3.5)
         renderer.rtts = [0, 2.0, 7.5, 5.0, 20]
-        self.assertEquals(renderer.median(), 5)
+        self.assertEqual(renderer.median(), 5)
         renderer.rtts = [0, 2.0, 7.5, 5.0, 20, 50]
-        self.assertEquals(renderer.median(), 6.25)
+        self.assertEqual(renderer.median(), 6.25)

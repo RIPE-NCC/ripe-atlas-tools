@@ -156,7 +156,7 @@ class TestProbesCommand(unittest.TestCase):
                     {"geometry": {"location": {"lat": 1, "lng": 2}}}]}
                 cmd = Command()
                 cmd.init_args(["--location", "blaaaa"])
-                self.assertEquals(cmd.build_request_args(), {'radius': '1,2:15'})
+                self.assertEqual(cmd.build_request_args(), {'radius': '1,2:15'})
 
     def test_location_arg_with_radius(self):
         """User passed location arg"""
@@ -168,7 +168,7 @@ class TestProbesCommand(unittest.TestCase):
                 ]}
                 cmd = Command()
                 cmd.init_args(["--location", "blaaaa", "--radius", "4"])
-                self.assertEquals(
+                self.assertEqual(
                     cmd.build_request_args(),
                     {"radius": "1,2:4"}
                 )
@@ -207,7 +207,7 @@ class TestProbesCommand(unittest.TestCase):
         """User passed all arguments"""
         cmd = Command()
         cmd.init_args(["--all"])
-        self.assertEquals(cmd.build_request_args(), {})
+        self.assertEqual(cmd.build_request_args(), {})
 
     def test_center_arg_wrong_value(self):
         """User passed center arg with wrong value"""
@@ -220,7 +220,7 @@ class TestProbesCommand(unittest.TestCase):
         """User passed center arg"""
         cmd = Command()
         cmd.init_args(["--center", "1,2"])
-        self.assertEquals(
+        self.assertEqual(
             cmd.build_request_args(),
             {"radius": "1,2:15"}
         )
@@ -229,26 +229,26 @@ class TestProbesCommand(unittest.TestCase):
         """User passed center and radius arg"""
         cmd = Command()
         cmd.init_args(["--center", "1,2", "--radius", "4"])
-        self.assertEquals(cmd.build_request_args(), {"radius": "1,2:4"})
+        self.assertEqual(cmd.build_request_args(), {"radius": "1,2:4"})
 
     def test_country_arg(self):
         """User passed country code arg"""
         cmd = Command()
         cmd.init_args(["--country", "GR"])
-        self.assertEquals(cmd.build_request_args(), {"country_code": "GR"})
+        self.assertEqual(cmd.build_request_args(), {"country_code": "GR"})
 
     def test_country_arg_with_radius(self):
         """User passed country code arg together with radius"""
         cmd = Command()
         cmd.init_args(["--country", "GR", "--radius", "4"])
-        self.assertEquals(cmd.build_request_args(), {"country_code": "GR"})
+        self.assertEqual(cmd.build_request_args(), {"country_code": "GR"})
 
     def test_status_arg(self):
         """User passed valid status arg."""
         for status in range(0, 3):
             cmd = Command()
             cmd.init_args(["--status", str(status)])
-            self.assertEquals(cmd.build_request_args(), {"status": status})
+            self.assertEqual(cmd.build_request_args(), {"status": status})
 
     def test_status_arg_wrong_value(self):
         """User passed status arg with wrong value"""
@@ -262,14 +262,14 @@ class TestProbesCommand(unittest.TestCase):
         """Sane tags"""
         cmd = Command()
         cmd.init_args(["--tag", "native-ipv6"])
-        self.assertEquals(
+        self.assertEqual(
             cmd.build_request_args(),
             {"tags": "native-ipv6"}
         )
 
         cmd = Command()
         cmd.init_args(["--tag", "native-ipv6", "--tag", "system-ipv4-works"])
-        self.assertEquals(
+        self.assertEqual(
             cmd.build_request_args(),
             {"tags": "native-ipv6,system-ipv4-works"}
         )
@@ -283,7 +283,7 @@ class TestProbesCommand(unittest.TestCase):
             "--asnv4", "3333",
             "--prefix", "193.0.0.0/21"
         ])
-        self.assertEquals(
+        self.assertEqual(
             cmd.build_request_args(),
             {'asn_v4': 3333, 'prefix': '193.0.0.0/21', 'radius': '1,2:4'}
         )
@@ -301,7 +301,7 @@ class TestProbesCommand(unittest.TestCase):
         path = '{}.Command.location2degrees'.format(COMMAND_MODULE)
         with mock.patch(path) as mock_get:
             mock_get.return_value = (1, 2)
-            self.assertEquals(cmd.build_request_args(), {
+            self.assertEqual(cmd.build_request_args(), {
                 'asn': 3333,
                 'prefix_v4': '193.0.0.0/21',
                 'radius': '1,2:15'
@@ -316,7 +316,7 @@ class TestProbesCommand(unittest.TestCase):
             "--asnv6", "3333",
             "--prefixv6", "2001:67c:2e8::/48"
         ])
-        self.assertEquals(cmd.build_request_args(), {
+        self.assertEqual(cmd.build_request_args(), {
             'asn_v6': 3333,
             'prefix_v6': '2001:67c:2e8::/48',
             'radius': '1,2:15'
@@ -335,7 +335,7 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                self.assertEquals(stdout.getvalue(), "1\n2\n3\n4\n5\n")
+                self.assertEqual(stdout.getvalue(), "1\n2\n3\n4\n5\n")
 
     def test_render_ids_only_with_limit(self):
         """User passed ids_only arg together with limit, testing rendering"""
@@ -351,7 +351,7 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                self.assertEquals(stdout.getvalue(), "1\n2\n")
+                self.assertEqual(stdout.getvalue(), "1\n2\n")
 
     def test_render_ids_only_with_aggr(self):
         """
@@ -369,7 +369,7 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                self.assertEquals(stdout.getvalue(), "1\n2\n3\n4\n5\n")
+                self.assertEqual(stdout.getvalue(), "1\n2\n3\n4\n5\n")
 
     def test_get_aggregators(self):
         """User passed --aggregate-by args"""
@@ -387,7 +387,7 @@ class TestProbesCommand(unittest.TestCase):
         cmd.set_aggregators()
         for index, v in enumerate(cmd.aggregators):
             self.assertTrue(isinstance(v, ValueKeyAggregator))
-            self.assertEquals(
+            self.assertEqual(
                 v.aggregation_keys,
                 expected_output[index].aggregation_keys
             )
@@ -420,7 +420,7 @@ class TestProbesCommand(unittest.TestCase):
                     "                Showing 4 of 4 total probes",
                     "",
                 ]
-                self.assertEquals(set(stdout.getvalue().split("\n")), set(expected_output))
+                self.assertEqual(set(stdout.getvalue().split("\n")), set(expected_output))
 
     def test_render_without_aggregation_with_limit(self):
         """Tests rendering of results without aggregation but with limit"""
@@ -449,7 +449,7 @@ class TestProbesCommand(unittest.TestCase):
                     "                Showing 2 of 4 total probes",
                     ""
                 ]
-                self.assertEquals(set(stdout.getvalue().split("\n")), set(expected_output))
+                self.assertEqual(set(stdout.getvalue().split("\n")), set(expected_output))
 
     def test_render_with_aggregation(self):
         """Tests rendering of results with aggregation"""
@@ -499,7 +499,7 @@ class TestProbesCommand(unittest.TestCase):
                 out = stdout.getvalue()
                 expected_set = set(expected_blob)
                 returned_set = set(out.split("\n"))
-                self.assertEquals(returned_set, expected_set)
+                self.assertEqual(returned_set, expected_set)
 
     def test_render_with_aggregation_with_limit(self):
         """Tests rendering of results with aggregation with limit"""
@@ -534,7 +534,7 @@ class TestProbesCommand(unittest.TestCase):
                 ]
                 expected_set = set(expected_output)
                 returned_set = set(stdout.getvalue().split("\n"))
-                self.assertEquals(returned_set, expected_set)
+                self.assertEqual(returned_set, expected_set)
 
     def test_render_with_aggregation_with_max_per_aggr(self):
         """
@@ -584,4 +584,4 @@ class TestProbesCommand(unittest.TestCase):
                 ]
                 expected_set = set(expected_output)
                 returned_set = set(stdout.getvalue().split("\n"))
-                self.assertEquals(returned_set, expected_set)
+                self.assertEqual(returned_set, expected_set)

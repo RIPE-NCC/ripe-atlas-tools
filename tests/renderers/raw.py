@@ -83,4 +83,4 @@ class TestRawRenderer(unittest.TestCase):
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["1", "--renderer", "raw"])
                     self.cmd.run()
-                    self.assertEquals(stdout.getvalue(), expected_output)
+                    self.assertEqual(stdout.getvalue(), expected_output)
