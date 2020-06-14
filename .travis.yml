@@ -2,10 +2,11 @@ language: python
 sudo: false
 env:
   - TOXENV=py27
-  - TOXENV=py34
   - TOXENV=py27-pyflakes
   - TOXENV=py27-pep8
   - TOXENV=py27-coverage
+  - TOXENV=py35
+  - TOXENV=py35-syntax
 install:
   - pip install tox
   - pip install coveralls
