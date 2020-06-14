@@ -43,6 +43,7 @@ setup(
     tests_require=[
         "nose",
         "coverage",
+        "mock==3.0.5",
     ],
     extras_require={
         "doc": ["sphinx", "sphinx_rtd_theme"],
