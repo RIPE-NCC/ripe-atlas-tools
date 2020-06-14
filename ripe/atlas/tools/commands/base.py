@@ -304,10 +304,7 @@ class MetaDataMixin(object):
 
     @staticmethod
     def _render_line(header, value):
-        # Make sure we don't mix unicode and strings
-        if six.PY2 and isinstance(value, six.string_types):
-            value = unicode(value)
-
+        value = six.text_type(value)
         log = u"{}  {}".format(colourise("{:25}".format(header), "bold"), value).encode("utf-8")
         print(log)
 
