@@ -7,8 +7,9 @@ python:
 sudo: false
 install:
   - pip install tox
-  - pip install coveralls
+  # - pip install coveralls
 script:
-  tox
-after_success:
-  coveralls --verbose
+  tox -e py
+dist: bionic
+# after_success:
+#  coveralls --verbose
