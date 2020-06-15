@@ -38,9 +38,7 @@ class Colour(object):
 
     @classmethod
     def _colourise(cls, text, colour):
-        # Make sure we don't mix unicode and strings
-        if six.PY2 and isinstance(text, six.string_types):
-            text = unicode(text)
+        text = six.text_type(text)
 
         return u"{}[{}m{}{}[0m".format(chr(0x1b), colour, text, chr(0x1b))
 

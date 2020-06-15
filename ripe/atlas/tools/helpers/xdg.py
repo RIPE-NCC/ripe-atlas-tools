@@ -13,23 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import six
+import os
+import os.path
 
-FORBIDDEN = dict((i, None) for i in list(range(0, 32)) + [127])
 
-
-def sanitise(s, strip_newlines=True):
+def get_config_home():
     """
-    Strip out control characters to prevent people from screwing with the output
     """
-
-    if not isinstance(s, six.string_types):
-        return s
-
-    s = six.text_type(s)
-
-    if not strip_newlines:
-        return s.translate(
-            dict((k, v) for k, v in FORBIDDEN.items() if not k == 10))
-
-    return s.translate(FORBIDDEN)
+    config_home = os.environ.get("XDG_CONFIG_HOME")
+    if config_home is None:
+        config_home = os.path.expanduser("~/.config")
+    return os.path.join(config_home, "ripe-atlas-tools")
