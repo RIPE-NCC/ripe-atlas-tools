@@ -124,5 +124,5 @@ class Rendering(object):
         elif isinstance(data, dict):
 
             for k, v in data.items():
-                print(u"{}{}".format(indent, k))
+                print("{}{}".format(indent, k))
                 self._smart_render(v, indent=indent + " ")
