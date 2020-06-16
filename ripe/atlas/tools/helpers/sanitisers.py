@@ -23,7 +23,7 @@ def sanitise(s, strip_newlines=True):
     if isinstance(s, bytes):
         s = s.decode("utf-8")
     if not isinstance(s, str):
-        return
+        return s
 
     if not strip_newlines:
         return s.translate(
