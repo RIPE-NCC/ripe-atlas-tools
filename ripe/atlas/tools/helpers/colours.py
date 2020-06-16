@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import six
 COLOURS_AVAILABLE = False
 try:
     # We use curses to detect ANSI colour support
@@ -38,8 +37,6 @@ class Colour(object):
 
     @classmethod
     def _colourise(cls, text, colour):
-        text = six.text_type(text)
-
         return u"{}[{}m{}{}[0m".format(chr(0x1b), colour, text, chr(0x1b))
 
     @classmethod

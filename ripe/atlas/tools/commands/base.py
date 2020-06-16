@@ -19,7 +19,6 @@ import importlib
 import os
 import pkgutil
 import re
-import six
 import sys
 
 from ..helpers import xdg
@@ -297,16 +296,15 @@ class MetaDataMixin(object):
     @staticmethod
     def _prettify_time(dtime):
         if isinstance(dtime, datetime):
-            return "{} UTC".format(
+            return u"{} UTC".format(
                 dtime.isoformat().replace("T", " "))
 
         return str(dtime)
 
     @staticmethod
     def _render_line(header, value):
-        value = six.text_type(value)
-        log = u"{}  {}".format(colourise("{:25}".format(header), "bold"), value).encode("utf-8")
-        print(log)
+        print(u"{}  {}".format(
+            colourise(u"{:25}".format(header), "bold"), value))
 
 
 class Factory(object):
