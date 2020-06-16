@@ -16,6 +16,7 @@
 from __future__ import print_function, absolute_import
 
 import re
+import webbrowser
 
 from collections import OrderedDict
 
@@ -122,6 +123,11 @@ class Command(BaseCommand):
             help="Don't wait for a response from the measurement, just return "
                  "the URL at which you can later get information about the "
                  "measurement."
+        )
+        self.parser.add_argument(
+            "--go-web",
+            action="store_true",
+            help="Open the measurement in a webbrowser immediately."
         )
         self.parser.add_argument(
             "--set-alias",
@@ -256,6 +262,15 @@ class Command(BaseCommand):
             "Looking good!  Your measurement was created and details about "
             "it can be found here:\n\n  {0}".format(url)
         )
+        if self.arguments.go_web:
+            self.ok(
+                "Opening the url in the browser\n\n "
+            )
+            if not webbrowser.open(url):
+                self.ok(
+                    "It looks like your system doesn't have a web browser "
+                    "available.  You'll have to go there manually: {0}".format(url)
+                    )
 
         if self.arguments.set_alias:
             alias = self.arguments.set_alias
@@ -447,6 +462,18 @@ class Command(BaseCommand):
 
         if isinstance(response, dict) and "detail" in response:
             error_detail = response["detail"]
+
+            if response.get("error", {}).get("status") == 403:
+                message = (
+                    "There was a problem communicating with the RIPE Atlas "
+                    "infrastructure. \nStatus is 403 so you probably need an API "
+                    "key. Register and create API Keys at "
+                    "https://atlas.ripe.net/\n"
+                    "Create the new key with the permission Create a new user "
+                    "defined measurement and install using:\n\n"
+                    "   ripe-atlas configure --set authorisation.create=MY_API_KEY\n\n"
+                    "The message given was:\n\n  {}"
+                ).format(error_detail)
 
         message = (
             "There was a problem communicating with the RIPE Atlas "

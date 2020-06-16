@@ -28,6 +28,8 @@ try:
 except ImportError:
     import dbm  # ... and on Python3 dbm does the same
 
+from .helpers import xdg
+
 
 class LocalCache(object):
     """
@@ -110,8 +112,7 @@ class LocalCache(object):
 
         db_path = os.path.join("/", "tmp", file_name)
         if "HOME" in os.environ:
-            db_path = os.path.join(
-                os.environ["HOME"], ".config", "ripe-atlas-tools", file_name)
+            db_path = os.path.join(xdg.get_config_home(), file_name)
 
         try:
             os.makedirs(os.path.dirname(db_path))

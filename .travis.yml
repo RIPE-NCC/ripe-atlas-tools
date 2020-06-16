@@ -1,15 +1,19 @@
 language: python
-sudo: false
-env:
-  - TOXENV=py27
-  - TOXENV=py34
-  - TOXENV=py27-pyflakes
-  - TOXENV=py27-pep8
-  - TOXENV=py27-coverage
+os: linux
+dist: bionic
+python:
+ - 3.6
+ - 3.7
+ - 3.8
+jobs:
+  include:
+    -
+      python: 3.5
+      dist: xenial
 install:
   - pip install tox
-  - pip install coveralls
+  # - pip install coveralls
 script:
-  tox
-after_success:
-  coveralls --verbose
+  tox -e py
+# after_success:
+#  coveralls --verbose

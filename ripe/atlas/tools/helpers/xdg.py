@@ -13,4 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = "2.3.0"
+import os
+import os.path
+
+
+def get_config_home():
+    """
+    """
+    config_home = os.environ.get("XDG_CONFIG_HOME")
+    if config_home is None:
+        config_home = os.path.expanduser("~/.config")
+    return os.path.join(config_home, "ripe-atlas-tools")

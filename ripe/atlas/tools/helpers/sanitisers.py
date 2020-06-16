@@ -26,8 +26,7 @@ def sanitise(s, strip_newlines=True):
     if not isinstance(s, six.string_types):
         return s
 
-    if six.PY2:
-        s = unicode(s)
+    s = six.text_type(s)
 
     if not strip_newlines:
         return s.translate(
