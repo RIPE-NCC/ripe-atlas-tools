@@ -19,7 +19,6 @@ import importlib
 import os
 import pkgutil
 import re
-import six
 import sys
 
 from ..helpers import xdg
@@ -233,11 +232,11 @@ class TabularFieldsMixin(object):
         Python's string format mini language.  We later use this string to
         format the values for each row.
         """
-        r = u""
+        r = ""
         for field in self.arguments.field:
             if r:
-                r += u" "
-            r += (u"{!s:" + u"{}{}".format(*self.COLUMNS[field]) + u"}")
+                r += " "
+            r += ("{!s:" + u"{}{}".format(*self.COLUMNS[field]) + "}")
         return r
 
     def _get_header_names(self):
@@ -287,8 +286,8 @@ class MetaDataMixin(object):
     @staticmethod
     def _prettify_boolean(boolean):
 
-        checkmark = u"\u2714"
-        x = u"\u2718"
+        checkmark = "\u2714"
+        x = "\u2718"
 
         if boolean:
             return colourise(checkmark, "green")
@@ -304,9 +303,8 @@ class MetaDataMixin(object):
 
     @staticmethod
     def _render_line(header, value):
-        value = six.text_type(value)
-        log = u"{}  {}".format(colourise("{:25}".format(header), "bold"), value).encode("utf-8")
-        print(log)
+        print("{}  {}".format(
+            colourise("{:25}".format(header), "bold"), value))
 
 
 class Factory(object):

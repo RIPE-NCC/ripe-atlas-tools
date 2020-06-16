@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, absolute_import
-
 from ...exceptions import RipeAtlasToolsException
 from ..base import Factory as BaseFactory
 from .ping import PingMeasureCommand

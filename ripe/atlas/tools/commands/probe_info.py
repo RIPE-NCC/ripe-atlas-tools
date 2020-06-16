@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, absolute_import
-
 from ripe.atlas.cousteau import Probe
 from ripe.atlas.cousteau.exceptions import APIResponseError
 
@@ -72,8 +70,7 @@ class Command(MetaDataMixin, BaseCommand):
 
         print(colourise("Tags", "bold"))
         for tag in probe.tags:
-            log_tag = "  {}".format(tag["slug"])
-            print(log_tag.encode("utf8"))
+            print("  {}".format(tag["slug"]))
 
     @staticmethod
     def _prettify_coordinates(geometry):

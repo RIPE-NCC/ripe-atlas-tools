@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, absolute_import
-
 import itertools
 
 from ripe.atlas.cousteau import MeasurementRequest
@@ -147,10 +145,9 @@ class Command(TabularFieldsMixin, BaseCommand):
         print(colourise(hr, "bold"))
 
         for measurement in truncated_measurements:
-            lformat = self._get_line_format().format(*self._get_line_items(measurement))
-            lcolour = self._get_colour_from_status(measurement.status_id)
-            log = colourise(lformat, lcolour).encode("utf8")
-            print(log)
+            print(colourise(self._get_line_format().format(
+                *self._get_line_items(measurement)
+            ), self._get_colour_from_status(measurement.status_id)))
 
         print(colourise(hr, "bold"))
 

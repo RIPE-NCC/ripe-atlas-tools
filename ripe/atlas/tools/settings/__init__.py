@@ -32,7 +32,7 @@ class UserSettingsParser(object):
         r = copy.deepcopy(self.DEFAULT)
         if os.path.exists(self.USER_RC):
             with open(self.USER_RC) as y:
-                custom = yaml.load(y)
+                custom = yaml.load(y, Loader=yaml.FullLoader)
                 if custom:
                     r = self.deep_update(r, custom)
         return r

@@ -13,10 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, absolute_import
-
 import itertools
-import six
 import requests
 import sys
 
@@ -202,7 +199,7 @@ class Command(TabularFieldsMixin, BaseCommand):
                 "id", "asn_v4", "asn_v6", "country", "status")
 
         if self.arguments.all:
-            self.arguments.limit = sys.maxsize if six.PY3 else sys.maxint
+            self.arguments.limit = sys.maxsize
 
         filters = self.build_request_args()
 
@@ -239,7 +236,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         else:
 
             for probe in truncated_probes:
-                print(self._get_line(probe).encode("utf8"))
+                print(self._get_line(probe))
 
         print(colourise(hr, "bold"))
 
@@ -266,13 +263,14 @@ class Command(TabularFieldsMixin, BaseCommand):
                     else:
                         self.first_line_padding = True
 
-                print((u" " * indent) + colourise(k, "bold"))
+                print((" " * indent) + colourise(k, "bold"))
                 self.render_aggregation(v, indent=indent + 1)
 
         elif isinstance(aggregation_data, list):
 
             for index, probe in enumerate(aggregation_data):
-                print(" {}".format(self._get_line(probe)).encode("utf8"))
+                print(" ", end="")
+                print(self._get_line(probe))
                 if self.arguments.max_per_aggregation:
                     if index >= self.arguments.max_per_aggregation - 1:
                         break
@@ -468,12 +466,12 @@ class Command(TabularFieldsMixin, BaseCommand):
                     lng, lat = probe.geometry["coordinates"]
                 else:
                     lng, lat = UNK_COORDS
-                r.append(u"{},{}".format(lat, lng))
+                r.append("{},{}".format(lat, lng))
             elif field in ("is_public", "is_anchor"):
                 if getattr(probe, field):
-                    r.append(u"\u2714")  # Check mark
+                    r.append("\u2714")  # Check mark
                 else:
-                    r.append(u"\u2718")  # X
+                    r.append("\u2718")  # X
             else:
                 r.append(sanitise(getattr(probe, field)))
 
@@ -493,7 +491,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         r = TabularFieldsMixin._get_line_format(self)
         if not self.aggregators:
             return r
-        return (u" " * len(self.aggregators)) + r
+        return (" " * len(self.aggregators)) + r
 
     def _get_header_names(self):
         r = []
@@ -509,16 +507,10 @@ class Command(TabularFieldsMixin, BaseCommand):
         return r
 
     def _get_line(self, probe):
-        """
-        Returns a utf8 encode string safe for printing and outputing
-        to files.
-        """
-        log = colourise(
+        return colourise(
             self._get_line_format().format(*self._get_line_items(probe)),
             self._get_colour_from_status(probe.status)
         )
-
-        return log
 
     def _get_filter_key_value_pair(self, k, v):
         if k == "country_code":

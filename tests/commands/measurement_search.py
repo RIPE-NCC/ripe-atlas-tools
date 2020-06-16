@@ -95,23 +95,22 @@ class TestMeasurementsCommand(unittest.TestCase):
             cmd.init_args([])
             cmd.run()
 
-        expected_content = [
-            "",
-            "Id      Type       Description                                            Status",
-            "================================================================================",
-            str(b"1       ping       Description 1                                         Ongoing"),
-            str(b"2       ping       Description 2                                         Ongoing"),
-            str(b"3       ping       Description 3                                         Ongoing"),
-            str(b"4       ping       Description 4                                         Ongoing"),
-            str(b"5       ping       Description 5                                         Ongoing"),
-            "================================================================================",
-            "                                               Showing 5 of 5 total measurements",
-            "",
-        ]
-        self.maxDiff = None
+        expected_content = (
+            "\n"
+            "Id      Type       Description                                            Status\n"
+            "================================================================================\n"
+            "1       ping       Description 1                                         Ongoing\n"
+            "2       ping       Description 2                                         Ongoing\n"
+            "3       ping       Description 3                                         Ongoing\n"
+            "4       ping       Description 4                                         Ongoing\n"
+            "5       ping       Description 5                                         Ongoing\n"
+            "================================================================================\n"
+            "                                               Showing 5 of 5 total measurements\n"
+            "\n"
+        )
         self.assertEqual(
             set(stdout.getvalue().split("\n")),
-            set(expected_content)
+            set(expected_content.split("\n"))
         )
         self.assertEqual(
             cmd.arguments.field, ("id", "type", "description", "status"))

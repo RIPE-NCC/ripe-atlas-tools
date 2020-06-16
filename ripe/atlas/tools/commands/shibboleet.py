@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import, print_function
-
 import random
 import requests
 
@@ -73,9 +71,9 @@ class Command(BaseCommand):
         ).format("-" * 79)
 
         for contributor in self.get_contributors():
-            r += u"{name:20}  {changes:10}  {url}\n".format(**contributor)
+            r += "{name:20}  {changes:10}  {url}\n".format(**contributor)
 
-        print(u"{}{}{}\n".format(
+        print("{}{}{}\n".format(
             r,
             colourise(colourise(self.BOAT, "black"), "bold"),
             colourise(self.WATER, "blue")
