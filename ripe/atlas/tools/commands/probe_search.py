@@ -16,7 +16,6 @@
 from __future__ import print_function, absolute_import
 
 import itertools
-import six
 import requests
 import sys
 
@@ -202,7 +201,7 @@ class Command(TabularFieldsMixin, BaseCommand):
                 "id", "asn_v4", "asn_v6", "country", "status")
 
         if self.arguments.all:
-            self.arguments.limit = sys.maxsize if six.PY3 else sys.maxint
+            self.arguments.limit = sys.maxsize
 
         filters = self.build_request_args()
 

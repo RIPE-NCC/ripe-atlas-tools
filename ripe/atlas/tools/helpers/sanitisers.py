@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import six
-
 FORBIDDEN = dict((i, None) for i in list(range(0, 32)) + [127])
 
 
@@ -22,11 +20,10 @@ def sanitise(s, strip_newlines=True):
     """
     Strip out control characters to prevent people from screwing with the output
     """
-
-    if not isinstance(s, six.string_types):
-        return s
-
-    s = six.text_type(s)
+    if isinstance(s, bytes):
+        s = s.decode("utf-8")
+    if not isinstance(s, str):
+        return
 
     if not strip_newlines:
         return s.translate(
