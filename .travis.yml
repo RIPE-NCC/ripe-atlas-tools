@@ -12,8 +12,8 @@ jobs:
       dist: xenial
 install:
   - pip install tox
-  # - pip install coveralls
+  - pip install coveralls
 script:
-  tox -e py
-# after_success:
-#  coveralls --verbose
+  tox
+after_success:
+  coveralls --verbose
