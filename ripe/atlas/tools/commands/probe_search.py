@@ -263,7 +263,7 @@ class Command(TabularFieldsMixin, BaseCommand):
                     else:
                         self.first_line_padding = True
 
-                print((u" " * indent) + colourise(k, "bold"))
+                print((" " * indent) + colourise(k, "bold"))
                 self.render_aggregation(v, indent=indent + 1)
 
         elif isinstance(aggregation_data, list):
@@ -466,12 +466,12 @@ class Command(TabularFieldsMixin, BaseCommand):
                     lng, lat = probe.geometry["coordinates"]
                 else:
                     lng, lat = UNK_COORDS
-                r.append(u"{},{}".format(lat, lng))
+                r.append("{},{}".format(lat, lng))
             elif field in ("is_public", "is_anchor"):
                 if getattr(probe, field):
-                    r.append(u"\u2714")  # Check mark
+                    r.append("\u2714")  # Check mark
                 else:
-                    r.append(u"\u2718")  # X
+                    r.append("\u2718")  # X
             else:
                 r.append(sanitise(getattr(probe, field)))
 
@@ -491,7 +491,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         r = TabularFieldsMixin._get_line_format(self)
         if not self.aggregators:
             return r
-        return (u" " * len(self.aggregators)) + r
+        return (" " * len(self.aggregators)) + r
 
     def _get_header_names(self):
         r = []

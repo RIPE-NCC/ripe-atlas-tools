@@ -37,7 +37,7 @@ class Colour(object):
 
     @classmethod
     def _colourise(cls, text, colour):
-        return u"{}[{}m{}{}[0m".format(chr(0x1b), colour, text, chr(0x1b))
+        return "{}[{}m{}{}[0m".format(chr(0x1b), colour, text, chr(0x1b))
 
     @classmethod
     def black(cls, text):
