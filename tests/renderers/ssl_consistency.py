@@ -189,6 +189,18 @@ class TestSSLConsistency(unittest.TestCase):
             renderer.gather_unique_certs(sagans)
             self.assertEquals(renderer.get_nprobes_ofpopular_cert(), 11)
 
+    def test_get_nprobes_ofpopular_cert_empty(self):
+        """Tests that getting the number of probes for popular certs does not
+        throw an error when there are no valid certificates."""
+
+        path = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
+        with mock.patch(path) as mock_get_many:
+            mock_get_many.return_value = self.probes.values()
+            sagans = SaganSet([])
+            renderer = Renderer()
+            renderer.gather_unique_certs(sagans)
+            self.assertEquals(renderer.get_nprobes_ofpopular_cert(), 0)
+
     def test_render_certificate(self):
         """Tests rendering of single certificate."""
         expected_output = (
