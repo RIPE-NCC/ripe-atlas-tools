@@ -64,6 +64,8 @@ class Renderer(BaseRenderer):
         Gets the number of probes that have seen the most popular
         (in terms of probes) cert.
         """
+        if not self.uniqcerts:
+            return 0
         return max(
             [self.uniqcerts[cert_id]["cnt"] for cert_id in self.uniqcerts]
         )
