@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import re
 import webbrowser
 
@@ -93,8 +94,9 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--auth",
             type=str,
-            default=conf["authorisation"]["create"],
+            default=os.getenv("ATLAS_CREATE_KEY", conf["authorisation"]["create"]),
             help="The API key you want to use to create the measurement"
+                 " (can be as well passed using ATLAS_CREATE_KEY environment variable)"
         )
         self.parser.add_argument(
             "--af",
