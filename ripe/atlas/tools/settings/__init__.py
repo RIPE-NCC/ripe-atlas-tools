@@ -69,6 +69,7 @@ class Configuration(UserSettingsParser):
             "fetch": "",
             "fetch_aliases": {},
             "create": "",
+            "google_geocoding": "",
         },
         "specification": {
             "af": 4,

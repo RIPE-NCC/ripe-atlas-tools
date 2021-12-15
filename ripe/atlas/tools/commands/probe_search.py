@@ -25,6 +25,7 @@ from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
+from ..settings import conf
 
 
 # Unknown latitude-longitude coordinates.
@@ -189,6 +190,15 @@ class Command(TabularFieldsMixin, BaseCommand):
             help=(
                 "Probe's connection status [0 - Never Connected, "
                 "1 - Connected, 2 - Disconnected, 3 - Abandoned]"
+            )
+        )
+        self.parser.add_argument(
+            "--auth",
+            type=str,
+            default=conf["authorisation"]["google_geocoding"],
+            help=(
+                "Google Geocoding API key to be "
+                "used to perform --location search."
             )
         )
 
@@ -381,13 +391,13 @@ class Command(TabularFieldsMixin, BaseCommand):
     def location2degrees(self):
         """Fetches degrees based on the given location."""
         error_log = (
-            "Following error occured while trying to fetch lat/lon"
+            "Following error occured while trying to fetch lat/lon "
             "for location <{}>:\n{}"
         )
-        goole_api_url = "http://maps.googleapis.com/maps/api/geocode/json"
+        google_api_url = "https://maps.googleapis.com/maps/api/geocode/json"
         try:
-            result = requests.get(goole_api_url, params={
-                "sensor": "false",
+            result = requests.get(google_api_url, params={
+                "key": self.arguments.auth,
                 "address": self.arguments.location
             })
         except (
@@ -399,6 +409,11 @@ class Command(TabularFieldsMixin, BaseCommand):
             raise RipeAtlasToolsException(error_log)
 
         result = result.json()
+
+        if "error_message" in result:
+            error = error_log.format(self.arguments.location,
+                                     result["error_message"])
+            raise RipeAtlasToolsException(error)
 
         try:
             lat = result["results"][0]["geometry"]["location"]["lat"]
