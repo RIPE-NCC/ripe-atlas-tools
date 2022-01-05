@@ -1,20 +1,15 @@
 language: python
 os: linux
-dist: bionic
 python:
- - "3.6"
- - "3.7"
- - "3.8"
- - "pypy3"
-jobs:
-  include:
-    -
-      python: 3.5
-      dist: xenial
+ - 3.7
+ - 3.8
+ - 3.9
+ - 3.10
+ - pypy3
 install:
   - pip install tox
   - pip install coveralls
 script:
-  tox
+  tox -e py
 after_success:
   coveralls --verbose
