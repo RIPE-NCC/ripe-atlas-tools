@@ -23,7 +23,6 @@ from .base import Command
 
 
 class DnsMeasureCommand(Command):
-
     def _upper_str(self, s):
         """
         Private method to validate specific command line arguments that
@@ -43,7 +42,7 @@ class DnsMeasureCommand(Command):
             type=self._upper_str,
             choices=("UDP", "TCP"),
             default=conf["specification"]["types"]["dns"]["protocol"],
-            help="The protocol used."
+            help="The protocol used.",
         )
         specific.add_argument(
             "--query-class",
@@ -52,58 +51,59 @@ class DnsMeasureCommand(Command):
             default=conf["specification"]["types"]["dns"]["query-class"],
             help='The query class.  The default is "{}"'.format(
                 conf["specification"]["types"]["dns"]["query-class"]
-            )
+            ),
         )
         specific.add_argument(
             "--query-type",
             type=self._upper_str,
-            choices=list(Message.ANSWER_CLASSES.keys()) + ["ANY"],  # The only ones we can parse
+            choices=list(Message.ANSWER_CLASSES.keys())
+            + ["ANY"],  # The only ones we can parse
             default=conf["specification"]["types"]["dns"]["query-type"],
             help='The query type.  The default is "{}"'.format(
                 conf["specification"]["types"]["dns"]["query-type"]
-            )
+            ),
         )
         specific.add_argument(
             "--query-argument",
             type=str,
             default=conf["specification"]["types"]["dns"]["query-argument"],
-            help="The DNS label to query"
+            help="The DNS label to query",
         )
         specific.add_argument(
             "--set-cd-bit",
             action="store_true",
             default=conf["specification"]["types"]["dns"]["set-cd-bit"],
-            help="Set the DNSSEC Checking Disabled flag (RFC4035)"
+            help="Set the DNSSEC Checking Disabled flag (RFC4035)",
         )
         specific.add_argument(
             "--set-do-bit",
             action="store_true",
             default=conf["specification"]["types"]["dns"]["set-do-bit"],
-            help="Set the DNSSEC OK flag (RFC3225)"
+            help="Set the DNSSEC OK flag (RFC3225)",
         )
         specific.add_argument(
             "--set-nsid-bit",
             action="store_true",
             default=conf["specification"]["types"]["dns"]["set-nsid-bit"],
-            help="Include an EDNS name server ID request with the query"
+            help="Include an EDNS name server ID request with the query",
         )
         specific.add_argument(
             "--set-rd-bit",
             action="store_true",
             default=conf["specification"]["types"]["dns"]["set-rd-bit"],
-            help="Set the Recursion Desired flag"
+            help="Set the Recursion Desired flag",
         )
         specific.add_argument(
             "--retry",
             type=ArgumentType.integer_range(minimum=0, maximum=10),
             default=conf["specification"]["types"]["dns"]["retry"],
-            help="Number of times to retry"
+            help="Number of times to retry",
         )
         specific.add_argument(
             "--udp-payload-size",
             type=ArgumentType.integer_range(minimum=512, maximum=4096),
             default=conf["specification"]["types"]["dns"]["udp-payload-size"],
-            help="May be any integer between 512 and 4096 inclusive"
+            help="May be any integer between 512 and 4096 inclusive",
         )
         specific.add_argument(
             "--timeout",
@@ -115,7 +115,7 @@ class DnsMeasureCommand(Command):
             "--tls",
             action="store_true",
             default=conf["specification"]["types"]["dns"]["tls"],
-            help="Send query using DNS-over-TLS"
+            help="Send query using DNS-over-TLS",
         )
 
     def clean_target(self):
@@ -136,7 +136,8 @@ class DnsMeasureCommand(Command):
         for opt in ("class", "type", "argument"):
             if not getattr(self.arguments, "query_{0}".format(opt)):
                 raise RipeAtlasToolsException(
-                    "At a minimum, DNS measurements require a query argument.")
+                    "At a minimum, DNS measurements require a query argument."
+                )
 
         r["query_class"] = self.arguments.query_class
         r["query_type"] = self.arguments.query_type
@@ -149,7 +150,7 @@ class DnsMeasureCommand(Command):
         r["retry"] = self.arguments.retry
         r["udp_payload_size"] = self.arguments.udp_payload_size
         r["use_probe_resolver"] = "target" not in r
-	r["tls"] = self.arguments.tls
+        r["tls"] = self.arguments.tls
         if self.arguments.timeout is not None:
             r["timeout"] = self.arguments.timeout
 

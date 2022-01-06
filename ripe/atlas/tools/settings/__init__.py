@@ -113,10 +113,7 @@ class Configuration(UserSettingsParser):
                     "port": 443,
                     "hostname": None,
                 },
-                "ntp": {
-                    "packets": 3,
-                    "timeout": 4000
-                },
+                "ntp": {"packets": 3, "timeout": 4000},
                 "dns": {
                     "set-cd-bit": False,
                     "set-do-bit": False,
@@ -129,7 +126,7 @@ class Configuration(UserSettingsParser):
                     "set-rd-bit": True,
                     "retry": 0,
                     "timeout": None,
-		    "tls": False,
+                    "tls": False,
                 },
                 "http": {
                     "header-bytes": 0,
@@ -145,71 +142,29 @@ class Configuration(UserSettingsParser):
             },
             "tags": {
                 "ipv4": {
-                    "ping": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "traceroute": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "dns": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "sslcert": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "http": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "ntp": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "all": {
-                        "include": ["system-ipv4-works"],
-                        "exclude": []
-                    },
+                    "ping": {"include": [], "exclude": []},
+                    "traceroute": {"include": [], "exclude": []},
+                    "dns": {"include": [], "exclude": []},
+                    "sslcert": {"include": [], "exclude": []},
+                    "http": {"include": [], "exclude": []},
+                    "ntp": {"include": [], "exclude": []},
+                    "all": {"include": ["system-ipv4-works"], "exclude": []},
                 },
                 "ipv6": {
-                    "ping": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "traceroute": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "dns": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "sslcert": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "http": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "ntp": {
-                        "include": [],
-                        "exclude": []
-                    },
-                    "all": {
-                        "include": ["system-ipv6-works"],
-                        "exclude": []
-                    }
-                }
-            }
+                    "ping": {"include": [], "exclude": []},
+                    "traceroute": {"include": [], "exclude": []},
+                    "dns": {"include": [], "exclude": []},
+                    "sslcert": {"include": [], "exclude": []},
+                    "http": {"include": [], "exclude": []},
+                    "ntp": {"include": [], "exclude": []},
+                    "all": {"include": ["system-ipv6-works"], "exclude": []},
+                },
+            },
         },
         "ripe-ncc": {
             "endpoint": "https://atlas.ripe.net",
             "version": 0,
-        }
+        },
     }
 
     @staticmethod
@@ -222,7 +177,8 @@ class Configuration(UserSettingsParser):
         """
 
         template = os.path.join(
-            os.path.dirname(__file__), "templates", "base.yaml")
+            os.path.dirname(__file__), "templates", "base.yaml"
+        )
 
         authorisation = re.compile("^authorisation:$", re.MULTILINE)
         tags = re.compile("^  tags:$", re.MULTILINE)
@@ -231,30 +187,21 @@ class Configuration(UserSettingsParser):
 
         with open(template) as t:
             payload = str(t.read()).format(
-                payload=yaml.dump(
-                    config,
-                    default_flow_style=False
-                )
+                payload=yaml.dump(config, default_flow_style=False)
             )
             payload = ripe.sub(
                 "\n# Don't mess with these, or Bad Things may happen\n"
                 "ripe-ncc:",
-                payload
+                payload,
             )
             payload = authorisation.sub(
-                "# Authorisation\n"
-                "authorisation:",
-                payload
+                "# Authorisation\n" "authorisation:", payload
             )
             payload = specification.sub(
-                "\n# Measurement Creation\n"
-                "specification:",
-                payload
+                "\n# Measurement Creation\n" "specification:", payload
             )
             payload = tags.sub(
-                "  # Tags added to probes selection\n"
-                "  tags:",
-                payload
+                "  # Tags added to probes selection\n" "  tags:", payload
             )
 
         with open(Configuration.USER_RC, "w") as rc:
@@ -268,20 +215,14 @@ class AliasesDB(UserSettingsParser):
 
     USER_RC = os.path.join(UserSettingsParser.USER_CONFIG_DIR, "aliases")
 
-    DEFAULT = {
-        "measurement": {},
-        "probe": {}
-    }
+    DEFAULT = {"measurement": {}, "probe": {}}
 
     @staticmethod
     def write(aliases):
         if not os.path.exists(AliasesDB.USER_CONFIG_DIR):
             os.makedirs(AliasesDB.USER_CONFIG_DIR)
 
-        payload = yaml.dump(
-            aliases,
-            default_flow_style=False
-        )
+        payload = yaml.dump(aliases, default_flow_style=False)
 
         with open(AliasesDB.USER_RC, "w") as rc:
             rc.write(payload)
