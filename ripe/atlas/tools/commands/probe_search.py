@@ -85,7 +85,8 @@ class Command(TabularFieldsMixin, BaseCommand):
         geo_location.add_argument(
             "--center",
             type=str,
-            help="location as <lat>,<lon>-string, i.e. '48.45,9.16'",
+            help="Location as <lat>,<lon>-string, i.e. '48.45,9.16'. "
+            "Note: use --center=-5,10 (no space) to allow for negative latitudes",
         )
         geo_location.add_argument(
             "--country", type=str, help="The country code of probes."
