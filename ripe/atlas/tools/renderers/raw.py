@@ -27,12 +27,11 @@ class Renderer(BaseRenderer):
         BaseRenderer.TYPE_DNS,
         BaseRenderer.TYPE_SSLCERT,
         BaseRenderer.TYPE_HTTP,
-        BaseRenderer.TYPE_NTP
+        BaseRenderer.TYPE_NTP,
     ]
 
     SHOW_DEFAULT_HEADER = False
     SHOW_DEFAULT_FOOTER = False
 
     def on_result(self, result, probes=None):
-        return sanitise(
-            json.dumps(result.raw_data, separators=(",", ":"))) + "\n"
+        return sanitise(json.dumps(result.raw_data, separators=(",", ":"))) + "\n"

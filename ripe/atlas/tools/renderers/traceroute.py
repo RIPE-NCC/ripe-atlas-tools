@@ -34,10 +34,9 @@ class Renderer(BaseRenderer):
         )
         group.add_argument(
             "--traceroute-show-asns",
-            help="Show Autonomous System Numbers (ASNs) in the traceroute "
-                 "results.",
+            help="Show Autonomous System Numbers (ASNs) in the traceroute " "results.",
             action="store_true",
-            default=Renderer.DEFAULT_SHOW_ASNS
+            default=Renderer.DEFAULT_SHOW_ASNS,
         )
 
     def __init__(self, *args, **kwargs):
@@ -55,8 +54,7 @@ class Renderer(BaseRenderer):
         for hop in result.hops:
 
             if hop.is_error:
-                r += "{}\n".format(
-                    colourise(sanitise(hop.error_message), "red"))
+                r += "{}\n".format(colourise(sanitise(hop.error_message), "red"))
                 continue
 
             name = ""
@@ -81,12 +79,12 @@ class Renderer(BaseRenderer):
                 hop=hop.index,
                 name=sanitise(name),
                 asn="AS{}".format(asn) if asn else "",
-                rtts="  ".join(rtts)
+                rtts="  ".join(rtts),
             )
 
         created = result.created.astimezone(get_localzone())
         return "\n{}\n{}\n\n{}".format(
             colourise("Probe #{}".format(result.probe_id), "bold"),
             colourise(created.strftime(self.TIME_FORMAT), "bold"),
-            r
+            r,
         )

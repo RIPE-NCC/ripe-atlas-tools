@@ -36,24 +36,44 @@ class Command(BaseCommand):
             "/repos/RIPE-NCC/ripe-atlas-cousteau/stats/contributors",
             "/repos/RIPE-NCC/ripe-atlas-tools/stats/contributors",
         ],
-        "users": "/users"
+        "users": "/users",
     }
 
     SPACING = (
-        61, 61, 61, 53, 7, 53, 6, 52, 5, 52, 49, 48, 47, 46, 47, 47, 43, 41, 38,
-        39, 42, 46
+        61,
+        61,
+        61,
+        53,
+        7,
+        53,
+        6,
+        52,
+        5,
+        52,
+        49,
+        48,
+        47,
+        46,
+        47,
+        47,
+        43,
+        41,
+        38,
+        39,
+        42,
+        46,
     )
     BOAT = (
         "\n{}|\n{}|\n{}|\n{}|{}|\n{}|{}---\n{}---{}'-'\n{}'-'  ____|_____\n{}__"
         "__|__/    |    /\n{}/    | /     |   /\n{}/     |(      |  (\n{}(     "
-        " | \     |   \\\n{}\     |  \____|____\   /|\n{}/\____|___`---.----` ."
-        "' |\n{}.-'/      |  \    |__.--'    \\\n{}.'/ (       |   \   |.      "
-        "    \\\n{}_ /_/   \      |    \  | `.         \\\n{}`-.'    \.--._|.--"
+        " | \\     |   \\\n{}\\     |  \\____|____\\   /|\n{}/\\____|___`---.----` ."
+        "' |\n{}.-'/      |  \\    |__.--'    \\\n{}.'/ (       |   \\   |.      "
+        "    \\\n{}_ /_/   \\      |    \\  | `.         \\\n{}`-.'    \\.--._|.--"
         "-`  |   `-._______\\\n{}``-.-------'-------'------------/\n{}`'.______"
         "_________________.'\n"
     ).format(*[" " * _ for _ in SPACING])
 
-    WATER = ("~" * 80)
+    WATER = "~" * 80
 
     def __init__(self, *args, **kwargs):
         BaseCommand.__init__(self, *args, **kwargs)
@@ -73,11 +93,13 @@ class Command(BaseCommand):
         for contributor in self.get_contributors():
             r += "{name:20}  {changes:10}  {url}\n".format(**contributor)
 
-        print("{}{}{}\n".format(
-            r,
-            colourise(colourise(self.BOAT, "black"), "bold"),
-            colourise(self.WATER, "blue")
-        ))
+        print(
+            "{}{}{}\n".format(
+                r,
+                colourise(self.BOAT, "bold"),
+                colourise(self.WATER, "blue"),
+            )
+        )
 
     def get_contributors(self):
 
@@ -91,11 +113,9 @@ class Command(BaseCommand):
 
         r = []
         for k, v in self.statistics.items():
-            r.append({
-                "name": sanitise(k),
-                "changes": v["changes"],
-                "url": v["url"]
-            })
+            r.append(
+                {"name": sanitise(k), "changes": v["changes"], "url": v["url"]}
+            )
 
         random.shuffle(r)
 
@@ -104,7 +124,8 @@ class Command(BaseCommand):
     def _update_statistics_from_url(self, url):
 
         response = requests.get(
-            "{}{}".format(self.URLS["root"], url), headers=self.HEADERS)
+            "{}{}".format(self.URLS["root"], url), headers=self.HEADERS
+        )
 
         contributors = response.json()
 
@@ -120,7 +141,7 @@ class Command(BaseCommand):
             if name not in self.statistics:
                 self.statistics[name] = {
                     "changes": 0,
-                    "url": contributor["author"]["html_url"]
+                    "url": contributor["author"]["html_url"],
                 }
 
             for week in contributor["weeks"]:
@@ -138,13 +159,11 @@ class Command(BaseCommand):
             cache_key,
             requests.get(
                 "{}{}/{}".format(
-                    self.URLS["root"],
-                    self.URLS["users"],
-                    username
+                    self.URLS["root"], self.URLS["users"], username
                 ),
-                headers=self.HEADERS
+                headers=self.HEADERS,
             ).json(),
-            60 * 60 * 24 * 365
+            60 * 60 * 24 * 365,
         )
 
         return self.get_user(username)

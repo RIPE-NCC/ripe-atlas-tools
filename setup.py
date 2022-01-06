@@ -12,7 +12,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 current_dir = dirname(abspath(__file__))
 description = open(join(current_dir, "README.rst")).read()
 changes = open(join(current_dir, "CHANGES.rst")).read()
-long_description = '\n\n'.join([description, changes])
+long_description = "\n\n".join([description, changes])
 
 # Get the long description from README.md
 setup(
@@ -53,7 +53,7 @@ setup(
         "scripts/antp",
         "scripts/ripe-atlas",
     ],
-    keywords=['RIPE', 'RIPE NCC', 'RIPE Atlas', 'Command Line'],
+    keywords=["RIPE", "RIPE NCC", "RIPE Atlas", "Command Line"],
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: POSIX",

@@ -20,7 +20,15 @@ import webbrowser
 from collections import OrderedDict
 
 from ripe.atlas.cousteau import (
-    Ping, Traceroute, Dns, Sslcert, Http, Ntp, AtlasSource, AtlasCreateRequest)
+    Ping,
+    Traceroute,
+    Dns,
+    Sslcert,
+    Http,
+    Ntp,
+    AtlasSource,
+    AtlasCreateRequest,
+)
 
 from ...exceptions import RipeAtlasToolsException
 from ...helpers.colours import colourise
@@ -37,14 +45,16 @@ class Command(BaseCommand):
 
     DESCRIPTION = "Create a measurement and optionally wait for the results"
 
-    CREATION_CLASSES = OrderedDict((
-        ("ping", Ping),
-        ("traceroute", Traceroute),
-        ("dns", Dns),
-        ("sslcert", Sslcert),
-        ("http", Http),
-        ("ntp", Ntp)
-    ))
+    CREATION_CLASSES = OrderedDict(
+        (
+            ("ping", Ping),
+            ("traceroute", Traceroute),
+            ("dns", Dns),
+            ("sslcert", Sslcert),
+            ("http", Http),
+            ("ntp", Ntp),
+        )
+    )
 
     def __init__(self, *args, **kwargs):
 
@@ -81,12 +91,12 @@ class Command(BaseCommand):
             "--renderer",
             choices=Renderer.get_available(),
             help="The renderer you want to use. If this isn't defined, an "
-                 "appropriate renderer will be selected."
+            "appropriate renderer will be selected.",
         )
         self.parser.add_argument(
             "--dry-run",
             action="store_true",
-            help="Do not create the measurement, only show its definition."
+            help="Do not create the measurement, only show its definition.",
         )
 
         # Standard for all types
@@ -94,78 +104,87 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--auth",
             type=str,
-            default=os.getenv("ATLAS_CREATE_KEY", conf["authorisation"]["create"]),
+            default=os.getenv(
+                "ATLAS_CREATE_KEY", conf["authorisation"]["create"]
+            ),
             help="The API key you want to use to create the measurement. "
-                 "(Can be defined with `ripe-atlas configure --set authorisation.create` or the ATLAS_CREATE_KEY environment variable)"
+            "(Can be defined with `ripe-atlas configure --set authorisation.create` "
+            "or the ATLAS_CREATE_KEY environment variable)",
         )
         self.parser.add_argument(
             "--af",
             type=int,
             choices=(4, 6),
-            help="The address family, either 4 or 6"
+            help="The address family, either 4 or 6",
         )
         self.parser.add_argument(
             "--description",
             type=str,
             default=conf["specification"]["description"],
-            help="A free-form description"
+            help="A free-form description",
         )
         self.parser.add_argument(  # Most types
             "--target",
             type=ArgumentType.ip_or_domain,
             help="The target, either a domain name or IP address.  If creating "
-                 "a DNS measurement, the absence of this option will imply "
-                 "that you wish to use the probe's resolver."
+            "a DNS measurement, the absence of this option will imply "
+            "that you wish to use the probe's resolver.",
         )
         self.parser.add_argument(
             "--no-report",
             action="store_true",
             help="Don't wait for a response from the measurement, just return "
-                 "the URL at which you can later get information about the "
-                 "measurement."
+            "the URL at which you can later get information about the "
+            "measurement.",
         )
         self.parser.add_argument(
             "--go-web",
             action="store_true",
-            help="Open the measurement in a webbrowser immediately."
+            help="Open the measurement in a webbrowser immediately.",
         )
         self.parser.add_argument(
             "--set-alias",
             help="After creating the measurement, register an alias for it.",
             type=ArgumentType.alias_is_valid,
-            metavar="ALIAS"
+            metavar="ALIAS",
         )
 
         self.parser.add_argument(
             "--interval",
             type=int,
             help="Rather than run this measurement as a one-off (the default), "
-                 "create this measurement as a recurring one, with an interval "
-                 "of n seconds between attempted measurements. This option "
-                 "implies --no-report."
+            "create this measurement as a recurring one, with an interval "
+            "of n seconds between attempted measurements. This option "
+            "implies --no-report.",
         )
 
         origins = self.parser.add_mutually_exclusive_group()
         origins.add_argument(
             "--from-area",
             type=str,
-            choices=("WW", "West", "North-Central", "South-Central",
-                     "North-East", "South-East"),
-            help="The area from which you'd like to select your probes."
+            choices=(
+                "WW",
+                "West",
+                "North-Central",
+                "South-Central",
+                "North-East",
+                "South-East",
+            ),
+            help="The area from which you'd like to select your probes.",
         )
         origins.add_argument(
             "--from-country",
             type=ArgumentType.country_code,
             metavar="COUNTRY",
             help="The two-letter ISO code for the country from which you'd "
-                 "like to select your probes. Example: --from-country=GR"
+            "like to select your probes. Example: --from-country=GR",
         )
         origins.add_argument(
             "--from-prefix",
             type=str,
             metavar="PREFIX",
             help="The prefix from which you'd like to select your probes. "
-                 "Example: --from-prefix=82.92.0.0/14"
+            "Example: --from-prefix=82.92.0.0/14",
         )
         origins.add_argument(
             "--from-asn",
@@ -173,31 +192,33 @@ class Command(BaseCommand):
             type=ArgumentType.integer_range(1, 2 ** 32 - 2),
             metavar="ASN",
             help="The ASN from which you'd like to select your probes. "
-                 "Example: --from-asn=3333"
+            "Example: --from-asn=3333",
         )
         origins.add_argument(
             "--from-probes",
             type=ArgumentType.comma_separated_integers(minimum=1),
             metavar="PROBES",
             help="A comma-separated list of probe-ids you want to use in your "
-                 "measurement. Example: --from-probes=1,2,34,157,10006"
+            "measurement. Example: --from-probes=1,2,34,157,10006",
         )
         origins.add_argument(
             "--from-measurement",
             type=ArgumentType.integer_range(minimum=1),
             metavar="MEASUREMENT_ID",
             help="A measurement id which you want to use as the basis for "
-                 "probe selection in your new measurement.  This is a handy "
-                 "way to re-create a measurement under conditions similar to "
-                 "another measurement. Example: --from-measurement=1000192"
+            "probe selection in your new measurement.  This is a handy "
+            "way to re-create a measurement under conditions similar to "
+            "another measurement. Example: --from-measurement=1000192",
         )
         self.parser.add_argument(
             "--probes",
             type=ArgumentType.integer_range(minimum=1),
             default=None,
             help="The number of probes you want to use.  Defaults to {},"
-                 "unless --from-probes is invoked, in which case the number of "
-                 "probes selected is used.".format(conf["specification"]["source"]["requested"])
+            "unless --from-probes is invoked, in which case the number of "
+            "probes selected is used.".format(
+                conf["specification"]["source"]["requested"]
+            ),
         )
         self.parser.add_argument(
             "--include-tag",
@@ -205,7 +226,7 @@ class Command(BaseCommand):
             action="append",
             metavar="TAG",
             help="Include only probes that are marked with these tags. "
-                 "Example: --include-tag=system-ipv6-works"
+            "Example: --include-tag=system-ipv6-works",
         )
         self.parser.add_argument(
             "--exclude-tag",
@@ -213,7 +234,7 @@ class Command(BaseCommand):
             action="append",
             metavar="TAG",
             help="Exclude probes that are marked with these tags. "
-                 "Example: --exclude-tag=system-ipv6-works"
+            "Example: --exclude-tag=system-ipv6-works",
         )
 
         self.parser.add_argument(
@@ -234,11 +255,12 @@ class Command(BaseCommand):
             "--resolve-on-probe",
             action="store_true",
             default=conf["specification"]["resolve_on_probe"],
-            help="Causes the target to be resolved by each probe rather than once by the server",
+            help="Causes the target to be resolved by each probe "
+            "rather than once by the server",
         )
         self.parser.add_argument(
             "--measurement-tags",
-            help="Comma-separated list of tags to apply to the newly created measurement",
+            help="Comma-separated list of tags to apply to the new measurement",
         )
 
         Renderer.add_arguments_for_available_renderers(self.parser)
@@ -263,14 +285,14 @@ class Command(BaseCommand):
             "it can be found here:\n\n  {0}".format(url)
         )
         if self.arguments.go_web:
-            self.ok(
-                "Opening the url in the browser\n\n "
-            )
+            self.ok("Opening the url in the browser\n\n ")
             if not webbrowser.open(url):
                 self.ok(
                     "It looks like your system doesn't have a web browser "
-                    "available.  You'll have to go there manually: {0}".format(url)
+                    "available.  You'll have to go there manually: {0}".format(
+                        url
                     )
+                )
 
         if self.arguments.set_alias:
             alias = self.arguments.set_alias
@@ -291,12 +313,17 @@ class Command(BaseCommand):
 
         for param, val in self._get_source_kwargs().items():
             if param == "tags":
-                print(colourise("tags\n  include{}{}\n  exclude{}{}\n".format(
-                    " " * 17,
-                    ", ".join(val["include"]),
-                    " " * 17,
-                    ", ".join(val["exclude"])
-                ), "cyan"))
+                print(
+                    colourise(
+                        "tags\n  include{}{}\n  exclude{}{}\n".format(
+                            " " * 17,
+                            ", ".join(val["include"]),
+                            " " * 17,
+                            ", ".join(val["exclude"]),
+                        ),
+                        "cyan",
+                    )
+                )
                 continue
             print(colourise("{:<25} {}".format(param, val), "cyan"))
 
@@ -309,19 +336,22 @@ class Command(BaseCommand):
             user_agent=self.user_agent,
             measurements=[creation_class(**self._get_measurement_kwargs())],
             sources=[AtlasSource(**self._get_source_kwargs())],
-            is_oneoff=self._is_oneoff
+            is_oneoff=self._is_oneoff,
         ).create()
 
     def stream(self, pk, url):
         self.ok("Connecting to stream...")
         try:
             Stream(capture_limit=self.arguments.probes, timeout=300).stream(
-                self.arguments.renderer, self.arguments, self._type, pk)
+                self.arguments.renderer, self.arguments, self._type, pk
+            )
         except (KeyboardInterrupt, CaptureLimitExceeded):
             pass  # User said stop, so we fall through to the finally block.
         finally:
-            self.ok("Disconnecting from stream\n\nYou can find details "
-                    "about this measurement here:\n\n  {0}".format(url))
+            self.ok(
+                "Disconnecting from stream\n\nYou can find details "
+                "about this measurement here:\n\n  {0}".format(url)
+            )
 
     def clean_target(self):
 
@@ -338,7 +368,8 @@ class Command(BaseCommand):
         if conf["specification"]["description"]:
             return conf["specification"]["description"]
         return "{} measurement to {}".format(
-            self._type.capitalize(), self.arguments.target)
+            self._type.capitalize(), self.arguments.target
+        )
 
     def _get_measurement_kwargs(self):
 
@@ -407,7 +438,7 @@ class Command(BaseCommand):
 
         r["tags"] = {
             "include": self.arguments.include_tag or [],
-            "exclude": self.arguments.exclude_tag or []
+            "exclude": self.arguments.exclude_tag or [],
         }
 
         af = "ipv{}".format(self._get_af())

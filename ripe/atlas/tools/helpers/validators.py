@@ -24,14 +24,11 @@ from ..settings import aliases
 
 
 class ArgumentType(object):
-
     @staticmethod
     def path(string):
         if not os.path.exists(string) and not string == "-":
             raise argparse.ArgumentTypeError(
-                'The file name specified, "{}" does not appear to exist'.format(
-                    string
-                )
+                'The file name specified, "{}" does not appear to exist'.format(string)
             )
         return string
 
@@ -39,14 +36,15 @@ class ArgumentType(object):
     def country_code(string):
         if not re.match(r"^[a-zA-Z][a-zA-Z]$", string):
             raise argparse.ArgumentTypeError(
-                "Countries must be defined with a two-letter ISO code")
+                "Countries must be defined with a two-letter ISO code"
+            )
         return string.upper()
 
     @staticmethod
     def datetime(string):
         try:
             return parser.parse(string)
-        except:
+        except parser.ParserError:
             raise argparse.ArgumentTypeError(
                 "Times must be specified in ISO 8601 format.  For example: "
                 "2010-10-01T00:00:00 or a portion thereof.  All times are in "
@@ -55,8 +53,9 @@ class ArgumentType(object):
 
     @staticmethod
     def ip_or_domain(string):
-        message = '"{}" does not appear to be an IP address or host ' \
-                  'name'.format(string)
+        message = '"{}" does not appear to be an IP address or host ' "name".format(
+            string
+        )
 
         if " " in string:
             raise argparse.ArgumentTypeError(message)
@@ -79,9 +78,7 @@ class ArgumentType(object):
         f = sys.stdin
         if not string == "-":
             if not os.path.exists(string):
-                raise argparse.ArgumentTypeError("Cannot find file: {}".format(
-                    string
-                ))
+                raise argparse.ArgumentTypeError("Cannot find file: {}".format(string))
             f = open(string)
 
         try:
@@ -95,16 +92,16 @@ class ArgumentType(object):
 
     @staticmethod
     def tag(string):
-        pattern = re.compile("^[a-z_\-0-9]+$")
+        pattern = re.compile(r"^[a-z_\-0-9]+$")
 
         if not pattern.match(string):
             raise argparse.ArgumentTypeError(
-                '"{}" does not appear to be a valid tag.'.format(string))
+                '"{}" does not appear to be a valid tag.'.format(string)
+            )
 
         return string
 
     class integer_range(object):
-
         def __init__(self, minimum=float("-inf"), maximum=float("inf")):
             self.minimum = minimum
             self.maximum = maximum
@@ -112,24 +109,21 @@ class ArgumentType(object):
         def __call__(self, string):
 
             message = "The integer must be between {} and {}.".format(
-                self.minimum, self.maximum)
+                self.minimum, self.maximum
+            )
             if self.maximum == float("inf"):
-                message = "The integer must be greater than {}.".format(
-                    self.minimum)
+                message = "The integer must be greater than {}.".format(self.minimum)
 
             try:
                 integer = int(string)
                 if integer < self.minimum or integer > self.maximum:
                     raise argparse.ArgumentTypeError(message)
             except ValueError:
-                raise argparse.ArgumentTypeError(
-                    "An integer must be specified."
-                )
+                raise argparse.ArgumentTypeError("An integer must be specified.")
 
             return integer
 
     class comma_separated_integers(object):
-
         def __init__(self, minimum=float("-inf"), maximum=float("inf")):
             self.minimum = minimum
             self.maximum = maximum
@@ -158,7 +152,8 @@ class ArgumentType(object):
                 if i > self.maximum:
                     raise argparse.ArgumentTypeError(
                         "{} exceeds the maximum permitted value of {}.".format(
-                            i, self.maximum)
+                            i, self.maximum
+                        )
                     )
 
                 r.append(i)
@@ -166,7 +161,6 @@ class ArgumentType(object):
             return r
 
     class regex(object):
-
         def __init__(self, regex):
             self.regex = re.compile(regex)
 
@@ -174,7 +168,8 @@ class ArgumentType(object):
 
             if not self.regex.match(string):
                 raise argparse.ArgumentTypeError(
-                    '"{}" does not appear to be valid.'.format(string))
+                    '"{}" does not appear to be valid.'.format(string)
+                )
 
             return string
 
@@ -183,15 +178,15 @@ class ArgumentType(object):
         ret = None
 
         if string and not string.isdigit():
-            pattern = re.compile("^[a-zA-Z\._\-0-9]+$")
+            pattern = re.compile(r"^[a-zA-Z\._\-0-9]+$")
 
             if pattern.match(string):
                 ret = string
 
         if not ret:
             raise argparse.ArgumentTypeError(
-                '"{}" does not appear to be a valid '
-                'alias.'.format(string))
+                '"{}" does not appear to be a valid ' "alias.".format(string)
+            )
 
         return ret
 
@@ -207,7 +202,7 @@ class ArgumentType(object):
             else:
                 raise argparse.ArgumentTypeError(
                     '"{}" does not appear to be an existent '
-                    '{} alias.'.format(string, self.TYPE)
+                    "{} alias.".format(string, self.TYPE)
                 )
 
     class msm_id_or_name(id_or_alias):

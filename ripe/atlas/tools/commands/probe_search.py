@@ -66,61 +66,35 @@ class Command(TabularFieldsMixin, BaseCommand):
     def add_arguments(self):
         """Adds all commands line arguments for this command."""
         asn = self.parser.add_argument_group("ASN")
-        asn.add_argument(
-            "--asn",
-            type=int,
-            help="ASN"
-        )
-        asn.add_argument(
-            "--asnv4",
-            type=int,
-            help="ASNv4"
-        )
-        asn.add_argument(
-            "--asnv6",
-            type=int,
-            help="ASNv6"
-        )
+        asn.add_argument("--asn", type=int, help="ASN")
+        asn.add_argument("--asnv4", type=int, help="ASNv4")
+        asn.add_argument("--asnv6", type=int, help="ASNv6")
 
         prefix = self.parser.add_argument_group("Prefix")
-        prefix.add_argument(
-            "--prefix",
-            type=str,
-            help="Prefix"
-        )
-        prefix.add_argument(
-            "--prefixv4",
-            type=str,
-            help="Prefixv4"
-        )
-        prefix.add_argument(
-            "--prefixv6",
-            type=str,
-            help="Prefixv6"
-        )
+        prefix.add_argument("--prefix", type=str, help="Prefix")
+        prefix.add_argument("--prefixv4", type=str, help="Prefixv4")
+        prefix.add_argument("--prefixv6", type=str, help="Prefixv6")
 
         area = self.parser.add_argument_group("Area")
         geo_location = area.add_mutually_exclusive_group()
         geo_location.add_argument(
             "--location",
             type=str,
-            help="The location of probes as a string i.e. 'Amsterdam'"
+            help="The location of probes as a string i.e. 'Amsterdam'",
         )
         geo_location.add_argument(
             "--center",
             type=str,
-            help="location as <lat>,<lon>-string, i.e. '48.45,9.16'"
+            help="location as <lat>,<lon>-string, i.e. '48.45,9.16'",
         )
         geo_location.add_argument(
-            "--country",
-            type=str,
-            help="The country code of probes."
+            "--country", type=str, help="The country code of probes."
         )
         area.add_argument(
             "--radius",
             type=int,
             default=15,
-            help="Radius in km from specified center/point. Default is 15."
+            help="Radius in km from specified center/point. Default is 15.",
         )
 
         self.parser.add_argument(
@@ -129,17 +103,17 @@ class Command(TabularFieldsMixin, BaseCommand):
             action="append",
             metavar="TAG",
             help="Include only probes that are marked with these tags. "
-                 "Use --tag multiple times to filter on the basis of more "
-                 "than one tag. "
-                 "Example: --tag system-ipv6-works --tag system-ipv4-works",
-            dest="tags"
+            "Use --tag multiple times to filter on the basis of more "
+            "than one tag. "
+            "Example: --tag system-ipv6-works --tag system-ipv4-works",
+            dest="tags",
         )
 
         self.parser.add_argument(
             "--limit",
             type=int,
             default=25,
-            help="Return limited number of probes"
+            help="Return limited number of probes",
         )
         self.parser.add_argument(
             "--field",
@@ -148,40 +122,36 @@ class Command(TabularFieldsMixin, BaseCommand):
             choices=self.COLUMNS.keys(),
             default=[],
             help="The field(s) to display. Invoke multiple times for multiple "
-                 "fields. The default is id, asn_v4, asn_v6, country, and "
-                 "status."
+            "fields. The default is id, asn_v4, asn_v6, country, and "
+            "status.",
         )
         self.parser.add_argument(
             "--aggregate-by",
             type=str,
-            choices=[
-                'country',
-                'asn_v4', 'asn_v6',
-                'prefix_v4', 'prefix_v6'
-            ],
+            choices=["country", "asn_v4", "asn_v6", "prefix_v4", "prefix_v6"],
             action="append",
             help=(
                 "Aggregate list of probes based on all specified aggregations."
                 " Multiple aggregations supported."
-            )
+            ),
         )
         self.parser.add_argument(
             "--all",
-            action='store_true',
-            help="Fetch *ALL* probes. That will give you a loooong list."
+            action="store_true",
+            help="Fetch *ALL* probes. That will give you a loooong list.",
         )
         self.parser.add_argument(
             "--max-per-aggregation",
             type=int,
-            help="Maximum number of probes per aggregated bucket."
+            help="Maximum number of probes per aggregated bucket.",
         )
         self.parser.add_argument(
             "--ids-only",
-            action='store_true',
+            action="store_true",
             help=(
                 "Print only IDs of probes. Useful to pipe it to another "
                 "command."
-            )
+            ),
         )
         self.parser.add_argument(
             "--status",
@@ -190,7 +160,7 @@ class Command(TabularFieldsMixin, BaseCommand):
             help=(
                 "Probe's connection status [0 - Never Connected, "
                 "1 - Connected, 2 - Disconnected, 3 - Abandoned]"
-            )
+            ),
         )
         self.parser.add_argument(
             "--auth",
@@ -199,14 +169,19 @@ class Command(TabularFieldsMixin, BaseCommand):
             help=(
                 "Google Geocoding API key to be "
                 "used to perform --location search."
-            )
+            ),
         )
 
     def run(self):
 
         if not self.arguments.field:
             self.arguments.field = (
-                "id", "asn_v4", "asn_v6", "country", "status")
+                "id",
+                "asn_v4",
+                "asn_v6",
+                "country",
+                "status",
+            )
 
         if self.arguments.all:
             self.arguments.limit = sys.maxsize
@@ -214,17 +189,20 @@ class Command(TabularFieldsMixin, BaseCommand):
         filters = self.build_request_args()
 
         if not filters and not self.arguments.all:
-            raise RipeAtlasToolsException(colourise(
-                "Typically you'd want to run this with some arguments to "
-                "filter the probe \nlist, as fetching all of the probes can "
-                "take a Very Long Time.  However, if you \ndon't care about "
-                "the wait, you can use --all and go get yourself a coffee.",
-                "blue"
-            ))
+            raise RipeAtlasToolsException(
+                colourise(
+                    "Typically you'd want to run this with some arguments to "
+                    "filter the probe \nlist, as fetching all of the probes can "
+                    "take a Very Long Time.  However, if you \ndon't care about "
+                    "the wait, you can use --all and go get yourself a coffee.",
+                    "blue",
+                )
+            )
 
         self.set_aggregators()
         probes = ProbeRequest(
-            return_objects=True, user_agent=self.user_agent, **filters)
+            return_objects=True, user_agent=self.user_agent, **filters
+        )
         truncated_probes = itertools.islice(probes, self.arguments.limit)
 
         if self.arguments.ids_only:
@@ -251,12 +229,14 @@ class Command(TabularFieldsMixin, BaseCommand):
         print(colourise(hr, "bold"))
 
         # Print total count of found measurements
-        print(("{:>" + str(len(hr)) + "}\n").format(
-            "Showing {} of {} total probes".format(
-                min(self.arguments.limit, probes.total_count) or "all",
-                probes.total_count
+        print(
+            ("{:>" + str(len(hr)) + "}\n").format(
+                "Showing {} of {} total probes".format(
+                    min(self.arguments.limit, probes.total_count) or "all",
+                    probes.total_count,
+                )
             )
-        ))
+        )
 
     def render_aggregation(self, aggregation_data, indent=0):
         """
@@ -304,11 +284,13 @@ class Command(TabularFieldsMixin, BaseCommand):
         ):
             args.update(self._clean_asn())
 
-        if any([
-            self.arguments.prefix,
-            self.arguments.prefixv4,
-            self.arguments.prefixv6
-        ]):
+        if any(
+            [
+                self.arguments.prefix,
+                self.arguments.prefixv4,
+                self.arguments.prefixv6,
+            ]
+        ):
             args.update(self._clean_prefix())
 
         if self.arguments.location:
@@ -379,7 +361,10 @@ class Command(TabularFieldsMixin, BaseCommand):
     def _clean_location(self):
         """Make sure location argument are sane."""
         if not self.arguments.auth:
-            raise RipeAtlasToolsException("--location requires a Google Geocoding API  key specified with --auth or configure command (authorisation.google_geocoding)")
+            raise RipeAtlasToolsException(
+                "--location requires a Google Geocoding API  key specified with "
+                "--auth or configure command (authorisation.google_geocoding)"
+            )
         lat, lng = self.location2degrees()
         if self.arguments.radius:
             location_args = {
@@ -398,10 +383,13 @@ class Command(TabularFieldsMixin, BaseCommand):
         )
         google_api_url = "https://maps.googleapis.com/maps/api/geocode/json"
         try:
-            result = requests.get(google_api_url, params={
-                "key": self.arguments.auth,
-                "address": self.arguments.location
-            })
+            result = requests.get(
+                google_api_url,
+                params={
+                    "key": self.arguments.auth,
+                    "address": self.arguments.location,
+                },
+            )
         except (
             requests.ConnectionError,
             requests.HTTPError,
@@ -413,8 +401,9 @@ class Command(TabularFieldsMixin, BaseCommand):
         result = result.json()
 
         if "error_message" in result:
-            error = error_log.format(self.arguments.location,
-                                     result["error_message"])
+            error = error_log.format(
+                self.arguments.location, result["error_message"]
+            )
             raise RipeAtlasToolsException(error)
 
         try:
@@ -461,8 +450,9 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         for key in self.arguments.aggregate_by:
             if key == "country":
-                self.aggregators.append(ValueKeyAggregator(
-                    key="country_code", prefix="Country"))
+                self.aggregators.append(
+                    ValueKeyAggregator(key="country_code", prefix="Country")
+                )
             else:
                 self.aggregators.append(ValueKeyAggregator(key=key))
 
@@ -477,7 +467,7 @@ class Command(TabularFieldsMixin, BaseCommand):
                 r.append(getattr(probe, field) or "")
             elif field == "description":
                 description = sanitise(probe.description) or ""
-                r.append(description[:self.COLUMNS["description"][1]])
+                r.append(description[: self.COLUMNS["description"][1]])
             elif field == "coordinates":
                 if probe.geometry and probe.geometry["coordinates"]:
                     lng, lat = probe.geometry["coordinates"]
@@ -526,7 +516,7 @@ class Command(TabularFieldsMixin, BaseCommand):
     def _get_line(self, probe):
         return colourise(
             self._get_line_format().format(*self._get_line_items(probe)),
-            self._get_colour_from_status(probe.status)
+            self._get_colour_from_status(probe.status),
         )
 
     def _get_filter_key_value_pair(self, k, v):

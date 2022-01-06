@@ -30,22 +30,15 @@ from ..base import capture_sys_output
 
 
 class FakeAliasesDB(AliasesDB):
-
     @staticmethod
     def write(aliases):
         pass
 
+
 class TestAliasCommand(unittest.TestCase):
 
     ALIASES_PATH = "ripe.atlas.tools.commands.alias.aliases"
-    ALIASES = {
-        "measurement": {
-            "msm1": 1
-        },
-        "probe": {
-            "prb1": 1
-        }
-    }
+    ALIASES = {"measurement": {"msm1": 1}, "probe": {"prb1": 1}}
     ALIASES_CLASS_PATH = "ripe.atlas.tools.commands.alias.AliasesDB"
 
     def setUp(self):
@@ -61,8 +54,7 @@ class TestAliasCommand(unittest.TestCase):
             with self.assertRaises(RipeAtlasToolsException) as e:
                 self.cmd.init_args([])
                 self.cmd.run()
-            self.assertTrue(
-                str(e.exception).startswith("Action not given."))
+            self.assertTrue(str(e.exception).startswith("Action not given."))
 
     def test_bad_action(self):
         with capture_sys_output():
@@ -75,8 +67,7 @@ class TestAliasCommand(unittest.TestCase):
                 self.cmd.init_args("add probe a b".split())
             err = stderr.getvalue().split("\n")[-2]
         self.assertEqual(
-            err,
-            "Ripe-atlas alias add: error: argument target: invalid int value: 'a'"
+            err, "Ripe-atlas alias add: error: argument target: invalid int value: 'a'"
         )
 
     def test_add_args(self):
@@ -124,8 +115,8 @@ class TestAliasCommand(unittest.TestCase):
             err = stderr.getvalue().split("\n")[-2]
         self.assertEqual(
             err,
-            'Ripe-atlas alias add: error: argument alias: '
-            '"bad+alias" does not appear to be a valid alias.'
+            "Ripe-atlas alias add: error: argument alias: "
+            '"bad+alias" does not appear to be a valid alias.',
         )
 
     def test_show_msm_ok(self):
@@ -149,10 +140,7 @@ class TestAliasCommand(unittest.TestCase):
             self.cmd.init_args("add measurement 2 msm2".split())
             self.cmd.run()
         self.assertTrue("msm2" in self.aliases["measurement"])
-        self.assertEqual(
-            self.aliases["measurement"]["msm2"],
-            2
-        )
+        self.assertEqual(self.aliases["measurement"]["msm2"], 2)
 
     def test_del_msm(self):
         self.assertTrue("msm1" in self.aliases["measurement"])

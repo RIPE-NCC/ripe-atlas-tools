@@ -28,28 +28,28 @@ class Command(BaseCommand):
     EDITOR = os.environ.get("EDITOR", "/usr/bin/vim")
     DESCRIPTION = "Adjust or initialize configuration options"
     EXTRA_DESCRIPTION = (
-        "As an alternative to this command, you can just create/edit {}"
-        .format(Configuration.USER_RC)
+        "As an alternative to this command, you can just create/edit {}".format(
+            Configuration.USER_RC
+        )
     )
 
     def add_arguments(self):
         self.parser.add_argument(
             "--editor",
             action="store_true",
-            help="Invoke {0} to edit the configuration directly".format(
-                self.EDITOR)
+            help="Invoke {0} to edit the configuration directly".format(self.EDITOR),
         )
         self.parser.add_argument(
             "--set",
             action="store",
             help="Permanently set a configuration value so it can be used in "
-                 "the future.  Example: --set authorisation.create=MY_API_KEY"
+            "the future.  Example: --set authorisation.create=MY_API_KEY",
         )
         self.parser.add_argument(
             "--init",
             action="store_true",
             help="Create a configuration file and save it into your home "
-                 "directory at: {}".format(Configuration.USER_RC)
+            "directory at: {}".format(Configuration.USER_RC),
         )
 
     def run(self):
@@ -68,12 +68,14 @@ class Command(BaseCommand):
 
         if self.arguments.init or self.arguments.editor:
             return self.ok(
-                "Configuration file writen to {}".format(Configuration.USER_RC))
+                "Configuration file writen to {}".format(Configuration.USER_RC)
+            )
 
         if self.arguments.set:
             if "=" not in self.arguments.set:
                 raise RipeAtlasToolsException(
-                    "Invalid format. Execute with --help for more information.")
+                    "Invalid format. Execute with --help for more information."
+                )
             path, value = self.arguments.set.split("=")
             self.set(path.split("."), value)
 
@@ -89,21 +91,22 @@ class Command(BaseCommand):
         return s
 
     def set(self, path, value):
-        if path[:2] == ['authorisation', 'fetch_aliases']:
+        if path[:2] == ["authorisation", "fetch_aliases"]:
             if len(path) > 3:
                 raise RipeAtlasToolsException(
-                    'Invalid alias for a fetch API key: it must be in the '
-                    'format authorisation.fetch.some-alias=MY_API_KEY')
+                    "Invalid alias for a fetch API key: it must be in the "
+                    "format authorisation.fetch.some-alias=MY_API_KEY"
+                )
 
-            if 'fetch_aliases' not in conf['authorisation']:
-                conf['authorisation']['fetch_aliases'] = {}
-            if conf['authorisation']['fetch_aliases'] is None:
-                conf['authorisation']['fetch_aliases'] = {}
+            if "fetch_aliases" not in conf["authorisation"]:
+                conf["authorisation"]["fetch_aliases"] = {}
+            if conf["authorisation"]["fetch_aliases"] is None:
+                conf["authorisation"]["fetch_aliases"] = {}
 
             alias = path[2]
 
-            if alias not in conf['authorisation']['fetch_aliases']:
-                conf['authorisation']['fetch_aliases'][alias] = None
+            if alias not in conf["authorisation"]["fetch_aliases"]:
+                conf["authorisation"]["fetch_aliases"][alias] = None
 
             required_type = str
         else:
@@ -111,7 +114,8 @@ class Command(BaseCommand):
                 required_type = type(self._get_from_dict(conf, path))
             except KeyError:
                 raise RipeAtlasToolsException(
-                    'Invalid configuration key: "{}"'.format(".".join(path)))
+                    'Invalid configuration key: "{}"'.format(".".join(path))
+                )
 
         if value.isdigit():
             value = int(value)
@@ -119,7 +123,7 @@ class Command(BaseCommand):
         if not isinstance(value, required_type):
             raise RipeAtlasToolsException(
                 'Invalid configuration value: "{}". You must supply a {} for '
-                'this key'.format(value, required_type.__name__)
+                "this key".format(value, required_type.__name__)
             )
 
         self._set_in_dict(conf, path, value)

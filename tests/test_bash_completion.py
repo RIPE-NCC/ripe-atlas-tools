@@ -11,13 +11,13 @@ class BashCompletionTests(unittest.TestCase):
     """
 
     def setUp(self):
-        os.environ['RIPE_ATLAS_AUTO_COMPLETE'] = '1'
+        os.environ["RIPE_ATLAS_AUTO_COMPLETE"] = "1"
 
     def _setup_env(self, substring):
         input_str = "ripe-atlas" + substring
-        os.environ['COMP_WORDS'] = input_str
-        comp_cword = len(input_str.split(' ')) - 1  # Index of the last word
-        os.environ['COMP_CWORD'] = str(comp_cword)
+        os.environ["COMP_WORDS"] = input_str
+        comp_cword = len(input_str.split(" ")) - 1  # Index of the last word
+        os.environ["COMP_CWORD"] = str(comp_cword)
 
     def _autocomplete(self, substring):
 
@@ -25,7 +25,11 @@ class BashCompletionTests(unittest.TestCase):
         cmd_parts = "ripe-atlas" + substring
         envs = os.environ.copy()
         process = subprocess.Popen(
-            cmd_parts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=envs, shell=True
+            cmd_parts,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=envs,
+            shell=True,
         )
         output, error = process.communicate()
         return output.decode("utf-8"), error.decode("utf-8")
@@ -43,7 +47,7 @@ class BashCompletionTests(unittest.TestCase):
         is not set.
         """
         input_str = " mea"
-        del os.environ['RIPE_ATLAS_AUTO_COMPLETE']
+        del os.environ["RIPE_ATLAS_AUTO_COMPLETE"]
         output, error = self._autocomplete(input_str)
         print(output, error)
         self.assertTrue("No such command" in error)

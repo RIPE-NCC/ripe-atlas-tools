@@ -34,14 +34,14 @@ class Renderer(BaseRenderer):
         return "\n{}\n{}\n{}\n".format(
             colourise("Probe #{}".format(result.probe_id), "bold"),
             colourise(created.strftime(self.TIME_FORMAT), "bold"),
-            r
+            r,
         )
 
     @classmethod
     def get_formatted_response(cls, certificate):
         x509 = OpenSSL.crypto.load_certificate(
             OpenSSL.crypto.FILETYPE_PEM,
-            certificate.raw_data.replace("\\/", "/").replace("\n\n", "\n")
+            certificate.raw_data.replace("\\/", "/").replace("\n\n", "\n"),
         )
 
         pkey_type = x509.get_pubkey().type()
@@ -68,5 +68,5 @@ class Renderer(BaseRenderer):
             pkey_type=pkey_type_descr,
             pkey_bits=x509.get_pubkey().bits(),
             sha1fp=certificate.checksum_sha1,
-            sha256fp=certificate.checksum_sha256
+            sha256fp=certificate.checksum_sha256,
         )

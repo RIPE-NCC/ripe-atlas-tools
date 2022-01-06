@@ -34,37 +34,57 @@ class FakeGen(object):
     A rip-off of the code used for testing probes, but a little prettier.
     """
 
-    Measurement = collections.namedtuple("Measurement", (
-        "id", "type", "status", "status_id", "meta_data", "target",
-        "description"
-    ))
+    Measurement = collections.namedtuple(
+        "Measurement",
+        ("id", "type", "status", "status_id", "meta_data", "target", "description"),
+    )
 
     def __init__(self):
         self.data = [
             self.Measurement(
-                id=1, type="ping", status="Ongoing", status_id=2,
+                id=1,
+                type="ping",
+                status="Ongoing",
+                status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                target="Name 1", description="Description 1",
+                target="Name 1",
+                description="Description 1",
             ),
             self.Measurement(
-                id=2, type="ping", status="Ongoing", status_id=2,
+                id=2,
+                type="ping",
+                status="Ongoing",
+                status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                target="Name 2", description="Description 2",
+                target="Name 2",
+                description="Description 2",
             ),
             self.Measurement(
-                id=3, type="ping", status="Ongoing", status_id=2,
+                id=3,
+                type="ping",
+                status="Ongoing",
+                status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                target="Name 3", description="Description 3",
+                target="Name 3",
+                description="Description 3",
             ),
             self.Measurement(
-                id=4, type="ping", status="Ongoing", status_id=2,
+                id=4,
+                type="ping",
+                status="Ongoing",
+                status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                target="Name 4", description="Description 4",
+                target="Name 4",
+                description="Description 4",
             ),
             self.Measurement(
-                id=5, type="ping", status="Ongoing", status_id=2,
+                id=5,
+                type="ping",
+                status="Ongoing",
+                status_id=2,
                 meta_data={"status": {"name": "Ongoing", "id": 2}},
-                target="Name 5", description="Description 5",
+                target="Name 5",
+                description="Description 5",
             ),
         ]
         self.total_count = 5
@@ -84,7 +104,6 @@ class FakeGen(object):
 
 
 class TestMeasurementsCommand(unittest.TestCase):
-
     @mock.patch("{}.MeasurementRequest".format(COMMAND_MODULE))
     def test_with_empty_args(self, mock_request):
 
@@ -109,11 +128,9 @@ class TestMeasurementsCommand(unittest.TestCase):
             "\n"
         )
         self.assertEqual(
-            set(stdout.getvalue().split("\n")),
-            set(expected_content.split("\n"))
+            set(stdout.getvalue().split("\n")), set(expected_content.split("\n"))
         )
-        self.assertEqual(
-            cmd.arguments.field, ("id", "type", "description", "status"))
+        self.assertEqual(cmd.arguments.field, ("id", "type", "description", "status"))
 
     @mock.patch("{}.MeasurementRequest".format(COMMAND_MODULE))
     def test_get_line_items(self, mock_request):
@@ -123,63 +140,94 @@ class TestMeasurementsCommand(unittest.TestCase):
         cmd.init_args([])
         cmd.run()
         self.assertEqual(
-            cmd._get_line_items(FakeGen.Measurement(
-                id=1, type="ping", status="Ongoing", status_id=2,
-                meta_data={"status": {"name": "Ongoing", "id": 2}},
-                target="Name 1", description="Description 1",
-            )),
-            [1, "ping", "Description 1", "Ongoing"]
+            cmd._get_line_items(
+                FakeGen.Measurement(
+                    id=1,
+                    type="ping",
+                    status="Ongoing",
+                    status_id=2,
+                    meta_data={"status": {"name": "Ongoing", "id": 2}},
+                    target="Name 1",
+                    description="Description 1",
+                )
+            ),
+            [1, "ping", "Description 1", "Ongoing"],
         )
 
         cmd = Command()
-        cmd.init_args([
-            "--field", "id",
-            "--field", "status"
-        ])
+        cmd.init_args(["--field", "id", "--field", "status"])
         self.assertEqual(
-            cmd._get_line_items(FakeGen.Measurement(
-                id=1, type="ping", status="Ongoing", status_id=2,
-                meta_data={"status": {"name": "Ongoing", "id": 2}},
-                target="Name 1", description="Description 1",
-            )),
-            [1, "Ongoing"]
+            cmd._get_line_items(
+                FakeGen.Measurement(
+                    id=1,
+                    type="ping",
+                    status="Ongoing",
+                    status_id=2,
+                    meta_data={"status": {"name": "Ongoing", "id": 2}},
+                    target="Name 1",
+                    description="Description 1",
+                )
+            ),
+            [1, "Ongoing"],
         )
 
         cmd = Command()
-        cmd.init_args([
-            "--field", "url",
-        ])
+        cmd.init_args(
+            [
+                "--field",
+                "url",
+            ]
+        )
         self.assertEqual(
-            cmd._get_line_items(FakeGen.Measurement(
-                id=1, type="ping", status="Ongoing", status_id=2,
-                meta_data={"status": {"name": "Ongoing", "id": 2}},
-                target="Name 1", description="Description 1",
-            )),
-            ["https://atlas.ripe.net/measurements/1/"]
+            cmd._get_line_items(
+                FakeGen.Measurement(
+                    id=1,
+                    type="ping",
+                    status="Ongoing",
+                    status_id=2,
+                    meta_data={"status": {"name": "Ongoing", "id": 2}},
+                    target="Name 1",
+                    description="Description 1",
+                )
+            ),
+            ["https://atlas.ripe.net/measurements/1/"],
         )
 
     def test_get_filters(self):
         cmd = Command()
-        cmd.init_args([
-            "--search", "the force is strong with this one",
-            "--status", "ongoing",
-            "--af", "6",
-            "--type", "ping",
-            "--started-before", "2015-01-01",
-            "--started-after", "2014-01-01",
-            "--stopped-before", "2015-01-01",
-            "--stopped-after", "2014-01-01",
-        ])
-        self.assertEqual(cmd._get_filters(), {
-            "search": "the force is strong with this one",
-            "status__in": (2,),
-            "af": 6,
-            "type": "ping",
-            "start_time__lt": datetime.datetime(2015, 1, 1),
-            "start_time__gt": datetime.datetime(2014, 1, 1),
-            "stop_time__lt": datetime.datetime(2015, 1, 1),
-            "stop_time__gt": datetime.datetime(2014, 1, 1),
-        })
+        cmd.init_args(
+            [
+                "--search",
+                "the force is strong with this one",
+                "--status",
+                "ongoing",
+                "--af",
+                "6",
+                "--type",
+                "ping",
+                "--started-before",
+                "2015-01-01",
+                "--started-after",
+                "2014-01-01",
+                "--stopped-before",
+                "2015-01-01",
+                "--stopped-after",
+                "2014-01-01",
+            ]
+        )
+        self.assertEqual(
+            cmd._get_filters(),
+            {
+                "search": "the force is strong with this one",
+                "status__in": (2,),
+                "af": 6,
+                "type": "ping",
+                "start_time__lt": datetime.datetime(2015, 1, 1),
+                "start_time__gt": datetime.datetime(2014, 1, 1),
+                "stop_time__lt": datetime.datetime(2015, 1, 1),
+                "stop_time__gt": datetime.datetime(2014, 1, 1),
+            },
+        )
 
     def test_get_colour_from_status(self):
         cmd = Command()

@@ -18,8 +18,9 @@ from ..helpers.rendering import SaganSet
 
 class ValueKeyAggregator(object):
     """Aggregator based on tha actual value of the key/attribute"""
+
     def __init__(self, key, prefix=None):
-        self.aggregation_keys = key.split('.')
+        self.aggregation_keys = key.split(".")
         self.key_prefix = prefix or self.aggregation_keys[-1].upper()
 
     def get_key_value(self, entity):
@@ -62,8 +63,7 @@ class RangeKeyAggregator(ValueKeyAggregator):
         key/attribute
         """
 
-        bucket = "{0}: < {1}".format(
-            self.key_prefix, self.aggregation_ranges[-1])
+        bucket = "{0}: < {1}".format(self.key_prefix, self.aggregation_ranges[-1])
 
         key_value = self.get_key_value(entity)
         for index, krange in enumerate(self.aggregation_ranges):
@@ -72,9 +72,7 @@ class RangeKeyAggregator(ValueKeyAggregator):
                     bucket = "{0}: > {1}".format(self.key_prefix, krange)
                 else:
                     bucket = "{0}: {1}-{2}".format(
-                        self.key_prefix,
-                        krange,
-                        self.aggregation_ranges[index - 1]
+                        self.key_prefix, krange, self.aggregation_ranges[index - 1]
                     )
                 break
 

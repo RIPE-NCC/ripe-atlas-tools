@@ -30,8 +30,6 @@ from ripe.atlas.tools.cache import LocalCache
 
 
 class FakeCache(LocalCache):
-
-
     def __init__(self):
         self.paths = []
         LocalCache.__init__(self)
@@ -66,17 +64,125 @@ class FakeErrorResponse(FakeResponse):
 
 class TestIPDetails(unittest.TestCase):
 
-    IP = '193.0.6.1'
-    ASN = '3333'
-    HOLDER = 'RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL'
-    SAME_PREFIX_IP = '193.0.6.2'
-    PREFIX = '193.0.0.0/21'
-    SAME_AS_DIFFERENT_PREFIX_IP = '193.0.22.1'
-    NOT_ANNOUNCED_IP = '80.81.192.1'
+    IP = "193.0.6.1"
+    ASN = "3333"
+    HOLDER = (
+        "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL"
+    )
+    SAME_PREFIX_IP = "193.0.6.2"
+    PREFIX = "193.0.0.0/21"
+    SAME_AS_DIFFERENT_PREFIX_IP = "193.0.22.1"
+    NOT_ANNOUNCED_IP = "80.81.192.1"
     MOCK_RESULTS = {
-        IP: {"status": "ok", "server_id": "stat-app2", "cached": False, "status_code": 200, "time": "2015-10-12T15:30:00.113317", "messages": [["warning", "Given resource is not announced but result has been aligned to first-level less-specific (193.0.0.0/21)."]], "version": "1.3", "data_call_status": "supported - connecting to ursa", "see_also": [], "process_time": 561, "query_id": "196d2754-70f6-11e5-b8ba-782bcb346712", "data": {"query_time": "2015-10-12T08:00:00", "is_less_specific": True, "resource": "193.0.0.0/21", "actual_num_related": 0, "num_filtered_out": 0, "asns": [{"holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL", "asn": 3333}], "announced": True, "related_prefixes": [], "type": "prefix", "block": {"resource": "193.0.0.0/8", "name": "IANA IPv4 Address Space Registry", "desc": "RIPE NCC (Status: ALLOCATED)"}}},
-        SAME_AS_DIFFERENT_PREFIX_IP: {"status": "ok", "server_id": "stat-app2", "cached": False, "status_code": 200, "time": "2015-10-12T15:32:25.778643", "messages": [["warning", "Given resource is not announced but result has been aligned to first-level less-specific (193.0.22.0/23)."]], "version": "1.3", "data_call_status": "supported - connecting to ursa", "see_also": [], "process_time": 818, "query_id": "7018b6cc-70f6-11e5-8bf8-782bcb346712", "data": {"query_time": "2015-10-12T08:00:00", "is_less_specific": True, "resource": "193.0.22.0/23", "actual_num_related": 0, "num_filtered_out": 0, "asns": [{"holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL", "asn": 3333}], "announced": True, "related_prefixes": [], "type": "prefix", "block": {"resource": "193.0.0.0/8", "name": "IANA IPv4 Address Space Registry", "desc": "RIPE NCC (Status: ALLOCATED)"}}},
-        NOT_ANNOUNCED_IP: {"status": "ok", "server_id": "stat-app2", "cached": False, "status_code": 200, "time": "2015-10-12T15:33:58.911309", "messages": [["info", "2 routes were filtered due to low visibility (min peers:3)."]], "version": "1.3", "data_call_status": "supported - connecting to ursa", "see_also": [], "process_time": 462, "query_id": "a7d1daee-70f6-11e5-aaec-782bcb346712", "data": {"query_time": "2015-10-12T08:00:00", "is_less_specific": False, "resource": "80.81.192.1", "actual_num_related": 0, "num_filtered_out": 2, "asns": [], "announced": False, "related_prefixes": [], "type": "prefix", "block": {"resource": "80.0.0.0/8", "name": "IANA IPv4 Address Space Registry", "desc": "RIPE NCC (Status: ALLOCATED)"}}}
+        IP: {
+            "status": "ok",
+            "server_id": "stat-app2",
+            "cached": False,
+            "status_code": 200,
+            "time": "2015-10-12T15:30:00.113317",
+            "messages": [
+                [
+                    "warning",
+                    "Given resource is not announced but result has been aligned to first-level less-specific (193.0.0.0/21).",
+                ]
+            ],
+            "version": "1.3",
+            "data_call_status": "supported - connecting to ursa",
+            "see_also": [],
+            "process_time": 561,
+            "query_id": "196d2754-70f6-11e5-b8ba-782bcb346712",
+            "data": {
+                "query_time": "2015-10-12T08:00:00",
+                "is_less_specific": True,
+                "resource": "193.0.0.0/21",
+                "actual_num_related": 0,
+                "num_filtered_out": 0,
+                "asns": [
+                    {
+                        "holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+                        "asn": 3333,
+                    }
+                ],
+                "announced": True,
+                "related_prefixes": [],
+                "type": "prefix",
+                "block": {
+                    "resource": "193.0.0.0/8",
+                    "name": "IANA IPv4 Address Space Registry",
+                    "desc": "RIPE NCC (Status: ALLOCATED)",
+                },
+            },
+        },
+        SAME_AS_DIFFERENT_PREFIX_IP: {
+            "status": "ok",
+            "server_id": "stat-app2",
+            "cached": False,
+            "status_code": 200,
+            "time": "2015-10-12T15:32:25.778643",
+            "messages": [
+                [
+                    "warning",
+                    "Given resource is not announced but result has been aligned to first-level less-specific (193.0.22.0/23).",
+                ]
+            ],
+            "version": "1.3",
+            "data_call_status": "supported - connecting to ursa",
+            "see_also": [],
+            "process_time": 818,
+            "query_id": "7018b6cc-70f6-11e5-8bf8-782bcb346712",
+            "data": {
+                "query_time": "2015-10-12T08:00:00",
+                "is_less_specific": True,
+                "resource": "193.0.22.0/23",
+                "actual_num_related": 0,
+                "num_filtered_out": 0,
+                "asns": [
+                    {
+                        "holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+                        "asn": 3333,
+                    }
+                ],
+                "announced": True,
+                "related_prefixes": [],
+                "type": "prefix",
+                "block": {
+                    "resource": "193.0.0.0/8",
+                    "name": "IANA IPv4 Address Space Registry",
+                    "desc": "RIPE NCC (Status: ALLOCATED)",
+                },
+            },
+        },
+        NOT_ANNOUNCED_IP: {
+            "status": "ok",
+            "server_id": "stat-app2",
+            "cached": False,
+            "status_code": 200,
+            "time": "2015-10-12T15:33:58.911309",
+            "messages": [
+                ["info", "2 routes were filtered due to low visibility (min peers:3)."]
+            ],
+            "version": "1.3",
+            "data_call_status": "supported - connecting to ursa",
+            "see_also": [],
+            "process_time": 462,
+            "query_id": "a7d1daee-70f6-11e5-aaec-782bcb346712",
+            "data": {
+                "query_time": "2015-10-12T08:00:00",
+                "is_less_specific": False,
+                "resource": "80.81.192.1",
+                "actual_num_related": 0,
+                "num_filtered_out": 2,
+                "asns": [],
+                "announced": False,
+                "related_prefixes": [],
+                "type": "prefix",
+                "block": {
+                    "resource": "80.0.0.0/8",
+                    "name": "IANA IPv4 Address Space Registry",
+                    "desc": "RIPE NCC (Status: ALLOCATED)",
+                },
+            },
+        },
     }
 
     def setUp(self):
@@ -85,9 +191,7 @@ class TestIPDetails(unittest.TestCase):
         self.mock_cache = mock.patch(
             "ripe.atlas.tools.ipdetails.cache", wraps=fake_cache
         ).start()
-        self.mock_get = mock.patch(
-            'ripe.atlas.tools.ipdetails.requests.get'
-        ).start()
+        self.mock_get = mock.patch("ripe.atlas.tools.ipdetails.requests.get").start()
         self.mock_get.return_value = FakeResponse(
             json_return=self.MOCK_RESULTS[self.IP]
         )
@@ -202,32 +306,26 @@ class TestIPDetails(unittest.TestCase):
         self.assertEqual(
             ip.query_stat(),
             {
-                'Prefix': '193.0.0.0/21',
-                'Holder': 'RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL',
-                'ASN': '3333'
-            }
+                "Prefix": "193.0.0.0/21",
+                "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+                "ASN": "3333",
+            },
         )
 
     def test_invalid_query_stat(self):
         """Test case where stat returns not ok status"""
-        self.mock_get.return_value = FakeResponse(
-            json_return={"status": "notok"}
-        )
+        self.mock_get.return_value = FakeResponse(json_return={"status": "notok"})
         ip = IP(self.IP)
         self.assertEqual(ip.query_stat(), {})
 
-        self.mock_get.return_value = FakeResponse(
-            json_return={}
-        )
+        self.mock_get.return_value = FakeResponse(json_return={})
         ip = IP(self.IP)
         self.assertEqual(ip.query_stat(), {})
 
     def test_invalid_query_stat1(self):
         """Test case where stat returns not valid data structure"""
         # no data at all
-        self.mock_get.return_value = FakeResponse(
-            json_return={"status": "ok"}
-        )
+        self.mock_get.return_value = FakeResponse(json_return={"status": "ok"})
         ip = IP(self.IP)
         self.assertEqual(ip.query_stat(), {})
 
@@ -272,23 +370,21 @@ class TestIPDetails(unittest.TestCase):
     def test_update_cache(self):
         """Test case where we store both prefix/address"""
         details = {
-            'Prefix': '193.0.0.0/21',
-            'Holder': 'RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL',
-            'ASN': '3333'
+            "Prefix": "193.0.0.0/21",
+            "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+            "ASN": "3333",
         }
         IP(self.IP)
         self.assertEqual(self.mock_cache.set.call_count, 2)
         self.assertEqual(self.mock_cache.get("IPDetails:193.0.6.1"), details)
-        self.assertEqual(self.mock_cache.get(
-            "IPDetailsPrefix:193.0.0.0/21"), details
-        )
+        self.assertEqual(self.mock_cache.get("IPDetailsPrefix:193.0.0.0/21"), details)
 
     def test_update_cache1(self):
         """Test case where we store only address"""
         details = {
-            'Prefix': '193.0.0.0/21',
-            'Holder': 'RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL',
-            'ASN': '3333'
+            "Prefix": "193.0.0.0/21",
+            "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+            "ASN": "3333",
         }
         self.mock_cache.set("IPDetailsPrefix:193.0.0.0/21", details, 1)
         IP(self.IP)
@@ -299,11 +395,7 @@ class TestIPDetails(unittest.TestCase):
 
     def test_get_from_cache_prefix(self):
         """Test case where we have a matching prefix in cache"""
-        details = {
-            'Prefix': '193.0.0.0/21',
-            'Holder': 'test',
-            'ASN': 'test'
-        }
+        details = {"Prefix": "193.0.0.0/21", "Holder": "test", "ASN": "test"}
         self.mock_cache.set("IPDetailsPrefix:193.0.0.0/20", details, 1)
         ip = IP(self.IP)
         self.assertTrue(ip.cached_prefix_found)

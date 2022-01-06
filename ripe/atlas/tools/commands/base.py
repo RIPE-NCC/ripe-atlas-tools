@@ -27,16 +27,17 @@ from ..version import __version__
 
 
 class RipeHelpFormatter(argparse.RawTextHelpFormatter):
-
     def _format_usage(self, *args):
-        r = argparse.RawTextHelpFormatter._format_usage(
-            self, *args).capitalize()
+        r = argparse.RawTextHelpFormatter._format_usage(self, *args).capitalize()
         return "\n\n{}\n".format(r)
 
 
 def _get_command_name(cmd_or_factory):
-    return cmd_or_factory.NAME if cmd_or_factory.NAME else \
-        cmd_or_factory.__module__.rsplit(".", 1)[-1]
+    return (
+        cmd_or_factory.NAME
+        if cmd_or_factory.NAME
+        else cmd_or_factory.__module__.rsplit(".", 1)[-1]
+    )
 
 
 class Command(object):
@@ -59,11 +60,13 @@ class Command(object):
         self.arguments = None
         self.parser = argparse.ArgumentParser(
             formatter_class=RipeHelpFormatter,
-            description="\n\n".join([
-                self.DESCRIPTION + ".",
-                getattr(self, "EXTRA_DESCRIPTION", ""),
-            ]),
-            prog="ripe-atlas {}".format(self.get_name())
+            description="\n\n".join(
+                [
+                    self.DESCRIPTION + ".",
+                    getattr(self, "EXTRA_DESCRIPTION", ""),
+                ]
+            ),
+            prog="ripe-atlas {}".format(self.get_name()),
         )
         self.user_agent = self._get_user_agent()
 
@@ -114,12 +117,15 @@ class Command(object):
         if command_name in cls.DEPRECATED_ALIASES:
             alias = command_name
             command_name = cls.DEPRECATED_ALIASES[alias]
-            sys.stderr.write(colourise(
-                "Warning: {} is a deprecated alias for {}\n\n".format(
-                    alias, command_name,
-                ),
-                "yellow"
-            ))
+            sys.stderr.write(
+                colourise(
+                    "Warning: {} is a deprecated alias for {}\n\n".format(
+                        alias,
+                        command_name,
+                    ),
+                    "yellow",
+                )
+            )
 
         if cls._commands is None:
             cls._load_commands()
@@ -160,8 +166,7 @@ class Command(object):
         if args is None:
             args = sys.argv[1:]
 
-        self.arguments = self.parser.parse_args(
-            self._modify_parser_args(args))
+        self.arguments = self.parser.parse_args(self._modify_parser_args(args))
 
     def run(self):
         raise NotImplementedError()
@@ -197,7 +202,7 @@ class Command(object):
         """
         Write to stdout regardless of whether it is a tty or not.
         """
-        sys.stdout.write(message + '\n')
+        sys.stdout.write(message + "\n")
 
     def ok(self, message):
         """
@@ -248,7 +253,7 @@ class TabularFieldsMixin(object):
         for field in self.arguments.field:
             if r:
                 r += " "
-            r += ("{!s:" + u"{}{}".format(*self.COLUMNS[field]) + "}")
+            r += "{!s:" + u"{}{}".format(*self.COLUMNS[field]) + "}"
         return r
 
     def _get_header_names(self):
@@ -267,8 +272,7 @@ class TabularFieldsMixin(object):
         determine the width of that line.  Then we use a regex to overwrite that
         line with "=".
         """
-        return re.sub(
-            r".", "=", self._get_line_format().format(*self.arguments.field))
+        return re.sub(r".", "=", self._get_line_format().format(*self.arguments.field))
 
     def _get_line_items(self, measurement):
         raise NotImplementedError("This needs to be defined in the subclass.")
@@ -283,8 +287,7 @@ class TabularFieldsMixin(object):
             if k not in ("search",):
                 v = str(v).capitalize()
             r += colourise(
-                "  {}: {}\n".format(*self._get_filter_key_value_pair(k, v)),
-                "cyan"
+                "  {}: {}\n".format(*self._get_filter_key_value_pair(k, v)), "cyan"
             )
 
         return r
@@ -294,7 +297,6 @@ class TabularFieldsMixin(object):
 
 
 class MetaDataMixin(object):
-
     @staticmethod
     def _prettify_boolean(boolean):
 
@@ -308,15 +310,13 @@ class MetaDataMixin(object):
     @staticmethod
     def _prettify_time(dtime):
         if isinstance(dtime, datetime):
-            return "{} UTC".format(
-                dtime.isoformat().replace("T", " "))
+            return "{} UTC".format(dtime.isoformat().replace("T", " "))
 
         return str(dtime)
 
     @staticmethod
     def _render_line(header, value):
-        print("{}  {}".format(
-            colourise("{:25}".format(header), "bold"), value))
+        print("{}  {}".format(colourise("{:25}".format(header), "bold"), value))
 
 
 class Factory(object):

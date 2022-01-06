@@ -28,7 +28,6 @@ from ripe.atlas.tools.helpers.validators import ArgumentType
 
 
 class TestArgumentTypeHelper(unittest.TestCase):
-
     def test_path(self):
 
         self.assertEqual("/tmp", ArgumentType.path("/tmp"))
@@ -49,11 +48,9 @@ class TestArgumentTypeHelper(unittest.TestCase):
 
     def test_comma_separated_integers(self):
 
-        self.assertEqual(
-            [1, 2, 3], ArgumentType.comma_separated_integers()("1,2,3"))
+        self.assertEqual([1, 2, 3], ArgumentType.comma_separated_integers()("1,2,3"))
 
-        self.assertEqual(
-            [1, 2, 3], ArgumentType.comma_separated_integers()("1, 2, 3"))
+        self.assertEqual([1, 2, 3], ArgumentType.comma_separated_integers()("1, 2, 3"))
 
         self.assertEqual([1], ArgumentType.comma_separated_integers()("1"))
 
@@ -97,8 +94,11 @@ class TestArgumentTypeHelper(unittest.TestCase):
     def test_ip_or_domain(self):
 
         passable_hosts = (
-            "localhost", "ripe.net", "www.ripe.net", "1.2.3.4",
-            "2001:67c:2e8:22::c100:68b"
+            "localhost",
+            "ripe.net",
+            "www.ripe.net",
+            "1.2.3.4",
+            "2001:67c:2e8:22::c100:68b",
         )
         for host in passable_hosts:
             self.assertEqual(host, ArgumentType.ip_or_domain(host))
@@ -119,34 +119,34 @@ class TestArgumentTypeHelper(unittest.TestCase):
 
         old = sys.stdin
         sys.stdin = StringIO("1\n2\n")
-        self.assertEqual(
-            ArgumentType.comma_separated_integers_or_file("-"),
-            [1, 2]
-        )
+        self.assertEqual(ArgumentType.comma_separated_integers_or_file("-"), [1, 2])
         sys.stdin = old
 
         in_file = "/tmp/__test_file__"
         with open(in_file, "w") as f:
             f.write("1\n2\n3\n")
         self.assertEqual(
-            ArgumentType.comma_separated_integers_or_file(in_file),
-            [1, 2, 3]
+            ArgumentType.comma_separated_integers_or_file(in_file), [1, 2, 3]
         )
         os.unlink(in_file)
 
     def test_measurement_alias(self):
 
-        tests = ["", "\\invalid", "+invalid",
-                 ":invalid", "12345"]
+        tests = ["", "\\invalid", "+invalid", ":invalid", "12345"]
         for test in tests:
             with self.assertRaises(argparse.ArgumentTypeError):
                 ArgumentType.alias_is_valid(test)
 
-        tests = ["valid", "123valid", "valid123", "_valid",
-                 "valid_", "-valid", "valid-", ".valid"]
+        tests = [
+            "valid",
+            "123valid",
+            "valid123",
+            "_valid",
+            "valid_",
+            "-valid",
+            "valid-",
+            ".valid",
+        ]
 
         for test in tests:
-            self.assertEqual(
-                ArgumentType.alias_is_valid(test),
-                test
-            )
+            self.assertEqual(ArgumentType.alias_is_valid(test), test)

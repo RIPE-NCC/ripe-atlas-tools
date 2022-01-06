@@ -20,20 +20,18 @@ from .base import Command
 
 
 class SslcertMeasureCommand(Command):
-
     def add_arguments(self):
 
         Command.add_arguments(self)
 
         spec = conf["specification"]["types"]["sslcert"]
 
-        specific = self.parser.add_argument_group(
-            "SSL Certificate-specific Options")
+        specific = self.parser.add_argument_group("SSL Certificate-specific Options")
         specific.add_argument(
             "--port",
             type=ArgumentType.integer_range(minimum=1, maximum=65535),
             default=spec["port"],
-            help="Destination port"
+            help="Destination port",
         )
         specific.add_argument(
             "--hostname",

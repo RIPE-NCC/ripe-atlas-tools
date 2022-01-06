@@ -26,7 +26,6 @@ class CaptureLimitExceeded(Exception):
 
 
 class Stream(object):
-
     def __init__(self, capture_limit=None, timeout=None):
 
         self.captured = 0
@@ -41,11 +40,15 @@ class Stream(object):
         )
 
         def on_result_response(result, *args):
-            sys.stdout.write(renderer.on_result(Result.get(
-                result,
-                on_error=Result.ACTION_IGNORE,
-                on_malformation=Result.ACTION_IGNORE
-            )))
+            sys.stdout.write(
+                renderer.on_result(
+                    Result.get(
+                        result,
+                        on_error=Result.ACTION_IGNORE,
+                        on_malformation=Result.ACTION_IGNORE,
+                    )
+                )
+            )
             self.captured += 1
             if self.capture_limit and self.captured >= self.capture_limit:
                 raise CaptureLimitExceeded()

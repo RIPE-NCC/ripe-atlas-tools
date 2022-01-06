@@ -73,8 +73,7 @@ class Renderer(object):
         A crude templating engine.
         """
 
-        template = os.path.join(
-            os.path.dirname(__file__), "templates", template)
+        template = os.path.join(os.path.dirname(__file__), "templates", template)
 
         with open(template) as f:
             return str(f.read()).format(**kwargs)
@@ -102,9 +101,9 @@ class Renderer(object):
 
     @classmethod
     def get_renderer_by_name(cls, name):
-        error_message = (
-            'The renderer you selected, "{}" could not be found.'
-        ).format(name)
+        error_message = ('The renderer you selected, "{}" could not be found.').format(
+            name
+        )
 
         try:  # User-defined, user-supplied
             r = cls.import_renderer("renderers", name)
@@ -118,9 +117,7 @@ class Renderer(object):
 
     @classmethod
     def get_renderer_by_kind(cls, kind):
-        error_message = (
-            'The selected renderer, "{}" could not be found.'
-        ).format(kind)
+        error_message = ('The selected renderer, "{}" could not be found.').format(kind)
 
         try:
             r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
@@ -132,8 +129,7 @@ class Renderer(object):
     @staticmethod
     def import_renderer(package, name):
         return getattr(
-            importlib.import_module("{}.{}".format(package, name)),
-            "Renderer"
+            importlib.import_module("{}.{}".format(package, name)), "Renderer"
         )
 
     @staticmethod
@@ -174,7 +170,7 @@ class Renderer(object):
     def _test_renderer_accepts_kind(renderer, kind):
         if kind not in renderer.RENDERS:
             raise RipeAtlasToolsException(
-                'The renderer selected does not appear to support measurements '
+                "The renderer selected does not appear to support measurements "
                 'of type "{}"'.format(kind)
             )
 
@@ -191,6 +187,7 @@ class Result(str):
     A string-like object that we can use to render results, but that contains
     enough information to be used by the aggregators if need be.
     """
+
     def __new__(cls, value, probe_id):
         obj = str.__new__(cls, value)
         obj.probe_id = probe_id

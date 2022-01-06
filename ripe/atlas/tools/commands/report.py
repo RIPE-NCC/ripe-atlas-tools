@@ -78,7 +78,8 @@ class Command(BaseCommand):
             choices=conf["authorisation"]["fetch_aliases"].keys(),
             help="The API key alias you want to use to fetch the measurement. "
             "To configure an API key alias, use "
-            "`ripe-atlas configure --set authorisation.fetch_aliases.ALIAS_NAME=YOUR_KEY`. "
+            "`ripe-atlas configure --set "
+            "authorisation.fetch_aliases.ALIAS_NAME=YOUR_KEY`. "
             "(Can also be passed using the ATLAS_FETCH_KEY environment variable)",
         )
         self.parser.add_argument(
@@ -110,8 +111,7 @@ class Command(BaseCommand):
                 # http://www.iana.org/assignments/as-numbers/as-numbers.xhtml
                 maximum=2 ** 32 - 2,
             ),
-            help="A comma-separated list of probe ASNs you want to see "
-            "exclusively.",
+            help="A comma-separated list of probe ASNs you want to see " "exclusively.",
         )
         self.parser.add_argument(
             "--start-time",
@@ -166,9 +166,7 @@ class Command(BaseCommand):
                 "measurement_id, not both."
             )
         if self.arguments.measurement_id:
-            results, sample = self._get_results_from_api(
-                self.arguments.measurement_id
-            )
+            results, sample = self._get_results_from_api(self.arguments.measurement_id)
             use_regular_file = False
         else:
             if self.arguments.from_file:
@@ -185,9 +183,9 @@ class Command(BaseCommand):
         # so we use .raw_data once we have verified and parsed the sample.
         measurement_type = Result.get(sample).raw_data["type"].lower()
 
-        renderer = Renderer.get_renderer(
-            self.arguments.renderer, measurement_type
-        )(arguments=self.arguments)
+        renderer = Renderer.get_renderer(self.arguments.renderer, measurement_type)(
+            arguments=self.arguments
+        )
 
         results = SaganSet(iterable=results, probes=self.arguments.probes)
 
@@ -261,9 +259,7 @@ class Command(BaseCommand):
             if aggr_key == "rtt-median":
                 # Get range for the aggregation
                 key_range = self.AGGREGATORS[aggr_key][2]
-                aggregation_keys.append(
-                    aggregation_class(key=key, ranges=key_range)
-                )
+                aggregation_keys.append(aggregation_class(key=key, ranges=key_range))
             else:
                 aggregation_keys.append(aggregation_class(key=key))
         return aggregation_keys

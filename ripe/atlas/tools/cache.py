@@ -75,12 +75,13 @@ class LocalCache(object):
             if not expires or expires > self._now:
                 return value
             else:
-                del(self._db[key])
+                del self._db[key]
         return default
 
     def set(self, key, value, expires=None):
         return self.__setitem__(
-            key, value, self._now + datetime.timedelta(seconds=expires))
+            key, value, self._now + datetime.timedelta(seconds=expires)
+        )
 
     def clear(self, key=None):
         """
@@ -90,10 +91,10 @@ class LocalCache(object):
         """
         if key:
             if key in self._db:
-                del(self._db[key])
+                del self._db[key]
         else:
             for key in self.keys():
-                del(self._db[key])
+                del self._db[key]
 
     def expire(self):
         """
@@ -120,6 +121,7 @@ class LocalCache(object):
             pass  # Better to ask forgiveness than permission
 
         return db_path
+
 
 cache = LocalCache()
 
@@ -161,6 +163,8 @@ def memoised(cache_time):
         ...
         return whatever
     """
+
     def _wrap(function):
         return Memoiser(function, cache_time=cache_time)
+
     return _wrap

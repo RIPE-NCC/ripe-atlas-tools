@@ -46,10 +46,7 @@ class TestCommandLoading(unittest.TestCase):
         # Create a directory for storing user commands and insert the dummy
         # command
         self.user_command_path = tempfile.mkdtemp()
-        with open(
-            os.path.join(self.user_command_path, "user_command_1.py"),
-            "w"
-        ) as f:
+        with open(os.path.join(self.user_command_path, "user_command_1.py"), "w") as f:
             f.write(USER_COMMAND)
 
     def tearDown(self):
@@ -74,8 +71,8 @@ class TestCommandLoading(unittest.TestCase):
         self.assertEqual(
             sorted(available_commands),
             sorted(
-                [b.replace('-', '_') for b in self.expected_builtins] +
-                ["user_command_1"]
+                [b.replace("-", "_") for b in self.expected_builtins]
+                + ["user_command_1"]
             ),
         )
 

@@ -28,8 +28,9 @@ class Command(BaseCommand):
     EDITOR = os.environ.get("EDITOR", "/usr/bin/vim")
     DESCRIPTION = "Manage measurements' and probes' aliases"
     EXTRA_DESCRIPTION = (
-        "As an alternative to this command, you can just create/edit {}"
-        .format(AliasesDB.USER_RC)
+        "As an alternative to this command, you can just create/edit {}".format(
+            AliasesDB.USER_RC
+        )
     )
 
     def add_arguments(self):
@@ -37,13 +38,10 @@ class Command(BaseCommand):
             title="action",
             dest="action",
             help="Action to be performed on aliases. "
-                 "Run 'ripe-atlas alias <action> --help' for more details."
+            "Run 'ripe-atlas alias <action> --help' for more details.",
         )
 
-        add_parser = subparsers.add_parser(
-            "add",
-            help="Add/modify an alias."
-        )
+        add_parser = subparsers.add_parser("add", help="Add/modify an alias.")
         add_parser.add_argument(
             "type",
             action="store",
@@ -63,10 +61,7 @@ class Command(BaseCommand):
             help="Alias name.",
         )
 
-        del_parser = subparsers.add_parser(
-            "del",
-            help="Remove an alias."
-        )
+        del_parser = subparsers.add_parser("del", help="Remove an alias.")
         del_parser.add_argument(
             "type",
             action="store",
@@ -80,10 +75,7 @@ class Command(BaseCommand):
             help="Alias name.",
         )
 
-        show_parser = subparsers.add_parser(
-            "show",
-            help="Show target's ID."
-        )
+        show_parser = subparsers.add_parser("show", help="Show target's ID.")
         show_parser.add_argument(
             "type",
             action="store",
@@ -97,10 +89,7 @@ class Command(BaseCommand):
             help="Alias name.",
         )
 
-        list_parser = subparsers.add_parser(
-            "list",
-            help="List configured aliases."
-        )
+        list_parser = subparsers.add_parser("list", help="List configured aliases.")
         list_parser.add_argument(
             "type",
             action="store",
@@ -110,20 +99,19 @@ class Command(BaseCommand):
 
         subparsers.add_parser(
             "editor",
-            help="Invoke {0} to edit the configuration directly".format(
-                self.EDITOR)
+            help="Invoke {0} to edit the configuration directly".format(self.EDITOR),
         )
 
     def run(self):
 
         if not self.arguments.action:
             raise RipeAtlasToolsException(
-                "Action not given. Use --help for more information.")
+                "Action not given. Use --help for more information."
+            )
 
         if self.arguments.action == "editor":
             os.system("{0} {1}".format(self.EDITOR, AliasesDB.USER_RC))
-            return self.ok(
-                "Aliases file writen to {}".format(AliasesDB.USER_RC))
+            return self.ok("Aliases file writen to {}".format(AliasesDB.USER_RC))
 
         else:
             alias_type = self.arguments.type
@@ -150,16 +138,11 @@ class Command(BaseCommand):
                 if alias_name in aliases[alias_type]:
                     self.ok(
                         "'{}' is an alias for {}".format(
-                            alias_name,
-                            aliases[alias_type][alias_name]
+                            alias_name, aliases[alias_type][alias_name]
                         )
                     )
                 else:
-                    self.not_ok(
-                        "'{}' alias does not exist".format(
-                            alias_name
-                        )
-                    )
+                    self.not_ok("'{}' alias does not exist".format(alias_name))
 
             elif self.arguments.action == "list":
                 res = "{} aliases:\n\n".format(alias_type.capitalize())

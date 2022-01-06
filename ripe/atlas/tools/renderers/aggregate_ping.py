@@ -34,10 +34,7 @@ class Renderer(BaseRenderer):
         self.rtts = []
         self.rtts_min = []
         self.rtts_max = []
-        self.rtt_types_map = {
-            "min": self.rtts_min,
-            "max": self.rtts_max
-        }
+        self.rtt_types_map = {"min": self.rtts_min, "max": self.rtts_max}
 
     def header(self):
         return "Collecting results...\n"
@@ -54,7 +51,7 @@ class Renderer(BaseRenderer):
             min=min(self.rtts_min),
             median=self.median(),
             mean=self.mean(),
-            max=max(self.rtts_max)
+            max=max(self.rtts_max),
         )
 
     def collect_stats(self, results):
@@ -107,9 +104,7 @@ class Renderer(BaseRenderer):
 
     def mean(self):
         """Calculates the mean of the collected rtts"""
-        return round(
-            float(sum(self.rtts)) / max(len(self.rtts), 1), 3
-        )
+        return round(float(sum(self.rtts)) / max(len(self.rtts), 1), 3)
 
     def median(self):
         """Calculates the median of the collected rtts"""

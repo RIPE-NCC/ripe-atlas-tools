@@ -16,6 +16,7 @@
 import sys
 
 from contextlib import contextmanager
+
 try:
     from cStringIO import StringIO
 except ImportError:  # Python 3
@@ -26,6 +27,7 @@ class FakeTTY(object):
     """
     Basic simulation of a user terminal.
     """
+
     def __init__(self, file_obj):
         self.file_obj = file_obj
 

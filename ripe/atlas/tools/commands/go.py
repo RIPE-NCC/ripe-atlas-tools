@@ -29,7 +29,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=ArgumentType.msm_id_or_name(),
-            help="The measurement id or alias you want reported"
+            help="The measurement id or alias you want reported",
         )
 
     def run(self):

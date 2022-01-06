@@ -32,10 +32,10 @@ class Renderer(BaseRenderer):
             "--traceroute-aspath-radius",
             type=int,
             help="Number of different ASs starting from the end of the "
-                 "traceroute path. "
-                 "Default: {}.".format(Renderer.DEFAULT_RADIUS),
+            "traceroute path. "
+            "Default: {}.".format(Renderer.DEFAULT_RADIUS),
             metavar="RADIUS",
-            default=Renderer.DEFAULT_RADIUS
+            default=Renderer.DEFAULT_RADIUS,
         )
 
     def __init__(self, *args, **kwargs):
@@ -53,12 +53,17 @@ class Renderer(BaseRenderer):
         asns_with_padding = [""] * radius + asns
         asns_with_padding = asns_with_padding[-radius:]
         return " ".join(
-            ["{:>8}".format("AS{}".format(asn) if asn else "") for asn in asns_with_padding]
+            [
+                "{:>8}".format("AS{}".format(asn) if asn else "")
+                for asn in asns_with_padding
+            ]
         )
 
     def on_start(self):
-        return "For each traceroute path toward the target, the " \
-               "last {} ASNs will be shown\n\n".format(self.RADIUS)
+        return (
+            "For each traceroute path toward the target, the "
+            "last {} ASNs will be shown\n\n".format(self.RADIUS)
+        )
 
     def on_result(self, result):
 
@@ -84,15 +89,16 @@ class Renderer(BaseRenderer):
 
         if as_path not in self.paths:
             self.paths[as_path] = {}
-            self.paths[as_path]['cnt'] = 0
-            self.paths[as_path]['responded'] = 0
-        self.paths[as_path]['cnt'] += 1
+            self.paths[as_path]["cnt"] = 0
+            self.paths[as_path]["responded"] = 0
+        self.paths[as_path]["cnt"] += 1
         if result.destination_ip_responded:
-            self.paths[as_path]['responded'] += 1
+            self.paths[as_path]["responded"] += 1
 
         return "Probe #{:<5}: {}, {}completed\n".format(
-            result.probe_id, as_path,
-            "NOT " if not result.destination_ip_responded else ""
+            result.probe_id,
+            as_path,
+            "NOT " if not result.destination_ip_responded else "",
         )
 
     def additional(self, results):
@@ -101,9 +107,9 @@ class Renderer(BaseRenderer):
         for as_path in self.paths:
             s += "  {}: {} probe{}, {} completed\n".format(
                 as_path,
-                self.paths[as_path]['cnt'],
-                "s" if self.paths[as_path]['cnt'] > 1 else "",
-                self.paths[as_path]['responded']
+                self.paths[as_path]["cnt"],
+                "s" if self.paths[as_path]["cnt"] > 1 else "",
+                self.paths[as_path]["responded"],
             )
 
         return s

@@ -33,9 +33,14 @@ class IP(object):
         self.holder = None
         self.prefix = None
         self.not_querable_types = [
-            'RESERVED', 'UNSPECIFIED', 'LOOPBACK',
-            'UNASSIGNED', 'DOCUMENTATION', 'ULA',
-            'LINKLOCAL', 'PRIVATE'
+            "RESERVED",
+            "UNSPECIFIED",
+            "LOOPBACK",
+            "UNASSIGNED",
+            "DOCUMENTATION",
+            "ULA",
+            "LINKLOCAL",
+            "PRIVATE",
         ]
 
         details = self._get_details()
@@ -66,7 +71,7 @@ class IP(object):
 
     def is_querable(self):
         """Determines if address is worth querable."""
-        return (self.ip_object.iptype() not in self.not_querable_types)
+        return self.ip_object.iptype() not in self.not_querable_types
 
     def get_from_cached_prefix(self):
         """Search cache for existing cached Prefix"""
@@ -110,11 +115,15 @@ class IP(object):
                 details = {
                     "ASN": str(res["data"]["asns"][0]["asn"]),
                     "Holder": res["data"]["asns"][0]["holder"],
-                    "Prefix": res["data"]["resource"]
+                    "Prefix": res["data"]["resource"],
                 }
             except (
                 # Protect from any kind of malformed json response
-                AttributeError, ValueError, KeyError, IndexError, TypeError
+                AttributeError,
+                ValueError,
+                KeyError,
+                IndexError,
+                TypeError,
             ):
                 pass
 
@@ -130,6 +139,4 @@ class IP(object):
         cache.set(key, details, self.CACHE_EXPIRATION_TIME)
 
     def __str__(self):
-        return "IP {}, ASN {}, Holder {}".format(
-            self.address, self.asn, self.holder
-        )
+        return "IP {}, ASN {}, Holder {}".format(self.address, self.asn, self.holder)

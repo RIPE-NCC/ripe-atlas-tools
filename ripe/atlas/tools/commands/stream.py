@@ -27,9 +27,7 @@ class Command(BaseCommand):
 
     NAME = "stream"
 
-    DESCRIPTION = (
-        "Output the results of a public measurement as they become available"
-    )
+    DESCRIPTION = "Output the results of a public measurement as they become available"
     EXTRA_DESCRIPTION = "Streaming of non-public measurements is not supported."
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
@@ -39,18 +37,16 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "measurement_id",
             type=ArgumentType.msm_id_or_name(),
-            help="The measurement id or alias you want streamed"
+            help="The measurement id or alias you want streamed",
         )
         self.parser.add_argument(
-            "--limit",
-            type=int,
-            help="The maximum number of results you want to stream"
+            "--limit", type=int, help="The maximum number of results you want to stream"
         )
         self.parser.add_argument(
             "--renderer",
             choices=Renderer.get_available(),
             help="The renderer you want to use. If this isn't defined, an "
-                 "appropriate renderer will be selected."
+            "appropriate renderer will be selected.",
         )
 
         Renderer.add_arguments_for_available_renderers(self.parser)
@@ -59,7 +55,8 @@ class Command(BaseCommand):
 
         try:
             measurement = Measurement(
-                id=self.arguments.measurement_id, user_agent=self.user_agent,
+                id=self.arguments.measurement_id,
+                user_agent=self.user_agent,
             )
         except APIResponseError as e:
             raise RipeAtlasToolsException(e.args[0])
@@ -69,7 +66,7 @@ class Command(BaseCommand):
                 self.arguments.renderer,
                 self.arguments,
                 measurement.type.lower(),
-                self.arguments.measurement_id
+                self.arguments.measurement_id,
             )
         except (KeyboardInterrupt, CaptureLimitExceeded):
             self.ok("Disconnecting from the stream")

@@ -176,9 +176,7 @@ class Configuration(UserSettingsParser):
         easy for n00bs to read.
         """
 
-        template = os.path.join(
-            os.path.dirname(__file__), "templates", "base.yaml"
-        )
+        template = os.path.join(os.path.dirname(__file__), "templates", "base.yaml")
 
         authorisation = re.compile("^authorisation:$", re.MULTILINE)
         tags = re.compile("^  tags:$", re.MULTILINE)
@@ -190,13 +188,10 @@ class Configuration(UserSettingsParser):
                 payload=yaml.dump(config, default_flow_style=False)
             )
             payload = ripe.sub(
-                "\n# Don't mess with these, or Bad Things may happen\n"
-                "ripe-ncc:",
+                "\n# Don't mess with these, or Bad Things may happen\n" "ripe-ncc:",
                 payload,
             )
-            payload = authorisation.sub(
-                "# Authorisation\n" "authorisation:", payload
-            )
+            payload = authorisation.sub("# Authorisation\n" "authorisation:", payload)
             payload = specification.sub(
                 "\n# Measurement Creation\n" "specification:", payload
             )

@@ -19,7 +19,6 @@ from .base import Command
 
 
 class PingMeasureCommand(Command):
-
     def add_arguments(self):
 
         Command.add_arguments(self)
@@ -31,13 +30,13 @@ class PingMeasureCommand(Command):
             "--packets",
             type=ArgumentType.integer_range(minimum=1, maximum=16),
             default=spec["packets"],
-            help="The number of packets sent"
+            help="The number of packets sent",
         )
         specific.add_argument(
             "--size",
             type=ArgumentType.integer_range(minimum=1, maximum=2048),
             default=spec["size"],
-            help="The size of packets sent"
+            help="The size of packets sent",
         )
         specific.add_argument(
             "--packet-interval",

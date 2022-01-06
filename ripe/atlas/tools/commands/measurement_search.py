@@ -36,14 +36,17 @@ class Command(TabularFieldsMixin, BaseCommand):
     STATUS_NO_SUITABLE_PROBES = 6
     STATUS_FAILED = 7
     STATUSES = {
-        "scheduled": (STATUS_SPECIFIED, STATUS_SCHEDULED,),
+        "scheduled": (
+            STATUS_SPECIFIED,
+            STATUS_SCHEDULED,
+        ),
         "ongoing": (STATUS_ONGOING,),
         "stopped": (
             STATUS_STOPPED,
             STATUS_FORCED_STOP,
             STATUS_NO_SUITABLE_PROBES,
             STATUS_FAILED,
-        )
+        ),
     }
 
     # Column name: (alignment, width)
@@ -66,25 +69,22 @@ class Command(TabularFieldsMixin, BaseCommand):
         self.parser.add_argument(
             "--search",
             type=str,
-            help="A search string.  This could match the target or description."
+            help="A search string.  This could match the target or description.",
         )
         self.parser.add_argument(
             "--status",
             type=str,
             choices=self.STATUSES.keys(),
-            help="The measurement status."
+            help="The measurement status.",
         )
         self.parser.add_argument(
-            "--af",
-            type=int,
-            choices=(4, 6),
-            help="The address family."
+            "--af", type=int, choices=(4, 6), help="The address family."
         )
         self.parser.add_argument(
             "--type",
             type=str,
             choices=("ping", "traceroute", "dns", "sslcert", "ntp", "http"),
-            help="The measurement type."
+            help="The measurement type.",
         )
         self.parser.add_argument(
             "--field",
@@ -93,14 +93,13 @@ class Command(TabularFieldsMixin, BaseCommand):
             choices=self.COLUMNS.keys(),
             default=[],
             help="The field(s) to display. Invoke multiple times for multiple "
-                 "fields. The default is id, type, description, and status."
+            "fields. The default is id, type, description, and status.",
         )
         self.parser.add_argument(
             "--ids-only",
             action="store_true",
             default=False,
-            help="Display a list of measurement ids matching your filter "
-                 "criteria."
+            help="Display a list of measurement ids matching your filter " "criteria.",
         )
 
         timing = self.parser.add_argument_group("Timing")
@@ -110,8 +109,9 @@ class Command(TabularFieldsMixin, BaseCommand):
                     "--{}-{}".format(position, chrono),
                     type=ArgumentType.datetime,
                     help="Filter for measurements that {} {} a specific date. "
-                         "The format required is YYYY-MM-DDTHH:MM:SS".format(
-                             position, chrono)
+                    "The format required is YYYY-MM-DDTHH:MM:SS".format(
+                        position, chrono
+                    ),
                 )
 
         self.parser.add_argument(
@@ -119,7 +119,7 @@ class Command(TabularFieldsMixin, BaseCommand):
             type=ArgumentType.integer_range(self.LIMITS[0], self.LIMITS[1]),
             default=50,
             help="The number of measurements to return.  The number must be "
-                 "between {} and {}".format(self.LIMITS[0], self.LIMITS[1])
+            "between {} and {}".format(self.LIMITS[0], self.LIMITS[1]),
         )
 
     def run(self):
@@ -129,9 +129,9 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         filters = self._get_filters()
         measurements = MeasurementRequest(
-            return_objects=True, user_agent=self.user_agent, **filters)
-        truncated_measurements = itertools.islice(
-            measurements, self.arguments.limit)
+            return_objects=True, user_agent=self.user_agent, **filters
+        )
+        truncated_measurements = itertools.islice(measurements, self.arguments.limit)
 
         if self.arguments.ids_only:
             for measurement in truncated_measurements:
@@ -145,19 +145,24 @@ class Command(TabularFieldsMixin, BaseCommand):
         print(colourise(hr, "bold"))
 
         for measurement in truncated_measurements:
-            print(colourise(self._get_line_format().format(
-                *self._get_line_items(measurement)
-            ), self._get_colour_from_status(measurement.status_id)))
+            print(
+                colourise(
+                    self._get_line_format().format(*self._get_line_items(measurement)),
+                    self._get_colour_from_status(measurement.status_id),
+                )
+            )
 
         print(colourise(hr, "bold"))
 
         # Print total count of found measurements
-        print(("{:>" + str(len(hr)) + "}\n").format(
-            "Showing {} of {} total measurements".format(
-                min(self.arguments.limit, measurements.total_count),
-                measurements.total_count
+        print(
+            ("{:>" + str(len(hr)) + "}\n").format(
+                "Showing {} of {} total measurements".format(
+                    min(self.arguments.limit, measurements.total_count),
+                    measurements.total_count,
+                )
             )
-        ))
+        )
 
     def _get_line_items(self, measurement):
 
@@ -165,21 +170,21 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         for field in self.arguments.field:
             if field == "url":
-                r.append("https://atlas.ripe.net/measurements/{}/".format(
-                    measurement.id
-                ))
+                r.append(
+                    "https://atlas.ripe.net/measurements/{}/".format(measurement.id)
+                )
             elif field == "type":
                 r.append(measurement.type.lower())
                 continue
             elif field == "target":
-                r.append(sanitise(
-                    measurement.target or
-                    measurement.target_ip or
-                    "-"
-                )[:self.COLUMNS["target"][1]])
+                r.append(
+                    sanitise(measurement.target or measurement.target_ip or "-")[
+                        : self.COLUMNS["target"][1]
+                    ]
+                )
             elif field == "description":
                 description = sanitise(measurement.description) or ""
-                r.append(description[:self.COLUMNS["description"][1]])
+                r.append(description[: self.COLUMNS["description"][1]])
             else:
                 r.append(sanitise(getattr(measurement, field)))
 

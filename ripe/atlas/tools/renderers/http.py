@@ -27,18 +27,13 @@ class Renderer(BaseRenderer):
     """
 
     RENDERS = [BaseRenderer.TYPE_HTTP]
-    COLOURS = {
-        "2": "green",
-        "3": "blue",
-        "4": "yellow",
-        "5": "red"
-    }
+    COLOURS = {"2": "green", "3": "blue", "4": "yellow", "5": "red"}
 
     def on_result(self, result, probes=None):
         r = "#Version: 1.0\n#Date: {}\n#Fields: {}\n".format(
             result.created.strftime("%Y-%m-%d %H:%M:%S"),
             "cs-method cs-uri c-ip s-ip sc-status time-taken http-version "
-            "header-bytes body-bytes"
+            "header-bytes body-bytes",
         )
         for response in result.responses:
             r += self._colourise_by_status(
@@ -51,9 +46,9 @@ class Renderer(BaseRenderer):
                     response.response_time,
                     response.version,
                     response.head_size,
-                    response.body_size
+                    response.body_size,
                 ),
-                response.code
+                response.code,
             )
 
         return r + "\n"

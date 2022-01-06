@@ -19,9 +19,6 @@ import sys
 
 
 class RipeAtlasToolsException(Exception):
-
     def write(self):
         r = str(self)
-        sys.stderr.write("\n{0}\n\n".format(
-            colourise(r, "red", fileobj=sys.stderr))
-        )
+        sys.stderr.write("\n{0}\n\n".format(colourise(r, "red", fileobj=sys.stderr)))

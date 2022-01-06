@@ -26,22 +26,19 @@ from ..helpers.validators import ArgumentType
 class Command(MetaDataMixin, BaseCommand):
 
     NAME = "measurement-info"
-    DESCRIPTION = (
-        "Return the meta data for one measurement"
-    )
+    DESCRIPTION = "Return the meta data for one measurement"
 
     def add_arguments(self):
-        self.parser.add_argument("id", type=ArgumentType.msm_id_or_name(),
-                                 help="The measurement id or alias")
+        self.parser.add_argument(
+            "id", type=ArgumentType.msm_id_or_name(), help="The measurement id or alias"
+        )
 
     def run(self):
 
         try:
-            measurement = Measurement(
-                id=self.arguments.id, user_agent=self.user_agent)
+            measurement = Measurement(id=self.arguments.id, user_agent=self.user_agent)
         except APIResponseError:
-            raise RipeAtlasToolsException(
-                "That measurement does not appear to exist")
+            raise RipeAtlasToolsException("That measurement does not appear to exist")
 
         self.render_basic(measurement)
         getattr(self, "render_{}".format(measurement.type.lower()))(measurement)
@@ -49,95 +46,108 @@ class Command(MetaDataMixin, BaseCommand):
     @classmethod
     def render_basic(cls, measurement):
         url_template = "https://atlas.ripe.net/measurements/{}/"
-        cls._render(measurement, (
-            ("id", "ID"),
-            ("id", "URL", lambda _: colourise(url_template.format(_), "cyan")),
-            ("type", "Type", cls._prettify_type),
-            ("status", "Status"),
-            ("description", "Description", sanitise),
-            ("af", "Address Family"),
-            ("is_public", "Public?", cls._prettify_boolean),
-            ("is_oneoff", "One-off?", cls._prettify_boolean),
-            ("target", "Target Name", sanitise),
-            ("target_address", "Target Address", sanitise),
-            ("target_asn", "Target ASN"),
-            ("interval", "Interval"),
-            ("spread", "Spread"),
-            ("creation_time", "Created", cls._prettify_time),
-            ("start_time", "Started", cls._prettify_time),
-            ("stop_time", "Stopped", cls._prettify_time),
-            ("probes_requested", "Probes Requested"),
-            ("probes_scheduled", "Probes Scheduled"),
-            ("probes_currently_involved", "Probes Involved"),
-            ("participant_count", "Participant Count"),
-            ("is_all_scheduled", "Fully Scheduled?", cls._prettify_boolean),
-            ("resolved_ips", "Resolved IPs", lambda _: ", ".join(_)),
-            ("resolve_on_probe", "Resolve on the Probe", cls._prettify_boolean),
-        ))
+        cls._render(
+            measurement,
+            (
+                ("id", "ID"),
+                ("id", "URL", lambda _: colourise(url_template.format(_), "cyan")),
+                ("type", "Type", cls._prettify_type),
+                ("status", "Status"),
+                ("description", "Description", sanitise),
+                ("af", "Address Family"),
+                ("is_public", "Public?", cls._prettify_boolean),
+                ("is_oneoff", "One-off?", cls._prettify_boolean),
+                ("target", "Target Name", sanitise),
+                ("target_address", "Target Address", sanitise),
+                ("target_asn", "Target ASN"),
+                ("interval", "Interval"),
+                ("spread", "Spread"),
+                ("creation_time", "Created", cls._prettify_time),
+                ("start_time", "Started", cls._prettify_time),
+                ("stop_time", "Stopped", cls._prettify_time),
+                ("probes_requested", "Probes Requested"),
+                ("probes_scheduled", "Probes Scheduled"),
+                ("probes_currently_involved", "Probes Involved"),
+                ("participant_count", "Participant Count"),
+                ("is_all_scheduled", "Fully Scheduled?", cls._prettify_boolean),
+                ("resolved_ips", "Resolved IPs", lambda _: ", ".join(_)),
+                ("resolve_on_probe", "Resolve on the Probe", cls._prettify_boolean),
+            ),
+        )
 
     @classmethod
     def render_ping(cls, measurement):
-        cls._render(measurement, (
-            ("packets", "Packets"),
-            ("size", "Size"),
-        ))
+        cls._render(
+            measurement,
+            (
+                ("packets", "Packets"),
+                ("size", "Size"),
+            ),
+        )
 
     @classmethod
     def render_traceroute(cls, measurement):
-        cls._render(measurement, (
-            ("packets", "Packets"),
-            ("protocol", "Protocol"),
-            ("dont_fragment", "Don't Fragment", cls._prettify_boolean),
-            ("paris", "Paris"),
-            ("first_hop", "First Hop"),
-            ("max_hops", "Maximum Hops"),
-            ("timeout", "Timeout"),
-            ("size", "Size"),
-            ("destination_option_size", "Destination Option Size"),
-            ("hop_by_hop_option_size", "Hop-by-hop Option Size"),
-            ("gap_limit", "Gap Limit"),
-        ))
+        cls._render(
+            measurement,
+            (
+                ("packets", "Packets"),
+                ("protocol", "Protocol"),
+                ("dont_fragment", "Don't Fragment", cls._prettify_boolean),
+                ("paris", "Paris"),
+                ("first_hop", "First Hop"),
+                ("max_hops", "Maximum Hops"),
+                ("timeout", "Timeout"),
+                ("size", "Size"),
+                ("destination_option_size", "Destination Option Size"),
+                ("hop_by_hop_option_size", "Hop-by-hop Option Size"),
+                ("gap_limit", "Gap Limit"),
+            ),
+        )
 
     @classmethod
     def render_dns(cls, measurement):
-        cls._render(measurement, (
-            ("query", "Query", cls._prettify_query),
-            ("retry", "Retry Times"),
-            ("include_qbuf", "Include the Qbuf?", cls._prettify_boolean),
-            ("include_abuf", "Include the Abuf?", cls._prettify_boolean),
-            ("protocol", "Protocol"),
-            ("prepend_probe_id", "Prepend the Probe ID?"),
-            ("udp_payload_size", "UDP Payload Size"),
+        cls._render(
+            measurement,
             (
-                "use_probe_resolver",
-                "Use the Probe's Resolver?",
-                cls._prettify_boolean
+                ("query", "Query", cls._prettify_query),
+                ("retry", "Retry Times"),
+                ("include_qbuf", "Include the Qbuf?", cls._prettify_boolean),
+                ("include_abuf", "Include the Abuf?", cls._prettify_boolean),
+                ("protocol", "Protocol"),
+                ("prepend_probe_id", "Prepend the Probe ID?"),
+                ("udp_payload_size", "UDP Payload Size"),
+                (
+                    "use_probe_resolver",
+                    "Use the Probe's Resolver?",
+                    cls._prettify_boolean,
+                ),
+                ("set_do_bit", "Set the DO Bit?", cls._prettify_boolean),
+                ("set_nsid_bit", "Set the NSID Bit?", cls._prettify_boolean),
+                ("set_rd_bit", "Set the RD Bit?", cls._prettify_boolean),
+                ("set_cd_bit", "Set the CD Bit?", cls._prettify_boolean),
             ),
-            ("set_do_bit", "Set the DO Bit?", cls._prettify_boolean),
-            ("set_nsid_bit", "Set the NSID Bit?", cls._prettify_boolean),
-            ("set_rd_bit", "Set the RD Bit?", cls._prettify_boolean),
-            ("set_cd_bit", "Set the CD Bit?", cls._prettify_boolean),
-        ))
+        )
 
     @classmethod
     def render_sslcert(cls, measurement):
-        cls._render(measurement, (
-            ("port", "Port"),
-        ))
+        cls._render(measurement, (("port", "Port"),))
 
     @classmethod
     def render_http(cls, measurement):
 
-        cls._render(measurement, (
-            ("header_bytes", "Header Bytes"),
-            ("version", "Version"),
-            ("method", "Method"),
-            ("port", "Port"),
-            ("path", "Path", sanitise),
-            ("query_string", "Query String", sanitise),
-            ("user_agent", "User-Agent"),
-            ("max_bytes_read", "Body Bytes"),
-        ))
+        cls._render(
+            measurement,
+            (
+                ("header_bytes", "Header Bytes"),
+                ("version", "Version"),
+                ("method", "Method"),
+                ("port", "Port"),
+                ("path", "Path", sanitise),
+                ("query_string", "Query String", sanitise),
+                ("user_agent", "User-Agent"),
+                ("max_bytes_read", "Body Bytes"),
+            ),
+        )
 
         timing_verbosity = 0
         if "extended_timing" in measurement.meta_data:
@@ -150,10 +160,13 @@ class Command(MetaDataMixin, BaseCommand):
 
     @classmethod
     def render_ntp(cls, measurement):
-        cls._render(measurement, (
-            ("packets", "Packets"),
-            ("timeout", "Timeout"),
-        ))
+        cls._render(
+            measurement,
+            (
+                ("packets", "Packets"),
+                ("timeout", "Timeout"),
+            ),
+        )
 
     @staticmethod
     def _prettify_type(kind):
@@ -163,7 +176,7 @@ class Command(MetaDataMixin, BaseCommand):
             "dns": "DNS",
             "sslcert": "SSL Certificate",
             "http": "HTTP",
-            "ntp": "NTP"
+            "ntp": "NTP",
         }
         if kind in types:
             return colourise(colourise(types[kind], "bold"), "blue")
@@ -172,7 +185,8 @@ class Command(MetaDataMixin, BaseCommand):
     @staticmethod
     def _prettify_query(query):
         return sanitise(
-            "{} {} {}".format(query["class"], query["type"], query["value"]))
+            "{} {} {}".format(query["class"], query["type"], query["value"])
+        )
 
     @classmethod
     def _render(cls, measurement, keys):

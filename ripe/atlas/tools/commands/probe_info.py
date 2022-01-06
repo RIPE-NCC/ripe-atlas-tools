@@ -29,16 +29,16 @@ class Command(MetaDataMixin, BaseCommand):
     DESCRIPTION = "Return the meta data for one probe"
 
     def add_arguments(self):
-        self.parser.add_argument("id", type=ArgumentType.probe_id_or_name(),
-                                 help="The probe id or alias")
+        self.parser.add_argument(
+            "id", type=ArgumentType.probe_id_or_name(), help="The probe id or alias"
+        )
 
     def run(self):
 
         try:
             probe = Probe(id=self.arguments.id, user_agent=self.user_agent)
         except APIResponseError:
-            raise RipeAtlasToolsException(
-                "That probe does not appear to exist")
+            raise RipeAtlasToolsException("That probe does not appear to exist")
 
         url_template = "https://atlas.ripe.net/probes/{}/"
         keys = (
@@ -76,6 +76,5 @@ class Command(MetaDataMixin, BaseCommand):
     def _prettify_coordinates(geometry):
         if geometry and "coordinates" in geometry and geometry["coordinates"]:
             return "{},{}".format(
-                geometry["coordinates"][1],
-                geometry["coordinates"][0]
+                geometry["coordinates"][1], geometry["coordinates"][0]
             )

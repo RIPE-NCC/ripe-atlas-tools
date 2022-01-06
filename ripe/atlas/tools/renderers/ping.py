@@ -41,5 +41,5 @@ class Renderer(BaseRenderer):
             result.destination_name,
             result.destination_address,
             packets[0].ttl,
-            " ".join(["{:8}".format(str(_.rtt) + ",") for _ in packets])
+            " ".join(["{:8}".format(str(_.rtt) + ",") for _ in packets]),
         )

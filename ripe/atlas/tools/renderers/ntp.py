@@ -27,11 +27,11 @@ class Renderer(BaseRenderer):
         created = result.created.astimezone(get_localzone())
         r = self.get_formatted_response(result)
         if not r:
-            r = colourise('No results\n', 'red')
+            r = colourise("No results\n", "red")
         return "\n{}\n{}\n\n{}".format(
             colourise("Probe #{}".format(result.probe_id), "bold"),
             colourise(created.strftime(self.TIME_FORMAT), "bold"),
-            r
+            r,
         )
 
     @staticmethod
@@ -52,28 +52,36 @@ class Renderer(BaseRenderer):
         if not leap and not stratum and not v and not mode:
             return
 
-        if mode != 'server':
-            print('invalid mode: %s' % mode)
+        if mode != "server":
+            print("invalid mode: %s" % mode)
 
-        r = '[NTP] %s -> %s (%s)\n' % (result.source_address,
-                                       result.destination_name,
-                                       result.destination_address)
-        r += '\tversion: %s, stratum: %s/16\n' % (colourise(v, 'bold'),
-                                                  colourise(stratum, 'bold'))
-        r += '\trefid: %s\n' % colourise(refid, 'bold')
-        r += '\tleap: %s, poll: %s, precision: %s\n' % (leap, poll, precision)
-        r += '\troot_delay: %s, root_disp: %s\n' % (root_delay, root_disp)
-        r += '\tref-time: %s\n\n' % datetime.fromtimestamp(ref_time)
+        r = "[NTP] %s -> %s (%s)\n" % (
+            result.source_address,
+            result.destination_name,
+            result.destination_address,
+        )
+        r += "\tversion: %s, stratum: %s/16\n" % (
+            colourise(v, "bold"),
+            colourise(stratum, "bold"),
+        )
+        r += "\trefid: %s\n" % colourise(refid, "bold")
+        r += "\tleap: %s, poll: %s, precision: %s\n" % (leap, poll, precision)
+        r += "\troot_delay: %s, root_disp: %s\n" % (root_delay, root_disp)
+        r += "\tref-time: %s\n\n" % datetime.fromtimestamp(ref_time)
 
         try:
             for idx, pkt in enumerate(result.packets):
-                r += '\t[%s] %s\n' % (idx, str(pkt))
-                r += '\t\ttrans: %s -> recv: %s\n' % (pkt.transmitted_time,
-                                                      pkt.received_time)
-                r += '\t\torigin: %s -> final: %s\n\n' % (pkt.origin_time,
-                                                          pkt.final_time)
+                r += "\t[%s] %s\n" % (idx, str(pkt))
+                r += "\t\ttrans: %s -> recv: %s\n" % (
+                    pkt.transmitted_time,
+                    pkt.received_time,
+                )
+                r += "\t\torigin: %s -> final: %s\n\n" % (
+                    pkt.origin_time,
+                    pkt.final_time,
+                )
         except Exception as ex:
-            print('Got exception when reading packet: %s' % ex)
-            print('Raw: %s' % pkt.raw_data)
+            print("Got exception when reading packet: %s" % ex)
+            print("Raw: %s" % pkt.raw_data)
 
         return r

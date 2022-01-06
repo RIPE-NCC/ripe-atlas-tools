@@ -49,7 +49,7 @@ class SaganSet(object):
                 sagan = SaganResult.get(
                     line,
                     on_error=SaganResult.ACTION_IGNORE,
-                    on_warning=SaganResult.ACTION_IGNORE
+                    on_warning=SaganResult.ACTION_IGNORE,
                 )
                 if not self._probes or sagan.probe_id in self._probes:
                     sagans.append(sagan)
@@ -71,16 +71,13 @@ class SaganSet(object):
 
     @staticmethod
     def _attach_probes(sagans):
-        probes = dict(
-            [(p.id, p) for p in Probe.get_many(s.probe_id for s in sagans)]
-        )
+        probes = dict([(p.id, p) for p in Probe.get_many(s.probe_id for s in sagans)])
         for sagan in sagans:
             sagan.probe = probes[sagan.probe_id]
             yield sagan
 
 
 class Rendering(object):
-
     def __init__(self, renderer=None, header="", footer="", payload=()):
 
         self.renderer = renderer

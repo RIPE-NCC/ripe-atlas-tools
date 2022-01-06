@@ -26,7 +26,6 @@ def sanitise(s, strip_newlines=True):
         return s
 
     if not strip_newlines:
-        return s.translate(
-            dict((k, v) for k, v in FORBIDDEN.items() if not k == 10))
+        return s.translate(dict((k, v) for k, v in FORBIDDEN.items() if not k == 10))
 
     return s.translate(FORBIDDEN)

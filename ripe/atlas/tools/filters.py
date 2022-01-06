@@ -17,7 +17,6 @@ from .exceptions import RipeAtlasToolsException
 
 
 class FilterFactory(object):
-
     @staticmethod
     def create(key, value):
         """Create new filter class based on the key"""
@@ -47,8 +46,7 @@ class Filter(object):
             attr_value = getattr(result.probe, self.key)
         except AttributeError:
             log = (
-                "Cousteau's Probe class does not have an attribute "
-                "called: <{}>"
+                "Cousteau's Probe class does not have an attribute " "called: <{}>"
             ).format(self.key)
             raise RipeAtlasToolsException(log)
         if attr_value == self.value:

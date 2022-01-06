@@ -43,8 +43,8 @@ class Renderer(BaseRenderer):
                 self.asns[ip.asn] += 1
                 self.asn2name[ip.asn] = sanitise(ip.holder)
             else:
-                self.asns['<unknown>'] += 1
-                self.asn2name['<unknown>'] = 'unknown'
+                self.asns["<unknown>"] += 1
+                self.asn2name["<unknown>"] = "unknown"
             return ""
         return ""
 
@@ -54,10 +54,6 @@ class Renderer(BaseRenderer):
 
         r = ""
         for asn, count in self.asns.most_common():
-            r += "AS%s %.2f%% (%s)" % (
-                asn,
-                100.0 * count / total,
-                self.asn2name[asn]
-            )
+            r += "AS%s %.2f%% (%s)" % (asn, 100.0 * count / total, self.asn2name[asn])
 
         return r

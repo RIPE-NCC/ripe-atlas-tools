@@ -24,7 +24,7 @@ class Renderer(BaseRenderer):
 
     RENDERS = [BaseRenderer.TYPE_DNS]
     TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
-    ANSWER_COLORS = ['cyan', 'blue']
+    ANSWER_COLORS = ["cyan", "blue"]
 
     def on_result(self, result):
 
@@ -34,20 +34,23 @@ class Renderer(BaseRenderer):
         r = []
         if result.responses:
             for response in result.responses:
-                r.append(self.get_formatted_response(probe_id,
-                                                     created, response))
+                r.append(self.get_formatted_response(probe_id, created, response))
         else:
-            r.append("{}{}\n".format(self.get_header(probe_id, created),
-                                     colourise("No response found", "red"),
-                                     ))
+            r.append(
+                "{}{}\n".format(
+                    self.get_header(probe_id, created),
+                    colourise("No response found", "red"),
+                )
+            )
 
         return "".join(r)
 
     @classmethod
     def get_header(cls, probe_id, created):
-        return "Probe {0:>6}: {1} ".format("#{}".format(probe_id),
-                                           created.strftime(cls.TIME_FORMAT),
-                                           )
+        return "Probe {0:>6}: {1} ".format(
+            "#{}".format(probe_id),
+            created.strftime(cls.TIME_FORMAT),
+        )
 
     @classmethod
     def get_formatted_response(cls, probe_id, created, response):
@@ -56,7 +59,14 @@ class Renderer(BaseRenderer):
         answers = ""
         if response.abuf:
             header_flags = []
-            for flag in ("aa", "ad", "cd", "qr", "ra", "rd",):
+            for flag in (
+                "aa",
+                "ad",
+                "cd",
+                "qr",
+                "ra",
+                "rd",
+            ):
                 if getattr(response.abuf.header, flag):
                     header_flags.append(flag)
             s.append(response.abuf.header.return_code)
@@ -73,12 +83,15 @@ class Renderer(BaseRenderer):
             color = "green"
 
         status = colourise(" ".join(s), color)
-        return "". join([cls.get_header(probe_id, created),
-                         status,
-                         " " if answers else "",
-                         answers,
-                         "\n"
-                         ])
+        return "".join(
+            [
+                cls.get_header(probe_id, created),
+                status,
+                " " if answers else "",
+                answers,
+                "\n",
+            ]
+        )
 
     @staticmethod
     def get_rrdata(data):
@@ -99,6 +112,6 @@ class Renderer(BaseRenderer):
         Return list of colourised condensed textual RRdata.
         """
         r = []
-        for record, color in zip(data, cls.ANSWER_COLORS*len(data)):
+        for record, color in zip(data, cls.ANSWER_COLORS * len(data)):
             r.append(colourise(cls.get_rrdata(record), color))
         return "; ".join(r)

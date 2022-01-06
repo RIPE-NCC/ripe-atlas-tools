@@ -18,8 +18,7 @@ import os.path
 
 
 def get_config_home():
-    """
-    """
+    """ """
     config_home = os.environ.get("XDG_CONFIG_HOME")
     if config_home is None:
         config_home = os.path.expanduser("~/.config")

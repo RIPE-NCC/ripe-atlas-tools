@@ -48,14 +48,10 @@ class Factory(BaseFactory):
     def raise_log(self):
         """Depending on the input raise with different log message."""
         # cases: 1) ripe-atlas measure 2) ripe-atlas measure --help/-h
-        if (
-            len(self.sys_args) == 1 or
-            (len(self.sys_args) == 2 and self.sys_args[1] in ("--help", "-h"))
+        if len(self.sys_args) == 1 or (
+            len(self.sys_args) == 2 and self.sys_args[1] in ("--help", "-h")
         ):
-            log = (
-                "Usage: ripe-atlas measure <type> [arguments]\n\n"
-                "Types:\n"
-            )
+            log = "Usage: ripe-atlas measure <type> [arguments]\n\n" "Types:\n"
             for type_ in sorted(self.TYPES):
                 log += "\t{}\n".format(type_)
             log += (

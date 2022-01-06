@@ -32,9 +32,7 @@ class Renderer(BaseRenderer):
         self.gather_unique_certs(results)
         most_seen_cert = self.get_nprobes_ofpopular_cert()
         for cert_id in sorted(
-            self.uniqcerts,
-            key=lambda pk: self.uniqcerts[pk]["cnt"],
-            reverse=True
+            self.uniqcerts, key=lambda pk: self.uniqcerts[pk]["cnt"], reverse=True
         ):
             self.blob_list.append(self.render_certificate(cert_id))
             if self.uniqcerts[cert_id]["cnt"] < most_seen_cert * THRESHOLD / 100:
@@ -50,11 +48,7 @@ class Renderer(BaseRenderer):
         for certificate in result.certificates:
             cert_id = certificate.checksum_sha256
             if cert_id not in self.uniqcerts:
-                self.uniqcerts[cert_id] = {
-                    "cert": None,
-                    "cnt": 0,
-                    "probes": []
-                }
+                self.uniqcerts[cert_id] = {"cert": None, "cnt": 0, "probes": []}
             self.uniqcerts[cert_id]["cert"] = certificate
             self.uniqcerts[cert_id]["cnt"] += 1
             self.uniqcerts[cert_id]["probes"].append(result.probe)
@@ -66,9 +60,7 @@ class Renderer(BaseRenderer):
         """
         if not self.uniqcerts:
             return 0
-        return max(
-            [self.uniqcerts[cert_id]["cnt"] for cert_id in self.uniqcerts]
-        )
+        return max([self.uniqcerts[cert_id]["cnt"] for cert_id in self.uniqcerts])
 
     def render_certificate(self, cert_id):
         """Renders the specific certificate"""
@@ -84,7 +76,7 @@ class Renderer(BaseRenderer):
             subject_cn=sanitise(certificate.subject_cn),
             sha256fp=certificate.checksum_sha256,
             seenby=self.uniqcerts[cert_id]["cnt"],
-            s="s" if self.uniqcerts[cert_id]["cnt"] > 1 else ""
+            s="s" if self.uniqcerts[cert_id]["cnt"] > 1 else "",
         )
 
     def render_below_threshold(self, cert_id):
@@ -101,8 +93,7 @@ class Renderer(BaseRenderer):
             log = (
                 "    ID: {id}, country code: {cc}, ASN (v4/v6): {asn4}/{asn6}"
             ).format(
-                id=probe.id, cc=probe.country_code,
-                asn4=probe.asn_v4, asn6=probe.asn_v6
+                id=probe.id, cc=probe.country_code, asn4=probe.asn_v4, asn6=probe.asn_v6
             )
             blob_list.append(log)
 

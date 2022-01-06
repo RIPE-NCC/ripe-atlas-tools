@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+
 COLOURS_AVAILABLE = False
 try:
     # We use curses to detect ANSI colour support
@@ -34,10 +35,9 @@ else:
 
 
 class Colour(object):
-
     @classmethod
     def _colourise(cls, text, colour):
-        return "{}[{}m{}{}[0m".format(chr(0x1b), colour, text, chr(0x1b))
+        return "{}[{}m{}{}[0m".format(chr(0x1B), colour, text, chr(0x1B))
 
     @classmethod
     def black(cls, text):
