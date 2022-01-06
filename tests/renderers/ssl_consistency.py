@@ -132,7 +132,7 @@ class TestSSLConsistency(unittest.TestCase):
         path = 'ripe.atlas.tools.helpers.rendering.Probe.get_many'
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
-            self.assertEquals(
+            self.assertEqual(
                 set(Renderer().additional(SaganSet(self.results)).split("\n")),
                 set(expected_output.split("\n"))
             )
@@ -159,7 +159,7 @@ class TestSSLConsistency(unittest.TestCase):
             # remove cert key to make easier to test
             for k in renderer.uniqcerts:
                 renderer.uniqcerts[k].pop("cert")
-            self.assertEquals(renderer.uniqcerts, expected_certs)
+            self.assertEqual(renderer.uniqcerts, expected_certs)
 
     def test_bucketize_result_cert(self):
         """Tests bucketize of a single sagan result"""
@@ -176,7 +176,7 @@ class TestSSLConsistency(unittest.TestCase):
             # remove cert key to make easier to test
             for k in renderer.uniqcerts:
                 renderer.uniqcerts[k].pop("cert")
-            self.assertEquals(renderer.uniqcerts, expected_certs)
+            self.assertEqual(renderer.uniqcerts, expected_certs)
 
     def test_get_nprobes_ofpopular_cert(self):
         """Tests fetching the number of probes for the most popular cert"""
@@ -187,7 +187,7 @@ class TestSSLConsistency(unittest.TestCase):
             sagans = SaganSet(self.results)
             renderer = Renderer()
             renderer.gather_unique_certs(sagans)
-            self.assertEquals(renderer.get_nprobes_ofpopular_cert(), 11)
+            self.assertEqual(renderer.get_nprobes_ofpopular_cert(), 11)
 
     def test_get_nprobes_ofpopular_cert_empty(self):
         """Tests that getting the number of probes for popular certs does not
@@ -199,7 +199,7 @@ class TestSSLConsistency(unittest.TestCase):
             sagans = SaganSet([])
             renderer = Renderer()
             renderer.gather_unique_certs(sagans)
-            self.assertEquals(renderer.get_nprobes_ofpopular_cert(), 0)
+            self.assertEqual(renderer.get_nprobes_ofpopular_cert(), 0)
 
     def test_render_certificate(self):
         """Tests rendering of single certificate."""
@@ -216,7 +216,7 @@ class TestSSLConsistency(unittest.TestCase):
             sagans = SaganSet(self.results)
             renderer = Renderer()
             renderer.gather_unique_certs(sagans)
-            self.assertEquals(
+            self.assertEqual(
                 renderer.render_certificate("36:13:D2:B2:2A:75:00:94:76:0C:41:AD:19:DB:52:A4:F0:5B:DE:A8:01:72:E2:57:87:61:AD:96:7F:7E:D9:AA"),
                 expected_output
             )
@@ -234,7 +234,7 @@ class TestSSLConsistency(unittest.TestCase):
             sagans = SaganSet(self.results)
             renderer = Renderer()
             renderer.gather_unique_certs(sagans)
-            self.assertEquals(
+            self.assertEqual(
                 renderer.render_below_threshold("07:52:BE:65:72:BF:02:D4:C9:E2:93:09:A8:E0:BE:3A:EA:D4:30:41:B8:49:FA:C5:F2:12:33:07:37:57:EE:C7"),
                 expected_output
             )
@@ -271,4 +271,4 @@ class TestSSLConsistency(unittest.TestCase):
                     cmd.run()
                     expected_set = set(expected_output.split("\n"))
                     returned_set = set(stdout.getvalue().split("\n"))
-                    self.assertEquals(returned_set, expected_set)
+                    self.assertEqual(returned_set, expected_set)

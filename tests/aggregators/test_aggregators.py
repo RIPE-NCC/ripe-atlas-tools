@@ -90,7 +90,7 @@ class TestAggregators(unittest.TestCase):
                 'RTT: 35.0': [self.Result(id=3, probe=self.Probe(id=3, country='SE', asn=335, status='Connected'), rtt=35.0, source='127.0.0.1', prefix='193/8')]
             }
         }
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_value_aggregation1(self):
         """Test 1 tier aggregation"""
@@ -104,7 +104,7 @@ class TestAggregators(unittest.TestCase):
             'COUNTRY: NL': [self.Result(id=2, probe=self.Probe(id=2, country='NL', asn=334, status='Connected'), rtt=34.0, source='127.0.0.1', prefix='192/8')],
             'COUNTRY: SE': [self.Result(id=3, probe=self.Probe(id=3, country='SE', asn=335, status='Connected'), rtt=35.0, source='127.0.0.1', prefix='193/8'), self.Result(id=4, probe=self.Probe(id=4, country='SE', asn=336, status='DisConnected'), rtt=6, source='127.0.0.1', prefix='193/8'), self.Result(id=5, probe=self.Probe(id=5, country='SE', asn=337, status='DisConnected'), rtt=17, source='127.0.0.1', prefix='192/8'), self.Result(id=6, probe=self.Probe(id=6, country='SE', asn=335, status='DisConnected'), rtt=15, source='127.0.0.1', prefix='195/8')]
         }
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_value_aggregation2(self):
         """Test 2 tier aggregation."""
@@ -131,7 +131,7 @@ class TestAggregators(unittest.TestCase):
                 'RTT: 48': [self.Result(id=9, probe=self.Probe(id=9, country='DK', asn=348, status='Connected'), rtt=48, source='127.0.0.1', prefix='195/8')]
             }
         }
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_value_aggregation3(self):
         """Test 3 tier aggregation."""
@@ -180,7 +180,7 @@ class TestAggregators(unittest.TestCase):
                 }
             }
         }
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_value_aggregation4(self):
         """Test 2 tier aggregation with probes."""
@@ -204,7 +204,7 @@ class TestAggregators(unittest.TestCase):
                 'ASN: 338': [self.Probe(id=10, country='DE', asn=338, status='NeverConnected')]
             }
         }
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_range_aggregation(self):
         """Test 1 tier range aggregation"""
@@ -221,7 +221,7 @@ class TestAggregators(unittest.TestCase):
         import pprint
         pp = pprint.PrettyPrinter()
         pp.pprint(buckets)
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_range_aggregation1(self):
         """Test 1 tier range aggregation (1)"""
@@ -235,7 +235,7 @@ class TestAggregators(unittest.TestCase):
             'RTT: 40-50': [self.Result(id=9, probe=self.Probe(id=9, country='DK', asn=348, status='Connected'), rtt=48, source='127.0.0.1', prefix='195/8')],
             'RTT: < 10': [self.Result(id=1, probe=self.Probe(id=1, country='GR', asn=333, status='Connected'), rtt=3, source='127.0.0.1', prefix='192/8'), self.Result(id=4, probe=self.Probe(id=4, country='SE', asn=336, status='DisConnected'), rtt=6, source='127.0.0.1', prefix='193/8')]
         }
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_range_aggregation2(self):
         """Test 1 tier range aggregation (2)"""
@@ -248,7 +248,7 @@ class TestAggregators(unittest.TestCase):
             'RTT: 30-35': [self.Result(id=2, probe=self.Probe(id=2, country='NL', asn=334, status='Connected'), rtt=34.0, source='127.0.0.1', prefix='192/8'), self.Result(id=3, probe=self.Probe(id=3, country='SE', asn=335, status='Connected'), rtt=35.0, source='127.0.0.1', prefix='193/8'), self.Result(id=7, probe=self.Probe(id=7, country='IN', asn=335, status='Connected'), rtt=35, source='127.0.0.1', prefix='192/8')],
             'RTT: 5-10': [self.Result(id=4, probe=self.Probe(id=4, country='SE', asn=336, status='DisConnected'), rtt=6, source='127.0.0.1', prefix='193/8')],
             'RTT: > 35': [self.Result(id=9, probe=self.Probe(id=9, country='DK', asn=348, status='Connected'), rtt=48, source='127.0.0.1', prefix='195/8'), self.Result(id=11, probe=self.Probe(id=11, country='DE', asn=340, status='DisConnected'), rtt=40, source='127.0.0.1', prefix='193/8')]}
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_mixed_aggregation(self):
         """Test value and range aggregation together"""
@@ -273,7 +273,7 @@ class TestAggregators(unittest.TestCase):
                 'COUNTRY: DK': [self.Result(id=9, probe=self.Probe(id=9, country='DK', asn=348, status='Connected'), rtt=48, source='127.0.0.1', prefix='195/8')]
             }
         }
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)
 
     def test_mixed_aggregation1(self):
         """Test value and range aggregation together (1)"""
@@ -299,4 +299,4 @@ class TestAggregators(unittest.TestCase):
                 'COUNTRY: SE': {'STATUS: DisConnected': [self.Result(id=4, probe=self.Probe(id=4, country='SE', asn=336, status='DisConnected'), rtt=6, source='127.0.0.1', prefix='193/8')]}
             }
         }
-        self.assertEquals(buckets, expected_output)
+        self.assertEqual(buckets, expected_output)

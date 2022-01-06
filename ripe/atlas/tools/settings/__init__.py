@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import collections
+from collections.abc import Mapping
 import copy
 import os
 import re
@@ -44,7 +44,7 @@ class UserSettingsParser(object):
         Stolen from http://stackoverflow.com/questions/3232943/
         """
         for k, v in u.items():
-            if isinstance(v, collections.Mapping):
+            if isinstance(v, Mapping):
                 r = cls.deep_update(d.get(k, {}), v)
                 d[k] = r
             else:

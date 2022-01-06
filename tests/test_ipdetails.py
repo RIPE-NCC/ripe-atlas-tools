@@ -103,63 +103,63 @@ class TestIPDetails(unittest.TestCase):
     def test_loopback4(self):
         """IPv4 loopback address"""
         det = IP("127.0.0.1")
-        self.assertEquals(det.asn, None)
-        self.assertEquals(det.is_querable(), False)
+        self.assertEqual(det.asn, None)
+        self.assertEqual(det.is_querable(), False)
         # no query to stat
-        self.assertEquals(self.mock_get.call_count, 0)
+        self.assertEqual(self.mock_get.call_count, 0)
         # no access to cache get
-        self.assertEquals(self.mock_cache.get.call_count, 0)
+        self.assertEqual(self.mock_cache.get.call_count, 0)
 
     def test_loopback6(self):
         """IPv6 loopback address"""
         det = IP("::1")
-        self.assertEquals(det.asn, None)
-        self.assertEquals(det.is_querable(), False)
+        self.assertEqual(det.asn, None)
+        self.assertEqual(det.is_querable(), False)
         # no query to stat
-        self.assertEquals(self.mock_get.call_count, 0)
+        self.assertEqual(self.mock_get.call_count, 0)
         # no access to cache get
-        self.assertEquals(self.mock_cache.get.call_count, 0)
+        self.assertEqual(self.mock_cache.get.call_count, 0)
 
     def test_nocache(self):
         """No cache"""
         det = IP(self.IP)
 
-        self.assertEquals(det.asn, self.ASN)
-        self.assertEquals(det.prefix, self.PREFIX)
-        self.assertEquals(det.holder, self.HOLDER)
+        self.assertEqual(det.asn, self.ASN)
+        self.assertEqual(det.prefix, self.PREFIX)
+        self.assertEqual(det.holder, self.HOLDER)
         # query to stat
-        self.assertEquals(self.mock_get.call_count, 1)
+        self.assertEqual(self.mock_get.call_count, 1)
         # access to cache get
-        self.assertEquals(self.mock_cache.get.call_count, 1)
+        self.assertEqual(self.mock_cache.get.call_count, 1)
         # access to cache set
-        self.assertEquals(self.mock_cache.set.call_count, 2)
+        self.assertEqual(self.mock_cache.set.call_count, 2)
 
     def test_fakecache_sameip(self):
         """Fake cache, same IP"""
         det = IP(self.IP)
         det = IP(self.IP)
 
-        self.assertEquals(det.asn, self.ASN)
+        self.assertEqual(det.asn, self.ASN)
         # query to stat
-        self.assertEquals(self.mock_get.call_count, 1)
+        self.assertEqual(self.mock_get.call_count, 1)
         # access to cache get
-        self.assertEquals(self.mock_cache.get.call_count, 2)
+        self.assertEqual(self.mock_cache.get.call_count, 2)
         # access to cache set
-        self.assertEquals(self.mock_cache.set.call_count, 2)
+        self.assertEqual(self.mock_cache.set.call_count, 2)
 
     def test_fakecache_sameprefix(self):
         """Fake cache, same prefix"""
         det1 = IP(self.IP)
         det2 = IP(self.SAME_PREFIX_IP)
 
-        self.assertEquals(det1.asn, self.ASN)
-        self.assertEquals(det2.asn, det1.asn)
+        self.assertEqual(det1.asn, self.ASN)
+        self.assertEqual(det2.asn, det1.asn)
         # query to stat
-        self.assertEquals(self.mock_get.call_count, 1)
+        self.assertEqual(self.mock_get.call_count, 1)
         # access to cache get
-        self.assertEquals(self.mock_cache.get.call_count, 3)
+        self.assertEqual(self.mock_cache.get.call_count, 3)
         # access to cache set
-        self.assertEquals(self.mock_cache.set.call_count, 3)
+        self.assertEqual(self.mock_cache.set.call_count, 3)
 
     def test_fakecache_diffprefix(self):
         """Fake cache, same AS, different prefix"""
@@ -172,13 +172,13 @@ class TestIPDetails(unittest.TestCase):
         )
         det2 = IP(self.SAME_AS_DIFFERENT_PREFIX_IP)
 
-        self.assertEquals(det1.asn, self.ASN)
-        self.assertEquals(det2.asn, det1.asn)
-        self.assertEquals(self.mock_get.call_count, 2)
+        self.assertEqual(det1.asn, self.ASN)
+        self.assertEqual(det2.asn, det1.asn)
+        self.assertEqual(self.mock_get.call_count, 2)
         # access to cache get
-        self.assertEquals(self.mock_cache.get.call_count, 3)
+        self.assertEqual(self.mock_cache.get.call_count, 3)
         # access to cache set
-        self.assertEquals(self.mock_cache.set.call_count, 4)
+        self.assertEqual(self.mock_cache.set.call_count, 4)
 
     def test_fakecache_notannounced(self):
         """Fake cache, IP not announced"""
@@ -187,14 +187,14 @@ class TestIPDetails(unittest.TestCase):
         )
         det = IP(self.NOT_ANNOUNCED_IP)
 
-        self.assertEquals(det.asn, None)
-        self.assertEquals(self.mock_get.call_count, 1)
+        self.assertEqual(det.asn, None)
+        self.assertEqual(self.mock_get.call_count, 1)
 
         IP(self.NOT_ANNOUNCED_IP)
 
         # now it should be cached
-        self.assertEquals(det.asn, None)
-        self.assertEquals(self.mock_get.call_count, 2)
+        self.assertEqual(det.asn, None)
+        self.assertEqual(self.mock_get.call_count, 2)
 
     def test_valid_query_stat(self):
         """Test case for valid stat response"""
@@ -277,9 +277,9 @@ class TestIPDetails(unittest.TestCase):
             'ASN': '3333'
         }
         IP(self.IP)
-        self.assertEquals(self.mock_cache.set.call_count, 2)
-        self.assertEquals(self.mock_cache.get("IPDetails:193.0.6.1"), details)
-        self.assertEquals(self.mock_cache.get(
+        self.assertEqual(self.mock_cache.set.call_count, 2)
+        self.assertEqual(self.mock_cache.get("IPDetails:193.0.6.1"), details)
+        self.assertEqual(self.mock_cache.get(
             "IPDetailsPrefix:193.0.0.0/21"), details
         )
 
@@ -293,9 +293,9 @@ class TestIPDetails(unittest.TestCase):
         self.mock_cache.set("IPDetailsPrefix:193.0.0.0/21", details, 1)
         IP(self.IP)
         # we already called it above, so it should be 2 by bow
-        self.assertEquals(self.mock_cache.set.call_count, 2)
-        self.assertEquals(self.mock_cache.get("IPDetails:193.0.6.1"), details)
-        self.assertEquals(self.mock_cache.get("IPDetailsPrefix:193.0.0.0/21"), details)
+        self.assertEqual(self.mock_cache.set.call_count, 2)
+        self.assertEqual(self.mock_cache.get("IPDetails:193.0.6.1"), details)
+        self.assertEqual(self.mock_cache.get("IPDetailsPrefix:193.0.0.0/21"), details)
 
     def test_get_from_cache_prefix(self):
         """Test case where we have a matching prefix in cache"""
@@ -307,9 +307,9 @@ class TestIPDetails(unittest.TestCase):
         self.mock_cache.set("IPDetailsPrefix:193.0.0.0/20", details, 1)
         ip = IP(self.IP)
         self.assertTrue(ip.cached_prefix_found)
-        self.assertEquals(ip.asn, "test")
-        self.assertEquals(ip.holder, "test")
-        self.assertEquals(ip.get_from_cached_prefix(), details)
+        self.assertEqual(ip.asn, "test")
+        self.assertEqual(ip.holder, "test")
+        self.assertEqual(ip.get_from_cached_prefix(), details)
 
     def test_get_from_cache_prefix1(self):
         """Test case where we dont' have a matching prefix in cache"""
@@ -317,7 +317,7 @@ class TestIPDetails(unittest.TestCase):
         # clear out db to test specific function
         self.mock_cache.clear()
         self.assertFalse(ip.cached_prefix_found)
-        self.assertEquals(ip.get_from_cached_prefix(), None)
+        self.assertEqual(ip.get_from_cached_prefix(), None)
 
     def test_is_querable(self):
         """Test case where IP is quearable"""
