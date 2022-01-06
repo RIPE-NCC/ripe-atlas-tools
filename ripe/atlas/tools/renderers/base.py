@@ -181,6 +181,13 @@ class Renderer(object):
         """
         raise NotImplementedError()
 
+    def on_finish(self):
+        """
+        Called when all results have been passed to 'on_result'.
+        Does not have to be implemented.
+        """
+        return ""
+
 
 class Result(str):
     """

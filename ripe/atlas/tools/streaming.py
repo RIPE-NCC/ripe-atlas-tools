@@ -34,10 +34,8 @@ class Stream(object):
         self.timeout = timeout
 
     def stream(self, renderer_name, arguments, kind, pk):
-
-        renderer = Renderer.get_renderer(name=renderer_name, kind=kind)(
-            arguments=arguments
-        )
+        cls = Renderer.get_renderer(name=renderer_name, kind=kind)
+        renderer = cls(arguments=arguments)
 
         def on_result_response(result, *args):
             sys.stdout.write(
@@ -63,3 +61,5 @@ class Stream(object):
         except (KeyboardInterrupt, CaptureLimitExceeded) as e:
             stream.disconnect()
             raise e
+        finally:
+            sys.stdout.write(renderer.on_finish())

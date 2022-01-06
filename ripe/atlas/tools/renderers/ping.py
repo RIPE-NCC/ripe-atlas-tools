@@ -13,15 +13,121 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from ..helpers.sanitisers import sanitise
 from .base import Renderer as BaseRenderer
+from .ping import Renderer as ResultRenderer
 
 
 class Renderer(BaseRenderer):
+    """
+    This is meant to be a stub example for what an aggregate renderer might look
+    like. If you have ideas as to how to make this better, feel free to send
+    along a pull request.
+    """
 
     RENDERS = [BaseRenderer.TYPE_PING]
 
-    def on_result(self, result):
+    def __init__(self, **kwargs):
+        self.target = ""
+        self.packet_loss = 0
+        self.sent_packets = 0
+        self.received_packets = 0
+        self.results = []
+        self.rtts = []
+        self.rtts_min = []
+        self.rtts_max = []
+        self.rtt_types_map = {"min": self.rtts_min, "max": self.rtts_max}
+        self.result_renderer = ResultRenderer()
 
+    def header(self):
+        return "Collecting results...\n"
+
+    def additional(self, results):
+        self.collect_stats(results)
+        self.packet_loss = self.calculate_loss()
+        return self.render(
+            "reports/aggregate_ping.txt",
+            target=sanitise(self.target),
+            sent=self.sent_packets,
+            received=self.received_packets,
+            packet_loss=self.packet_loss,
+            min=min(self.rtts_min),
+            median=self.median(),
+            mean=self.mean(),
+            max=max(self.rtts_max),
+        )
+
+    def collect_stats(self, results):
+        """
+        Calculates, stores and collects all stats we want from the given
+        results.
+        """
+        for result in results:
+            self.set_target(result)
+
+            self.sent_packets += result.packets_sent
+            self.received_packets += result.packets_received
+            self.collect_min_max_rtts("min", result.rtt_min)
+            self.collect_min_max_rtts("max", result.rtt_max)
+
+            self.collect_packets_rtt(result.packets)
+
+    def set_target(self, result):
+        """Sets the target of the measurement if not set."""
+        if not self.target:
+            self.target = result.destination_name
+
+    def collect_min_max_rtts(self, rtt_type, rtt):
+        """
+        Stores the given rtt in the corresponding list (min/max) if rtt is set.
+        """
+        rtt = rtt
+        if not rtt:
+            rtt = 0
+
+        self.rtt_types_map[rtt_type].append(rtt)
+
+    def collect_packets_rtt(self, packets):
+        """
+        Collects all the rrts of given packets and stores them
+        in our rtts list.
+        """
+        for packet in packets:
+            rtt = packet.rtt
+            if not packet.rtt:
+                rtt = 0
+            self.rtts.append(rtt)
+
+    def calculate_loss(self):
+        """Calculates the total loss between received and sent packets."""
+        if not self.sent_packets:
+            return 0
+
+        return (1 - float(self.received_packets) / self.sent_packets) * 100
+
+    def mean(self):
+        """Calculates the mean of the collected rtts"""
+        return round(float(sum(self.rtts)) / max(len(self.rtts), 1), 3)
+
+    def median(self):
+        """Calculates the median of the collected rtts"""
+        sorted_rtts = sorted(self.rtts)
+        index = (len(self.rtts) - 1) // 2
+        if len(self.rtts) % 2:
+            return sorted_rtts[index]
+        else:
+            return (sorted_rtts[index] + sorted_rtts[index + 1]) / 2.0
+
+    def on_result(self, result):
+        self.results.append(result)
+        s = ""
+        if len(self.results) == 1:
+            self.set_target(result)
+            s += f"PING {self.target}\n"
+        s += self.get_ping_line(result)
+        return s
+
+    def get_ping_line(self, result):
         packets = result.packets
 
         if not packets:
@@ -33,13 +139,13 @@ class Renderer(BaseRenderer):
         if ":" in origin:
             origin = packets[0].source_address
 
-        line = "{} bytes from probe #{:<5} {:15} to {} ({}): ttl={} times:{}\n"
-        return line.format(
-            result.packet_size,
-            result.probe_id,
-            origin,
-            result.destination_name,
-            result.destination_address,
-            packets[0].ttl,
-            " ".join(["{:8}".format(str(_.rtt) + ",") for _ in packets]),
+        times = ", ".join([str(_.rtt) + " ms" for _ in packets])
+
+        return (
+            f"{result.packet_size} bytes from {result.destination_address} via "
+            f"probe #{result.probe_id} ({origin})"
+            f": ttl={packets[0].ttl} times={times}\n"
         )
+
+    def on_finish(self):
+        return "\n" + self.additional(self.results)
