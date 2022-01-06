@@ -378,6 +378,8 @@ class Command(TabularFieldsMixin, BaseCommand):
 
     def _clean_location(self):
         """Make sure location argument are sane."""
+        if not self.arguments.auth:
+            raise RipeAtlasToolsException("--location requires a Google Geocoding API  key specified with --auth or configure command (authorisation.google_geocoding)")
         lat, lng = self.location2degrees()
         if self.arguments.radius:
             location_args = {
@@ -391,8 +393,8 @@ class Command(TabularFieldsMixin, BaseCommand):
     def location2degrees(self):
         """Fetches degrees based on the given location."""
         error_log = (
-            "Following error occured while trying to fetch lat/lon "
-            "for location <{}>:\n{}"
+            "The following error occured while trying to fetch lat/lon "
+            "for location <{}>:\n\n{}"
         )
         google_api_url = "https://maps.googleapis.com/maps/api/geocode/json"
         try:
