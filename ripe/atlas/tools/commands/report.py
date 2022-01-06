@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import sys
 try:
     import ujson as json
@@ -80,6 +81,7 @@ class Command(BaseCommand):
                  "To configure an API key alias, use "
                  "ripe-atlas configure --set authorisation.fetch_aliases."
                  "ALIAS_NAME=YOUR_KEY"
+                 " (can be as well passed using ATLAS_FETCH_KEY environment variable)"
         )
         self.parser.add_argument(
             "--probes",
@@ -134,6 +136,8 @@ class Command(BaseCommand):
         Renderer.add_arguments_for_available_renderers(self.parser)
 
     def _get_request_auth(self):
+        if os.getenv("ATLAS_FETCH_KEY"):
+            return os.getenv("ATLAS_FETCH_KEY")
         if self.arguments.auth:
             return conf["authorisation"]["fetch_aliases"][self.arguments.auth]
         else:
