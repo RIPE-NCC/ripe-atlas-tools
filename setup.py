@@ -40,16 +40,10 @@ setup(
         "pyyaml",
         "pyOpenSSL>=0.13",
     ],
-    tests_require=[
-        "nose",
-        "coverage",
-        "mock==3.0.5",
-    ],
     extras_require={
         "doc": ["sphinx", "sphinx_rtd_theme"],
         "fast": ["ujson"],
     },
-    test_suite="nose.collector",
     scripts=[
         "scripts/aping",
         "scripts/atraceroute",
@@ -64,12 +58,10 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: POSIX",
         "Operating System :: Unix",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Internet :: WWW/HTTP",
     ],
 )
