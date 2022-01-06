@@ -162,7 +162,7 @@ easy:
 
 .. code:: bash
 
-    sudo pkg_add py-ripe.atlas.tools
+    sudo pkg_add ripe.atlas.tools
 
 
 .. _installation-from-freebsd:
