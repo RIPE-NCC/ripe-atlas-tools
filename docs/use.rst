@@ -267,7 +267,7 @@ Change the limit from the default of 25 to 200::
 
 Aggregate the probes by country, and then by ASN::
 
-    $ ripe-atlas probe-search --asn 3333 --aggregate-by country --aggregate-by asn
+    $ ripe-atlas probe-search --asn 3333 --aggregate-by country --aggregate-by asn_v4
 
 Show the id, url, target, description, and whether the probe is public or not::
 
