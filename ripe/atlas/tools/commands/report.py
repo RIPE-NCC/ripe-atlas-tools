@@ -15,6 +15,7 @@
 
 import os
 import sys
+
 try:
     import ujson as json
 except ImportError:
@@ -22,9 +23,7 @@ except ImportError:
 import itertools
 
 from ripe.atlas.sagan import Result
-from ripe.atlas.cousteau import (
-    AtlasLatestRequest, AtlasResultsRequest
-)
+from ripe.atlas.cousteau import AtlasLatestRequest, AtlasResultsRequest
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
@@ -56,7 +55,7 @@ class Command(BaseCommand):
         "rtt-median": [
             "rtt_median",
             RangeKeyAggregator,
-            [10, 20, 30, 40, 50, 100, 200, 300]
+            [10, 20, 30, 40, 50, 100, 200, 300],
         ],
         "status": ["probe.status", ValueKeyAggregator],
         "asn_v4": ["probe.asn_v4", ValueKeyAggregator],
@@ -78,23 +77,22 @@ class Command(BaseCommand):
             type=str,
             choices=conf["authorisation"]["fetch_aliases"].keys(),
             help="The API key alias you want to use to fetch the measurement. "
-                 "To configure an API key alias, use "
-                 "ripe-atlas configure --set authorisation.fetch_aliases."
-                 "ALIAS_NAME=YOUR_KEY"
-                 " (can be as well passed using ATLAS_FETCH_KEY environment variable)"
+            "To configure an API key alias, use "
+            "`ripe-atlas configure --set authorisation.fetch_aliases.ALIAS_NAME=YOUR_KEY`. "
+            "(Can also be passed using the ATLAS_FETCH_KEY environment variable)",
         )
         self.parser.add_argument(
             "--probes",
             type=ArgumentType.comma_separated_integers_or_file,
             help="Either a comma-separated list of probe ids you want to see "
-                 "exclusively, a path to a file containing probe ids (one on "
-                 "each line), or \"-\" for standard input in the same format."
+            "exclusively, a path to a file containing probe ids (one on "
+            'each line), or "-" for standard input in the same format.',
         )
         self.parser.add_argument(
             "--renderer",
             choices=Renderer.get_available(),
             help="The renderer you want to use. If this isn't defined, an "
-                 "appropriate renderer will be selected."
+            "appropriate renderer will be selected.",
         )
         self.parser.add_argument(
             "--aggregate-by",
@@ -102,35 +100,35 @@ class Command(BaseCommand):
             choices=self.AGGREGATORS.keys(),
             action="append",
             help="Tell the rendering engine to aggregate the results by the "
-                 "selected option. Note that if you opt for aggregation, no "
-                 "output will be generated until all results are received."
+            "selected option. Note that if you opt for aggregation, no "
+            "output will be generated until all results are received.",
         )
         self.parser.add_argument(
             "--probe-asns",
             type=ArgumentType.comma_separated_integers(
                 minimum=1,
                 # http://www.iana.org/assignments/as-numbers/as-numbers.xhtml
-                maximum=2 ** 32 - 2
+                maximum=2 ** 32 - 2,
             ),
             help="A comma-separated list of probe ASNs you want to see "
-                 "exclusively."
+            "exclusively.",
         )
         self.parser.add_argument(
             "--start-time",
             type=ArgumentType.datetime,
-            help="The start time of the report."
+            help="The start time of the report.",
         )
         self.parser.add_argument(
             "--stop-time",
             type=ArgumentType.datetime,
-            help="The stop time of the report."
+            help="The stop time of the report.",
         )
 
         self.parser.add_argument(
             "--from-file",
             type=ArgumentType.path,
-            help='The source of the data to be rendered. '
-            '(Conflicts with specifying measurement_id)',
+            help="The source of the data to be rendered. "
+            "(Conflicts with specifying measurement_id)",
         )
 
         Renderer.add_arguments_for_available_renderers(self.parser)
@@ -147,7 +145,7 @@ class Command(BaseCommand):
 
         kwargs = {
             "msm_id": self.arguments.measurement_id,
-            "user_agent": self.user_agent
+            "user_agent": self.user_agent,
         }
         kwargs["key"] = self._get_request_auth()
         if self.arguments.probes:
@@ -181,9 +179,7 @@ class Command(BaseCommand):
             else:
                 use_regular_file = False
 
-            results, sample = self._get_results_from_file(
-                use_regular_file
-            )
+            results, sample = self._get_results_from_file(use_regular_file)
 
         # Sagan calls measurements "ssl" when they are actually "sslcert"
         # so we use .raw_data once we have verified and parsed the sample.
@@ -215,14 +211,13 @@ class Command(BaseCommand):
         if isinstance(results, list):
             if not results:
                 raise RipeAtlasToolsException(
-                    "There aren't any results for your request.")
+                    "There aren't any results for your request."
+                )
         else:
             error = results.get("error")
             msg = "Error fetching measurement results"
             if error:
-                msg += ": [{status} {title}] {detail}".format(
-                    **error
-                )
+                msg += ": [{status} {title}] {detail}".format(**error)
             else:
                 msg = "{} Error fetching measurement results".format(error)
             raise RipeAtlasToolsException(msg)

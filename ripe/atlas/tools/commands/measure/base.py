@@ -95,8 +95,8 @@ class Command(BaseCommand):
             "--auth",
             type=str,
             default=os.getenv("ATLAS_CREATE_KEY", conf["authorisation"]["create"]),
-            help="The API key you want to use to create the measurement"
-                 " (can be as well passed using ATLAS_CREATE_KEY environment variable)"
+            help="The API key you want to use to create the measurement. "
+                 "(Can be defined with `ripe-atlas configure --set authorisation.create` or the ATLAS_CREATE_KEY environment variable)"
         )
         self.parser.add_argument(
             "--af",

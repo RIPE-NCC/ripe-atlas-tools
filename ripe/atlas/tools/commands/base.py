@@ -193,11 +193,23 @@ class Command(object):
 
         return args
 
+    def print(self, message):
+        """
+        Write to stdout regardless of whether it is a tty or not.
+        """
+        sys.stdout.write(message + '\n')
+
     def ok(self, message):
+        """
+        Write a successful message to the tty if present.
+        """
         if sys.stdout.isatty():
             sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
 
     def not_ok(self, message):
+        """
+        Writer an unsuccessful message to the tty if present.
+        """
         if sys.stdout.isatty():
             sys.stdout.write("\n{}\n\n".format(colourise(message, "red")))
 

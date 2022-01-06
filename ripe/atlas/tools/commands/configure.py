@@ -57,8 +57,9 @@ class Command(BaseCommand):
         if not self.arguments.init:
             if not self.arguments.editor:
                 if not self.arguments.set:
-                    raise RipeAtlasToolsException(
-                        "Run this with --help for more information")
+                    self.ok("Effective configuration options:")
+                    self.print(self.get_existing_config())
+                    return self.ok("Call configure --help for more information")
 
         self._create_if_necessary()
 
@@ -75,6 +76,17 @@ class Command(BaseCommand):
                     "Invalid format. Execute with --help for more information.")
             path, value = self.arguments.set.split("=")
             self.set(path.split("."), value)
+
+    def get_existing_config(self, c=conf, parts=[]):
+        s = ""
+        for key in c:
+            full_key = parts + [key]
+            val = c[key]
+            if isinstance(val, dict):
+                s += self.get_existing_config(val, full_key)
+            else:
+                s += f'{".".join(full_key)} = {val!r}\n'
+        return s
 
     def set(self, path, value):
         if path[:2] == ['authorisation', 'fetch_aliases']:
