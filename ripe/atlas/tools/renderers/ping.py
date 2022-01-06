@@ -36,7 +36,6 @@ class Renderer(BaseRenderer):
         self.rtts_min = []
         self.rtts_max = []
         self.rtt_types_map = {"min": self.rtts_min, "max": self.rtts_max}
-        self.result_renderer = ResultRenderer()
 
     def header(self):
         return "Collecting results...\n"
