@@ -15,7 +15,6 @@
 
 from ..helpers.sanitisers import sanitise
 from .base import Renderer as BaseRenderer
-from .ping import Renderer as ResultRenderer
 
 
 class Renderer(BaseRenderer):
