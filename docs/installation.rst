@@ -258,4 +258,4 @@ same directory as ``setup.py``:
 
 Using Docker
 --------------
-We do not offer official docker image, however there's an unofficial docker image available based on Alpine based image with RIPE Atlas Tools. You can find it on Dockerhub `here <https://hub.docker.com/r/anuragbhatia/ripe-atlas-tools>`_ or simply build your own image based on Dockerfile available on the Github `here <https://github.com/anuragbhatia/ripe-atlas-tools>`_. 
+You can find an unofficial Alpine-based docker image on Dockerhub `here <https://hub.docker.com/r/anuragbhatia/ripe-atlas-tools>`_, or simply build your own image based on the Dockerfile available `here <https://github.com/anuragbhatia/ripe-atlas-tools>`_.
