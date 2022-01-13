@@ -323,7 +323,7 @@ class TestRawRenderer(unittest.TestCase):
             path = "ripe.atlas.cousteau.AtlasRequest.get"
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [(True, self.mocked_results)]
-                mpath = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+                mpath = "ripe.atlas.tools.filters.Probe.get_many"
                 with mock.patch(mpath) as mock_get_many:
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["1", "--renderer", "raw"])

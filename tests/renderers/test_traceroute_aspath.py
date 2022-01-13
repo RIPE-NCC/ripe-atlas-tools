@@ -22,6 +22,9 @@ from ripe.atlas.tools.renderers.traceroute_aspath import Renderer
 
 
 class TestTracerouteASPathRenderer(unittest.TestCase):
+
+    # TODO: The AS lookups need to be mocked!
+
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self.results = json.loads(
@@ -34,28 +37,29 @@ class TestTracerouteASPathRenderer(unittest.TestCase):
         output = ""
         for res in self.results:
             output += renderer.on_result(Result.get(res))
-        output += renderer.additional(None)
+        output += renderer.footer(None)
         return output
 
     def test_basic(self):
         output = self.run_renderer()
-        expected = """Probe #12185:  AS10026   AS1921, completed
-Probe #22880:  AS10026   AS1921, completed
+        expected = """Probe #12185:   AS4637   AS1921, completed
+Probe #22880:   AS4637   AS1921, completed
 
 Number of probes for each AS path:
 
-   AS10026   AS1921: 2 probes, 2 completed
+    AS4637   AS1921: 2 probes, 2 completed
 """
-        self.assertEqual(output, expected)
+        self.assertEqual(output.split("\n"), expected.split("\n"))
 
     def test_arg_radius(self):
+        self.maxDiff = 1000
         output = self.run_renderer(traceroute_aspath_radius=4)
-        expected = """Probe #12185:   AS3356   AS3549  AS10026   AS1921, completed
-Probe #22880:  AS26088   AS6939  AS10026   AS1921, completed
+        expected = """Probe #12185:   AS3356   AS3549   AS4637   AS1921, completed
+Probe #22880:  AS26088   AS6939   AS4637   AS1921, completed
 
 Number of probes for each AS path:
 
-   AS26088   AS6939  AS10026   AS1921: 1 probe, 1 completed
-    AS3356   AS3549  AS10026   AS1921: 1 probe, 1 completed
+    AS3356   AS3549   AS4637   AS1921: 1 probe, 1 completed
+   AS26088   AS6939   AS4637   AS1921: 1 probe, 1 completed
 """
-        self.assertEqual(output, expected)
+        self.assertEqual(output.split("\n"), expected.split("\n"))

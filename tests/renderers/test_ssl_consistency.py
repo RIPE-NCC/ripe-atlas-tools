@@ -21,7 +21,7 @@ except ImportError:
     import mock
 
 from ripe.atlas.cousteau import Probe as CProbe
-from ripe.atlas.tools.helpers.rendering import SaganSet
+from ripe.atlas.tools.filters import SaganSet
 from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.renderers.ssl_consistency import Renderer
 from ..base import capture_sys_output
@@ -509,8 +509,8 @@ class TestSSLConsistency(unittest.TestCase):
             ),
         }
 
-    def test_additional(self):
-        """Tests whole functionality of additional unit."""
+    def test_footer(self):
+        """Tests whole functionality of footer unit."""
         expected_output = (
             "Certificate:\n"
             "  Issuer: C=US, O=DigiCert Inc, CN=DigiCert High Assurance CA-3\n"
@@ -523,14 +523,6 @@ class TestSSLConsistency(unittest.TestCase):
             "  SHA256 Fingerprint=21:EB:37:AB:4C:F6:EF:89:65:EC:17:66:40:9C:A7:6B:8B:2E:03:F2:D1:A3:88:DF:73:42:08:E8:6D:EE:E6:79\n\n"
             "  Seen by 11 probes\n\n"
             "Certificate:\n"
-            "  Issuer: C=None, O=None, CN=DSV Enterprise CA 1\n"
-            "  Subject: C=EU, O=DSV, CN=apac.proxy.dsv.com\n"
-            "  SHA256 Fingerprint=1A:B8:9E:ED:1B:DD:A0:E2:EA:67:89:C1:C5:4B:20:1C:49:9D:74:27:B0:5D:11:F2:9A:5F:C1:0D:F9:18:48:DA\n\n"
-            "  Seen by 1 probe\n\n"
-            "  Below the threshold (80%)\n"
-            "  Probes that saw it: \n"
-            "    ID: 2844, country code: GR, ASN (v4/v6): 3333/4444\n"
-            "Certificate:\n"
             "  Issuer: C=EU, O=DSV, CN=apac.proxy.dsv.com\n"
             "  Subject: C=US, O=The Tor Project, Inc., CN=*.torproject.org\n"
             "  SHA256 Fingerprint=07:52:BE:65:72:BF:02:D4:C9:E2:93:09:A8:E0:BE:3A:EA:D4:30:41:B8:49:FA:C5:F2:12:33:07:37:57:EE:C7\n\n"
@@ -538,14 +530,22 @@ class TestSSLConsistency(unittest.TestCase):
             "  Below the threshold (80%)\n"
             "  Probes that saw it: \n"
             "    ID: 2844, country code: GR, ASN (v4/v6): 3333/4444\n"
+            "Certificate:\n"
+            "  Issuer: C=None, O=None, CN=DSV Enterprise CA 1\n"
+            "  Subject: C=EU, O=DSV, CN=apac.proxy.dsv.com\n"
+            "  SHA256 Fingerprint=1A:B8:9E:ED:1B:DD:A0:E2:EA:67:89:C1:C5:4B:20:1C:49:9D:74:27:B0:5D:11:F2:9A:5F:C1:0D:F9:18:48:DA\n\n"
+            "  Seen by 1 probe\n\n"
+            "  Below the threshold (80%)\n"
+            "  Probes that saw it: \n"
+            "    ID: 2844, country code: GR, ASN (v4/v6): 3333/4444"
         )
 
-        path = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+        path = "ripe.atlas.tools.filters.Probe.get_many"
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
             self.assertEqual(
-                set(Renderer().additional(SaganSet(self.results)).split("\n")),
-                set(expected_output.split("\n")),
+                Renderer().footer({"": SaganSet(self.results)}).split("\n"),
+                expected_output.split("\n"),
             )
 
     def test_gather_unique_certs(self):
@@ -593,7 +593,7 @@ class TestSSLConsistency(unittest.TestCase):
             },
         }
 
-        path = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+        path = "ripe.atlas.tools.filters.Probe.get_many"
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
@@ -616,7 +616,7 @@ class TestSSLConsistency(unittest.TestCase):
                 "probes": [self.probes[1003]],
             },
         }
-        path = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+        path = "ripe.atlas.tools.filters.Probe.get_many"
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
@@ -630,7 +630,7 @@ class TestSSLConsistency(unittest.TestCase):
     def test_get_nprobes_ofpopular_cert(self):
         """Tests fetching the number of probes for the most popular cert"""
 
-        path = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+        path = "ripe.atlas.tools.filters.Probe.get_many"
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
@@ -642,7 +642,7 @@ class TestSSLConsistency(unittest.TestCase):
         """Tests that getting the number of probes for popular certs does not
         throw an error when there are no valid certificates."""
 
-        path = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+        path = "ripe.atlas.tools.filters.Probe.get_many"
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet([])
@@ -659,7 +659,7 @@ class TestSSLConsistency(unittest.TestCase):
             "  SHA256 Fingerprint=36:13:D2:B2:2A:75:00:94:76:0C:41:AD:19:DB:52:A4:F0:5B:DE:A8:01:72:E2:57:87:61:AD:96:7F:7E:D9:AA\n\n"
             "  Seen by 11 probes\n"
         )
-        path = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+        path = "ripe.atlas.tools.filters.Probe.get_many"
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
@@ -679,7 +679,7 @@ class TestSSLConsistency(unittest.TestCase):
             "  Probes that saw it: ",
             "    ID: 2844, country code: GR, ASN (v4/v6): 3333/4444",
         ]
-        path = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+        path = "ripe.atlas.tools.filters.Probe.get_many"
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
@@ -714,7 +714,7 @@ class TestSSLConsistency(unittest.TestCase):
             path = "ripe.atlas.cousteau.AtlasRequest.get"
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [(True, results)]
-                mpath = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+                mpath = "ripe.atlas.tools.filters.Probe.get_many"
                 with mock.patch(mpath) as mock_get_many:
                     mock_get_many.return_value = [self.probes[1003], self.probes[1004]]
                     cmd = Command()

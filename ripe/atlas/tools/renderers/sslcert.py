@@ -52,7 +52,7 @@ class Renderer(BaseRenderer):
         else:
             pkey_type_descr = pkey_type
 
-        return cls.render(
+        return cls.render_template(
             "reports/sslcert.txt",
             issuer_c=sanitise(certificate.issuer_c),
             issuer_o=sanitise(certificate.issuer_o),

@@ -48,12 +48,16 @@ class Renderer(BaseRenderer):
             return ""
         return ""
 
-    def additional(self, results):
+    def additional(self):
 
         total = sum(self.asns.values())
 
         r = ""
         for asn, count in self.asns.most_common():
-            r += "AS%s %.2f%% (%s)" % (asn, 100.0 * count / total, self.asn2name[asn])
+            r += "AS%s %.2f%% (%s)" % (
+                asn,
+                100.0 * count / total,
+                self.asn2name[asn],
+            )
 
         return r

@@ -31,29 +31,10 @@ class Renderer(BaseRenderer):
         self.packet_loss = 0
         self.sent_packets = 0
         self.received_packets = 0
-        self.results = []
         self.rtts = []
         self.rtts_min = []
         self.rtts_max = []
         self.rtt_types_map = {"min": self.rtts_min, "max": self.rtts_max}
-
-    def header(self):
-        return "Collecting results...\n"
-
-    def additional(self, results):
-        self.collect_stats(results)
-        self.packet_loss = self.calculate_loss()
-        return self.render(
-            "reports/aggregate_ping.txt",
-            target=sanitise(self.target),
-            sent=self.sent_packets,
-            received=self.received_packets,
-            packet_loss=self.packet_loss,
-            min=min(self.rtts_min),
-            median=self.median(),
-            mean=self.mean(),
-            max=max(self.rtts_max),
-        )
 
     def collect_stats(self, results):
         """
@@ -61,19 +42,14 @@ class Renderer(BaseRenderer):
         results.
         """
         for result in results:
-            self.set_target(result)
-
+            if not self.target:
+                self.target = result.destination_name
             self.sent_packets += result.packets_sent
             self.received_packets += result.packets_received
             self.collect_min_max_rtts("min", result.rtt_min)
             self.collect_min_max_rtts("max", result.rtt_max)
 
             self.collect_packets_rtt(result.packets)
-
-    def set_target(self, result):
-        """Sets the target of the measurement if not set."""
-        if not self.target:
-            self.target = result.destination_name
 
     def collect_min_max_rtts(self, rtt_type, rtt):
         """
@@ -117,15 +93,6 @@ class Renderer(BaseRenderer):
             return (sorted_rtts[index] + sorted_rtts[index + 1]) / 2.0
 
     def on_result(self, result):
-        self.results.append(result)
-        s = ""
-        if len(self.results) == 1:
-            self.set_target(result)
-            s += f"PING {self.target}\n"
-        s += self.get_ping_line(result)
-        return s
-
-    def get_ping_line(self, result):
         packets = result.packets
 
         if not packets:
@@ -145,5 +112,26 @@ class Renderer(BaseRenderer):
             f": ttl={packets[0].ttl} times={times}\n"
         )
 
-    def on_finish(self):
-        return "\n" + self.additional(self.results)
+    def header(self, sample):
+        resolved_on = (
+            "server"
+            if sample.destination_address == sample.destination_name
+            else "probe"
+        )
+        return f"PING {sample.destination_name} (resolved on {resolved_on})\n"
+
+    def footer(self, results):
+        for bucket in results.values():
+            self.collect_stats(bucket)
+        self.packet_loss = self.calculate_loss()
+        return self.render_template(
+            "reports/aggregate_ping.txt",
+            target=sanitise(self.target),
+            sent=self.sent_packets,
+            received=self.received_packets,
+            packet_loss=self.packet_loss,
+            min=min(self.rtts_min),
+            median=self.median(),
+            mean=self.mean(),
+            max=max(self.rtts_max),
+        )

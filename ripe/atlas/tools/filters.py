@@ -12,8 +12,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from ripe.atlas.sagan import Result
+from ripe.atlas.sagan import ResultParseError
+from ripe.atlas.cousteau import ProbeRequest
+from ripe.atlas.cousteau import Probe as CProbe
 
 from .exceptions import RipeAtlasToolsException
+from .cache import cache
 
 
 class FilterFactory(object):
@@ -46,7 +51,8 @@ class Filter(object):
             attr_value = getattr(result.probe, self.key)
         except AttributeError:
             log = (
-                "Cousteau's Probe class does not have an attribute " "called: <{}>"
+                "Cousteau's Probe class does not have an attribute "
+                "called: <{}>"
             ).format(self.key)
             raise RipeAtlasToolsException(log)
         if attr_value == self.value:
@@ -81,3 +87,111 @@ def filter_results(filters, results):
                 break
 
     return new_results
+
+
+class SaganSet(object):
+    """
+    An iterable of sagan results with attached probe information that allows
+    for filtering by the filters module.
+    """
+
+    def __init__(self, iterable=None, probes=()):
+        self._probes = probes
+        self._iterable = iterable
+
+    def __iter__(self):
+
+        sagans = []
+
+        for line in self._iterable:
+
+            # line may be a dictionary (parsed JSON)
+            if hasattr(line, "strip"):
+                line = line.strip()
+
+            # Break out when there's nothing left
+            if not line:
+                break
+
+            try:
+                sagan = Result.get(
+                    line,
+                    on_error=Result.ACTION_IGNORE,
+                    on_warning=Result.ACTION_IGNORE,
+                )
+                if not self._probes or sagan.probe_id in self._probes:
+                    sagans.append(sagan)
+                if len(sagans) > 100:
+                    for sagan in self._attach_probes(sagans):
+                        yield sagan
+                    sagans = []
+            except ResultParseError:
+                pass  # Probably garbage in the file
+
+        for sagan in self._attach_probes(sagans):
+            yield sagan
+
+    def __next__(self):
+        return iter(self).next()
+
+    def next(self):
+        return self.__next__()
+
+    @staticmethod
+    def _attach_probes(sagans):
+        probes = dict(
+            [(p.id, p) for p in Probe.get_many(s.probe_id for s in sagans)]
+        )
+        for sagan in sagans:
+            sagan.probe = probes[sagan.probe_id]
+            yield sagan
+
+
+class Probe(object):
+    """
+    A crude representation of the data we get from the API via Cousteau
+    """
+
+    EXPIRE_TIME = 60 * 60 * 24 * 30
+
+    @classmethod
+    def get(cls, pk):
+        """
+        Given a single id, attempt to fetch a probe object from the cache.  If
+        that fails, do an API call to get it.  Don't use this for multiple
+        probes unless you know they're all in the cache, or you'll be in for a
+        long wait.
+        """
+        r = cache.get("probe:{}".format(pk))
+        if not r:
+            probe = CProbe(id=pk)
+            cache.set("probe:{}".format(probe.id), probe, cls.EXPIRE_TIME)
+            return probe
+
+    @classmethod
+    def get_many(cls, ids):
+        """
+        Given a list of ids, attempt to get probe objects out of the local
+        cache.  Probes that cannot be found will be fetched from the API and
+        cached for future use.
+        """
+
+        r = []
+
+        fetch_ids = []
+        for pk in ids:
+            probe = cache.get("probe:{}".format(pk))
+            if probe:
+                r.append(probe)
+            else:
+                fetch_ids.append(str(pk))
+
+        if fetch_ids:
+            kwargs = {"id__in": fetch_ids}
+            for probe in [
+                p for p in ProbeRequest(return_objects=True, **kwargs)
+            ]:
+                cache.set("probe:{}".format(probe.id), probe, cls.EXPIRE_TIME)
+                r.append(probe)
+
+        return r

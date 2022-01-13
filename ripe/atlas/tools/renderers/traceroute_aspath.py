@@ -59,7 +59,7 @@ class Renderer(BaseRenderer):
             ]
         )
 
-    def on_start(self):
+    def header(self, sample):
         return (
             "For each traceroute path toward the target, the "
             "last {} ASNs will be shown\n\n".format(self.RADIUS)
@@ -101,7 +101,7 @@ class Renderer(BaseRenderer):
             "NOT " if not result.destination_ip_responded else "",
         )
 
-    def additional(self, results):
+    def footer(self, results):
         s = "\nNumber of probes for each AS path:\n\n"
 
         for as_path in self.paths:

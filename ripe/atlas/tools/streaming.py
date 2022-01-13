@@ -28,7 +28,7 @@ class CaptureLimitExceeded(Exception):
 class Stream(object):
     def __init__(self, capture_limit=None, timeout=None):
 
-        self.captured = 0
+        self.num_results = 0
         self.capture_limit = capture_limit
 
         self.timeout = timeout
@@ -37,18 +37,20 @@ class Stream(object):
         cls = Renderer.get_renderer(name=renderer_name, kind=kind)
         renderer = cls(arguments=arguments)
 
+        results = []
+
         def on_result_response(result, *args):
-            sys.stdout.write(
-                renderer.on_result(
-                    Result.get(
-                        result,
-                        on_error=Result.ACTION_IGNORE,
-                        on_malformation=Result.ACTION_IGNORE,
-                    )
-                )
+            parsed = Result.get(
+                result,
+                on_error=Result.ACTION_IGNORE,
+                on_malformation=Result.ACTION_IGNORE,
             )
-            self.captured += 1
-            if self.capture_limit and self.captured >= self.capture_limit:
+            if not results:
+                print(renderer.header(sample=parsed))
+            results.append(parsed)
+            self.num_results += 1
+            sys.stdout.write(renderer.on_result(parsed))
+            if self.capture_limit and self.num_results >= self.capture_limit:
                 raise CaptureLimitExceeded()
 
         stream = AtlasStream()
@@ -62,4 +64,4 @@ class Stream(object):
             stream.disconnect()
             raise e
         finally:
-            sys.stdout.write(renderer.on_finish())
+            sys.stdout.write(renderer.footer(results={"": results}))

@@ -12,17 +12,3 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from .measure import TestMeasureCommand
-from .measurement_search import TestMeasurementsCommand
-from .probe_search import TestProbesCommand
-from .report import TestReportCommand
-from .loading import TestCommandLoading
-
-__all__ = [
-    TestMeasureCommand,
-    TestMeasurementsCommand,
-    TestProbesCommand,
-    TestReportCommand,
-    TestCommandLoading,
-]

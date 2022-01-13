@@ -280,15 +280,20 @@ class TestReportCommand(unittest.TestCase):
         },
     ]
     expected_output_no_aggr = (
-        "20 bytes from probe #1216  109.190.83.40   to hsi.cablecom.ch (62.2.16.24): ttl=54 times:27.429,  25.672,  25.681, \n"
-        "20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
-        "20 bytes from probe #202   178.190.51.206  to hsi.cablecom.ch (62.2.16.24): ttl=52 times:40.024,  40.399,  39.29,  \n"
-        "20 bytes from probe #2225  46.126.90.165   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:10.858,  12.632,  20.53,   32.775,  47.509,  62.745,  78.54,   93.272,  109.738,\n"
-        "20 bytes from probe #270   188.192.110.111 to hsi.cablecom.ch (62.2.16.24): ttl=51 times:28.527,  26.586,  26.393, \n"
-        "20 bytes from probe #579   195.88.195.170  to hsi.cablecom.ch (62.2.16.24): ttl=51 times:23.201,  22.981,  22.863, \n"
-        "20 bytes from probe #677   78.128.9.202    to hsi.cablecom.ch (62.2.16.24): ttl=54 times:40.715,  40.259,  40.317, \n"
-        "20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n"
-        "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
+        "PING hsi.cablecom.ch (resolved on probe)\n"
+        "20 bytes from 62.2.16.24 via probe #1216 (109.190.83.40): ttl=54 times=27.429 ms, 25.672 ms, 25.681 ms\n"
+        "20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"
+        "20 bytes from 62.2.16.24 via probe #202 (178.190.51.206): ttl=52 times=40.024 ms, 40.399 ms, 39.29 ms\n"
+        "20 bytes from 62.2.16.24 via probe #2225 (46.126.90.165): ttl=56 times=10.858 ms, 12.632 ms, 20.53 ms, 32.775 ms, 47.509 ms, 62.745 ms, 78.54 ms, 93.272 ms, 109.738 ms\n"
+        "20 bytes from 62.2.16.24 via probe #270 (188.192.110.111): ttl=51 times=28.527 ms, 26.586 ms, 26.393 ms\n"
+        "20 bytes from 62.2.16.24 via probe #579 (195.88.195.170): ttl=51 times=23.201 ms, 22.981 ms, 22.863 ms\n"
+        "20 bytes from 62.2.16.24 via probe #677 (78.128.9.202): ttl=54 times=40.715 ms, 40.259 ms, 40.317 ms\n"
+        "20 bytes from 62.2.16.24 via probe #879 (94.254.125.2): ttl=53 times=34.32 ms, 34.446 ms, 34.376 ms\n"
+        "20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"
+        "\n"
+        "--- hsi.cablecom.ch ping statistics ---\n"
+        "27 packets transmitted, 27 received, 0.0% loss\n"
+        "rtt min/med/avg/max = 10.858/34.376/42.948/91.000 ms\n"
     )
 
     def setUp(self):
@@ -296,7 +301,7 @@ class TestReportCommand(unittest.TestCase):
 
     def test_with_empty_args(self):
         """User passes no args, should fail with SystemExit"""
-        with capture_sys_output():
+        with capture_sys_output(use_fake_tty=True):
             with self.assertRaises(SystemExit):
                 self.cmd.init_args([])
                 self.cmd.run()
@@ -532,7 +537,7 @@ class TestReportCommand(unittest.TestCase):
             path = "ripe.atlas.cousteau.AtlasRequest.get"
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [(True, self.mocked_results)]
-                mpath = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+                mpath = "ripe.atlas.tools.filters.Probe.get_many"
                 with mock.patch(mpath) as mock_get_many:
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["1"])
@@ -542,20 +547,30 @@ class TestReportCommand(unittest.TestCase):
     def test_valid_case_with_aggr(self):
         """Test case where we have result with aggregation."""
         expected_output = (
-            "RTT_MEDIAN: 40-50\n"
-            " 20 bytes from probe #202   178.190.51.206  to hsi.cablecom.ch (62.2.16.24): ttl=52 times:40.024,  40.399,  39.29,  \n"
-            " 20 bytes from probe #677   78.128.9.202    to hsi.cablecom.ch (62.2.16.24): ttl=54 times:40.715,  40.259,  40.317, \n"
+            "PING hsi.cablecom.ch (resolved on probe)\n"
+            "\n"
             "RTT_MEDIAN: 10-20\n"
-            " 20 bytes from probe #2225  46.126.90.165   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:10.858,  12.632,  20.53,   32.775,  47.509,  62.745,  78.54,   93.272,  109.738,\n"
-            "RTT_MEDIAN: 50-100\n"
-            " 20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
+            " 20 bytes from 62.2.16.24 via probe #2225 (46.126.90.165): ttl=56 times=10.858 ms, 12.632 ms, 20.53 ms, 32.775 ms, 47.509 ms, 62.745 ms, 78.54 ms, 93.272 ms, 109.738 ms\n"
+            "\n"
             "RTT_MEDIAN: 20-30\n"
-            " 20 bytes from probe #1216  109.190.83.40   to hsi.cablecom.ch (62.2.16.24): ttl=54 times:27.429,  25.672,  25.681, \n"
-            " 20 bytes from probe #270   188.192.110.111 to hsi.cablecom.ch (62.2.16.24): ttl=51 times:28.527,  26.586,  26.393, \n"
-            " 20 bytes from probe #579   195.88.195.170  to hsi.cablecom.ch (62.2.16.24): ttl=51 times:23.201,  22.981,  22.863, \n"
-            " 20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
+            " 20 bytes from 62.2.16.24 via probe #1216 (109.190.83.40): ttl=54 times=27.429 ms, 25.672 ms, 25.681 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #270 (188.192.110.111): ttl=51 times=28.527 ms, 26.586 ms, 26.393 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #579 (195.88.195.170): ttl=51 times=23.201 ms, 22.981 ms, 22.863 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"
+            "\n"
             "RTT_MEDIAN: 30-40\n"
-            " 20 bytes from probe #879   94.254.125.2    to hsi.cablecom.ch (62.2.16.24): ttl=53 times:34.32,   34.446,  34.376, \n"
+            " 20 bytes from 62.2.16.24 via probe #879 (94.254.125.2): ttl=53 times=34.32 ms, 34.446 ms, 34.376 ms\n"
+            "\n"
+            "RTT_MEDIAN: 40-50\n"
+            " 20 bytes from 62.2.16.24 via probe #202 (178.190.51.206): ttl=52 times=40.024 ms, 40.399 ms, 39.29 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #677 (78.128.9.202): ttl=54 times=40.715 ms, 40.259 ms, 40.317 ms\n"
+            "\n"
+            "RTT_MEDIAN: 50-100\n"
+            " 20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"
+            "\n"
+            "--- hsi.cablecom.ch ping statistics ---\n"
+            "27 packets transmitted, 27 received, 0.0% loss\n"
+            "rtt min/med/avg/max = 10.858/34.376/42.948/91.000 ms\n"
         )
         probes = [
             Probe(
@@ -596,24 +611,29 @@ class TestReportCommand(unittest.TestCase):
             ),
         ]
 
+        self.maxDiff = 102444
+
         with capture_sys_output() as (stdout, stderr):
             path = "ripe.atlas.cousteau.AtlasRequest.get"
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [(True, self.mocked_results)]
-                mpath = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+                mpath = "ripe.atlas.tools.filters.Probe.get_many"
                 with mock.patch(mpath) as mock_get_many:
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["--aggregate-by", "rtt-median", "1"])
                     self.cmd.run()
-                    expected_set = set(expected_output.split("\n"))
-                    returned_set = set(stdout.getvalue().split("\n"))
-                    self.assertEqual(returned_set, expected_set)
+                    self.assertEqual(expected_output.split("\n"), stdout.getvalue().split("\n"))
 
     def test_asns_filter(self):
         """Test case where user specified probe asns filters.."""
         expected_output = (
-            "20 bytes from probe #165   194.85.27.7     to hsi.cablecom.ch (62.2.16.24): ttl=48 times:87.825,  87.611,  91.0,   \n"
-            "20 bytes from probe #945   92.111.237.94   to hsi.cablecom.ch (62.2.16.24): ttl=56 times:61.665,  23.833,  23.269, \n"
+            "PING hsi.cablecom.ch (resolved on probe)\n"
+            "20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"
+            "20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"
+            "\n"
+            "--- hsi.cablecom.ch ping statistics ---\n"
+            "6 packets transmitted, 6 received, 0.0% loss\n"
+            "rtt min/med/avg/max = 23.269/74.638/62.534/91.000 ms\n"
         )
 
         probes = [
@@ -659,7 +679,7 @@ class TestReportCommand(unittest.TestCase):
             path = "ripe.atlas.cousteau.AtlasRequest.get"
             with mock.patch(path) as mock_get:
                 mock_get.side_effect = [(True, self.mocked_results)]
-                mpath = "ripe.atlas.tools.helpers.rendering.Probe.get_many"
+                mpath = "ripe.atlas.tools.filters.Probe.get_many"
                 with mock.patch(mpath) as mock_get_many:
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["1", "--probe-asns", "3334"])

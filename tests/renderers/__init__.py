@@ -12,18 +12,3 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from .ping import TestPingRenderer
-from .http import TestHttpRenderer
-from .aggregate_ping import TestAggregatePing
-from .ssl_consistency import TestSSLConsistency
-from .raw import TestRawRenderer
-from .dns_compact import TestDnsCompact
-
-__all__ = [
-    TestPingRenderer,
-    TestHttpRenderer,
-    TestAggregatePing,
-    TestSSLConsistency,
-    TestDnsCompact,
-]

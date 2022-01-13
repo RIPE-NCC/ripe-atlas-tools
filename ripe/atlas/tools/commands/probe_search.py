@@ -239,28 +239,16 @@ class Command(TabularFieldsMixin, BaseCommand):
             )
         )
 
-    def render_aggregation(self, aggregation_data, indent=0):
+    def render_aggregation(self, aggregation_data):
         """
         Recursively traverses through aggregation data and print them indented.
         """
+        for key, probes in aggregation_data.items():
+            if key:
+                print("")
+                print((colourise(key, "bold")))
 
-        if isinstance(aggregation_data, dict):
-
-            for k, v in aggregation_data.items():
-
-                if not indent:
-                    if self.first_line_padding:
-                        print("")
-                    else:
-                        self.first_line_padding = True
-
-                print((" " * indent) + colourise(k, "bold"))
-                self.render_aggregation(v, indent=indent + 1)
-
-        elif isinstance(aggregation_data, list):
-
-            for index, probe in enumerate(aggregation_data):
-                print(" ", end="")
+            for index, probe in enumerate(probes):
                 print(self._get_line(probe))
                 if self.arguments.max_per_aggregation:
                     if index >= self.arguments.max_per_aggregation - 1:
@@ -452,7 +440,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         for key in self.arguments.aggregate_by:
             if key == "country":
                 self.aggregators.append(
-                    ValueKeyAggregator(key="country_code", prefix="Country")
+                    ValueKeyAggregator(key="country_code", prefix="COUNTRY")
                 )
             else:
                 self.aggregators.append(ValueKeyAggregator(key=key))
@@ -496,10 +484,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         return "white"
 
     def _get_line_format(self):
-        r = TabularFieldsMixin._get_line_format(self)
-        if not self.aggregators:
-            return r
-        return (" " * len(self.aggregators)) + r
+        return TabularFieldsMixin._get_line_format(self)
 
     def _get_header_names(self):
         r = []

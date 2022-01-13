@@ -72,7 +72,7 @@ class Renderer(BaseRenderer):
 
         return cls._colourise_by_response(
             response,
-            cls.render(
+            cls.render_template(
                 "reports/dns.txt",
                 # Older measurements don't have a response_id
                 response_id=response.response_id or 1,

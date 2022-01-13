@@ -27,11 +27,10 @@ from ripe.atlas.cousteau import AtlasLatestRequest, AtlasResultsRequest
 
 from ..aggregators import RangeKeyAggregator, ValueKeyAggregator, aggregate
 from ..exceptions import RipeAtlasToolsException
-from ..helpers.rendering import SaganSet, Rendering
 from ..helpers.validators import ArgumentType
 from ..renderers import Renderer
 from .base import Command as BaseCommand
-from ..filters import FilterFactory, filter_results
+from ..filters import SaganSet, FilterFactory, filter_results
 from ..settings import conf
 
 
@@ -165,6 +164,7 @@ class Command(BaseCommand):
                 "You can only specify one of --from-file or "
                 "measurement_id, not both."
             )
+
         if self.arguments.measurement_id:
             results, sample = self._get_results_from_api(self.arguments.measurement_id)
             use_regular_file = False
@@ -198,7 +198,7 @@ class Command(BaseCommand):
         if self.arguments.aggregate_by:
             results = aggregate(results, self.get_aggregators())
 
-        Rendering(renderer=renderer, payload=results).render()
+        renderer.render(results, Result.get(sample))
 
         if use_regular_file:
             self.file.close()

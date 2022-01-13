@@ -12,36 +12,3 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from .aggregators import TestAggregators
-from .commands import (
-    TestProbesCommand,
-    TestMeasureCommand,
-    TestMeasurementsCommand,
-    TestReportCommand,
-    TestCommandLoading,
-)
-from .helpers import TestArgumentTypeHelper
-from .renderers import (
-    TestPingRenderer,
-    TestHttpRenderer,
-    TestSSLConsistency,
-    TestAggregatePing,
-    TestRawRenderer,
-)
-
-
-__all__ = [
-    TestAggregators,
-    TestProbesCommand,
-    TestMeasureCommand,
-    TestMeasurementsCommand,
-    TestReportCommand,
-    TestCommandLoading,
-    TestArgumentTypeHelper,
-    TestPingRenderer,
-    TestHttpRenderer,
-    TestSSLConsistency,
-    TestAggregatePing,
-    TestRawRenderer,
-]

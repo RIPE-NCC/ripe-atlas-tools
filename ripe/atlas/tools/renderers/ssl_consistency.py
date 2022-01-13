@@ -28,8 +28,9 @@ class Renderer(BaseRenderer):
         self.uniqcerts = {}
         self.blob_list = []
 
-    def additional(self, results):
-        self.gather_unique_certs(results)
+    def footer(self, results):
+        for values in results.values():
+            self.gather_unique_certs(values)
         most_seen_cert = self.get_nprobes_ofpopular_cert()
         for cert_id in sorted(
             self.uniqcerts, key=lambda pk: self.uniqcerts[pk]["cnt"], reverse=True
@@ -66,7 +67,7 @@ class Renderer(BaseRenderer):
         """Renders the specific certificate"""
         certificate = self.uniqcerts[cert_id]["cert"]
 
-        return self.render(
+        return self.render_template(
             "reports/ssl_consistency.txt",
             issuer_c=sanitise(certificate.issuer_c),
             issuer_o=sanitise(certificate.issuer_o),

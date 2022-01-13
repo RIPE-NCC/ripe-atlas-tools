@@ -486,32 +486,27 @@ class TestProbesCommand(unittest.TestCase):
                     "Filters:\n"
                     "  Country: GR\n"
                     "\n"
-                    "   ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "==============================================\n"
-                    "Country: DE\n"
-                    " ASN_V4: 3332\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   3     3332            de    None           \n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   2     3333            de    None           \n"
+                    "ID    Asn_v4 Asn_v6 Country Status         \n"
+                    "===========================================\n"
                     "\n"
-                    "Country: GR\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   1     3333            gr    None           \n"
-                    "   5     3333            gr    None           \n"
+                    "COUNTRY: DE | ASN_V4: 3332 | PREFIX_V4: 193.0/22\n"
+                    "3     3332            de    None           \n"
                     "\n"
-                    "Country: NL\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   4     3333            nl    None           \n"
-                    "==============================================\n"
-                    "                   Showing 4 of 4 total probes\n"
+                    "COUNTRY: DE | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
+                    "2     3333            de    None           \n"
+                    "\n"
+                    "COUNTRY: GR | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
+                    "1     3333            gr    None           \n"
+                    "5     3333            gr    None           \n"
+                    "\n"
+                    "COUNTRY: NL | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
+                    "4     3333            nl    None           \n"
+                    "===========================================\n"
+                    "                Showing 4 of 4 total probes\n"
                     "\n"
                 )
-                expected_set = set(expected_blob.split("\n"))
-                returned_set = set(stdout.getvalue().split("\n"))
+                expected_set = expected_blob.split("\n")
+                returned_set = stdout.getvalue().split("\n")
                 self.assertEqual(returned_set, expected_set)
 
     def test_render_with_aggregation_with_limit(self):
@@ -542,18 +537,17 @@ class TestProbesCommand(unittest.TestCase):
                     "Filters:\n"
                     "  Country: GR\n"
                     "\n"
-                    "   ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "==============================================\n"
-                    "Country: GR\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   1     3333            gr    None           \n"
-                    "==============================================\n"
-                    "                   Showing 1 of 4 total probes\n"
+                    "ID    Asn_v4 Asn_v6 Country Status         \n"
+                    "===========================================\n"
+                    "\n"
+                    "COUNTRY: GR | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
+                    "1     3333            gr    None           \n"
+                    "===========================================\n"
+                    "                Showing 1 of 4 total probes\n"
                     "\n"
                 )
-                expected_set = set(expected_output.split("\n"))
-                returned_set = set(stdout.getvalue().split("\n"))
+                expected_set = expected_output.split("\n")
+                returned_set = stdout.getvalue().split("\n")
                 self.assertEqual(returned_set, expected_set)
 
     def test_render_with_aggregation_with_max_per_aggr(self):
@@ -586,29 +580,24 @@ class TestProbesCommand(unittest.TestCase):
                     "Filters:\n  "
                     "Country: GR\n"
                     "\n"
-                    "   ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "==============================================\n"
-                    "Country: DE\n"
-                    " ASN_V4: 3332\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   3     3332            de    None           \n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   2     3333            de    None           \n"
+                    "ID    Asn_v4 Asn_v6 Country Status         \n"
+                    "===========================================\n"
                     "\n"
-                    "Country: GR\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   1     3333            gr    None           \n"
+                    "COUNTRY: DE | ASN_V4: 3332 | PREFIX_V4: 193.0/22\n"
+                    "3     3332            de    None           \n"
                     "\n"
-                    "Country: NL\n"
-                    " ASN_V4: 3333\n"
-                    "  PREFIX_V4: 193.0/22\n"
-                    "   4     3333            nl    None           \n"
-                    "==============================================\n"
-                    "                   Showing 4 of 4 total probes\n"
+                    "COUNTRY: DE | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
+                    "2     3333            de    None           \n"
+                    "\n"
+                    "COUNTRY: GR | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
+                    "1     3333            gr    None           \n"
+                    "\n"
+                    "COUNTRY: NL | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
+                    "4     3333            nl    None           \n"
+                    "===========================================\n"
+                    "                Showing 4 of 4 total probes\n"
                     "\n"
                 )
-                expected_set = set(expected_output.split("\n"))
-                returned_set = set(stdout.getvalue().split("\n"))
+                expected_set = expected_output.split("\n")
+                returned_set = stdout.getvalue().split("\n")
                 self.assertEqual(returned_set, expected_set)

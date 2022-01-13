@@ -33,9 +33,6 @@ class Renderer(object):
 
     RENDERS = ()
 
-    SHOW_DEFAULT_HEADER = True
-    SHOW_DEFAULT_FOOTER = True
-
     def __init__(self, *args, **kwargs):
         """
         If "arguments" is in kwargs it can be used to gather renderer's
@@ -56,7 +53,9 @@ class Renderer(object):
             sys.path.append(path)
             paths += [os.path.join(path, "renderers")]
 
-        r = [package_name for _, package_name, _ in pkgutil.iter_modules(paths)]
+        r = [
+            package_name for _, package_name, _ in pkgutil.iter_modules(paths)
+        ]
         r.remove("base")
 
         return r
@@ -68,12 +67,14 @@ class Renderer(object):
             renderer_cls.add_arguments(parser)
 
     @staticmethod
-    def render(template, **kwargs):
+    def render_template(template, **kwargs):
         """
         A crude templating engine.
         """
 
-        template = os.path.join(os.path.dirname(__file__), "templates", template)
+        template = os.path.join(
+            os.path.dirname(__file__), "templates", template
+        )
 
         with open(template) as f:
             return str(f.read()).format(**kwargs)
@@ -101,9 +102,9 @@ class Renderer(object):
 
     @classmethod
     def get_renderer_by_name(cls, name):
-        error_message = ('The renderer you selected, "{}" could not be found.').format(
-            name
-        )
+        error_message = (
+            'The renderer you selected, "{}" could not be found.'
+        ).format(name)
 
         try:  # User-defined, user-supplied
             r = cls.import_renderer("renderers", name)
@@ -117,7 +118,9 @@ class Renderer(object):
 
     @classmethod
     def get_renderer_by_kind(cls, kind):
-        error_message = ('The selected renderer, "{}" could not be found.').format(kind)
+        error_message = (
+            'The selected renderer, "{}" could not be found.'
+        ).format(kind)
 
         try:
             r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
@@ -148,21 +151,54 @@ class Renderer(object):
         """
         pass
 
-    def header(self):
+    def render(self, results, sample):
+        # Put aggregated and unaggregated results in the same format
+        normalized = (
+            dict(results)
+            if isinstance(results, dict)
+            else {"": results}
+        )
+
+        print(self.header(sample), end="")
+
+        self._smart_render(normalized)
+
+        print(self.footer(normalized), end="")
+
+    def _get_rendered_results(self, data):
+        for sagan in data:
+            yield Result(self.on_result(sagan), sagan.probe_id)
+
+    def _smart_render(self, data):
         """
-        Override this to add an additional header.
+        Traverse the aggregated data and render all the results, annotated with
+        their aggregation keys if relevant.
+        """
+        for key, results in data.items():
+            if key:
+                print("\n" + key)
+                indent = " "
+            else:
+                indent = ""
+            for line in self._get_rendered_results(results):
+                print(indent + line, end="")
+
+    def header(self, sample):
+        """
+        Override this to add a header.
+
+        `sample` is a single parsed result from the result set
+        (probably the first one, but don't rely on it). It can be used to infer
+        metadata about the measurement without having to do an extra API call.
         """
         return ""
 
-    def additional(self, results):
+    def footer(self, results):
         """
-        Override this for summary logic.
-        """
-        return ""
+        Override this to add a footer.
 
-    def footer(self):
-        """
-        Override this to add an additional footer.
+        `results` is a dict of {group_key: result_list}, where group_key may be
+        None for ungrouped results.
         """
         return ""
 
@@ -180,13 +216,6 @@ class Renderer(object):
         that string is "".
         """
         raise NotImplementedError()
-
-    def on_finish(self):
-        """
-        Called when all results have been passed to 'on_result'.
-        Does not have to be implemented.
-        """
-        return ""
 
 
 class Result(str):

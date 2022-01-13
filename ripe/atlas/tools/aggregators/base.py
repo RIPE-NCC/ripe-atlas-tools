@@ -12,8 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from ..helpers.rendering import SaganSet
+import itertools
 
 
 class ValueKeyAggregator(object):
@@ -40,12 +39,6 @@ class ValueKeyAggregator(object):
         """
         return "{0}: {1}".format(self.key_prefix, self.get_key_value(entity))
 
-    def insert2bucket(self, buckets, bucket, entity):
-        if bucket in buckets:
-            buckets[bucket].append(entity)
-        else:
-            buckets[bucket] = [entity]
-
 
 class RangeKeyAggregator(ValueKeyAggregator):
     """
@@ -63,7 +56,9 @@ class RangeKeyAggregator(ValueKeyAggregator):
         key/attribute
         """
 
-        bucket = "{0}: < {1}".format(self.key_prefix, self.aggregation_ranges[-1])
+        bucket = "{0}: < {1}".format(
+            self.key_prefix, self.aggregation_ranges[-1]
+        )
 
         key_value = self.get_key_value(entity)
         for index, krange in enumerate(self.aggregation_ranges):
@@ -72,35 +67,40 @@ class RangeKeyAggregator(ValueKeyAggregator):
                     bucket = "{0}: > {1}".format(self.key_prefix, krange)
                 else:
                     bucket = "{0}: {1}-{2}".format(
-                        self.key_prefix, krange, self.aggregation_ranges[index - 1]
+                        self.key_prefix,
+                        krange,
+                        self.aggregation_ranges[index - 1],
                     )
                 break
 
         return bucket
 
 
+def _get_sort_key(kv):
+    key = []
+    for is_digit, part in itertools.groupby(kv[0], key=str.isdigit):
+        part = "".join(part)
+        if is_digit:
+            part = int(part)
+        key.append(part)
+    return key
+
+
 def aggregate(entities, aggregators):
     """
-    This is doing the len(aggregators) level aggregation of the entities.
-    Caution: being recursive is a bit hard to read/understand, if you change
-    something make sure you run tests.
-    """
+    Aggregate the given entities using the given aggregators.
 
+    Returns a dict of {combined_aggregation_key_tuple: entity_list}, where
+    the keys are in ascending numeric >> lexical order.
+    """
     if not aggregators:
         return entities
 
-    if isinstance(entities, (list, SaganSet)):
+    buckets = {}
 
-        aggregator = aggregators.pop(0)
-        buckets = {}
-        for entity in entities:
-            bucket = aggregator.get_bucket(entity)
-            aggregator.insert2bucket(buckets, bucket, entity)
-        return aggregate(buckets, aggregators)
+    for e in entities:
+        key = " | ".join(a.get_bucket(e) for a in aggregators)
+        bucket = buckets.setdefault(key, [])
+        bucket.append(e)
 
-    elif isinstance(entities, dict):
-
-        for k, v in entities.items():
-            entities[k] = aggregate(entities[k], aggregators[:])
-
-    return entities
+    return dict(sorted(buckets.items(), key=_get_sort_key))
