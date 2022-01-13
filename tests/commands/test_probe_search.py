@@ -187,11 +187,15 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = requests.Response()
             with mock.patch("requests.Response.json") as mock_json:
                 mock_json.return_value = {
-                    "results": [{"geometry": {"location": {"lat": 1, "lng": 2}}}]
+                    "results": [
+                        {"geometry": {"location": {"lat": 1, "lng": 2}}}
+                    ]
                 }
                 cmd = Command()
                 cmd.init_args(["--location", "blaaaa"])
-                self.assertEqual(cmd.build_request_args(), {"radius": "1,2:15"})
+                self.assertEqual(
+                    cmd.build_request_args(), {"radius": "1,2:15"}
+                )
 
     def test_location_arg_with_radius(self):
         """User passed location arg"""
@@ -199,7 +203,9 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = requests.Response()
             with mock.patch("requests.Response.json") as mock_json:
                 mock_json.return_value = {
-                    "results": [{"geometry": {"location": {"lat": 1, "lng": 2}}}]
+                    "results": [
+                        {"geometry": {"location": {"lat": 1, "lng": 2}}}
+                    ]
                 }
                 cmd = Command()
                 cmd.init_args(["--location", "blaaaa", "--radius", "4"])
@@ -221,13 +227,20 @@ class TestProbesCommand(unittest.TestCase):
         """User passed prefix arg together with prefixv4 or prefixv6"""
         with self.assertRaises(RipeAtlasToolsException):
             cmd = Command()
-            cmd.init_args(["--prefix", "193.0.0.0/21", "--prefixv4", "193.0.0.0/21"])
+            cmd.init_args(
+                ["--prefix", "193.0.0.0/21", "--prefixv4", "193.0.0.0/21"]
+            )
             cmd.run()
 
         with self.assertRaises(RipeAtlasToolsException):
             cmd = Command()
             cmd.init_args(
-                ["--prefix", "2001:67c:2e8::/48", "--prefixv6", "2001:67c:2e8::/48"]
+                [
+                    "--prefix",
+                    "2001:67c:2e8::/48",
+                    "--prefixv6",
+                    "2001:67c:2e8::/48",
+                ]
             )
             cmd.run()
 
@@ -320,7 +333,16 @@ class TestProbesCommand(unittest.TestCase):
 
         cmd = Command()
         cmd.init_args(
-            ["--location", "Amsterdam", "--asn", "3333", "--prefixv4", "193.0.0.0/21"]
+            [
+                "--auth",
+                "pretend-valid-fake-key",
+                "--location",
+                "Amsterdam",
+                "--asn",
+                "3333",
+                "--prefixv4",
+                "193.0.0.0/21",
+            ]
         )
 
         path = "{}.Command.location2degrees".format(COMMAND_MODULE)
@@ -336,11 +358,22 @@ class TestProbesCommand(unittest.TestCase):
 
         cmd = Command()
         cmd.init_args(
-            ["--center", "1,2", "--asnv6", "3333", "--prefixv6", "2001:67c:2e8::/48"]
+            [
+                "--center",
+                "1,2",
+                "--asnv6",
+                "3333",
+                "--prefixv6",
+                "2001:67c:2e8::/48",
+            ]
         )
         self.assertEqual(
             cmd.build_request_args(),
-            {"asn_v6": 3333, "prefix_v6": "2001:67c:2e8::/48", "radius": "1,2:15"},
+            {
+                "asn_v6": 3333,
+                "prefix_v6": "2001:67c:2e8::/48",
+                "radius": "1,2:15",
+            },
         )
 
     def test_render_ids_only(self):
@@ -373,7 +406,9 @@ class TestProbesCommand(unittest.TestCase):
         User passed ids_only arg together with aggregate, testing rendering
         """
         cmd = Command()
-        cmd.init_args(["--ids-only", "--country", "GR", "--aggregate-by", "country"])
+        cmd.init_args(
+            ["--ids-only", "--country", "GR", "--aggregate-by", "country"]
+        )
 
         with capture_sys_output() as (stdout, stderr):
             path = "{}.ProbeRequest".format(COMMAND_MODULE)
