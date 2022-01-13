@@ -27,6 +27,8 @@ class Renderer(BaseRenderer):
     RENDERS = [BaseRenderer.TYPE_PING]
 
     def __init__(self, **kwargs):
+        BaseRenderer.__init__(self, **kwargs)
+
         self.target = ""
         self.packet_loss = 0
         self.sent_packets = 0
@@ -36,20 +38,19 @@ class Renderer(BaseRenderer):
         self.rtts_max = []
         self.rtt_types_map = {"min": self.rtts_min, "max": self.rtts_max}
 
-    def collect_stats(self, results):
+    def collect_stats(self, result):
         """
         Calculates, stores and collects all stats we want from the given
-        results.
+        result.
         """
-        for result in results:
-            if not self.target:
-                self.target = result.destination_name
-            self.sent_packets += result.packets_sent
-            self.received_packets += result.packets_received
-            self.collect_min_max_rtts("min", result.rtt_min)
-            self.collect_min_max_rtts("max", result.rtt_max)
+        if not self.target:
+            self.target = result.destination_name
+        self.sent_packets += result.packets_sent
+        self.received_packets += result.packets_received
+        self.collect_min_max_rtts("min", result.rtt_min)
+        self.collect_min_max_rtts("max", result.rtt_max)
 
-            self.collect_packets_rtt(result.packets)
+        self.collect_packets_rtt(result.packets)
 
     def collect_min_max_rtts(self, rtt_type, rtt):
         """
@@ -98,6 +99,8 @@ class Renderer(BaseRenderer):
         if not packets:
             return "No packets found\n"
 
+        self.collect_stats(result)
+
         # Because the origin value is more reliable as "from" in v4 and as
         # "packet.source_address" in v6.
         origin = result.origin
@@ -120,9 +123,7 @@ class Renderer(BaseRenderer):
         )
         return f"PING {sample.destination_name} (resolved on {resolved_on})\n"
 
-    def footer(self, results):
-        for bucket in results.values():
-            self.collect_stats(bucket)
+    def footer(self):
         if not self.sent_packets:
             return ""
         self.packet_loss = self.calculate_loss()

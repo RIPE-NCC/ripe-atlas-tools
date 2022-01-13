@@ -429,83 +429,163 @@ class TestSSLConsistency(unittest.TestCase):
         cls.probes = {
             1003: CProbe(
                 id=1003,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             1004: CProbe(
                 id=1004,
-                meta_data={"country_code": "DE", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "DE",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             1008: CProbe(
                 id=1008,
-                meta_data={"country_code": "DE", "asn_v4": 3332, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "DE",
+                    "asn_v4": 3332,
+                    "asn_v6": "4444",
+                },
             ),
             1033: CProbe(
                 id=1033,
-                meta_data={"country_code": "NL", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "NL",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             1038: CProbe(
                 id=1038,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             1047: CProbe(
                 id=1047,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             11672: CProbe(
                 id=11572,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             11700: CProbe(
                 id=11700,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             12203: CProbe(
                 id=12203,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             12208: CProbe(
                 id=12208,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             12214: CProbe(
                 id=12214,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             13026: CProbe(
                 id=13026,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             13377: CProbe(
                 id=13377,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             1386: CProbe(
                 id=1386,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             2844: CProbe(
                 id=2844,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             3386: CProbe(
                 id=3386,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             3909: CProbe(
                 id=3909,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             3914: CProbe(
                 id=3914,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             400: CProbe(
                 id=400,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
             483: CProbe(
                 id=483,
-                meta_data={"country_code": "GR", "asn_v4": 3333, "asn_v6": "4444"},
+                meta_data={
+                    "country_code": "GR",
+                    "asn_v4": 3333,
+                    "asn_v6": "4444",
+                },
             ),
         }
 
@@ -543,8 +623,12 @@ class TestSSLConsistency(unittest.TestCase):
         path = "ripe.atlas.tools.filters.Probe.get_many"
         with mock.patch(path) as mock_get_many:
             mock_get_many.return_value = self.probes.values()
+            r = Renderer()
+            for s in SaganSet(self.results):
+                r.on_result(s)
+
             self.assertEqual(
-                Renderer().footer({"": SaganSet(self.results)}).split("\n"),
+                r.footer().split("\n"),
                 expected_output.split("\n"),
             )
 
@@ -598,7 +682,8 @@ class TestSSLConsistency(unittest.TestCase):
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
             renderer = Renderer()
-            renderer.gather_unique_certs(sagans)
+            for s in sagans:
+                renderer.on_result(s)
             # remove cert key to make easier to test
             for k in renderer.uniqcerts:
                 renderer.uniqcerts[k].pop("cert")
@@ -635,7 +720,8 @@ class TestSSLConsistency(unittest.TestCase):
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
             renderer = Renderer()
-            renderer.gather_unique_certs(sagans)
+            for s in sagans:
+                renderer.on_result(s)
             self.assertEqual(renderer.get_nprobes_ofpopular_cert(), 11)
 
     def test_get_nprobes_ofpopular_cert_empty(self):
@@ -647,7 +733,8 @@ class TestSSLConsistency(unittest.TestCase):
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet([])
             renderer = Renderer()
-            renderer.gather_unique_certs(sagans)
+            for s in sagans:
+                renderer.on_result(s)
             self.assertEqual(renderer.get_nprobes_ofpopular_cert(), 0)
 
     def test_render_certificate(self):
@@ -664,7 +751,8 @@ class TestSSLConsistency(unittest.TestCase):
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
             renderer = Renderer()
-            renderer.gather_unique_certs(sagans)
+            for s in sagans:
+                renderer.on_result(s)
             self.assertEqual(
                 renderer.render_certificate(
                     "36:13:D2:B2:2A:75:00:94:76:0C:41:AD:19:DB:52:A4:F0:5B:DE:A8:01:72:E2:57:87:61:AD:96:7F:7E:D9:AA"
@@ -684,7 +772,8 @@ class TestSSLConsistency(unittest.TestCase):
             mock_get_many.return_value = self.probes.values()
             sagans = SaganSet(self.results)
             renderer = Renderer()
-            renderer.gather_unique_certs(sagans)
+            for s in sagans:
+                renderer.on_result(s)
             self.assertEqual(
                 renderer.render_below_threshold(
                     "07:52:BE:65:72:BF:02:D4:C9:E2:93:09:A8:E0:BE:3A:EA:D4:30:41:B8:49:FA:C5:F2:12:33:07:37:57:EE:C7"
@@ -716,7 +805,10 @@ class TestSSLConsistency(unittest.TestCase):
                 mock_get.side_effect = [(True, results)]
                 mpath = "ripe.atlas.tools.filters.Probe.get_many"
                 with mock.patch(mpath) as mock_get_many:
-                    mock_get_many.return_value = [self.probes[1003], self.probes[1004]]
+                    mock_get_many.return_value = [
+                        self.probes[1003],
+                        self.probes[1004],
+                    ]
                     cmd = Command()
                     cmd.init_args(["1", "--renderer", "ssl_consistency"])
                     cmd.run()

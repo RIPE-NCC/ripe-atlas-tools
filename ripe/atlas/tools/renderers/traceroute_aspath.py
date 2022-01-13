@@ -101,7 +101,7 @@ class Renderer(BaseRenderer):
             "NOT " if not result.destination_ip_responded else "",
         )
 
-    def footer(self, results):
+    def footer(self):
         s = "\nNumber of probes for each AS path:\n\n"
 
         for as_path in self.paths:

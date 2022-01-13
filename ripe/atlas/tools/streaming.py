@@ -12,13 +12,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import sys
+import time
 
 from ripe.atlas.cousteau import AtlasStream
 from ripe.atlas.sagan import Result
-
-from .renderers import Renderer
 
 
 class CaptureLimitExceeded(Exception):
@@ -26,17 +23,20 @@ class CaptureLimitExceeded(Exception):
 
 
 class Stream(object):
-    def __init__(self, capture_limit=None, timeout=None):
+    """
+    Iterable wrapper for AtlasStream that yields sagan Results up to a
+    specified capture limit.
+    """
+    STREAM_INTERVAL = 0.01
 
-        self.num_results = 0
+    def __init__(self, pk, capture_limit=None, timeout=None):
+        self.pk = pk
         self.capture_limit = capture_limit
-
         self.timeout = timeout
 
-    def stream(self, renderer_name, arguments, kind, pk):
-        cls = Renderer.get_renderer(name=renderer_name, kind=kind)
-        renderer = cls(arguments=arguments)
+        self.num_results = 0
 
+    def __iter__(self):
         results = []
 
         def on_result_response(result, *args):
@@ -45,22 +45,27 @@ class Stream(object):
                 on_error=Result.ACTION_IGNORE,
                 on_malformation=Result.ACTION_IGNORE,
             )
-            if not results:
-                print(renderer.header(sample=parsed))
             results.append(parsed)
             self.num_results += 1
-            sys.stdout.write(renderer.on_result(parsed))
             if self.capture_limit and self.num_results >= self.capture_limit:
                 raise CaptureLimitExceeded()
 
         stream = AtlasStream()
         stream.connect()
 
+        start = time.time()
+        remaining = self.timeout
+
         stream.bind_channel("atlas_result", on_result_response)
+        stream.start_stream(stream_type="result", msm=self.pk)
         try:
-            stream.start_stream(stream_type="result", msm=pk)
-            stream.timeout(self.timeout)
+            while self.timeout is None or remaining > self.STREAM_INTERVAL:
+                stream.timeout(self.STREAM_INTERVAL)
+                if results:
+                    yield from results
+                    results = []
+                if self.timeout is not None:
+                    remaining = start + self.timeout - time.time()
         except (KeyboardInterrupt, CaptureLimitExceeded):
+            yield from results
             stream.disconnect()
-        finally:
-            sys.stdout.write(renderer.footer(results={"": results}))

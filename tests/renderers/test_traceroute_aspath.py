@@ -32,12 +32,16 @@ class TestTracerouteASPathRenderer(unittest.TestCase):
         )
 
     def run_renderer(self, traceroute_aspath_radius=2):
-        args = Namespace(traceroute_aspath_radius=traceroute_aspath_radius)
+        args = Namespace(
+            traceroute_aspath_radius=traceroute_aspath_radius,
+            show_header=True,
+            show_footer=True,
+        )
         renderer = Renderer(arguments=args)
         output = ""
         for res in self.results:
             output += renderer.on_result(Result.get(res))
-        output += renderer.footer(None)
+        output += renderer.footer()
         return output
 
     def test_basic(self):

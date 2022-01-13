@@ -68,10 +68,11 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(e.args[0])
 
         self.ok("Connecting to stream...")
-        Stream(capture_limit=self.arguments.limit).stream(
-            self.arguments.renderer,
-            self.arguments,
-            measurement.type.lower(),
-            self.arguments.measurement_id,
+        stream = Stream(
+            self.arguments.measurement_id, capture_limit=self.arguments.limit
         )
+        renderer = Renderer.get_renderer(
+            name=self.arguments.renderer, kind=measurement.type.lower()
+        )(arguments=self.arguments)
+        renderer.render(stream)
         self.ok("Disconnected from stream")

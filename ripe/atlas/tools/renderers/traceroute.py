@@ -39,8 +39,8 @@ class Renderer(BaseRenderer):
             default=Renderer.DEFAULT_SHOW_ASNS,
         )
 
-    def __init__(self, *args, **kwargs):
-        BaseRenderer.__init__(self, *args, **kwargs)
+    def __init__(self, **kwargs):
+        BaseRenderer.__init__(self, **kwargs)
 
         if "arguments" in kwargs:
             self.show_asns = kwargs["arguments"].traceroute_show_asns

@@ -203,13 +203,18 @@ class TestAggregatePing(unittest.TestCase):
             "rtt min/med/avg/max = 36.922/42.406/82.693/218.077 ms\n"
         )
 
-        self.assertEqual(Renderer().footer({"": self.sagans}), expected_output)
+        r = Renderer()
+        for s in self.sagans:
+            r.on_result(s)
+
+        self.assertEqual(r.footer(), expected_output)
 
     def test_collect_stats(self):
         """Tests collect stats function."""
 
         renderer = Renderer()
-        renderer.collect_stats(self.sagans)
+        for s in self.sagans:
+            renderer.collect_stats(s)
         self.assertEqual(
             renderer.rtts,
             [

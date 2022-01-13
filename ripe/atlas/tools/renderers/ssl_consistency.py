@@ -28,9 +28,7 @@ class Renderer(BaseRenderer):
         self.uniqcerts = {}
         self.blob_list = []
 
-    def footer(self, results):
-        for values in results.values():
-            self.gather_unique_certs(values)
+    def footer(self):
         most_seen_cert = self.get_nprobes_ofpopular_cert()
         for cert_id in sorted(
             self.uniqcerts, key=lambda pk: self.uniqcerts[pk]["cnt"], reverse=True
@@ -40,10 +38,6 @@ class Renderer(BaseRenderer):
                 self.blob_list.extend(self.render_below_threshold(cert_id))
 
         return "\n".join(self.blob_list)
-
-    def gather_unique_certs(self, results):
-        for result in results:
-            self.bucketize_result_cert(result)
 
     def bucketize_result_cert(self, result):
         for certificate in result.certificates:
@@ -101,4 +95,5 @@ class Renderer(BaseRenderer):
         return blob_list
 
     def on_result(self, result):
+        self.bucketize_result_cert(result)
         return ""

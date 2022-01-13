@@ -198,7 +198,7 @@ class Command(BaseCommand):
         if self.arguments.aggregate_by:
             results = aggregate(results, self.get_aggregators())
 
-        renderer.render(results, Result.get(sample))
+        renderer.render(results)
 
         if use_regular_file:
             self.file.close()

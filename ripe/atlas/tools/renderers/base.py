@@ -39,7 +39,11 @@ class Renderer(object):
         optional arguments which have been passed via CLI.
         See also add_arguments().
         """
-        pass
+        self.show_header = True
+        self.show_footer = True
+        if "arguments" in kwargs:
+            self.show_header = kwargs["arguments"].show_header
+            self.show_footer = kwargs["arguments"].show_footer
 
     @staticmethod
     def get_available():
@@ -61,7 +65,26 @@ class Renderer(object):
         return r
 
     @staticmethod
+    def add_common_arguments(parser):
+        group = parser.add_argument_group(
+            title="Optional arguments for all renderers"
+        )
+        group.add_argument(
+            "--no-header",
+            dest="show_header",
+            action="store_false",
+            help="Don't show a header/title before rendering results",
+        )
+        group.add_argument(
+            "--no-footer",
+            dest="show_footer",
+            action="store_false",
+            help="Don't show a footer/summary after rendering results",
+        )
+
+    @staticmethod
     def add_arguments_for_available_renderers(parser):
+        Renderer.add_common_arguments(parser)
         for renderer_name in Renderer.get_available():
             renderer_cls = Renderer.get_renderer_by_name(renderer_name)
             renderer_cls.add_arguments(parser)
@@ -151,54 +174,57 @@ class Renderer(object):
         """
         pass
 
-    def render(self, results, sample):
+    def render(self, results, sample=None):
+        """
+        Render the given iterable of RIPE Atlas JSON results.
+        """
         # Put aggregated and unaggregated results in the same format
         normalized = (
-            dict(results)
-            if isinstance(results, dict)
-            else {"": results}
+            dict(results) if isinstance(results, dict) else {"": results}
         )
 
-        print(self.header(sample), end="")
+        header_shown = False
+        last_key = None
 
-        self._smart_render(normalized)
+        for key, results in normalized.items():
+            for sagan in results:
+                # Possibly show render header
+                if self.show_header and not header_shown:
+                    print(self.header(sagan), end="")
+                    header_shown = True
 
-        print(self.footer(normalized), end="")
+                if key:
+                    indent = " "
+                    if key != last_key:
+                        # Show aggregation group header
+                        print("\n" + key)
+                        last_key = key
+                else:
+                    indent = ""
 
-    def _get_rendered_results(self, data):
-        for sagan in data:
-            yield Result(self.on_result(sagan), sagan.probe_id)
+                line = Result(self.on_result(sagan), sagan.probe_id)
 
-    def _smart_render(self, data):
-        """
-        Traverse the aggregated data and render all the results, annotated with
-        their aggregation keys if relevant.
-        """
-        for key, results in data.items():
-            if key:
-                print("\n" + key)
-                indent = " "
-            else:
-                indent = ""
-            for line in self._get_rendered_results(results):
                 print(indent + line, end="")
+
+        if self.show_footer:
+            print(self.footer(), end="")
 
     def header(self, sample):
         """
         Override this to add a header.
 
-        `sample` is a single parsed result from the result set
-        (probably the first one, but don't rely on it). It can be used to infer
-        metadata about the measurement without having to do an extra API call.
+        `sample` is a single parsed result from the result set (probably the
+        first one). It can be used to infer metadata about the measurement
+        without having to do an extra API call.
         """
         return ""
 
-    def footer(self, results):
+    def footer(self):
         """
         Override this to add a footer.
 
-        `results` is a dict of {group_key: result_list}, where group_key may be
-        None for ungrouped results.
+        To provide a summary here, statistics should be gathered in the
+        `on_result` callback, ideally without storing all results in memory.
         """
         return ""
 

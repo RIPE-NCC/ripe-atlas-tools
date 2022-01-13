@@ -341,9 +341,11 @@ class Command(BaseCommand):
 
     def stream(self, pk, url):
         self.ok("Connecting to stream...")
-        Stream(capture_limit=self.arguments.probes, timeout=300).stream(
-            self.arguments.renderer, self.arguments, self._type, pk
-        )
+        stream = Stream(pk, capture_limit=self.arguments.probes, timeout=300)
+        renderer = Renderer.get_renderer(
+            name=self.arguments.renderer, kind=self._type
+        )(arguments=self.arguments)
+        renderer.render(stream)
         self.ok("Disconnected from stream")
 
     def clean_target(self):
