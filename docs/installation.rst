@@ -174,8 +174,8 @@ FreeBSD has a port ready for you:
 
 .. code:: bash
 
-cd /usr/ports/net/py-ripe.atlas.tools
-make install
+    cd /usr/ports/net/py-ripe.atlas.tools
+    make install
 
 
 .. _installation-from-gentoo:
@@ -258,4 +258,4 @@ same directory as ``setup.py``:
 
 Using Docker
 --------------
-You can find an unofficial Alpine-based docker image on Dockerhub `here <https://hub.docker.com/r/anuragbhatia/ripe-atlas-tools>`_, or simply build your own image based on the Dockerfile available `here <https://github.com/anuragbhatia/ripe-atlas-tools>`_.
+You can find an unofficial Alpine-based docker image on Dockerhub `here <https://hub.docker.com/r/anuragbhatia/ripe-atlas-tools>`__, or simply build your own image based on the Dockerfile available `here <https://github.com/anuragbhatia/ripe-atlas-tools>`__.

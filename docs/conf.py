@@ -21,7 +21,7 @@ exec(open("../ripe/atlas/tools/version.py").read())
 
 # Believe it or not, this is the officially sanctioned way to add custom CSS.
 def setup(app):
-    app.add_stylesheet("custom.css")
+    app.add_css_file("custom.css")
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -40,7 +40,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
-    'sphinx.ext.pngmath',
+    'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
 ]
 

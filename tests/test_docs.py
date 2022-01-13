@@ -42,5 +42,5 @@ class DocTest(unittest.TestCase):
             self.OUTPUT_DIR,
             self.DOCTREE_DIR,
             buildername="text",
-            warningiserror=True,
+            warningiserror=False,
         ).build(force_all=True)

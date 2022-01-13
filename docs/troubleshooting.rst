@@ -54,6 +54,8 @@ Complaints from libyaml
 
 During the installation, you may see something like this scroll by:
 
+.. code::none
+
     Running setup.py install for pyyaml
       checking if libyaml is compilable
       x86_64-linux-gnu-gcc -pthread -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fPIC -I/usr/include/python2.7 -c build/temp.linux-x86_64-2.7/check_libyaml.c -o build/temp.linux-x86_64-2.7/check_libyaml.o
