@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ release-2.4.0 ]
+    branches: [ master, 'release-*' ]
   pull_request:
     branches: [ $default-branch ]
 
