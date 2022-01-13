@@ -162,12 +162,14 @@ class TestProbesCommand(unittest.TestCase):
                 with capture_sys_output():
                     with self.assertRaises(RipeAtlasToolsException):
                         cmd = Command()
-                        cmd.init_args(["--location", "blaaaa"])
+                        cmd.init_args(
+                            ["--auth", "fake-key", "--location", "blaaaa"]
+                        )
                         cmd.run()
             mock_get.side_effect = Exception()
             with self.assertRaises(Exception):
                 cmd = Command()
-                cmd.init_args(["--location", "blaaaa"])
+                cmd.init_args(["--auth", "fake-key", "--location", "blaaaa"])
                 cmd.run()
 
     def test_location_google_wrong_output(self):
@@ -178,7 +180,9 @@ class TestProbesCommand(unittest.TestCase):
                 mock_json.return_value = {"blaaa": "bla"}
                 with self.assertRaises(RipeAtlasToolsException):
                     cmd = Command()
-                    cmd.init_args(["--location", "blaaaa"])
+                    cmd.init_args(
+                        ["--auth", "fake-key", "--location", "blaaaa"]
+                    )
                     cmd.run()
 
     def test_location_arg(self):
@@ -192,7 +196,7 @@ class TestProbesCommand(unittest.TestCase):
                     ]
                 }
                 cmd = Command()
-                cmd.init_args(["--location", "blaaaa"])
+                cmd.init_args(["--auth", "fake-key", "--location", "blaaaa"])
                 self.assertEqual(
                     cmd.build_request_args(), {"radius": "1,2:15"}
                 )
@@ -208,7 +212,16 @@ class TestProbesCommand(unittest.TestCase):
                     ]
                 }
                 cmd = Command()
-                cmd.init_args(["--location", "blaaaa", "--radius", "4"])
+                cmd.init_args(
+                    [
+                        "--auth",
+                        "fake-key",
+                        "--location",
+                        "blaaaa",
+                        "--radius",
+                        "4",
+                    ]
+                )
                 self.assertEqual(cmd.build_request_args(), {"radius": "1,2:4"})
 
     def test_asn_args(self):
@@ -335,7 +348,7 @@ class TestProbesCommand(unittest.TestCase):
         cmd.init_args(
             [
                 "--auth",
-                "pretend-valid-fake-key",
+                "fake-key",
                 "--location",
                 "Amsterdam",
                 "--asn",
