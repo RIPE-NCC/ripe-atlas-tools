@@ -35,7 +35,7 @@ from ...helpers.colours import colourise
 from ...helpers.validators import ArgumentType
 from ...renderers import Renderer
 from ...settings import conf, aliases, AliasesDB
-from ...streaming import Stream, CaptureLimitExceeded
+from ...streaming import Stream
 from ..base import Command as BaseCommand
 
 
@@ -341,17 +341,10 @@ class Command(BaseCommand):
 
     def stream(self, pk, url):
         self.ok("Connecting to stream...")
-        try:
-            Stream(capture_limit=self.arguments.probes, timeout=300).stream(
-                self.arguments.renderer, self.arguments, self._type, pk
-            )
-        except (KeyboardInterrupt, CaptureLimitExceeded):
-            pass  # User said stop, so we fall through to the finally block.
-        finally:
-            self.ok(
-                "Disconnecting from stream\n\nYou can find details "
-                "about this measurement here:\n\n  {0}".format(url)
-            )
+        Stream(capture_limit=self.arguments.probes, timeout=300).stream(
+            self.arguments.renderer, self.arguments, self._type, pk
+        )
+        self.ok("Disconnected from stream")
 
     def clean_target(self):
 

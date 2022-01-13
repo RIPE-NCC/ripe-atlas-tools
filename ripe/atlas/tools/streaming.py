@@ -60,8 +60,7 @@ class Stream(object):
         try:
             stream.start_stream(stream_type="result", msm=pk)
             stream.timeout(self.timeout)
-        except (KeyboardInterrupt, CaptureLimitExceeded) as e:
+        except (KeyboardInterrupt, CaptureLimitExceeded):
             stream.disconnect()
-            raise e
         finally:
             sys.stdout.write(renderer.footer(results={"": results}))
