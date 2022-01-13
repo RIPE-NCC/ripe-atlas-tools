@@ -123,6 +123,8 @@ class Renderer(BaseRenderer):
     def footer(self, results):
         for bucket in results.values():
             self.collect_stats(bucket)
+        if not self.sent_packets:
+            return ""
         self.packet_loss = self.calculate_loss()
         return self.render_template(
             "reports/aggregate_ping.txt",
