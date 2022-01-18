@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
 import os
 import re
 import webbrowser
@@ -281,8 +282,8 @@ class Command(BaseCommand):
         url = "{0}/measurements/{1}/".format(conf["ripe-ncc"]["endpoint"], pk)
 
         self.ok(
-            "Looking good!  Your measurement was created and details about "
-            "it can be found here:\n\n  {0}".format(url)
+            f"Looking good! Measurement {pk} was created and details about "
+            f"it can be found here:\n\n  {url}"
         )
         if self.arguments.go_web:
             self.ok("Opening the url in the browser\n\n ")
@@ -484,26 +485,18 @@ class Command(BaseCommand):
     @staticmethod
     def _handle_api_error(response):
 
-        error_detail = response
+        message = "There was a problem communicating with the RIPE Atlas API."
 
-        if isinstance(response, dict) and "detail" in response:
-            error_detail = response["detail"]
-
+        if isinstance(response, dict):
             if response.get("error", {}).get("status") == 403:
-                message = (
-                    "There was a problem communicating with the RIPE Atlas "
-                    "infrastructure. \nStatus is 403 so you probably need an API "
-                    "key. Register and create API Keys at "
-                    "https://atlas.ripe.net/\n"
-                    "Create the new key with the permission Create a new user "
-                    "defined measurement and install using:\n\n"
-                    "   ripe-atlas configure --set authorisation.create=MY_API_KEY\n\n"
-                    "The message given was:\n\n  {}"
-                ).format(error_detail)
+                message += (
+                    "\n\nThe status is 403 so you probably need an API key.\n\n"
+                    "Go to https://atlas.ripe.net/keys/ and create a key with the "
+                    "permission 'Create a new user defined measurement' and install "
+                    "using:\n\n"
+                    " ripe-atlas configure --set authorisation.create=MY_API_KEY\n"
+                )
 
-        message = (
-            "There was a problem communicating with the RIPE Atlas "
-            "infrastructure.  The message given was:\n\n  {}"
-        ).format(error_detail)
+        message += f"\n\n{json.dumps(response, indent=2)}"
 
         raise RipeAtlasToolsException(message)

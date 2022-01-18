@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import copy
+import json
 import unittest
 
 from random import randint
@@ -808,18 +809,18 @@ class TestMeasureCommand(unittest.TestCase):
     def test_handle_api_error(self):
 
         cmd = Command()
-        message = (
-            "There was a problem communicating with the RIPE Atlas "
-            "infrastructure.  The message given was:\n\n  {}"
-        )
+
+        plain_error = "This is a plain text error"
 
         with self.assertRaises(RipeAtlasToolsException) as e:
-            cmd._handle_api_error("This is a plain text error")
-        self.assertEqual(str(e.exception), message.format("This is a plain text error"))
+            cmd._handle_api_error(plain_error)
+        self.assertIn(plain_error, str(e.exception))
+
+        err_obj = {"detail": "This is a formatted error"}
 
         with self.assertRaises(RipeAtlasToolsException) as e:
-            cmd._handle_api_error({"detail": "This is a formatted error"})
-        self.assertEqual(str(e.exception), message.format("This is a formatted error"))
+            cmd._handle_api_error(err_obj)
+        self.assertIn(json.dumps(err_obj, indent=2), str(e.exception))
 
     def test_add_arguments(self):
 
