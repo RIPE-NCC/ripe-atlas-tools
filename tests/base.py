@@ -17,10 +17,7 @@ import sys
 
 from contextlib import contextmanager
 
-try:
-    from cStringIO import StringIO
-except ImportError:  # Python 3
-    from io import StringIO
+from io import StringIO
 
 
 class FakeTTY(object):

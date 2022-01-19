@@ -17,10 +17,7 @@ import collections
 import datetime
 import unittest
 
-try:
-    from unittest import mock  # Python 3.4+
-except ImportError:
-    import mock
+from unittest import mock
 
 from ripe.atlas.tools.commands.measurement_search import Command
 

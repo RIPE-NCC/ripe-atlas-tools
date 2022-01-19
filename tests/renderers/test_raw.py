@@ -16,10 +16,7 @@
 import json
 import unittest
 
-try:
-    from unittest import mock  # Python 3.4+
-except ImportError:
-    import mock
+from unittest import mock
 
 from ripe.atlas.cousteau import Probe
 

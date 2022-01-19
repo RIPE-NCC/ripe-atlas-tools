@@ -21,11 +21,9 @@ import os
 import sys
 import tempfile
 import unittest
+from io import StringIO
 
-try:
-    from unittest import mock  # Python 3.4+
-except ImportError:
-    import mock
+from unittest import mock
 
 from ripe.atlas.cousteau import Probe
 
@@ -34,7 +32,7 @@ from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
 from ripe.atlas.tools.settings import AliasesDB
 from ripe.atlas.tools.version import __version__
-from ..base import capture_sys_output, StringIO
+from ..base import capture_sys_output
 
 
 class TestReportCommand(unittest.TestCase):

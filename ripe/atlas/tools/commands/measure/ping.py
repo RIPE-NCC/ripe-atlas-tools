@@ -19,6 +19,8 @@ from .base import Command
 
 
 class PingMeasureCommand(Command):
+    DESCRIPTION = "Create a ping measurement and wait for the results"
+
     def add_arguments(self):
 
         Command.add_arguments(self)

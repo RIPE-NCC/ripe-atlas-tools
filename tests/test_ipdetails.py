@@ -20,10 +20,7 @@ import requests
 import shutil
 import tempfile
 
-try:
-    from unittest import mock  # Python 3.4+
-except ImportError:
-    import mock
+from unittest import mock
 
 from ripe.atlas.tools.ipdetails import IP
 from ripe.atlas.tools.cache import LocalCache

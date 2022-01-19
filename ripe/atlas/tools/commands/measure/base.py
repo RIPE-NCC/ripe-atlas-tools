@@ -30,6 +30,7 @@ from ripe.atlas.cousteau import (
     AtlasSource,
     AtlasCreateRequest,
 )
+from ripe.atlas.cousteau.measurement import AtlasMeasurement
 
 from ...exceptions import RipeAtlasToolsException
 from ...helpers.colours import colourise
@@ -54,6 +55,7 @@ class Command(BaseCommand):
             ("sslcert", Sslcert),
             ("http", Http),
             ("ntp", Ntp),
+            ("spec", AtlasMeasurement),
         )
     )
 

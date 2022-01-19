@@ -20,6 +20,8 @@ from .base import Command
 
 
 class TracerouteMeasureCommand(Command):
+    DESCRIPTION = "Create a traceroute measurement and wait for the results"
+
     def _upper_str(self, s):
         """
         Private method to validate specific command line arguments that

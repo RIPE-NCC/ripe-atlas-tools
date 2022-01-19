@@ -15,10 +15,7 @@
 
 import unittest
 
-try:
-    from unittest import mock  # Python 3.4+
-except ImportError:
-    import mock
+from unittest import mock
 
 from ripe.atlas.cousteau import Probe as CProbe
 from ripe.atlas.tools.filters import SaganSet

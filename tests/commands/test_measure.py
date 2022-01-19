@@ -17,14 +17,14 @@
 
 import copy
 import json
+import os
+import tempfile
 import unittest
+from io import StringIO
 
 from random import randint
 
-try:
-    from unittest import mock  # Python 3.4+
-except ImportError:
-    import mock
+from unittest import mock
 
 from ripe.atlas.tools.commands.measure.base import Command
 from ripe.atlas.tools.commands.measure import (
@@ -34,6 +34,7 @@ from ripe.atlas.tools.commands.measure import (
     SslcertMeasureCommand,
     HttpMeasureCommand,
     NtpMeasureCommand,
+    SpecMeasureCommand,
 )
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.settings import Configuration, AliasesDB
@@ -1073,3 +1074,130 @@ class TestMeasureCommand(unittest.TestCase):
                     )
                     cmd.run()
                     self.assertEqual(new_aliases["measurement"]["PING_RIPE"], 1234)
+
+    def test_spec_valid(self):
+        cmd = SpecMeasureCommand()
+        cmd.init_args(["spec", '{"type": "ping", "target": "1.2.3.4"}'])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": 4,
+                "description": "Ping measurement",
+                "target": "1.2.3.4",
+                "type": "ping",
+            },
+        )
+
+    def test_spec_valid_target(self):
+        # Override target on command-line
+        cmd = SpecMeasureCommand()
+        cmd.init_args(
+            ["spec", '{"type": "ping", "target": "1.2.3.4"}', "--target", "5.6.7.8"]
+        )
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": 4,
+                "description": "Ping measurement",
+                "target": "5.6.7.8",
+                "type": "ping",
+            },
+        )
+
+    def test_spec_valid_description(self):
+        # Specify a custom description
+        cmd = SpecMeasureCommand()
+        cmd.init_args(
+            [
+                "spec",
+                '{"type": "ping", "target": "1.2.3.4"}',
+                "--description",
+                "A real cool measurement",
+            ]
+        )
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": 4,
+                "description": "A real cool measurement",
+                "target": "1.2.3.4",
+                "type": "ping",
+            },
+        )
+
+    def test_spec_valid_file(self):
+        # Specify a valid JSON file
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
+            filename = f.name
+            f.write('{"target": "1.2.3.4", "type": "ping"}\n')
+        try:
+            cmd = SpecMeasureCommand()
+            cmd.init_args(["spec", f"@{filename}"])
+            self.assertEqual(
+                cmd._get_measurement_kwargs(),
+                {
+                    "af": 4,
+                    "description": "Ping measurement",
+                    "target": "1.2.3.4",
+                    "type": "ping",
+                },
+            )
+        finally:
+            os.unlink(filename)
+
+    def test_spec_valid_stdin(self):
+        # Pass valid JSON to stdin
+        cmd = SpecMeasureCommand()
+        cmd.init_args(["spec", "@-"])
+        with mock.patch(
+            "sys.stdin", StringIO('{"type": "ping", "target": "1.2.3.4"}\n')
+        ):
+            self.assertEqual(
+                cmd._get_measurement_kwargs(),
+                {
+                    "af": 4,
+                    "description": "Ping measurement",
+                    "target": "1.2.3.4",
+                    "type": "ping",
+                },
+            )
+
+    def test_spec_invalid_no_type(self):
+        cmd = SpecMeasureCommand()
+        cmd.init_args(["spec", '{"target": "1.2.3.4"}'])
+        self.assertRaises(
+            RipeAtlasToolsException,
+            cmd._get_measurement_kwargs,
+        )
+
+    def test_spec_invalid_unknown_type(self):
+        cmd = SpecMeasureCommand()
+        cmd.init_args(["spec", '{"type": "funnytype", "target": "1.2.3.4"}'])
+        self.assertRaises(
+            RipeAtlasToolsException,
+            cmd._get_measurement_kwargs,
+        )
+
+    def test_spec_invalid_no_file(self):
+        cmd = SpecMeasureCommand()
+        cmd.init_args(["spec", "@/this/path/does/not/exist}"])
+        self.assertRaises(
+            RipeAtlasToolsException,
+            cmd._get_measurement_kwargs,
+        )
+
+    def test_spec_invalid_json(self):
+        cmd = SpecMeasureCommand()
+        cmd.init_args(["spec", "{lkdsjf]]"])
+        self.assertRaises(
+            RipeAtlasToolsException,
+            cmd._get_measurement_kwargs,
+        )
+
+    def test_spec_invalid_not_dict(self):
+        cmd = SpecMeasureCommand()
+        cmd.init_args(["spec", "[]"])
+        self.assertRaises(
+            RipeAtlasToolsException,
+            cmd._get_measurement_kwargs,
+        )

@@ -16,11 +16,7 @@
 import copy
 import unittest
 
-# Python 3.4+ comes with mock in unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from ripe.atlas.tools.commands.alias import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException

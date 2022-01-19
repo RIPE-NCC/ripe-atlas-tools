@@ -20,6 +20,8 @@ from .base import Command
 
 
 class SslcertMeasureCommand(Command):
+    DESCRIPTION = "Create a TLS (SSL) cert measurement and wait for the results"
+
     def add_arguments(self):
 
         Command.add_arguments(self)

@@ -21,6 +21,7 @@ from .dns import DnsMeasureCommand
 from .sslcert import SslcertMeasureCommand
 from .http import HttpMeasureCommand
 from .ntp import NtpMeasureCommand
+from .spec import SpecMeasureCommand
 
 
 class Factory(BaseFactory):
@@ -32,6 +33,7 @@ class Factory(BaseFactory):
         "sslcert": SslcertMeasureCommand,
         "http": HttpMeasureCommand,
         "ntp": NtpMeasureCommand,
+        "spec": SpecMeasureCommand,
     }
     DESCRIPTION = "Create a measurement and wait for the results"
 
@@ -52,8 +54,8 @@ class Factory(BaseFactory):
             len(self.sys_args) == 2 and self.sys_args[1] in ("--help", "-h")
         ):
             log = "Usage: ripe-atlas measure <type> [arguments]\n\n" "Types:\n"
-            for type_ in sorted(self.TYPES):
-                log += "\t{}\n".format(type_)
+            for type_name, type_ in sorted(self.TYPES.items()):
+                log += f"\t{type_name:<12} {type_.DESCRIPTION}\n"
             log += (
                 "\nFor extended options for a specific measurement type, "
                 "try ripe-atlas measure <type> --help."

@@ -64,7 +64,7 @@ class BashCompletionTests(unittest.TestCase):
         input_str = " measure "
         output, error = self._autocomplete(input_str)
         print(output, error)
-        self.assertEqual(output, "dns http ntp ping sslcert traceroute")
+        self.assertEqual(output, "dns http ntp ping spec sslcert traceroute")
 
     def test_option_completion(self):
         """Tests autocompletion of specific option of a command."""

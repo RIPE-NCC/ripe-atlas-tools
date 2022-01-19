@@ -19,10 +19,7 @@ import os
 import sys
 import unittest
 
-try:
-    from cStringIO import StringIO
-except ImportError:  # Python 3
-    from io import StringIO
+from io import StringIO
 
 from ripe.atlas.tools.helpers.validators import ArgumentType
 

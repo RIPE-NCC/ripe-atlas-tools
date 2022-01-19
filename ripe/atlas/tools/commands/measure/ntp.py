@@ -20,6 +20,8 @@ from .base import Command
 
 
 class NtpMeasureCommand(Command):
+    DESCRIPTION = "Create an NTP measurement and wait for the results"
+
     def add_arguments(self):
 
         Command.add_arguments(self)

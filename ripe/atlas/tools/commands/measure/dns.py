@@ -23,6 +23,8 @@ from .base import Command
 
 
 class DnsMeasureCommand(Command):
+    DESCRIPTION = "Create a DNS measurement and wait for the results"
+
     def _upper_str(self, s):
         """
         Private method to validate specific command line arguments that
