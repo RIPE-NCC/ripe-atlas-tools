@@ -182,6 +182,21 @@ class TestMeasureCommand(unittest.TestCase):
             },
         )
 
+        # Test using positional target
+        cmd = PingMeasureCommand()
+        cmd.init_args(["ping", "ripe.net"])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "Ping measurement to ripe.net",
+                "target": "ripe.net",
+                "packets": spec["packets"],
+                "packet_interval": spec["packet-interval"],
+                "size": spec["size"],
+            },
+        )
+
         cmd = PingMeasureCommand()
         cmd.init_args(
             [
@@ -229,6 +244,29 @@ class TestMeasureCommand(unittest.TestCase):
 
         cmd = TracerouteMeasureCommand()
         cmd.init_args(["traceroute", "--target", "ripe.net"])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "Traceroute measurement to ripe.net",
+                "target": "ripe.net",
+                "packets": spec["packets"],
+                "size": spec["size"],
+                "destination_option_size": spec["destination-option-size"],
+                "hop_by_hop_option_size": spec["hop-by-hop-option-size"],
+                "dont_fragment": spec["dont-fragment"],
+                "first_hop": spec["first-hop"],
+                "max_hops": spec["max-hops"],
+                "paris": spec["paris"],
+                "port": spec["port"],
+                "protocol": spec["protocol"],
+                "timeout": spec["timeout"],
+            },
+        )
+
+        # Test using positional target
+        cmd = TracerouteMeasureCommand()
+        cmd.init_args(["traceroute", "ripe.net"])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
             {
@@ -338,6 +376,29 @@ class TestMeasureCommand(unittest.TestCase):
 
         cmd = DnsMeasureCommand()
         cmd.init_args(["dns", "--query-argument", "ripe.net"])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "DNS measurement for ripe.net",
+                "query_class": spec["query-class"],
+                "query_type": spec["query-type"],
+                "query_argument": "ripe.net",
+                "set_cd_bit": spec["set-cd-bit"],
+                "set_do_bit": spec["set-do-bit"],
+                "set_rd_bit": spec["set-rd-bit"],
+                "tls": False,
+                "set_nsid_bit": spec["set-nsid-bit"],
+                "protocol": spec["protocol"],
+                "retry": spec["retry"],
+                "udp_payload_size": spec["udp-payload-size"],
+                "use_probe_resolver": True,
+            },
+        )
+
+        # Test using positional query argument
+        cmd = DnsMeasureCommand()
+        cmd.init_args(["dns", "ripe.net"])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
             {
@@ -539,6 +600,19 @@ class TestMeasureCommand(unittest.TestCase):
             },
         )
 
+        # Test using positional target
+        cmd = SslcertMeasureCommand()
+        cmd.init_args(["sslcert", "ripe.net"])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "Sslcert measurement to ripe.net",
+                "target": "ripe.net",
+                "port": spec["port"],
+            },
+        )
+
         cmd = SslcertMeasureCommand()
         cmd.init_args(
             [
@@ -573,6 +647,26 @@ class TestMeasureCommand(unittest.TestCase):
 
         cmd = HttpMeasureCommand()
         cmd.init_args(["http", "--target", "ripe.net"])
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "Http measurement to ripe.net",
+                "target": "ripe.net",
+                "header_bytes": spec["header-bytes"],
+                "version": spec["version"],
+                "method": spec["method"],
+                "port": spec["port"],
+                "path": spec["path"],
+                "query_string": spec["query-string"],
+                "user_agent": spec["user-agent"],
+                "max_bytes_read": spec["body-bytes"],
+            },
+        )
+
+        # Test using positional target
+        cmd = HttpMeasureCommand()
+        cmd.init_args(["http", "ripe.net"])
         self.assertEqual(
             cmd._get_measurement_kwargs(),
             {

@@ -25,6 +25,8 @@ class PingMeasureCommand(Command):
 
         Command.add_arguments(self)
 
+        self.add_primary_argument(name="target", parser=self.parser)
+
         spec = conf["specification"]["types"]["ping"]
 
         specific = self.parser.add_argument_group("Ping-specific Options")

@@ -26,6 +26,8 @@ class NtpMeasureCommand(Command):
 
         Command.add_arguments(self)
 
+        self.add_primary_argument(name="target", parser=self.parser)
+
         spec = conf["specification"]["types"]["ntp"]
 
         specific = self.parser.add_argument_group("NTP-specific Options")

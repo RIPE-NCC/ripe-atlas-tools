@@ -38,6 +38,8 @@ class DnsMeasureCommand(Command):
 
         Command.add_arguments(self)
 
+        self.add_primary_argument(name="query_argument", parser=self.parser)
+
         specific = self.parser.add_argument_group("DNS-specific Options")
         specific.add_argument(
             "--protocol",

@@ -26,6 +26,8 @@ class HttpMeasureCommand(Command):
 
         Command.add_arguments(self)
 
+        self.add_primary_argument(name="target", parser=self.parser)
+
         spec = conf["specification"]["types"]["http"]
 
         specific = self.parser.add_argument_group("HTTP-specific Options")

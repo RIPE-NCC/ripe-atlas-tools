@@ -35,6 +35,8 @@ class TracerouteMeasureCommand(Command):
 
         Command.add_arguments(self)
 
+        self.add_primary_argument(name="target", parser=self.parser)
+
         spec = conf["specification"]["types"]["traceroute"]
 
         specific = self.parser.add_argument_group("Traceroute-specific Options")

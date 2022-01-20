@@ -21,6 +21,7 @@ import pkgutil
 import re
 import sys
 
+from ..helpers.actions import StoreIfNotEmpty
 from ..helpers import xdg
 from ..helpers.colours import colourise
 from ..version import __version__
@@ -263,6 +264,17 @@ class Command(object):
             action="store_false",
             dest=dest,
             help=f"{no_help}{default_false}",
+        )
+
+    def add_primary_argument(self, name, parser):
+        """
+        Create a positional argument which acts as an alias for --`name`.
+        """
+        parser.add_argument(
+            name,
+            help=f"If present, sets the --{name} argument",
+            nargs="?",
+            action=StoreIfNotEmpty,
         )
 
 
