@@ -45,10 +45,10 @@ class PingMeasureCommand(Command):
             type=ArgumentType.integer_range(minimum=2, maximum=30000),
             default=spec["packet-interval"],
         )
-        specific.add_argument(
-            "--include-probe-id",
+        self.add_flag(
+            parser=specific,
+            name="include-probe-id",
             default=spec["include_probe_id"],
-            action="store_true",
             help="Include the ASCII-encoded probe ID in the ping packets",
         )
 

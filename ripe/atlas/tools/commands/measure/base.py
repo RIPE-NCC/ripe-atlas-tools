@@ -107,9 +107,7 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--auth",
             type=str,
-            default=os.getenv(
-                "ATLAS_CREATE_KEY", conf["authorisation"]["create"]
-            ),
+            default=os.getenv("ATLAS_CREATE_KEY", conf["authorisation"]["create"]),
             help="The API key you want to use to create the measurement. "
             "(Can be defined with `ripe-atlas configure --set authorisation.create` "
             "or the ATLAS_CREATE_KEY environment variable)",
@@ -254,12 +252,12 @@ class Command(BaseCommand):
             default=conf["specification"]["spread"],
             help="Specify the spread of probes within a single measurement interval",
         )
-        self.parser.add_argument(
-            "--resolve-on-probe",
-            action="store_true",
+        self.add_flag(
+            parser=self.parser,
+            name="resolve-on-probe",
             default=conf["specification"]["resolve_on_probe"],
-            help="Causes the target to be resolved by each probe "
-            "rather than once by the server",
+            help="Resolve the target on each probe instead of once by the server",
+            no_help="Resolve the target once on the server instead of on each probe",
         )
         self.parser.add_argument(
             "--measurement-tags",
@@ -292,9 +290,7 @@ class Command(BaseCommand):
             if not webbrowser.open(url):
                 self.ok(
                     "It looks like your system doesn't have a web browser "
-                    "available.  You'll have to go there manually: {0}".format(
-                        url
-                    )
+                    "available.  You'll have to go there manually: {0}".format(url)
                 )
 
         if self.arguments.set_alias:
@@ -345,9 +341,9 @@ class Command(BaseCommand):
     def stream(self, pk, url):
         self.ok("Connecting to stream...")
         stream = Stream(pk, capture_limit=self.arguments.probes, timeout=300)
-        renderer = Renderer.get_renderer(
-            name=self.arguments.renderer, kind=self._type
-        )(arguments=self.arguments)
+        renderer = Renderer.get_renderer(name=self.arguments.renderer, kind=self._type)(
+            arguments=self.arguments
+        )
         renderer.render(stream)
         self.ok("Disconnected from stream")
 

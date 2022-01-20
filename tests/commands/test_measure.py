@@ -487,6 +487,41 @@ class TestMeasureCommand(unittest.TestCase):
             },
         )
 
+        """Explicitly unset bits"""
+        cmd = DnsMeasureCommand()
+        cmd.init_args(
+            [
+                "dns",
+                "--query-argument",
+                "ripe.net",
+                "--query-type",
+                "txt",
+                "--no-set-cd-bit",
+                "--no-set-do-bit",
+                "--no-set-rd-bit",
+                "--no-set-nsid-bit",
+            ]
+        )
+        self.assertEqual(
+            cmd._get_measurement_kwargs(),
+            {
+                "af": Configuration.DEFAULT["specification"]["af"],
+                "description": "DNS measurement for ripe.net",
+                "query_class": spec["query-class"],
+                "query_type": "TXT",
+                "query_argument": "ripe.net",
+                "set_cd_bit": False,
+                "set_do_bit": False,
+                "set_rd_bit": False,
+                "tls": False,
+                "set_nsid_bit": False,
+                "protocol": spec["protocol"],
+                "retry": spec["retry"],
+                "udp_payload_size": spec["udp-payload-size"],
+                "use_probe_resolver": True,
+            },
+        )
+
     @mock.patch(CONF, Configuration.DEFAULT)
     def test_get_measurement_kwargs_sslcert(self):
 

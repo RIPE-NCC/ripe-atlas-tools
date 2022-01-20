@@ -71,30 +71,32 @@ class DnsMeasureCommand(Command):
             default=conf["specification"]["types"]["dns"]["query-argument"],
             help="The DNS label to query",
         )
-        specific.add_argument(
-            "--set-cd-bit",
-            action="store_true",
+
+        self.add_flag(
+            parser=specific,
+            name="set-cd-bit",
+            help="Set DNSSEC Checking Disabled flag (RFC4035)",
             default=conf["specification"]["types"]["dns"]["set-cd-bit"],
-            help="Set the DNSSEC Checking Disabled flag (RFC4035)",
         )
-        specific.add_argument(
-            "--set-do-bit",
-            action="store_true",
+        self.add_flag(
+            parser=specific,
+            name="set-do-bit",
+            help="Set DNSSEC OK flag (RFC3225)",
             default=conf["specification"]["types"]["dns"]["set-do-bit"],
-            help="Set the DNSSEC OK flag (RFC3225)",
         )
-        specific.add_argument(
-            "--set-nsid-bit",
-            action="store_true",
+        self.add_flag(
+            parser=specific,
+            name="set-nsid-bit",
+            help="Set Name Server Identifier flag (RFC5001)",
             default=conf["specification"]["types"]["dns"]["set-nsid-bit"],
-            help="Include an EDNS name server ID request with the query",
         )
-        specific.add_argument(
-            "--set-rd-bit",
-            action="store_true",
+        self.add_flag(
+            parser=specific,
+            name="set-rd-bit",
+            help="Set Recursion Desired flag (RFC1035)",
             default=conf["specification"]["types"]["dns"]["set-rd-bit"],
-            help="Set the Recursion Desired flag",
         )
+
         specific.add_argument(
             "--retry",
             type=ArgumentType.integer_range(minimum=0, maximum=10),
@@ -113,11 +115,11 @@ class DnsMeasureCommand(Command):
             type=ArgumentType.integer_range(minimum=100, maximum=30000),
             help="Per packet timeout in milliseconds",
         )
-        specific.add_argument(
-            "--tls",
-            action="store_true",
-            default=conf["specification"]["types"]["dns"]["tls"],
+        self.add_flag(
+            parser=specific,
+            name="tls",
             help="Send query using DNS-over-TLS",
+            default=conf["specification"]["types"]["dns"]["tls"],
         )
 
     def clean_target(self):

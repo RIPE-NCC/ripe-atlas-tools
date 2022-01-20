@@ -235,6 +235,36 @@ class Command(object):
 
         return "RIPE Atlas Tools (Magellan) {}".format(__version__)
 
+    def add_flag(self, parser, name, default, help, no_help=None):
+        """
+        Convenience method to create a store_true --foo option along with a --no-foo
+        store_false counterpart, including proper indication of which is the default.
+
+        This should be used when it's possible for a flag to have a True default,
+        either in the defaults or the custom user YAML.
+        """
+        dest = name.replace("-", "_")
+
+        if no_help is None:
+            no_help = f"Do not {help[0].lower()}{help[1:]}"
+
+        parser.set_defaults(**{dest: default})
+
+        default_true = " (default)" if default else ""
+        default_false = " (default)" if not default else ""
+
+        parser.add_argument(
+            f"--{name}",
+            action="store_true",
+            help=f"{help}{default_true}",
+        )
+        parser.add_argument(
+            f"--no-{name}",
+            action="store_false",
+            dest=dest,
+            help=f"{no_help}{default_false}",
+        )
+
 
 class TabularFieldsMixin(object):
     """

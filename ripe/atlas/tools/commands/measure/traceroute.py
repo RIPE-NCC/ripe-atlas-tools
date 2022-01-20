@@ -63,11 +63,11 @@ class TracerouteMeasureCommand(Command):
             default=spec["timeout"],
             help="The timeout per-packet",
         )
-        specific.add_argument(
-            "--dont-fragment",
-            action="store_true",
+        self.add_flag(
+            parser=specific,
+            name="dont-fragment",
             default=spec["dont-fragment"],
-            help="Don't Fragment the packet",
+            help="Disable fragmentation of outgoing packets",
         )
         specific.add_argument(
             "--paris",
