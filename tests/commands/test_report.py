@@ -279,15 +279,15 @@ class TestReportCommand(unittest.TestCase):
     ]
     expected_output_no_aggr = (
         "PING hsi.cablecom.ch (resolved on probe)\n"
-        "20 bytes from 62.2.16.24 via probe #1216 (109.190.83.40): ttl=54 times=27.429 ms, 25.672 ms, 25.681 ms\n"
-        "20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"
-        "20 bytes from 62.2.16.24 via probe #202 (178.190.51.206): ttl=52 times=40.024 ms, 40.399 ms, 39.29 ms\n"
-        "20 bytes from 62.2.16.24 via probe #2225 (46.126.90.165): ttl=56 times=10.858 ms, 12.632 ms, 20.53 ms, 32.775 ms, 47.509 ms, 62.745 ms, 78.54 ms, 93.272 ms, 109.738 ms\n"
-        "20 bytes from 62.2.16.24 via probe #270 (188.192.110.111): ttl=51 times=28.527 ms, 26.586 ms, 26.393 ms\n"
-        "20 bytes from 62.2.16.24 via probe #579 (195.88.195.170): ttl=51 times=23.201 ms, 22.981 ms, 22.863 ms\n"
-        "20 bytes from 62.2.16.24 via probe #677 (78.128.9.202): ttl=54 times=40.715 ms, 40.259 ms, 40.317 ms\n"
-        "20 bytes from 62.2.16.24 via probe #879 (94.254.125.2): ttl=53 times=34.32 ms, 34.446 ms, 34.376 ms\n"
-        "20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"
+        "20 bytes from 62.2.16.24 via probe #1216 (109.190.83.40): ttl=54 times=27.429 ms, 25.672 ms, 25.681 ms\n"  # noqa: E501
+        "20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"  # noqa: E501
+        "20 bytes from 62.2.16.24 via probe #202 (178.190.51.206): ttl=52 times=40.024 ms, 40.399 ms, 39.29 ms\n"  # noqa: E501
+        "20 bytes from 62.2.16.24 via probe #2225 (46.126.90.165): ttl=56 times=10.858 ms, 12.632 ms, 20.53 ms, 32.775 ms, 47.509 ms, 62.745 ms, 78.54 ms, 93.272 ms, 109.738 ms\n"  # noqa: E501
+        "20 bytes from 62.2.16.24 via probe #270 (188.192.110.111): ttl=51 times=28.527 ms, 26.586 ms, 26.393 ms\n"  # noqa: E501
+        "20 bytes from 62.2.16.24 via probe #579 (195.88.195.170): ttl=51 times=23.201 ms, 22.981 ms, 22.863 ms\n"  # noqa: E501
+        "20 bytes from 62.2.16.24 via probe #677 (78.128.9.202): ttl=54 times=40.715 ms, 40.259 ms, 40.317 ms\n"  # noqa: E501
+        "20 bytes from 62.2.16.24 via probe #879 (94.254.125.2): ttl=53 times=34.32 ms, 34.446 ms, 34.376 ms\n"  # noqa: E501
+        "20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"  # noqa: E501
         "\n"
         "--- hsi.cablecom.ch ping statistics ---\n"
         "27 packets transmitted, 27 received, 0.0% loss\n"
@@ -345,7 +345,6 @@ class TestReportCommand(unittest.TestCase):
                     cmd.run()
 
     def test_arg_renderer_traceroute_aspath_with_valid_radius_arg(self):
-        """User passed arg --traceroute-aspath-radius to traceroute_aspath renderer"""
         # Mock AtlasRequest to fail run fast and test args validity.
         path = "ripe.atlas.cousteau.AtlasRequest.get"
         with mock.patch(path) as mock_get:
@@ -364,7 +363,6 @@ class TestReportCommand(unittest.TestCase):
                 cmd.run()
 
     def test_arg_renderer_traceroute_aspath_with_invalid_radius_arg(self):
-        """User passed arg --traceroute-aspath-radius to traceroute_aspath renderer with invalid value"""
         # Mock AtlasRequest to fail run fast and test args validity.
         with capture_sys_output():
             with self.assertRaises(SystemExit):
@@ -548,23 +546,23 @@ class TestReportCommand(unittest.TestCase):
             "PING hsi.cablecom.ch (resolved on probe)\n"
             "\n"
             "RTT_MEDIAN: 10-20\n"
-            " 20 bytes from 62.2.16.24 via probe #2225 (46.126.90.165): ttl=56 times=10.858 ms, 12.632 ms, 20.53 ms, 32.775 ms, 47.509 ms, 62.745 ms, 78.54 ms, 93.272 ms, 109.738 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #2225 (46.126.90.165): ttl=56 times=10.858 ms, 12.632 ms, 20.53 ms, 32.775 ms, 47.509 ms, 62.745 ms, 78.54 ms, 93.272 ms, 109.738 ms\n"  # noqa: E501
             "\n"
             "RTT_MEDIAN: 20-30\n"
-            " 20 bytes from 62.2.16.24 via probe #1216 (109.190.83.40): ttl=54 times=27.429 ms, 25.672 ms, 25.681 ms\n"
-            " 20 bytes from 62.2.16.24 via probe #270 (188.192.110.111): ttl=51 times=28.527 ms, 26.586 ms, 26.393 ms\n"
-            " 20 bytes from 62.2.16.24 via probe #579 (195.88.195.170): ttl=51 times=23.201 ms, 22.981 ms, 22.863 ms\n"
-            " 20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #1216 (109.190.83.40): ttl=54 times=27.429 ms, 25.672 ms, 25.681 ms\n"  # noqa: E501
+            " 20 bytes from 62.2.16.24 via probe #270 (188.192.110.111): ttl=51 times=28.527 ms, 26.586 ms, 26.393 ms\n"  # noqa: E501
+            " 20 bytes from 62.2.16.24 via probe #579 (195.88.195.170): ttl=51 times=23.201 ms, 22.981 ms, 22.863 ms\n"  # noqa: E501
+            " 20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"  # noqa: E501
             "\n"
             "RTT_MEDIAN: 30-40\n"
-            " 20 bytes from 62.2.16.24 via probe #879 (94.254.125.2): ttl=53 times=34.32 ms, 34.446 ms, 34.376 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #879 (94.254.125.2): ttl=53 times=34.32 ms, 34.446 ms, 34.376 ms\n"  # noqa: E501
             "\n"
             "RTT_MEDIAN: 40-50\n"
-            " 20 bytes from 62.2.16.24 via probe #202 (178.190.51.206): ttl=52 times=40.024 ms, 40.399 ms, 39.29 ms\n"
-            " 20 bytes from 62.2.16.24 via probe #677 (78.128.9.202): ttl=54 times=40.715 ms, 40.259 ms, 40.317 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #202 (178.190.51.206): ttl=52 times=40.024 ms, 40.399 ms, 39.29 ms\n"  # noqa: E501
+            " 20 bytes from 62.2.16.24 via probe #677 (78.128.9.202): ttl=54 times=40.715 ms, 40.259 ms, 40.317 ms\n"  # noqa: E501
             "\n"
             "RTT_MEDIAN: 50-100\n"
-            " 20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"
+            " 20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"  # noqa: E501
             "\n"
             "--- hsi.cablecom.ch ping statistics ---\n"
             "27 packets transmitted, 27 received, 0.0% loss\n"
@@ -620,14 +618,16 @@ class TestReportCommand(unittest.TestCase):
                     mock_get_many.return_value = probes
                     self.cmd.init_args(["--aggregate-by", "rtt-median", "1"])
                     self.cmd.run()
-                    self.assertEqual(expected_output.split("\n"), stdout.getvalue().split("\n"))
+                    self.assertEqual(
+                        expected_output.split("\n"), stdout.getvalue().split("\n")
+                    )
 
     def test_asns_filter(self):
         """Test case where user specified probe asns filters.."""
         expected_output = (
             "PING hsi.cablecom.ch (resolved on probe)\n"
-            "20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"
-            "20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"
+            "20 bytes from 62.2.16.24 via probe #165 (194.85.27.7): ttl=48 times=87.825 ms, 87.611 ms, 91.0 ms\n"  # noqa: E501
+            "20 bytes from 62.2.16.24 via probe #945 (92.111.237.94): ttl=56 times=61.665 ms, 23.833 ms, 23.269 ms\n"  # noqa: E501
             "\n"
             "--- hsi.cablecom.ch ping statistics ---\n"
             "6 packets transmitted, 6 received, 0.0% loss\n"

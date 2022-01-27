@@ -54,12 +54,12 @@ class TestAliasCommand(unittest.TestCase):
 
     def test_bad_action(self):
         with capture_sys_output():
-            with self.assertRaises(SystemExit) as e:
+            with self.assertRaises(SystemExit):
                 self.cmd.init_args(["test"])
 
     def test_bad_target_id(self):
         with capture_sys_output() as (stdout, stderr):
-            with self.assertRaises(SystemExit) as e:
+            with self.assertRaises(SystemExit):
                 self.cmd.init_args("add probe a b".split())
             err = stderr.getvalue().split("\n")[-2]
         self.assertEqual(
@@ -69,15 +69,15 @@ class TestAliasCommand(unittest.TestCase):
     def test_add_args(self):
         for alias_type in ("probe", "measurement"):
             with capture_sys_output() as (stdout, stderr):
-                with self.assertRaises(SystemExit) as e:
+                with self.assertRaises(SystemExit):
                     cmd = Command()
                     cmd.init_args(["add", alias_type])
 
-                with self.assertRaises(SystemExit) as e:
+                with self.assertRaises(SystemExit):
                     cmd = Command()
                     cmd.init_args(["add", alias_type, "1"])
 
-                with self.assertRaises(SystemExit) as e:
+                with self.assertRaises(SystemExit):
                     cmd = Command()
                     cmd.init_args(["add", alias_type, "1", "1"])
 
@@ -90,11 +90,11 @@ class TestAliasCommand(unittest.TestCase):
     def test_del_args(self):
         for alias_type in ("probe", "measurement"):
             with capture_sys_output() as (stdout, stderr):
-                with self.assertRaises(SystemExit) as e:
+                with self.assertRaises(SystemExit):
                     cmd = Command()
                     cmd.init_args(["del", alias_type])
 
-                with self.assertRaises(SystemExit) as e:
+                with self.assertRaises(SystemExit):
                     cmd = Command()
                     cmd.init_args(["del", alias_type, "1"])
 
@@ -106,7 +106,7 @@ class TestAliasCommand(unittest.TestCase):
 
     def test_bad_alias(self):
         with capture_sys_output() as (stdout, stderr):
-            with self.assertRaises(SystemExit) as e:
+            with self.assertRaises(SystemExit):
                 self.cmd.init_args("add measurement 1 bad+alias".split())
             err = stderr.getvalue().split("\n")[-2]
         self.assertEqual(

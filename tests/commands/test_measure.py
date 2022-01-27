@@ -79,7 +79,7 @@ class TestMeasureCommand(unittest.TestCase):
             expected = (
                 "\n"
                 "Definitions:\n"
-                "================================================================================\n"
+                "================================================================================\n"  # noqa: E501
                 "target                    ripe.net\n"
                 "packet_interval           1000\n"
                 "description               Ping measurement to ripe.net\n"
@@ -88,7 +88,7 @@ class TestMeasureCommand(unittest.TestCase):
                 "size                      48\n"
                 "\n"
                 "Sources:\n"
-                "================================================================================\n"
+                "================================================================================\n"  # noqa: E501
                 "requested                 50\n"
                 "type                      area\n"
                 "value                     WW\n"
@@ -129,7 +129,7 @@ class TestMeasureCommand(unittest.TestCase):
             expected = (
                 "\n"
                 "Definitions:\n"
-                "================================================================================\n"
+                "================================================================================\n"  # noqa: E501
                 "target                    ripe.net\n"
                 "packet_interval           1000\n"
                 "description               Ping measurement to ripe.net\n"
@@ -138,7 +138,7 @@ class TestMeasureCommand(unittest.TestCase):
                 "size                      48\n"
                 "\n"
                 "Sources:\n"
-                "================================================================================\n"
+                "================================================================================\n"  # noqa: E501
                 "requested                 50\n"
                 "type                      area\n"
                 "value                     WW\n"

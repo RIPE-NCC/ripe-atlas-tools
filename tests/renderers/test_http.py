@@ -23,18 +23,18 @@ class TestHttpRenderer(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self.basic = Result.get(
-            '{"lts":64,"from":"217.13.64.36","msm_id":2841267,"fw":4720,"timestamp":1450185727,"uri":"http://at-vie-as1120.anchors.atlas.ripe.net:80/4096","prb_id":1,"result":[{"rt":45.953289,"src_addr":"217.13.64.36","hsize":131,"af":4,"bsize":1668618,"res":200,"method":"GET","ver":"1.1","dst_addr":"193.171.255.2"}],"group_id":2841267,"type":"http","msm_name":"HTTPGet"}'
+            '{"lts":64,"from":"217.13.64.36","msm_id":2841267,"fw":4720,"timestamp":1450185727,"uri":"http://at-vie-as1120.anchors.atlas.ripe.net:80/4096","prb_id":1,"result":[{"rt":45.953289,"src_addr":"217.13.64.36","hsize":131,"af":4,"bsize":1668618,"res":200,"method":"GET","ver":"1.1","dst_addr":"193.171.255.2"}],"group_id":2841267,"type":"http","msm_name":"HTTPGet"}'  # noqa: E501
         )
         self.multiple = Result.get(
-            '{"lts":64,"from":"217.13.64.36","msm_id":2841267,"fw":4720,"timestamp":1450185727,"uri":"http://at-vie-as1120.anchors.atlas.ripe.net:80/4096","prb_id":1,"result":[{"rt":45.953289,"src_addr":"217.13.64.36","hsize":131,"af":4,"bsize":1668618,"res":200,"method":"GET","ver":"1.1","dst_addr":"193.171.255.2"},{"rt":45.953289,"src_addr":"217.13.64.36","hsize":131,"af":4,"bsize":1668618,"res":200,"method":"GET","ver":"1.1","dst_addr":"193.171.255.2"}],"group_id":2841267,"type":"http","msm_name":"HTTPGet"}'
+            '{"lts":64,"from":"217.13.64.36","msm_id":2841267,"fw":4720,"timestamp":1450185727,"uri":"http://at-vie-as1120.anchors.atlas.ripe.net:80/4096","prb_id":1,"result":[{"rt":45.953289,"src_addr":"217.13.64.36","hsize":131,"af":4,"bsize":1668618,"res":200,"method":"GET","ver":"1.1","dst_addr":"193.171.255.2"},{"rt":45.953289,"src_addr":"217.13.64.36","hsize":131,"af":4,"bsize":1668618,"res":200,"method":"GET","ver":"1.1","dst_addr":"193.171.255.2"}],"group_id":2841267,"type":"http","msm_name":"HTTPGet"}'  # noqa: E501
         )
 
     def test_basic(self):
         expected = (
             "#Version: 1.0\n"
             "#Date: 2015-12-15 13:22:07\n"
-            "#Fields: cs-method cs-uri c-ip s-ip sc-status time-taken http-version header-bytes body-bytes\n"
-            "GET http://at-vie-as1120.anchors.atlas.ripe.net:80/4096 217.13.64.36 193.171.255.2 200 45.953289 1.1 131 1668618\n\n"
+            "#Fields: cs-method cs-uri c-ip s-ip sc-status time-taken http-version header-bytes body-bytes\n"  # noqa: E501
+            "GET http://at-vie-as1120.anchors.atlas.ripe.net:80/4096 217.13.64.36 193.171.255.2 200 45.953289 1.1 131 1668618\n\n"  # noqa: E501
         )
         self.assertEqual(Renderer().on_result(self.basic), expected)
 
@@ -42,8 +42,8 @@ class TestHttpRenderer(unittest.TestCase):
         expected = (
             "#Version: 1.0\n"
             "#Date: 2015-12-15 13:22:07\n"
-            "#Fields: cs-method cs-uri c-ip s-ip sc-status time-taken http-version header-bytes body-bytes\n"
-            "GET http://at-vie-as1120.anchors.atlas.ripe.net:80/4096 217.13.64.36 193.171.255.2 200 45.953289 1.1 131 1668618\n"
-            "GET http://at-vie-as1120.anchors.atlas.ripe.net:80/4096 217.13.64.36 193.171.255.2 200 45.953289 1.1 131 1668618\n\n"
+            "#Fields: cs-method cs-uri c-ip s-ip sc-status time-taken http-version header-bytes body-bytes\n"  # noqa: E501
+            "GET http://at-vie-as1120.anchors.atlas.ripe.net:80/4096 217.13.64.36 193.171.255.2 200 45.953289 1.1 131 1668618\n"  # noqa: E501
+            "GET http://at-vie-as1120.anchors.atlas.ripe.net:80/4096 217.13.64.36 193.171.255.2 200 45.953289 1.1 131 1668618\n\n"  # noqa: E501
         )
         self.assertEqual(Renderer().on_result(self.multiple), expected)

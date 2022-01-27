@@ -80,7 +80,8 @@ class TestIPDetails(unittest.TestCase):
             "messages": [
                 [
                     "warning",
-                    "Given resource is not announced but result has been aligned to first-level less-specific (193.0.0.0/21).",
+                    "Given resource is not announced but result has been aligned to "
+                    "first-level less-specific (193.0.0.0/21).",
                 ]
             ],
             "version": "1.3",
@@ -96,7 +97,8 @@ class TestIPDetails(unittest.TestCase):
                 "num_filtered_out": 0,
                 "asns": [
                     {
-                        "holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+                        "holder": "RIPE-NCC-AS Reseaux IP Europeens Network "
+                        "Coordination Centre (RIPE NCC),NL",
                         "asn": 3333,
                     }
                 ],
@@ -119,7 +121,8 @@ class TestIPDetails(unittest.TestCase):
             "messages": [
                 [
                     "warning",
-                    "Given resource is not announced but result has been aligned to first-level less-specific (193.0.22.0/23).",
+                    "Given resource is not announced but result has been aligned to "
+                    "first-level less-specific (193.0.22.0/23).",
                 ]
             ],
             "version": "1.3",
@@ -135,7 +138,8 @@ class TestIPDetails(unittest.TestCase):
                 "num_filtered_out": 0,
                 "asns": [
                     {
-                        "holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+                        "holder": "RIPE-NCC-AS Reseaux IP Europeens Network "
+                        "Coordination Centre (RIPE NCC),NL",
                         "asn": 3333,
                     }
                 ],
@@ -304,7 +308,8 @@ class TestIPDetails(unittest.TestCase):
             ip.query_stat(),
             {
                 "Prefix": "193.0.0.0/21",
-                "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+                "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network "
+                "Coordination Centre (RIPE NCC),NL",
                 "ASN": "3333",
             },
         )
@@ -368,7 +373,8 @@ class TestIPDetails(unittest.TestCase):
         """Test case where we store both prefix/address"""
         details = {
             "Prefix": "193.0.0.0/21",
-            "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+            "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network "
+            "Coordination Centre (RIPE NCC),NL",
             "ASN": "3333",
         }
         IP(self.IP)
@@ -380,7 +386,8 @@ class TestIPDetails(unittest.TestCase):
         """Test case where we store only address"""
         details = {
             "Prefix": "193.0.0.0/21",
-            "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network Coordination Centre (RIPE NCC),NL",
+            "Holder": "RIPE-NCC-AS Reseaux IP Europeens Network "
+            "Coordination Centre (RIPE NCC),NL",
             "ASN": "3333",
         }
         self.mock_cache.set("IPDetailsPrefix:193.0.0.0/21", details, 1)
