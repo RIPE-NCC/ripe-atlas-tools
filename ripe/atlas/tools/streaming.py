@@ -27,6 +27,7 @@ class Stream(object):
     Iterable wrapper for AtlasStream that yields sagan Results up to a
     specified capture limit.
     """
+
     STREAM_INTERVAL = 0.01
 
     def __init__(self, pk, capture_limit=None, timeout=None):
@@ -46,9 +47,6 @@ class Stream(object):
                 on_malformation=Result.ACTION_IGNORE,
             )
             results.append(parsed)
-            self.num_results += 1
-            if self.capture_limit and self.num_results >= self.capture_limit:
-                raise CaptureLimitExceeded()
 
         stream = AtlasStream()
         stream.connect()
@@ -61,11 +59,13 @@ class Stream(object):
         try:
             while self.timeout is None or remaining > self.STREAM_INTERVAL:
                 stream.timeout(self.STREAM_INTERVAL)
-                if results:
-                    yield from results
-                    results = []
+                for result in results:
+                    self.num_results += 1
+                    if self.capture_limit and self.num_results > self.capture_limit:
+                        raise CaptureLimitExceeded()
+                    yield result
+                results = []
                 if self.timeout is not None:
                     remaining = start + self.timeout - time.time()
         except (KeyboardInterrupt, CaptureLimitExceeded):
-            yield from results
             stream.disconnect()
