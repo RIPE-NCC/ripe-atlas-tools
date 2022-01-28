@@ -34,7 +34,7 @@ setup(
         "IPy",
         "python-dateutil",
         "requests>=2.7.0",
-        "ripe.atlas.cousteau>=1.4,<2",
+        "ripe.atlas.cousteau==1.5.0a2",
         "ripe.atlas.sagan>=1.2,<2",
         "tzlocal",
         "pyyaml",
