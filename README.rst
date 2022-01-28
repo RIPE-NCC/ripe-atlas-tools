@@ -20,10 +20,21 @@ measurement with limited options from the command line:
 .. code:: bash
 
     $ ripe-atlas measure ping --target example.com
+
+    # or you can omit --target for most measurement types
+    $ ripe-atlas measure ping example.com
+
     $ ripe-atlas measure ping --packets 7 --size 42 --target example.com
+
     $ ripe-atlas measure traceroute --target example.com
+
     $ ripe-atlas measure traceroute --packets 2 --target example.com
+
     $ ripe-atlas measure dns --query-argument example.com
+
+    # or you can omit --query-argument for DNS measuremetns
+    $ ripe-atlas measure dns example.com
+
     $ ripe-atlas measure dns --use-probe-resolver --query-type AAAA --query-argument example.com
 
 This will create a one-off measurement and then wait for the results to roll in,
