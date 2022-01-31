@@ -74,6 +74,9 @@ class TestBaseCommand(unittest.TestCase):
 
     @mock.patch("platform.system", return_value="Linux")
     @mock.patch("platform.platform", return_value=SAMPLE_PLATFORM)
+    @mock.patch(
+        "ripe.atlas.tools.helpers.xdg.freedesktop_os_release", side_effect=OSError
+    )
     def test_user_agent_xdg_absent(self, *mocks):
         cmd = base.Command()
         self.assertEqual(
