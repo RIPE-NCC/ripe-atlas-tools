@@ -20,6 +20,7 @@ import os
 import pkgutil
 import re
 import sys
+import platform
 
 from ..helpers.actions import StoreIfNotEmpty
 from ..helpers import xdg
@@ -220,11 +221,39 @@ class Command(object):
             sys.stdout.write("\n{}\n\n".format(colourise(message, "red")))
 
     @staticmethod
-    def _get_user_agent():
+    def _get_os_string():
+        """
+        Return a string identifying the system OS suitable for use in the User-Agent
+        header.
+        """
+        os = platform.system()
+
+        if os == 'Darwin':
+            release = platform.mac_ver()[0]
+            return f'macOS {release}'
+        elif os == 'Windows':
+            release = platform.win32_ver()[0]
+            return f"Windows {release}"
+            pass
+        else:
+            try:
+                # Use a shim for Python < 3.10
+                info = xdg.freedesktop_os_release()
+            except OSError:
+                pass
+            else:
+                name = info.get("NAME")
+                if name:
+                    version = info.get("VERSION_ID", "")
+                    return f"{name} {version}"
+        return platform.platform()
+
+    @classmethod
+    def _get_user_agent(cls):
         """
         Allow packagers to change the user-agent to whatever they like by
         placing a file called `user-agent` into the `tools` directory.  If no
-        file is found, we go with a sensible default + the version.
+        file is found, we go with a sensible platform-specific default + the version.
         """
 
         try:
@@ -234,7 +263,9 @@ class Command(object):
         except IOError:
             pass  # We go with the default
 
-        return "RIPE Atlas Tools (Magellan) {}".format(__version__)
+        os_str = cls._get_os_string()
+
+        return f"RIPE Atlas Tools [{os_str}] {__version__}"
 
     def add_flag(self, parser, name, default, help, no_help=None):
         """

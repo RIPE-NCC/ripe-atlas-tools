@@ -31,7 +31,6 @@ from ripe.atlas.tools.commands.report import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
 from ripe.atlas.tools.renderers import Renderer
 from ripe.atlas.tools.settings import AliasesDB
-from ripe.atlas.tools.version import __version__
 from ..base import capture_sys_output
 
 
@@ -683,20 +682,3 @@ class TestReportCommand(unittest.TestCase):
                     self.cmd.init_args(["1", "--probe-asns", "3334"])
                     self.cmd.run()
                     self.assertEqual(stdout.getvalue(), expected_output)
-
-    def test_user_agent(self):
-        standard = "RIPE Atlas Tools (Magellan) {}".format(__version__)
-        tests = {
-            standard: standard,
-            "Some custom agent": "Some custom agent",
-            "Some custom agent\nwith a second line": "Some custom agent",
-            "x" * 3000: "x" * 128,
-            "Πράκτορας χρήστη": "Πράκτορας χρήστη",
-            "이것은 테스트 요원": "이것은 테스트 요원",
-        }
-        self.assertEqual(self.cmd.user_agent, standard)
-        for in_string, out_string in tests.items():
-            path = "ripe.atlas.tools.commands.base.open"
-            content = mock.mock_open(read_data=in_string)
-            with mock.patch(path, content, create=True):
-                self.assertEqual(Command().user_agent, out_string)

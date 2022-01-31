@@ -38,9 +38,12 @@ the toolkit so that we can get a rough idea of which distros are using this
 software.  This is easily done by writing an arbitrary string to
 ``<root>/ripe/atlas/tools/user-agent``.  Something like this is recommended:::
 
-    RIPE Atlas Tools (Magellan) [FreeBSD 10.2] 1.2
+    RIPE Atlas Tools [FreeBSD 10.2] 1.2
 
 The only limitations to this file are that it should:
 
 * Only have one line in it (all other will be ignored)
 * That line should have a maximum of 128 characters in it
+
+If no ``user-agent`` file is included then a platform-specific string will be
+automatically generated based on Python's ``platform`` module.
