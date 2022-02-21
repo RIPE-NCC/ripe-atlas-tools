@@ -45,8 +45,8 @@ class Renderer(object):
             self.show_header = kwargs["arguments"].show_header
             self.show_footer = kwargs["arguments"].show_footer
 
-    @staticmethod
-    def get_available():
+    @classmethod
+    def get_available(cls):
         """
         Return a list of renderers available to be used.
         """
@@ -57,18 +57,23 @@ class Renderer(object):
             sys.path.append(path)
             paths += [os.path.join(path, "renderers")]
 
-        r = [
-            package_name for _, package_name, _ in pkgutil.iter_modules(paths)
-        ]
-        r.remove("base")
+        names = []
 
-        return r
+        for _, module_name, _ in pkgutil.iter_modules(paths):
+            if module_name == "base":
+                continue
+            # Check that we can actually use this renderer, otherwise drop it
+            try:
+                cls.get_renderer_by_name(module_name)
+            except Exception:
+                continue
+            names.append(module_name)
+
+        return names
 
     @staticmethod
     def add_common_arguments(parser):
-        group = parser.add_argument_group(
-            title="Optional arguments for all renderers"
-        )
+        group = parser.add_argument_group(title="Optional arguments for all renderers")
         group.add_argument(
             "--no-header",
             dest="show_header",
@@ -95,9 +100,7 @@ class Renderer(object):
         A crude templating engine.
         """
 
-        template = os.path.join(
-            os.path.dirname(__file__), "templates", template
-        )
+        template = os.path.join(os.path.dirname(__file__), "templates", template)
 
         with open(template) as f:
             return str(f.read()).format(**kwargs)
@@ -125,38 +128,43 @@ class Renderer(object):
 
     @classmethod
     def get_renderer_by_name(cls, name):
-        error_message = (
-            'The renderer you selected, "{}" could not be found.'
-        ).format(name)
+        error_message = f'The renderer you selected, "{name}" could not be found.'
 
-        try:  # User-defined, user-supplied
-            r = cls.import_renderer("renderers", name)
-        except ImportError:
-            try:  # User-defined, officially-supported
-                r = cls.import_renderer("ripe.atlas.tools.renderers", name)
-            except ImportError:
-                raise RipeAtlasToolsException(error_message)
+        # User-defined, user-supplied
+        r = cls.import_renderer("renderers", name)
+        if not r:
+            r = cls.import_renderer("ripe.atlas.tools.renderers", name)
+        if not r:
+            raise RipeAtlasToolsException(error_message)
 
         return r
 
     @classmethod
     def get_renderer_by_kind(cls, kind):
         error_message = (
-            'The selected renderer, "{}" could not be found.'
-        ).format(kind)
+            f'A default renderer for "{kind}" measurements could not be found.'
+        )
 
-        try:
-            r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
-        except ImportError:
+        r = cls.import_renderer("ripe.atlas.tools.renderers", kind)
+        if not r:
             raise RipeAtlasToolsException(error_message)
 
         return r
 
     @staticmethod
     def import_renderer(package, name):
-        return getattr(
-            importlib.import_module("{}.{}".format(package, name)), "Renderer"
-        )
+        """
+        Return the Renderer class from package.name, or None if either package
+        or package.name don't exist.
+        """
+        full_name = f"{package}.{name}"
+        try:
+            spec = importlib.util.find_spec(full_name)
+        except ModuleNotFoundError:
+            return
+        if not spec:
+            return
+        return getattr(importlib.import_module(full_name), "Renderer")
 
     @staticmethod
     def add_arguments(parser):
@@ -179,9 +187,7 @@ class Renderer(object):
         Render the given iterable of RIPE Atlas JSON results.
         """
         # Put aggregated and unaggregated results in the same format
-        normalized = (
-            dict(results) if isinstance(results, dict) else {"": results}
-        )
+        normalized = dict(results) if isinstance(results, dict) else {"": results}
 
         header_shown = False
         last_key = None
