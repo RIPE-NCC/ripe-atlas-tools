@@ -1,5 +1,18 @@
 Release History
 ===============
+3.0.0 (release 2022-02-23)
+--------------------------
+- API keys can now be passed in environment variables
+- probe-search by --location now works, as long as the user specifies their own Google Geocoding API key
+- Modernized tests and switched to GitHub actions
+- The default renderer for ping measurements is now more consistent and more similar to other ping tools, including having a statistical summary at the end
+- measure, report and stream commands now all use the same set of renderers
+- "measure spec" command which takes a JSON blob to create measurements
+- Allow measure --target to be specified as a positional arg (or --query-argument for DNS)
+- Move to latest cousteau version (python-socketio)
+- Various other fixes to code and documentation
+
+
 2.3.0 (released 2018-11-23)
 ---------------------------
 
