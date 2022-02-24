@@ -1,5 +1,9 @@
 Release History
 ===============
+3.0.1 (release 2022-02-24)
+--------------------------
+- Updated cousteau dependency to the non-alpha release
+
 3.0.0 (release 2022-02-23)
 --------------------------
 - API keys can now be passed in environment variables
@@ -11,6 +15,7 @@ Release History
 - Allow measure --target to be specified as a positional arg (or --query-argument for DNS)
 - Move to latest cousteau version (python-socketio)
 - Various other fixes to code and documentation
+- Official supported Python versions changed to 3.6, 3.7, 3.8, 3.9 and 3.10
 
 
 2.3.0 (released 2018-11-23)
