@@ -71,6 +71,9 @@ class Renderer(BaseRenderer):
 
         try:
             for idx, pkt in enumerate(result.packets):
+                if not pkt.rtt:
+                    r += f"\t[{idx}] *\n]"
+                    continue
                 r += "\t[%s] %s\n" % (idx, str(pkt))
                 r += "\t\ttrans: %s -> recv: %s\n" % (
                     pkt.transmitted_time,
