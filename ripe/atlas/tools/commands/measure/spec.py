@@ -39,6 +39,10 @@ class SpecMeasureCommand(Command):
             "Any optional command-line arguments you specify will be merged into this "
             "spec.",
         )
+        self.parser.add_argument(
+            "--type",
+            help="The 'type' of the measurement to be added to the spec JSON",
+        )
 
     def _read_file(self, filename):
         if filename == "-":
@@ -61,14 +65,17 @@ class SpecMeasureCommand(Command):
 
         if not isinstance(spec, dict):
             raise RipeAtlasToolsException("Spec should be a JSON object")
-        if "type" not in spec:
-            raise RipeAtlasToolsException('Spec should contain a "type"')
         return spec
 
     def _get_measurement_kwargs(self):
         spec = self._clean_json_spec()
 
-        self._type = spec["type"]
+        if self.arguments.type:
+            self._type = spec["type"] = self.arguments.type
+        else:
+            self._type = spec.get("type")
+        if not self._type:
+            raise RipeAtlasToolsException('Spec should contain a "type"')
         if self._type not in conf["specification"]["types"]:
             raise RipeAtlasToolsException(f"Unknown measurement type: {self._type}")
 
