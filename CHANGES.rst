@@ -1,5 +1,9 @@
 Release History
 ===============
+3.0.2 (release 2022-05-23)
+--------------------------
+- Fix "measure spec" command which was broken due to cousteau issue
+
 3.0.1 (release 2022-02-24)
 --------------------------
 - Updated cousteau dependency to the non-alpha release
