@@ -16,6 +16,7 @@ import time
 
 from ripe.atlas.cousteau import AtlasStream
 from ripe.atlas.sagan import Result
+from .settings import conf
 
 
 class CaptureLimitExceeded(Exception):
@@ -48,7 +49,7 @@ class Stream(object):
             )
             results.append(parsed)
 
-        stream = AtlasStream()
+        stream = AtlasStream(base_url=conf["stream-base-url"])
         stream.connect()
 
         start = time.time()

@@ -19,6 +19,7 @@ from ripe.atlas.cousteau import Probe as CProbe
 
 from .exceptions import RipeAtlasToolsException
 from .cache import cache
+from .settings import conf
 
 
 class FilterFactory(object):
@@ -51,8 +52,7 @@ class Filter(object):
             attr_value = getattr(result.probe, self.key)
         except AttributeError:
             log = (
-                "Cousteau's Probe class does not have an attribute "
-                "called: <{}>"
+                "Cousteau's Probe class does not have an attribute " "called: <{}>"
             ).format(self.key)
             raise RipeAtlasToolsException(log)
         if attr_value == self.value:
@@ -137,10 +137,14 @@ class SaganSet(object):
     def next(self):
         return self.__next__()
 
-    @staticmethod
-    def _attach_probes(sagans):
+    def _attach_probes(self, sagans):
         probes = dict(
-            [(p.id, p) for p in Probe.get_many(s.probe_id for s in sagans)]
+            [
+                (p.id, p)
+                for p in Probe.get_many(
+                    (s.probe_id for s in sagans)
+                )
+            ]
         )
         for sagan in sagans:
             sagan.probe = probes[sagan.probe_id]
@@ -164,7 +168,8 @@ class Probe(object):
         """
         r = cache.get("probe:{}".format(pk))
         if not r:
-            probe = CProbe(id=pk)
+            kwargs = {"id": pk, "server": conf["api-server"]}
+            probe = CProbe(**kwargs)
             cache.set("probe:{}".format(probe.id), probe, cls.EXPIRE_TIME)
             return probe
 
@@ -187,10 +192,8 @@ class Probe(object):
                 fetch_ids.append(str(pk))
 
         if fetch_ids:
-            kwargs = {"id__in": fetch_ids}
-            for probe in [
-                p for p in ProbeRequest(return_objects=True, **kwargs)
-            ]:
+            kwargs = {"id__in": fetch_ids, "server": conf["api-server"]}
+            for probe in [p for p in ProbeRequest(return_objects=True, **kwargs)]:
                 cache.set("probe:{}".format(probe.id), probe, cls.EXPIRE_TIME)
                 r.append(probe)
 

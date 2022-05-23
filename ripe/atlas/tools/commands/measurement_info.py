@@ -21,6 +21,7 @@ from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
+from ..settings import conf
 
 
 class Command(MetaDataMixin, BaseCommand):
@@ -36,7 +37,11 @@ class Command(MetaDataMixin, BaseCommand):
     def run(self):
 
         try:
-            measurement = Measurement(id=self.arguments.id, user_agent=self.user_agent)
+            measurement = Measurement(
+                server=conf["api-server"],
+                id=self.arguments.id,
+                user_agent=self.user_agent,
+            )
         except APIResponseError:
             raise RipeAtlasToolsException("That measurement does not appear to exist")
 
@@ -45,12 +50,17 @@ class Command(MetaDataMixin, BaseCommand):
 
     @classmethod
     def render_basic(cls, measurement):
-        url_template = "https://atlas.ripe.net/measurements/{}/"
         cls._render(
             measurement,
             (
                 ("id", "ID"),
-                ("id", "URL", lambda _: colourise(url_template.format(_), "cyan")),
+                (
+                    "id",
+                    "URL",
+                    lambda id: colourise(
+                        f"{conf['website-url']}/measurements/id/", "cyan"
+                    ),
+                ),
                 ("type", "Type", cls._prettify_type),
                 ("status", "Status"),
                 ("description", "Description", sanitise),

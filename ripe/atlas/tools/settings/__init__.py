@@ -163,6 +163,7 @@ class Configuration(UserSettingsParser):
         },
         "ripe-ncc": {
             "endpoint": "https://atlas.ripe.net",
+            "stream-base-url": "https://atlas-stream.ripe.net",
             "version": 0,
         },
     }
@@ -201,6 +202,13 @@ class Configuration(UserSettingsParser):
 
         with open(Configuration.USER_RC, "w") as rc:
             rc.write(payload)
+
+    def get(self):
+        d = super().get()
+        d["website-url"] = d["ripe-ncc"]["endpoint"]
+        d["api-server"] = d["ripe-ncc"]["endpoint"].replace("https://", "")
+        d["stream-base-url"] = d["ripe-ncc"]["stream-base-url"]
+        return d
 
 
 class AliasesDB(UserSettingsParser):

@@ -21,6 +21,7 @@ from .base import Command as BaseCommand, TabularFieldsMixin
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
+from ..settings import conf
 
 
 class Command(TabularFieldsMixin, BaseCommand):
@@ -129,6 +130,7 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         filters = self._get_filters()
         measurements = MeasurementRequest(
+            server=conf["api-server"],
             return_objects=True, user_agent=self.user_agent, **filters
         )
         truncated_measurements = itertools.islice(measurements, self.arguments.limit)

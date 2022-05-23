@@ -21,6 +21,7 @@ from ..exceptions import RipeAtlasToolsException
 from ..helpers.colours import colourise
 from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
+from ..settings import conf
 
 
 class Command(MetaDataMixin, BaseCommand):
@@ -36,14 +37,21 @@ class Command(MetaDataMixin, BaseCommand):
     def run(self):
 
         try:
-            probe = Probe(id=self.arguments.id, user_agent=self.user_agent)
+            probe = Probe(
+                server=conf["api-server"],
+                id=self.arguments.id,
+                user_agent=self.user_agent,
+            )
         except APIResponseError:
             raise RipeAtlasToolsException("That probe does not appear to exist")
 
-        url_template = "https://atlas.ripe.net/probes/{}/"
         keys = (
             ("id", "ID"),
-            ("id", "URL", lambda _: colourise(url_template.format(_), "cyan")),
+            (
+                "id",
+                "URL",
+                lambda id: colourise(f"{conf['website-url']}/probes/{id}/", "cyan"),
+            ),
             ("is_public", "Public?", self._prettify_boolean),
             ("is_anchor", "Anchor?", self._prettify_boolean),
             ("country_code", "Country"),

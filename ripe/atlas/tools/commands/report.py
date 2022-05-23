@@ -143,6 +143,7 @@ class Command(BaseCommand):
     def _get_request(self):
 
         kwargs = {
+            "server": conf["api-server"],
             "msm_id": self.arguments.measurement_id,
             "user_agent": self.user_agent,
         }
@@ -187,7 +188,10 @@ class Command(BaseCommand):
             arguments=self.arguments
         )
 
-        results = SaganSet(iterable=results, probes=self.arguments.probes)
+        results = SaganSet(
+            iterable=results,
+            probes=self.arguments.probes,
+        )
 
         if self.arguments.probe_asns:
             asn_filters = set([])

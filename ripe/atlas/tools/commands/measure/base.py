@@ -279,7 +279,7 @@ class Command(BaseCommand):
             self._handle_api_error(response)  # Raises an exception
 
         pk = response["measurements"][0]
-        url = "{0}/measurements/{1}/".format(conf["ripe-ncc"]["endpoint"], pk)
+        url = "{0}/measurements/{1}/".format(conf["website-url"], pk)
 
         self.ok(
             f"Looking good! Measurement {pk} was created and details about "
@@ -330,7 +330,7 @@ class Command(BaseCommand):
         creation_class = self.CREATION_CLASSES[self._type]
 
         return AtlasCreateRequest(
-            server=conf["ripe-ncc"]["endpoint"].replace("https://", ""),
+            server=conf["api-server"],
             key=self.arguments.auth,
             user_agent=self.user_agent,
             measurements=[creation_class(**self._get_measurement_kwargs())],
