@@ -19,7 +19,7 @@ from ripe.atlas.sagan import Result
 from .settings import conf
 
 
-class CaptureLimitExceeded(Exception):
+class CaptureLimitMet(Exception):
     pass
 
 
@@ -62,11 +62,12 @@ class Stream(object):
                 stream.timeout(self.STREAM_INTERVAL)
                 for result in results:
                     self.num_results += 1
-                    if self.capture_limit and self.num_results > self.capture_limit:
-                        raise CaptureLimitExceeded()
                     yield result
+                    if self.capture_limit and self.num_results == self.capture_limit:
+                        raise CaptureLimitMet()
                 results = []
                 if self.timeout is not None:
                     remaining = start + self.timeout - time.time()
-        except (KeyboardInterrupt, CaptureLimitExceeded):
-            stream.disconnect()
+        except (KeyboardInterrupt, CaptureLimitMet):
+            pass
+        stream.disconnect()

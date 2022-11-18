@@ -1,5 +1,9 @@
 Release History
 ===============
+3.0.3 (release 2022-11-18)
+--------------------------
+- Fix issue where the measure command would continue to stream results after all probes have responded
+
 3.0.2 (release 2022-05-23)
 --------------------------
 - Fix "measure spec" command which was broken due to cousteau issue
