@@ -190,7 +190,7 @@ class Command(BaseCommand):
         origins.add_argument(
             "--from-asn",
             # http://www.iana.org/assignments/as-numbers/as-numbers.xhtml
-            type=ArgumentType.integer_range(1, 2 ** 32 - 2),
+            type=ArgumentType.integer_range(1, 2**32 - 2),
             metavar="ASN",
             help="The ASN from which you'd like to select your probes. "
             "Example: --from-asn=3333",
@@ -262,6 +262,18 @@ class Command(BaseCommand):
         self.parser.add_argument(
             "--measurement-tags",
             help="Comma-separated list of tags to apply to the new measurement",
+        )
+        self.parser.add_argument(
+            "--stream-limit",
+            type=int,
+            help="The maximum number of results you want to stream, "
+            "defaults to number of requested probes",
+        )
+        self.parser.add_argument(
+            "--stream-timeout",
+            type=float,
+            default=300,
+            help="Stop streaming new measurements after this number of seconds",
         )
 
         Renderer.add_arguments_for_available_renderers(self.parser)
@@ -340,7 +352,10 @@ class Command(BaseCommand):
 
     def stream(self, pk, url):
         self.ok("Connecting to stream...")
-        stream = Stream(pk, capture_limit=self.arguments.probes, timeout=300)
+        capture_limit = self.arguments.stream_limit or self.arguments.probes
+        stream = Stream(
+            pk, capture_limit=capture_limit, timeout=self.arguments.stream_timeout
+        )
         renderer = Renderer.get_renderer(name=self.arguments.renderer, kind=self._type)(
             arguments=self.arguments
         )
