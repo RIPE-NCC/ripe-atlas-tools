@@ -27,12 +27,8 @@ class Command(BaseCommand):
 
     NAME = "stream"
 
-    DESCRIPTION = (
-        "Output the results of a public measurement as they become available"
-    )
-    EXTRA_DESCRIPTION = (
-        "Streaming of non-public measurements is not supported."
-    )
+    DESCRIPTION = "Output the results of a public measurement as they become available"
+    EXTRA_DESCRIPTION = "Streaming of non-public measurements is not supported."
     URLS = {
         "detail": "/api/v2/measurements/{0}.json",
     }
@@ -54,6 +50,11 @@ class Command(BaseCommand):
             help="The renderer you want to use. If this isn't defined, an "
             "appropriate renderer will be selected.",
         )
+        self.parser.add_argument(
+            "--timeout",
+            type=float,
+            help="Stop streaming after this number of seconds",
+        )
 
         Renderer.add_arguments_for_available_renderers(self.parser)
 
@@ -69,7 +70,9 @@ class Command(BaseCommand):
 
         self.ok("Connecting to stream...")
         stream = Stream(
-            self.arguments.measurement_id, capture_limit=self.arguments.limit
+            self.arguments.measurement_id,
+            capture_limit=self.arguments.limit,
+            timeout=self.arguments.timeout,
         )
         renderer = Renderer.get_renderer(
             name=self.arguments.renderer, kind=measurement.type.lower()

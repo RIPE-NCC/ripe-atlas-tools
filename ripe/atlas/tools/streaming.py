@@ -12,62 +12,38 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import time
-
 from ripe.atlas.cousteau import AtlasStream
 from ripe.atlas.sagan import Result
 from .settings import conf
 
 
-class CaptureLimitMet(Exception):
-    pass
-
-
 class Stream(object):
     """
     Iterable wrapper for AtlasStream that yields sagan Results up to a
-    specified capture limit.
+    specified capture limit and/or timeout
     """
-
-    STREAM_INTERVAL = 0.01
 
     def __init__(self, pk, capture_limit=None, timeout=None):
         self.pk = pk
         self.capture_limit = capture_limit
         self.timeout = timeout
-
-        self.num_results = 0
+        self.num_received = 0
 
     def __iter__(self):
-        results = []
-
-        def on_result_response(result, *args):
-            parsed = Result.get(
-                result,
-                on_error=Result.ACTION_IGNORE,
-                on_malformation=Result.ACTION_IGNORE,
-            )
-            results.append(parsed)
-
         stream = AtlasStream(base_url=conf["stream-base-url"])
         stream.connect()
-
-        start = time.time()
-        remaining = self.timeout
-
-        stream.bind_channel("atlas_result", on_result_response)
-        stream.start_stream(stream_type="result", msm=self.pk)
-        try:
-            while self.timeout is None or remaining > self.STREAM_INTERVAL:
-                stream.timeout(self.STREAM_INTERVAL)
-                for result in results:
-                    self.num_results += 1
-                    yield result
-                    if self.capture_limit and self.num_results == self.capture_limit:
-                        raise CaptureLimitMet()
-                results = []
-                if self.timeout is not None:
-                    remaining = start + self.timeout - time.time()
-        except (KeyboardInterrupt, CaptureLimitMet):
-            pass
+        stream.subscribe("result", msm=self.pk)
+        for event_name, payload in stream.iter(
+            seconds=self.timeout
+        ):
+            if event_name == "atlas_result":
+                parsed = Result.get(
+                    payload,
+                    on_error=Result.ACTION_IGNORE,
+                    on_malformation=Result.ACTION_IGNORE,
+                )
+                yield parsed
+                self.num_received += 1
+                if self.num_received == self.capture_limit:
+                    break
         stream.disconnect()
