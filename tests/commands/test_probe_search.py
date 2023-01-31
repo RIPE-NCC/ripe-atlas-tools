@@ -1,4 +1,4 @@
-# Copyright (c) 2015 RIPE NCC
+# Copyright (c) 2023 RIPE NCC
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,17 +14,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import requests
-
 from unittest import mock
 
+import requests
+from ripe.atlas.cousteau import Probe
 from ripe.atlas.tools.commands.probe_search import Command
 from ripe.atlas.tools.exceptions import RipeAtlasToolsException
-from ripe.atlas.cousteau import Probe
-from ripe.atlas.tools.aggregators import ValueKeyAggregator
 
 from ..base import capture_sys_output
-
 
 COMMAND_MODULE = "ripe.atlas.tools.commands.probe_search"
 
@@ -40,6 +37,7 @@ class FakeGen(object):
                     "country_code": "GR",
                     "asn_v4": 3333,
                     "prefix_v4": "193.0/22",
+                    "status": {"name": "Connected"},
                 },
             ),
             Probe(
@@ -48,6 +46,7 @@ class FakeGen(object):
                     "country_code": "DE",
                     "asn_v4": 3333,
                     "prefix_v4": "193.0/22",
+                    "status": {"name": "Connected"},
                 },
             ),
             Probe(
@@ -56,6 +55,7 @@ class FakeGen(object):
                     "country_code": "DE",
                     "asn_v4": 3332,
                     "prefix_v4": "193.0/22",
+                    "status": {"name": "Connected"},
                 },
             ),
             Probe(
@@ -64,6 +64,7 @@ class FakeGen(object):
                     "country_code": "NL",
                     "asn_v4": 3333,
                     "prefix_v4": "193.0/22",
+                    "status": {"name": "Connected"},
                 },
             ),
             Probe(
@@ -72,6 +73,7 @@ class FakeGen(object):
                     "country_code": "GR",
                     "asn_v4": 3333,
                     "prefix_v4": "193.0/22",
+                    "status": {"name": "Connected"},
                 },
             ),
         ]
@@ -94,13 +96,6 @@ class FakeGen(object):
 class TestProbesCommand(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
-
-    def test_with_empty_args(self):
-        """User passes no args, should fail with RipeAtlasToolsException"""
-        with self.assertRaises(RipeAtlasToolsException):
-            cmd = Command()
-            cmd.init_args([])
-            cmd.run()
 
     def test_with_random_args(self):
         """User passes random args, should fail with SystemExit"""
@@ -159,9 +154,7 @@ class TestProbesCommand(unittest.TestCase):
                 with capture_sys_output():
                     with self.assertRaises(RipeAtlasToolsException):
                         cmd = Command()
-                        cmd.init_args(
-                            ["--auth", "fake-key", "--location", "blaaaa"]
-                        )
+                        cmd.init_args(["--auth", "fake-key", "--location", "blaaaa"])
                         cmd.run()
             mock_get.side_effect = Exception()
             with self.assertRaises(Exception):
@@ -177,9 +170,7 @@ class TestProbesCommand(unittest.TestCase):
                 mock_json.return_value = {"blaaa": "bla"}
                 with self.assertRaises(RipeAtlasToolsException):
                     cmd = Command()
-                    cmd.init_args(
-                        ["--auth", "fake-key", "--location", "blaaaa"]
-                    )
+                    cmd.init_args(["--auth", "fake-key", "--location", "blaaaa"])
                     cmd.run()
 
     def test_location_arg(self):
@@ -188,15 +179,11 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = requests.Response()
             with mock.patch("requests.Response.json") as mock_json:
                 mock_json.return_value = {
-                    "results": [
-                        {"geometry": {"location": {"lat": 1, "lng": 2}}}
-                    ]
+                    "results": [{"geometry": {"location": {"lat": 1, "lng": 2}}}]
                 }
                 cmd = Command()
                 cmd.init_args(["--auth", "fake-key", "--location", "blaaaa"])
-                self.assertEqual(
-                    cmd.build_request_args(), {"radius": "1,2:15"}
-                )
+                self.assertEqual(cmd._get_filters(), {"radius": "1,2:15"})
 
     def test_location_arg_with_radius(self):
         """User passed location arg"""
@@ -204,9 +191,7 @@ class TestProbesCommand(unittest.TestCase):
             mock_get.return_value = requests.Response()
             with mock.patch("requests.Response.json") as mock_json:
                 mock_json.return_value = {
-                    "results": [
-                        {"geometry": {"location": {"lat": 1, "lng": 2}}}
-                    ]
+                    "results": [{"geometry": {"location": {"lat": 1, "lng": 2}}}]
                 }
                 cmd = Command()
                 cmd.init_args(
@@ -219,7 +204,7 @@ class TestProbesCommand(unittest.TestCase):
                         "4",
                     ]
                 )
-                self.assertEqual(cmd.build_request_args(), {"radius": "1,2:4"})
+                self.assertEqual(cmd._get_filters(), {"radius": "1,2:4"})
 
     def test_asn_args(self):
         """User passed asn arg together with asnv4 or asnv6"""
@@ -237,9 +222,7 @@ class TestProbesCommand(unittest.TestCase):
         """User passed prefix arg together with prefixv4 or prefixv6"""
         with self.assertRaises(RipeAtlasToolsException):
             cmd = Command()
-            cmd.init_args(
-                ["--prefix", "193.0.0.0/21", "--prefixv4", "193.0.0.0/21"]
-            )
+            cmd.init_args(["--prefix", "193.0.0.0/21", "--prefixv4", "193.0.0.0/21"])
             cmd.run()
 
         with self.assertRaises(RipeAtlasToolsException):
@@ -258,7 +241,7 @@ class TestProbesCommand(unittest.TestCase):
         """User passed all arguments"""
         cmd = Command()
         cmd.init_args(["--all"])
-        self.assertEqual(cmd.build_request_args(), {})
+        self.assertEqual(cmd._get_filters(), {})
 
     def test_center_arg_wrong_value(self):
         """User passed center arg with wrong value"""
@@ -271,32 +254,32 @@ class TestProbesCommand(unittest.TestCase):
         """User passed center arg"""
         cmd = Command()
         cmd.init_args(["--center", "1,2"])
-        self.assertEqual(cmd.build_request_args(), {"radius": "1,2:15"})
+        self.assertEqual(cmd._get_filters(), {"radius": "1,2:15"})
 
     def test_center_arg_with_radius(self):
         """User passed center and radius arg"""
         cmd = Command()
         cmd.init_args(["--center", "1,2", "--radius", "4"])
-        self.assertEqual(cmd.build_request_args(), {"radius": "1,2:4"})
+        self.assertEqual(cmd._get_filters(), {"radius": "1,2:4"})
 
     def test_country_arg(self):
         """User passed country code arg"""
         cmd = Command()
         cmd.init_args(["--country", "GR"])
-        self.assertEqual(cmd.build_request_args(), {"country_code": "GR"})
+        self.assertEqual(cmd._get_filters(), {"country_code": "GR"})
 
     def test_country_arg_with_radius(self):
         """User passed country code arg together with radius"""
         cmd = Command()
         cmd.init_args(["--country", "GR", "--radius", "4"])
-        self.assertEqual(cmd.build_request_args(), {"country_code": "GR"})
+        self.assertEqual(cmd._get_filters(), {"country_code": "GR"})
 
     def test_status_arg(self):
         """User passed valid status arg."""
         for status in range(0, 3):
             cmd = Command()
             cmd.init_args(["--status", str(status)])
-            self.assertEqual(cmd.build_request_args(), {"status": status})
+            self.assertEqual(cmd._get_filters(), {"status": status})
 
     def test_status_arg_wrong_value(self):
         """User passed status arg with wrong value"""
@@ -310,13 +293,11 @@ class TestProbesCommand(unittest.TestCase):
         """Sane tags"""
         cmd = Command()
         cmd.init_args(["--tag", "native-ipv6"])
-        self.assertEqual(cmd.build_request_args(), {"tags": "native-ipv6"})
+        self.assertEqual(cmd._get_filters(), {"tags": "native-ipv6"})
 
         cmd = Command()
         cmd.init_args(["--tag", "native-ipv6", "--tag", "system-ipv4-works"])
-        self.assertEqual(
-            cmd.build_request_args(), {"tags": "native-ipv6,system-ipv4-works"}
-        )
+        self.assertEqual(cmd._get_filters(), {"tags": "native-ipv6,system-ipv4-works"})
 
     def test_sane_args1(self):
         """User passed several arguments (1)"""
@@ -334,7 +315,7 @@ class TestProbesCommand(unittest.TestCase):
             ]
         )
         self.assertEqual(
-            cmd.build_request_args(),
+            cmd._get_filters(),
             {"asn_v4": 3333, "prefix": "193.0.0.0/21", "radius": "1,2:4"},
         )
 
@@ -359,7 +340,7 @@ class TestProbesCommand(unittest.TestCase):
         with mock.patch(path) as mock_get:
             mock_get.return_value = (1, 2)
             self.assertEqual(
-                cmd.build_request_args(),
+                cmd._get_filters(),
                 {"asn": 3333, "prefix_v4": "193.0.0.0/21", "radius": "1,2:15"},
             )
 
@@ -378,7 +359,7 @@ class TestProbesCommand(unittest.TestCase):
             ]
         )
         self.assertEqual(
-            cmd.build_request_args(),
+            cmd._get_filters(),
             {
                 "asn_v6": 3333,
                 "prefix_v6": "2001:67c:2e8::/48",
@@ -416,41 +397,14 @@ class TestProbesCommand(unittest.TestCase):
         User passed ids_only arg together with aggregate, testing rendering
         """
         cmd = Command()
-        cmd.init_args(
-            ["--ids-only", "--country", "GR", "--aggregate-by", "country"]
-        )
+        cmd.init_args(["--ids-only", "--aggregate-by", "country"])
 
         with capture_sys_output() as (stdout, stderr):
             path = "{}.ProbeRequest".format(COMMAND_MODULE)
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                self.assertEqual(stdout.getvalue(), "1\n2\n3\n4\n5\n")
-
-    def test_get_aggregators(self):
-        """User passed --aggregate-by args"""
-        cmd = Command()
-        cmd.init_args(
-            [
-                "--aggregate-by",
-                "asn_v4",
-                "--aggregate-by",
-                "country",
-                "--aggregate-by",
-                "prefix_v4",
-            ]
-        )
-        expected_output = [
-            ValueKeyAggregator(key="asn_v4"),
-            ValueKeyAggregator(key="country_code"),
-            ValueKeyAggregator(key="prefix_v4"),
-        ]
-        cmd.set_aggregators()
-        for index, v in enumerate(cmd.aggregators):
-            self.assertTrue(isinstance(v, ValueKeyAggregator))
-            self.assertEqual(
-                v.aggregation_keys, expected_output[index].aggregation_keys
-            )
+                self.assertEqual(stdout.getvalue(), "2\n3\n1\n5\n4\n")
 
     def test_render_without_aggregation(self):
         """Tests rendering of results without aggregation"""
@@ -462,22 +416,20 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_output = (
-                    "\n"
-                    "Filters:\n"
-                    "  Country: GR\n"
-                    "\n"
-                    "ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "===========================================\n"
-                    "1     3333            gr    None           \n"
-                    "2     3333            de    None           \n"
-                    "3     3332            de    None           \n"
-                    "4     3333            nl    None           \n"
-                    "5     3333            gr    None           \n"
-                    "===========================================\n"
-                    "                Showing 4 of 4 total probes\n"
-                    "\n"
-                )
+                expected_output = """
+Filters:
+  country_code: GR
+
+   id asn_v4 asn_v6 country     status     
+===========================================
+    1   3333      -   gr       Connected   
+    2   3333      -   de       Connected   
+    3   3332      -   de       Connected   
+    4   3333      -   nl       Connected   
+    5   3333      -   gr       Connected   
+===========================================
+                             Showing 4 of 4
+"""  # noqa
                 self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_render_without_aggregation_with_limit(self):
@@ -490,19 +442,17 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_output = (
-                    "\n"
-                    "Filters:\n"
-                    "  Country: GR\n"
-                    "\n"
-                    "ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "===========================================\n"
-                    "1     3333            gr    None           \n"
-                    "2     3333            de    None           \n"
-                    "===========================================\n"
-                    "                Showing 2 of 4 total probes\n"
-                    "\n"
-                )
+                expected_output = """
+Filters:
+  country_code: GR
+
+   id asn_v4 asn_v6 country     status     
+===========================================
+    1   3333      -   gr       Connected   
+    2   3333      -   de       Connected   
+===========================================
+                             Showing 2 of 4
+"""  # noqa
                 self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_render_with_aggregation(self):
@@ -510,8 +460,8 @@ class TestProbesCommand(unittest.TestCase):
         cmd = Command()
         cmd.init_args(
             [
-                "--country",
-                "GR",
+                "--status",
+                "1",
                 "--aggregate-by",
                 "country",
                 "--aggregate-by",
@@ -526,30 +476,24 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_blob = (
-                    "\n"
-                    "Filters:\n"
-                    "  Country: GR\n"
-                    "\n"
-                    "ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "===========================================\n"
-                    "\n"
-                    "COUNTRY: DE | ASN_V4: 3332 | PREFIX_V4: 193.0/22\n"
-                    "3     3332            de    None           \n"
-                    "\n"
-                    "COUNTRY: DE | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
-                    "2     3333            de    None           \n"
-                    "\n"
-                    "COUNTRY: GR | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
-                    "1     3333            gr    None           \n"
-                    "5     3333            gr    None           \n"
-                    "\n"
-                    "COUNTRY: NL | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
-                    "4     3333            nl    None           \n"
-                    "===========================================\n"
-                    "                Showing 4 of 4 total probes\n"
-                    "\n"
-                )
+                expected_blob = """
+Filters:
+  status: 1
+
+   id asn_v4 asn_v6 country     status     
+===========================================
+ ------ 3332 -------- de ------------------ (prefix_v4:193.0/22)
+    3   3332      -   de       Connected   
+ ------ 3333 -------- de ------------------ (prefix_v4:193.0/22)
+    2   3333      -   de       Connected   
+ ------ 3333 -------- gr ------------------ (prefix_v4:193.0/22)
+    1   3333      -   gr       Connected   
+    5   3333      -   gr       Connected   
+ ------ 3333 -------- nl ------------------ (prefix_v4:193.0/22)
+    4   3333      -   nl       Connected   
+===========================================
+                             Showing 4 of 4
+"""  # noqa
                 expected_set = expected_blob.split("\n")
                 returned_set = stdout.getvalue().split("\n")
                 self.assertEqual(returned_set, expected_set)
@@ -577,20 +521,17 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_output = (
-                    "\n"
-                    "Filters:\n"
-                    "  Country: GR\n"
-                    "\n"
-                    "ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "===========================================\n"
-                    "\n"
-                    "COUNTRY: GR | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
-                    "1     3333            gr    None           \n"
-                    "===========================================\n"
-                    "                Showing 1 of 4 total probes\n"
-                    "\n"
-                )
+                expected_output = """
+Filters:
+  country_code: GR
+
+   id asn_v4 asn_v6 country     status     
+===========================================
+ ------ 3333 -------- gr ------------------ (prefix_v4:193.0/22)
+    1   3333      -   gr       Connected   
+===========================================
+                             Showing 1 of 4
+"""  # noqa
                 expected_set = expected_output.split("\n")
                 returned_set = stdout.getvalue().split("\n")
                 self.assertEqual(returned_set, expected_set)
@@ -620,29 +561,23 @@ class TestProbesCommand(unittest.TestCase):
             with mock.patch(path) as mock_get:
                 mock_get.return_value = FakeGen()
                 cmd.run()
-                expected_output = (
-                    "\n"
-                    "Filters:\n  "
-                    "Country: GR\n"
-                    "\n"
-                    "ID    Asn_v4 Asn_v6 Country Status         \n"
-                    "===========================================\n"
-                    "\n"
-                    "COUNTRY: DE | ASN_V4: 3332 | PREFIX_V4: 193.0/22\n"
-                    "3     3332            de    None           \n"
-                    "\n"
-                    "COUNTRY: DE | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
-                    "2     3333            de    None           \n"
-                    "\n"
-                    "COUNTRY: GR | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
-                    "1     3333            gr    None           \n"
-                    "\n"
-                    "COUNTRY: NL | ASN_V4: 3333 | PREFIX_V4: 193.0/22\n"
-                    "4     3333            nl    None           \n"
-                    "===========================================\n"
-                    "                Showing 4 of 4 total probes\n"
-                    "\n"
-                )
+                expected_output = """
+Filters:
+  country_code: GR
+
+   id asn_v4 asn_v6 country     status     
+===========================================
+ ------ 3332 -------- de ------------------ (prefix_v4:193.0/22)
+    3   3332      -   de       Connected   
+ ------ 3333 -------- de ------------------ (prefix_v4:193.0/22)
+    2   3333      -   de       Connected   
+ ------ 3333 -------- gr ------------------ (prefix_v4:193.0/22)
+    1   3333      -   gr       Connected   
+ ------ 3333 -------- nl ------------------ (prefix_v4:193.0/22)
+    4   3333      -   nl       Connected   
+===========================================
+                             Showing 4 of 4
+"""  # noqa
                 expected_set = expected_output.split("\n")
                 returned_set = stdout.getvalue().split("\n")
                 self.assertEqual(returned_set, expected_set)

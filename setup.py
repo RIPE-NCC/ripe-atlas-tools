@@ -39,6 +39,7 @@ setup(
         "tzlocal",
         "pyyaml",
         "pyOpenSSL>=0.13",
+        "typing-extensions",
     ],
     extras_require={
         "doc": ["sphinx", "sphinx_rtd_theme"],

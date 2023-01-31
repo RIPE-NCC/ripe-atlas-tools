@@ -1,4 +1,4 @@
-# Copyright (c) 2016 RIPE NCC
+# Copyright (c) 2023 RIPE NCC
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,66 +14,72 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import itertools
-import requests
 import sys
+from typing import Any, Dict, List, Mapping, Tuple
 
+import requests
 from ripe.atlas.cousteau import ProbeRequest
-from ripe.atlas.tools.aggregators import ValueKeyAggregator, aggregate
 
-from .base import Command as BaseCommand, TabularFieldsMixin
 from ..exceptions import RipeAtlasToolsException
-from ..helpers.colours import colourise
+from ..helpers import tabular
 from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
 from ..settings import conf
+from .base import Command as BaseCommand
 
 
-# Unknown latitude-longitude coordinates.
-UNK_COORDS = -1111.0, -1111.0
-
-
-class Command(TabularFieldsMixin, BaseCommand):
+class Command(BaseCommand):
 
     NAME = "probe-search"
+    MAX_PAGE_SIZE = 500  # Request chunks of this size or smaller
 
     DESCRIPTION = (
-        "Fetch and print probes fulfilling specified criteria based on "
-        "given filters"
+        "Fetch and print probes fulfilling specified criteria based on " "given filters"
     )
 
-    # Column name: (alignment, width)
-    COLUMNS = {
-        "id": ("<", 5),
-        "asn_v4": ("<", 6),
-        "asn_v6": ("<", 6),
-        "country": ("^", 7),
-        "status": ("<", 15),
-        "prefix_v4": ("<", 18),
-        "prefix_v6": ("<", 18),
-        "coordinates": ("<", 19),
-        "is_public": ("^", 6),
-        "description": ("<", 30),
-        "address_v4": ("<", 15),
-        "address_v6": ("<", 39),
-        "is_anchor": ("^", 6),
+    COLUMNS: Dict[str, tabular.ColumnDef] = {
+        "id": {"align": ">", "width": 5},
+        "asn_v4": {"align": ">", "width": 6},
+        "asn_v6": {"align": ">", "width": 6},
+        "country": {"align": "^", "width": 7},
+        "status": {"align": "^", "width": 15},
+        "prefix_v4": {"align": ">", "width": 18},
+        "prefix_v6": {"align": ">", "width": 18},
+        "coordinates": {"align": "^", "width": 19},
+        "is_public": {"align": "^", "width": 9},
+        "description": {"align": "^", "width": 30},
+        "address_v4": {"align": ">", "width": 15},
+        "address_v6": {"align": ">", "width": 39},
+        "is_anchor": {"align": "^", "width": 9},
     }
 
-    def __init__(self, *args, **kwargs):
-        BaseCommand.__init__(self, *args, **kwargs)
-        self.aggregators = []
-        self.first_line_padding = False
-
-    def add_arguments(self):
+    def add_arguments(self) -> None:
         """Adds all commands line arguments for this command."""
         asn = self.parser.add_argument_group("ASN")
-        asn.add_argument("--asn", type=int, help="ASN")
-        asn.add_argument("--asnv4", type=int, help="ASNv4")
-        asn.add_argument("--asnv6", type=int, help="ASNv6")
+        asn.add_argument(
+            "--asn",
+            type=int,
+            help="Probes in IPv4 or IPv6 prefixes announced by this ASN",
+        )
+        asn.add_argument(
+            "--asnv4", type=int, help="Probes in IPv4 prexfixes announced by this ASN"
+        )
+        asn.add_argument(
+            "--asnv6", type=int, help="Probes in IPv6 prefixes announced by this ASN"
+        )
 
         prefix = self.parser.add_argument_group("Prefix")
-        prefix.add_argument("--prefix", type=str, help="Prefix")
-        prefix.add_argument("--prefixv4", type=str, help="Prefixv4")
-        prefix.add_argument("--prefixv6", type=str, help="Prefixv6")
+        prefix.add_argument(
+            "--prefix",
+            type=str,
+            help="Probes with addresses in this IPv4 or IPv6 CIDR prefix",
+        )
+        prefix.add_argument(
+            "--prefixv4", type=str, help="Probes with addresses in this IPv4 prefix"
+        )
+        prefix.add_argument(
+            "--prefixv6", type=str, help="Probes with addresses in this IPv6 prefix"
+        )
 
         area = self.parser.add_argument_group("Area")
         geo_location = area.add_mutually_exclusive_group()
@@ -95,7 +101,7 @@ class Command(TabularFieldsMixin, BaseCommand):
             "--radius",
             type=int,
             default=15,
-            help="Radius in km from specified center/point. Default is 15.",
+            help="Radius in km from specified center/point. Default: 15",
         )
 
         self.parser.add_argument(
@@ -114,45 +120,12 @@ class Command(TabularFieldsMixin, BaseCommand):
             "--limit",
             type=int,
             default=25,
-            help="Return limited number of probes",
-        )
-        self.parser.add_argument(
-            "--field",
-            type=str,
-            action="append",
-            choices=self.COLUMNS.keys(),
-            default=[],
-            help="The field(s) to display. Invoke multiple times for multiple "
-            "fields. The default is id, asn_v4, asn_v6, country, and "
-            "status.",
-        )
-        self.parser.add_argument(
-            "--aggregate-by",
-            type=str,
-            choices=["country", "asn_v4", "asn_v6", "prefix_v4", "prefix_v6"],
-            action="append",
-            help=(
-                "Aggregate list of probes based on all specified aggregations."
-                " Multiple aggregations supported."
-            ),
+            help="Return at most this number of probes. Default: 25",
         )
         self.parser.add_argument(
             "--all",
             action="store_true",
-            help="Fetch *ALL* probes. That will give you a loooong list.",
-        )
-        self.parser.add_argument(
-            "--max-per-aggregation",
-            type=int,
-            help="Maximum number of probes per aggregated bucket.",
-        )
-        self.parser.add_argument(
-            "--ids-only",
-            action="store_true",
-            help=(
-                "Print only IDs of probes. Useful to pipe it to another "
-                "command."
-            ),
+            help="Fetch all probes; takes a long time!",
         )
         self.parser.add_argument(
             "--status",
@@ -168,110 +141,60 @@ class Command(TabularFieldsMixin, BaseCommand):
             type=str,
             default=conf["authorisation"]["google_geocoding"],
             help=(
-                "Google Geocoding API key to be "
-                "used to perform --location search."
+                "Google Geocoding API key to be " "used to perform --location search."
             ),
         )
+        tabular.add_argument_group(self.parser, self.COLUMNS.keys())
 
-    def run(self):
-
+    def run(self) -> None:
         if not self.arguments.field:
-            self.arguments.field = (
+            self.arguments.field = [
                 "id",
                 "asn_v4",
                 "asn_v6",
                 "country",
                 "status",
-            )
+            ]
 
         if self.arguments.all:
             self.arguments.limit = sys.maxsize
 
-        filters = self.build_request_args()
+        filters = self._get_filters()
+        request_fields = self._get_request_fields()
 
-        if not filters and not self.arguments.all:
-            raise RipeAtlasToolsException(
-                colourise(
-                    "Typically you'd want to run this with some arguments to "
-                    "filter the probe \nlist, as fetching all of the probes can "
-                    "take a Very Long Time.  However, if you \ndon't care about "
-                    "the wait, you can use --all and go get yourself a coffee.",
-                    "blue",
-                )
-            )
-
-        self.set_aggregators()
         probes = ProbeRequest(
             server=conf["api-server"],
-            return_objects=True, user_agent=self.user_agent, **filters
+            return_objects=True,
+            user_agent=self.user_agent,
+            fields=",".join(request_fields),
+            page_size=min(self.MAX_PAGE_SIZE, self.arguments.limit),
+            **filters
         )
         truncated_probes = itertools.islice(probes, self.arguments.limit)
 
-        if self.arguments.ids_only:
-            for probe in truncated_probes:
-                print(probe.id)
-            return
+        renderer = tabular.renderers[self.arguments.format]
 
-        hr = self._get_horizontal_rule()
+        rows = [self._get_row(m) for m in truncated_probes]
 
-        print(self._get_filter_display(filters))
-        print(colourise(self._get_header(), "bold"))
-        print(colourise(hr, "bold"))
+        for line in renderer(
+            rows=rows,
+            total_count=probes.total_count,
+            columns=dict((c, self.COLUMNS[c]) for c in self.arguments.field),
+            filters=filters,
+            arguments=self.arguments,
+        ):
+            print(line)
 
-        if self.arguments.aggregate_by:
-
-            buckets = aggregate(list(truncated_probes), self.aggregators)
-            self.render_aggregation(buckets)
-
-        else:
-
-            for probe in truncated_probes:
-                print(self._get_line(probe))
-
-        print(colourise(hr, "bold"))
-
-        # Print total count of found measurements
-        print(
-            ("{:>" + str(len(hr)) + "}\n").format(
-                "Showing {} of {} total probes".format(
-                    min(self.arguments.limit, probes.total_count) or "all",
-                    probes.total_count,
-                )
-            )
-        )
-
-    def render_aggregation(self, aggregation_data):
+    def _get_filters(self) -> Dict[str, str]:
         """
-        Recursively traverses through aggregation data and print them indented.
-        """
-        for key, probes in aggregation_data.items():
-            if key:
-                print("")
-                print((colourise(key, "bold")))
-
-            for index, probe in enumerate(probes):
-                print(self._get_line(probe))
-                if self.arguments.max_per_aggregation:
-                    if index >= self.arguments.max_per_aggregation - 1:
-                        break
-
-    def build_request_args(self):
-        """
-        Builds the request arguments from parser arguments and returns a dict
-        that can be used with ATLAS API.
+        Get the request filters for sending to the API.
         """
         if self.arguments.all:
             return {}
 
-        return self._clean_request_args()
+        args: Dict[str, Any] = {}
 
-    def _clean_request_args(self):
-        """Cleans all arguments for the API request and checks for sanity."""
-        args = {}
-
-        if any(
-            [self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]
-        ):
+        if any([self.arguments.asn, self.arguments.asnv4, self.arguments.asnv6]):
             args.update(self._clean_asn())
 
         if any(
@@ -300,7 +223,7 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         return args
 
-    def _clean_asn(self):
+    def _clean_asn(self) -> Mapping[str, int]:
         """Make sure ASN arguments don't conflict and make sense."""
         asn = self.arguments.asn
         asnv4 = self.arguments.asnv4
@@ -324,7 +247,7 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         return asn_args
 
-    def _clean_prefix(self):
+    def _clean_prefix(self) -> Dict[str, str]:
         """Make sure ASN arguments don't conflict and make sense."""
         prefix = self.arguments.prefix
         prefixv4 = self.arguments.prefixv4
@@ -348,7 +271,7 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         return prefix_args
 
-    def _clean_location(self):
+    def _clean_location(self) -> Dict[str, Any]:
         """Make sure location argument are sane."""
         if not self.arguments.auth:
             raise RipeAtlasToolsException(
@@ -365,7 +288,7 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         return location_args
 
-    def location2degrees(self):
+    def location2degrees(self) -> Tuple[str, str]:
         """Fetches degrees based on the given location."""
         error_log = (
             "The following error occured while trying to fetch lat/lon "
@@ -388,24 +311,22 @@ class Command(TabularFieldsMixin, BaseCommand):
             error_log = error_log.format(self.arguments.location, e)
             raise RipeAtlasToolsException(error_log)
 
-        result = result.json()
+        data = result.json()
 
-        if "error_message" in result:
-            error = error_log.format(
-                self.arguments.location, result["error_message"]
-            )
+        if "error_message" in data:
+            error = error_log.format(self.arguments.location, data["error_message"])
             raise RipeAtlasToolsException(error)
 
         try:
-            lat = result["results"][0]["geometry"]["location"]["lat"]
-            lng = result["results"][0]["geometry"]["location"]["lng"]
+            lat = data["results"][0]["geometry"]["location"]["lat"]
+            lng = data["results"][0]["geometry"]["location"]["lng"]
         except (KeyError, IndexError) as e:
             error = error_log.format(self.arguments.location, e)
             raise RipeAtlasToolsException(error)
 
         return str(lat), str(lng)
 
-    def _clean_center(self):
+    def _clean_center(self) -> Dict[str, Any]:
         """Make sure center argument are sane."""
         try:
             lat, lng = self.arguments.center.split(",")
@@ -423,59 +344,39 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         return center_args
 
-    def _clean_country_code(self):
+    def _clean_country_code(self) -> Dict[str, str]:
         """Make sure country_code argument are sane."""
         return {"country_code": self.arguments.country}
 
-    def set_aggregators(self):
-        """
-        Builds and returns the key aggregators that will be used in
-        the aggregation.
-        """
+    def _get_row(self, probe) -> tabular.RowDef:
+        r = {}
 
-        self.aggregators = []
-
-        if not self.arguments.aggregate_by:
-            return
-
-        for key in self.arguments.aggregate_by:
-            if key == "country":
-                self.aggregators.append(
-                    ValueKeyAggregator(key="country_code", prefix="COUNTRY")
-                )
-            else:
-                self.aggregators.append(ValueKeyAggregator(key=key))
-
-    def _get_line_items(self, probe):
-
-        r = []
-
-        for field in self.arguments.field:
+        for field in self.arguments.field + self.arguments.aggregate_by:
             if field == "country":
-                r.append((probe.country_code or "").lower())
+                r[field] = (probe.country_code or "").lower()
             elif field in ("asn_v4", "asn_v6"):
-                r.append(getattr(probe, field) or "")
+                r[field] = getattr(probe, field) or None
             elif field == "description":
-                description = sanitise(probe.description) or ""
-                r.append(description[: self.COLUMNS["description"][1]])
+                description = sanitise(probe.description) or None
+                r[field] = description
             elif field == "coordinates":
                 if probe.geometry and probe.geometry["coordinates"]:
                     lng, lat = probe.geometry["coordinates"]
+                    r[field] = "{:7.4f} {:8.4f}".format(lat, lng)
                 else:
-                    lng, lat = UNK_COORDS
-                r.append("{},{}".format(lat, lng))
+                    r[field] = None
             elif field in ("is_public", "is_anchor"):
                 if getattr(probe, field):
-                    r.append("\u2714")  # Check mark
+                    r[field] = "\u2714"  # Check mark
                 else:
-                    r.append("\u2718")  # X
+                    r[field] = "\u2718"  # X
             else:
-                r.append(sanitise(getattr(probe, field)))
+                r[field] = sanitise(getattr(probe, field))
 
-        return r
+        return {"values": r, "colour": self._get_colour_from_status(probe.status)}
 
     @staticmethod
-    def _get_colour_from_status(status):
+    def _get_colour_from_status(status: str) -> str:
         if status == "Connected":
             return "green"
         if status == "Disconnected":
@@ -484,31 +385,17 @@ class Command(TabularFieldsMixin, BaseCommand):
             return "red"
         return "white"
 
-    def _get_line_format(self):
-        return TabularFieldsMixin._get_line_format(self)
-
-    def _get_header_names(self):
-        r = []
-        for field in self.arguments.field:
-            if field == "id":
-                r.append("ID")
-            elif field == "is_public":
-                r.append("Public")
-            elif field == "is_anchor":
-                r.append("Anchor")
-            else:
-                r.append(field.capitalize())
-        return r
-
-    def _get_line(self, probe):
-        return colourise(
-            self._get_line_format().format(*self._get_line_items(probe)),
-            self._get_colour_from_status(probe.status),
-        )
-
-    def _get_filter_key_value_pair(self, k, v):
-        if k == "country_code":
-            return "Country", v.upper()
-        if k == "asn":
-            return "ASN", v
-        return TabularFieldsMixin._get_filter_key_value_pair(self, k, v)
+    def _get_request_fields(self) -> List[str]:
+        request_fields = list(self.arguments.field)
+        for field in self.arguments.aggregate_by:
+            if field not in request_fields:
+                request_fields.append(field)
+        if "country" in request_fields:
+            request_fields.remove("country")
+            request_fields.append("country_code")
+        if "status" not in request_fields:
+            request_fields.append("status")
+        if "coordinates" in request_fields:
+            request_fields.remove("coordinates")
+            request_fields.append("geometry")
+        return request_fields

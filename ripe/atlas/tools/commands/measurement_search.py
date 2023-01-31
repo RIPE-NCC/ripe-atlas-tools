@@ -1,4 +1,4 @@
-# Copyright (c) 2016 RIPE NCC
+# Copyright (c) 2023 RIPE NCC
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,20 +14,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import itertools
+from typing import Dict
 
 from ripe.atlas.cousteau import MeasurementRequest
 
-from .base import Command as BaseCommand, TabularFieldsMixin
-from ..helpers.colours import colourise
+from ..helpers import tabular
 from ..helpers.sanitisers import sanitise
 from ..helpers.validators import ArgumentType
 from ..settings import conf
+from .base import Command as BaseCommand
 
 
-class Command(TabularFieldsMixin, BaseCommand):
+class Command(BaseCommand):
 
     NAME = "measurement-search"
-    LIMITS = (1, 1000)
+    LIMITS = (1, 10000)
+    MAX_PAGE_SIZE = 500  # Request chunks of this size or smaller
 
     STATUS_SPECIFIED = 0
     STATUS_SCHEDULED = 1
@@ -50,14 +52,13 @@ class Command(TabularFieldsMixin, BaseCommand):
         ),
     }
 
-    # Column name: (alignment, width)
-    COLUMNS = {
-        "id": ("<", 7),
-        "type": ("<", 10),
-        "description": ("<", 42),
-        "status": (">", 18),
-        "target": ("<", 45),
-        "url": ("<", 45),
+    COLUMNS: Dict[str, tabular.ColumnDef] = {
+        "id": {"align": ">", "width": 7},
+        "type": {"align": "^", "width": 10},
+        "description": {"align": "^", "width": 42},
+        "status": {"align": "^", "width": 18},
+        "target": {"align": ">", "width": 45},
+        "url": {"align": "^", "width": 45},
     }
 
     DESCRIPTION = (
@@ -65,8 +66,7 @@ class Command(TabularFieldsMixin, BaseCommand):
         "on given filters"
     )
 
-    def add_arguments(self):
-
+    def add_arguments(self) -> None:
         self.parser.add_argument(
             "--search",
             type=str,
@@ -86,21 +86,6 @@ class Command(TabularFieldsMixin, BaseCommand):
             type=str,
             choices=("ping", "traceroute", "dns", "sslcert", "ntp", "http"),
             help="The measurement type.",
-        )
-        self.parser.add_argument(
-            "--field",
-            type=str,
-            action="append",
-            choices=self.COLUMNS.keys(),
-            default=[],
-            help="The field(s) to display. Invoke multiple times for multiple "
-            "fields. The default is id, type, description, and status.",
-        )
-        self.parser.add_argument(
-            "--ids-only",
-            action="store_true",
-            default=False,
-            help="Display a list of measurement ids matching your filter " "criteria.",
         )
 
         timing = self.parser.add_argument_group("Timing")
@@ -122,77 +107,65 @@ class Command(TabularFieldsMixin, BaseCommand):
             help="The number of measurements to return.  The number must be "
             "between {} and {}".format(self.LIMITS[0], self.LIMITS[1]),
         )
+        tabular.add_argument_group(self.parser, self.COLUMNS.keys())
 
-    def run(self):
-
+    def run(self) -> None:
         if not self.arguments.field:
-            self.arguments.field = ("id", "type", "description", "status")
+            self.arguments.field = ["id", "type", "description", "status"]
+
+        request_fields = list(
+            set(self.arguments.field) | set(self.arguments.aggregate_by)
+        )
+        if "status" not in request_fields:
+            request_fields.append("status")
 
         filters = self._get_filters()
         measurements = MeasurementRequest(
             server=conf["api-server"],
-            return_objects=True, user_agent=self.user_agent, **filters
+            return_objects=True,
+            user_agent=self.user_agent,
+            fields=",".join(request_fields),
+            page_size=min(self.MAX_PAGE_SIZE, self.arguments.limit),
+            **filters,
         )
         truncated_measurements = itertools.islice(measurements, self.arguments.limit)
 
-        if self.arguments.ids_only:
-            for measurement in truncated_measurements:
-                print(measurement.id)
-            return
+        renderer = tabular.renderers[self.arguments.format]
 
-        hr = self._get_horizontal_rule()
+        rows = [self._get_row(m) for m in truncated_measurements]
 
-        print(self._get_filter_display(filters))
-        print(self._get_header())
-        print(colourise(hr, "bold"))
+        for line in renderer(
+            rows=rows,
+            total_count=measurements.total_count,
+            columns=dict((c, self.COLUMNS[c]) for c in self.arguments.field),
+            filters=filters,
+            arguments=self.arguments,
+        ):
+            print(line)
 
-        for measurement in truncated_measurements:
-            print(
-                colourise(
-                    self._get_line_format().format(*self._get_line_items(measurement)),
-                    self._get_colour_from_status(measurement.status_id),
-                )
-            )
+    def _get_row(self, measurement) -> tabular.RowDef:
+        r = {}
 
-        print(colourise(hr, "bold"))
-
-        # Print total count of found measurements
-        print(
-            ("{:>" + str(len(hr)) + "}\n").format(
-                "Showing {} of {} total measurements".format(
-                    min(self.arguments.limit, measurements.total_count),
-                    measurements.total_count,
-                )
-            )
-        )
-
-    def _get_line_items(self, measurement):
-
-        r = []
-
-        for field in self.arguments.field:
+        for field in self.arguments.field + self.arguments.aggregate_by:
             if field == "url":
-                r.append(
-                    "https://atlas.ripe.net/measurements/{}/".format(measurement.id)
-                )
+                r["url"] = f"https://atlas.ripe.net/measurements/{measurement.id}/"
             elif field == "type":
-                r.append(measurement.type.lower())
-                continue
+                r["type"] = measurement.type.lower()
             elif field == "target":
-                r.append(
-                    sanitise(measurement.target or measurement.target_ip or "-")[
-                        : self.COLUMNS["target"][1]
-                    ]
+                r["target"] = sanitise(
+                    measurement.target or measurement.target_ip or "-"
                 )
             elif field == "description":
-                description = sanitise(measurement.description) or ""
-                r.append(description[: self.COLUMNS["description"][1]])
+                r["description"] = sanitise(measurement.description) or ""
             else:
-                r.append(sanitise(getattr(measurement, field)))
+                r[field] = sanitise(getattr(measurement, field))
 
-        return r
+        return {
+            "values": r,
+            "colour": self._get_colour_from_status(measurement.status_id),
+        }
 
-    def _get_filters(self):
+    def _get_filters(self) -> Dict[str, str]:
 
         r = {}
 
@@ -215,7 +188,7 @@ class Command(TabularFieldsMixin, BaseCommand):
 
         return r
 
-    def _get_colour_from_status(self, status):
+    def _get_colour_from_status(self, status: int) -> str:
         if status in self.STATUSES["ongoing"]:
             return "green"
         if status == self.STATUS_STOPPED:

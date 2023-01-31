@@ -1,4 +1,4 @@
-# Copyright (c) 2015 RIPE NCC
+# Copyright (c) 2023 RIPE NCC
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
 import collections
 import datetime
 import unittest
-
 from unittest import mock
 
 from ripe.atlas.tools.commands.measurement_search import Command
@@ -101,6 +100,8 @@ class FakeGen(object):
 
 
 class TestMeasurementsCommand(unittest.TestCase):
+    maxDiff = 1000
+
     @mock.patch("{}.MeasurementRequest".format(COMMAND_MODULE))
     def test_with_empty_args(self, mock_request):
 
@@ -111,23 +112,19 @@ class TestMeasurementsCommand(unittest.TestCase):
             cmd.init_args([])
             cmd.run()
 
-        expected_content = (
-            "\n"
-            "Id      Type       Description                                            Status\n"  # noqa: E501
-            "================================================================================\n"  # noqa: E501
-            "1       ping       Description 1                                         Ongoing\n"  # noqa: E501
-            "2       ping       Description 2                                         Ongoing\n"  # noqa: E501
-            "3       ping       Description 3                                         Ongoing\n"  # noqa: E501
-            "4       ping       Description 4                                         Ongoing\n"  # noqa: E501
-            "5       ping       Description 5                                         Ongoing\n"  # noqa: E501
-            "================================================================================\n"  # noqa: E501
-            "                                               Showing 5 of 5 total measurements\n"  # noqa: E501
-            "\n"
-        )
-        self.assertEqual(
-            set(stdout.getvalue().split("\n")), set(expected_content.split("\n"))
-        )
-        self.assertEqual(cmd.arguments.field, ("id", "type", "description", "status"))
+        expected_content = """
+     id    type                   description                       status      
+================================================================================
+      1    ping                  Description 1                     Ongoing      
+      2    ping                  Description 2                     Ongoing      
+      3    ping                  Description 3                     Ongoing      
+      4    ping                  Description 4                     Ongoing      
+      5    ping                  Description 5                     Ongoing      
+================================================================================
+                                                                  Showing 5 of 5
+"""  # noqa
+        self.assertEqual(stdout.getvalue().split("\n"), expected_content.split("\n"))
+        self.assertEqual(cmd.arguments.field, ["id", "type", "description", "status"])
 
     @mock.patch("{}.MeasurementRequest".format(COMMAND_MODULE))
     def test_get_line_items(self, mock_request):
@@ -137,7 +134,7 @@ class TestMeasurementsCommand(unittest.TestCase):
         cmd.init_args([])
         cmd.run()
         self.assertEqual(
-            cmd._get_line_items(
+            cmd._get_row(
                 FakeGen.Measurement(
                     id=1,
                     type="ping",
@@ -148,13 +145,21 @@ class TestMeasurementsCommand(unittest.TestCase):
                     description="Description 1",
                 )
             ),
-            [1, "ping", "Description 1", "Ongoing"],
+            {
+                "values": {
+                    "id": 1,
+                    "type": "ping",
+                    "description": "Description 1",
+                    "status": "Ongoing",
+                },
+                "colour": "green",
+            },
         )
 
         cmd = Command()
         cmd.init_args(["--field", "id", "--field", "status"])
         self.assertEqual(
-            cmd._get_line_items(
+            cmd._get_row(
                 FakeGen.Measurement(
                     id=1,
                     type="ping",
@@ -165,7 +170,7 @@ class TestMeasurementsCommand(unittest.TestCase):
                     description="Description 1",
                 )
             ),
-            [1, "Ongoing"],
+            {"values": {"id": 1, "status": "Ongoing"}, "colour": "green"},
         )
 
         cmd = Command()
@@ -176,7 +181,7 @@ class TestMeasurementsCommand(unittest.TestCase):
             ]
         )
         self.assertEqual(
-            cmd._get_line_items(
+            cmd._get_row(
                 FakeGen.Measurement(
                     id=1,
                     type="ping",
@@ -187,7 +192,10 @@ class TestMeasurementsCommand(unittest.TestCase):
                     description="Description 1",
                 )
             ),
-            ["https://atlas.ripe.net/measurements/1/"],
+            {
+                "values": {"url": "https://atlas.ripe.net/measurements/1/"},
+                "colour": "green",
+            },
         )
 
     def test_get_filters(self):
