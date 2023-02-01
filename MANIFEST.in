@@ -2,6 +2,7 @@ include LICENSE
 include README.rst
 include CHANGES.rst
 include MANIFEST.in
+include ripe/atlas/tools/user-agent
 recursive-include ripe *.py
 recursive-include ripe *.yaml
 recursive-include ripe *.txt
