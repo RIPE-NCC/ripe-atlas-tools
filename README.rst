@@ -13,18 +13,27 @@ Everything is up on `ReadTheDocs`_
 Examples
 --------
 
-Ping an IP address from five probes:
+::
 
-``$ ripe-atlas measure ping 2001:67c:2e8:3::c100:a4 --probes 5``
+    # Ping an IP address from five probes
+    $ ripe-atlas measure ping ping.ripe.net --probes 5
 
 .. image:: screenshots/ripe-atlas-measure-ping.png
 
-Search for probes in Germany, grouping by ASN:
+::
 
-``$ ripe-atlas measure ping 2001:67c:2e8:3::c100:a4 --probes 5``
+    # Search for connected probes in Germany, grouping by ASN:
+    $ ripe-atlas probe-search --country de --aggregate-by asn_v4 --limit 10
 
 .. image:: screenshots/ripe-atlas-probe-search.png
 
+::
+
+    # Search for NTP measurement metadata and process the results with awk
+    $ ripe-atlas measurement-search --type ntp --format tab --no-header --limit 5 \
+      | awk -Ft '{printf "#%s (%s)\n", $1, $3}'
+
+.. image:: screenshots/ripe-atlas-measurement-search.png
 
 Can I Contribute?
 -----------------
