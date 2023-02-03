@@ -12,28 +12,30 @@ Everything is up on `ReadTheDocs`_
 
 Examples
 --------
+Configure API key for creating measurements::
 
-::
+    $ ripe-atlas configure --set authorisation.create=MY_API_KEY
 
-    # Ping an IP address from five probes
+Ping an IP address from five probes::
+
     $ ripe-atlas measure ping ping.ripe.net --probes 5
 
 .. image:: screenshots/ripe-atlas-measure-ping.png
 
-::
+Search for connected probes in Germany, grouping by ASN::
 
-    # Search for connected probes in Germany, grouping by ASN
     $ ripe-atlas probe-search --country de --aggregate-by asn_v4 --limit 10
 
 .. image:: screenshots/ripe-atlas-probe-search.png
 
-::
+Search for NTP measurement metadata and process the results with awk::
 
-    # Search for NTP measurement metadata and process the results with awk
     $ ripe-atlas measurement-search --type ntp --format tab --no-header --limit 5 \
       | awk -Ft '{printf "#%s (%s)\n", $1, $3}'
 
 .. image:: screenshots/ripe-atlas-measurement-search.png
+
+
 
 Can I Contribute?
 -----------------
