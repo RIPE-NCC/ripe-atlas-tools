@@ -22,7 +22,7 @@ Examples
 
 ::
 
-    # Search for connected probes in Germany, grouping by ASN:
+    # Search for connected probes in Germany, grouping by ASN
     $ ripe-atlas probe-search --country de --aggregate-by asn_v4 --limit 10
 
 .. image:: screenshots/ripe-atlas-probe-search.png
