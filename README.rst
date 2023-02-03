@@ -10,55 +10,31 @@ Full Documentation
 
 Everything is up on `ReadTheDocs`_
 
-
-How Does it Work?
------------------
-
-Presently, the setup is pretty crude.  You can create a ping or traceroute
-measurement with limited options from the command line:
-
-.. code:: bash
-
-    $ ripe-atlas measure ping --target example.com
-
-    # or you can omit --target for most measurement types
-    $ ripe-atlas measure ping example.com
-
-    $ ripe-atlas measure ping --packets 7 --size 42 --target example.com
-
-    $ ripe-atlas measure traceroute --target example.com
-
-    $ ripe-atlas measure traceroute --packets 2 --target example.com
-
-    $ ripe-atlas measure dns --query-argument example.com
-
-    # or you can omit --query-argument for DNS measuremetns
-    $ ripe-atlas measure dns example.com
-
-    $ ripe-atlas measure dns --use-probe-resolver --query-type AAAA --query-argument example.com
-
-This will create a one-off measurement and then wait for the results to roll in,
-formatting them as they do.
-
-You can also use it to connect to a stream of formatted data.  This command will
-start streaming out all of the results from one of our oldest measurements:
-
-.. code:: bash
-
-    $ ripe-atlas stream 1001
-
-Or you can generate a simple report:
-
-.. code:: bash
-
-    $ ripe-atlas report 1001
-
-Configuration is done by way of a config file, and modifying it can be done from
-the command line:
-
-.. code:: bash
+Examples
+--------
+Configure API key for creating measurements::
 
     $ ripe-atlas configure --set authorisation.create=MY_API_KEY
+
+Ping an IP address from five probes::
+
+    $ ripe-atlas measure ping ping.ripe.net --probes 5
+
+.. image:: screenshots/ripe-atlas-measure-ping.png
+
+Search for connected probes in Germany, grouping by ASN::
+
+    $ ripe-atlas probe-search --country de --aggregate-by asn_v4 --limit 10
+
+.. image:: screenshots/ripe-atlas-probe-search.png
+
+Search for NTP measurement metadata and process the results with awk::
+
+    $ ripe-atlas measurement-search --type ntp --format tab --no-header --limit 5 \
+      | awk -Ft '{printf "#%s (%s)\n", $1, $3}'
+
+.. image:: screenshots/ripe-atlas-measurement-search.png
+
 
 
 Can I Contribute?
