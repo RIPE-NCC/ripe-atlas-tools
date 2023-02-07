@@ -1,5 +1,11 @@
 Release History
 ===============
+3.1.0 (release 2023-02-06)
+--------------------------
+- Improved probe-search and measurement-search, including "csv" and "tab" output
+- --stream-timeout and --stream-limit added to measure command
+- Use the latest stream API (cousteau update) and add --timeout to stream command
+
 3.0.3 (release 2022-11-18)
 --------------------------
 - Fix issue where the measure command would continue to stream results after all probes have responded
