@@ -1,4 +1,4 @@
-# Copyright (c) 2016 RIPE NCC
+# Copyright (c) 2023 RIPE NCC
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,30 +12,37 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from typing import Iterator, Optional
+
 from ripe.atlas.cousteau import AtlasStream
 from ripe.atlas.sagan import Result
+
 from .settings import conf
 
 
-class Stream(object):
+class Stream:
     """
     Iterable wrapper for AtlasStream that yields sagan Results up to a
     specified capture limit and/or timeout
     """
 
-    def __init__(self, pk, capture_limit=None, timeout=None):
+    def __init__(
+        self,
+        pk: int,
+        capture_limit: Optional[int] = None,
+        timeout: Optional[float] = None,
+    ):
         self.pk = pk
         self.capture_limit = capture_limit
         self.timeout = timeout
         self.num_received = 0
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Result]:
         stream = AtlasStream(base_url=conf["stream-base-url"])
         stream.connect()
         stream.subscribe("result", msm=self.pk)
-        for event_name, payload in stream.iter(
-            seconds=self.timeout
-        ):
+        for event_name, payload in stream.iter(seconds=self.timeout):
             if event_name == "atlas_result":
                 parsed = Result.get(
                     payload,

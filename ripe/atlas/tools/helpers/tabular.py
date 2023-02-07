@@ -225,6 +225,7 @@ class CSVRenderer(Renderer):
     Renderer which outputs comma-separated values, where strings are always
     enclosed in double quotes, and literal double quotes are written as "".
     """
+
     dialect = "excel"
 
     def __init__(self, *args, **kwargs):
@@ -252,6 +253,7 @@ class TabRenderer(Renderer):
     Renderer which outputs tab-separated values, where literal tabs are replaced
     with spaces.
     """
+
     def get_header(self) -> Iterable[str]:
         yield self.get_line({"values": dict((k, k) for k in self.columns.keys())})
 
