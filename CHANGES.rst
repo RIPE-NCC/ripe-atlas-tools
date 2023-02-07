@@ -1,6 +1,6 @@
 Release History
 ===============
-3.1.0 (release 2023-02-06)
+3.1.0 (release 2023-02-07)
 --------------------------
 - Improved probe-search and measurement-search, including "csv" and "tab" output
 - --stream-timeout and --stream-limit added to measure command
