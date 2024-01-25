@@ -38,7 +38,7 @@ class Command(BaseCommand):
     )
 
     COLUMNS: Dict[str, tabular.ColumnDef] = {
-        "id": {"align": ">", "width": 5},
+        "id": {"align": ">", "width": 7},
         "asn_v4": {"align": ">", "width": 6},
         "asn_v6": {"align": ">", "width": 6},
         "country": {"align": "^", "width": 7},
