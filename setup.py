@@ -34,6 +34,7 @@ setup(
         "IPy",
         "python-dateutil",
         "requests>=2.7.0",
+        "urllib3<2",  # urllib3 >=2 breaks when compiled against LibreSSL
         "ripe.atlas.cousteau~=2.0.0",
         "ripe.atlas.sagan>=1.2,<2",
         "tzlocal",

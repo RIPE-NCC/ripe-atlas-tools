@@ -1,5 +1,9 @@
 Release History
 ===============
+3.1.1 (release 2024-04-10)
+--------------------------
+- Pin urllib3 to < 2 so that it works on LibreSSL Python
+
 3.1.0 (release 2023-02-07)
 --------------------------
 - Improved probe-search and measurement-search, including "csv" and "tab" output
