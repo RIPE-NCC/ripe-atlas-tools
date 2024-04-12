@@ -46,24 +46,24 @@ class TestTracerouteASPathRenderer(unittest.TestCase):
 
     def test_basic(self):
         output = self.run_renderer()
-        expected = """Probe #12185:   AS4637   AS1921, completed
-Probe #22880:   AS4637   AS1921, completed
+        expected = """Probe #12185:   AS4637 AS207021, completed
+Probe #22880:   AS4637 AS207021, completed
 
 Number of probes for each AS path:
 
-    AS4637   AS1921: 2 probes, 2 completed
+    AS4637 AS207021: 2 probes, 2 completed
 """
         self.assertEqual(output.split("\n"), expected.split("\n"))
 
     def test_arg_radius(self):
         self.maxDiff = 1000
         output = self.run_renderer(traceroute_aspath_radius=4)
-        expected = """Probe #12185:   AS3356   AS3549   AS4637   AS1921, completed
-Probe #22880:  AS26088   AS6939   AS4637   AS1921, completed
+        expected = """Probe #12185:   AS3356   AS3549   AS4637 AS207021, completed
+Probe #22880:  AS26088   AS6939   AS4637 AS207021, completed
 
 Number of probes for each AS path:
 
-    AS3356   AS3549   AS4637   AS1921: 1 probe, 1 completed
-   AS26088   AS6939   AS4637   AS1921: 1 probe, 1 completed
+    AS3356   AS3549   AS4637 AS207021: 1 probe, 1 completed
+   AS26088   AS6939   AS4637 AS207021: 1 probe, 1 completed
 """
         self.assertEqual(output.split("\n"), expected.split("\n"))
