@@ -980,7 +980,7 @@ class TestMeasureCommand(unittest.TestCase):
                 PingMeasureCommand().init_args(["ping", "--af", "5"])
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
-                "ripe-atlas measure: error: argument --af: invalid choice: 5 "
+                "ripe-atlas measure: error: argument --af: invalid choice: '5' "
                 "(choose from 4, 6)",
             )
 
@@ -1036,7 +1036,7 @@ class TestMeasureCommand(unittest.TestCase):
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --protocol: invalid "
-                "choice: 'INVALID' (choose from 'ICMP', 'UDP', 'TCP')",
+                "choice: 'INVALID' (choose from ICMP, UDP, TCP)",
             )
 
         with capture_sys_output() as (stdout, stderr):
@@ -1045,7 +1045,7 @@ class TestMeasureCommand(unittest.TestCase):
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --protocol: invalid "
-                "choice: 'INVALID' (choose from 'UDP', 'TCP')",
+                "choice: 'INVALID' (choose from UDP, TCP)",
             )
 
         with capture_sys_output() as (stdout, stderr):
@@ -1054,7 +1054,7 @@ class TestMeasureCommand(unittest.TestCase):
             self.assertEqual(
                 stderr.getvalue().split("\n")[-2],
                 "ripe-atlas measure: error: argument --timing-verbosity: "
-                "invalid choice: 3 (choose from 0, 1, 2)",
+                "invalid choice: '3' (choose from 0, 1, 2)",
             )
 
         min_options = [
