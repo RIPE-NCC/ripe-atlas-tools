@@ -312,23 +312,7 @@ class Command(BaseCommand):
             AliasesDB.write(aliases)
 
         if not self.arguments.no_report:
-            stream = AtlasStream(base_url=conf["stream-base-url"])
-            stream.connect()
-            self.ok("Subscribing to stream...")
-            stream.subscribe("result", msm=msm_id, sendBacklog=True)
-            capture_limit = self.arguments.stream_limit or self.arguments.probes
-            renderer = Renderer.get_renderer(
-                name=self.arguments.renderer, kind=self._type
-            )(arguments=self.arguments)
-            renderer.render(
-                StreamWrapper(
-                    stream,
-                    capture_limit=capture_limit,
-                    timeout=self.arguments.stream_timeout,
-                )
-            )
-            stream.disconnect()
-            self.ok("Disconnected from stream")
+            self.stream(msm_id)
 
     def dry_run(self):
 
@@ -366,6 +350,25 @@ class Command(BaseCommand):
             sources=[AtlasSource(**self._get_source_kwargs())],
             is_oneoff=self._is_oneoff,
         ).create()
+
+    def stream(self, msm_id: int) -> None:
+        stream = AtlasStream(base_url=conf["stream-base-url"])
+        stream.connect()
+        self.ok("Subscribing to stream...")
+        stream.subscribe("result", msm=msm_id, sendBacklog=True)
+        capture_limit = self.arguments.stream_limit or self.arguments.probes
+        renderer = Renderer.get_renderer(name=self.arguments.renderer, kind=self._type)(
+            arguments=self.arguments
+        )
+        renderer.render(
+            StreamWrapper(
+                stream,
+                capture_limit=capture_limit,
+                timeout=self.arguments.stream_timeout,
+            )
+        )
+        stream.disconnect()
+        self.ok("Disconnected from stream")
 
     def clean_target(self):
 
