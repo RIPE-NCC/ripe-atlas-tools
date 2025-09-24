@@ -16,14 +16,22 @@
 from argparse import Namespace
 import json
 import unittest
+from unittest import mock
 
 from ripe.atlas.sagan import Result
 from ripe.atlas.tools.renderers.traceroute_aspath import Renderer
 
 
-class TestTracerouteASPathRenderer(unittest.TestCase):
+class MockIP:
+    """
+    ipdetails.IP mock with deterministic ASNs
+    """
 
-    # TODO: The AS lookups need to be mocked!
+    def __init__(self, ip: str) -> None:
+        self.asn = ip.split(".")[-1].split(":")[-1]
+
+
+class TestTracerouteASPathRenderer(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
@@ -44,26 +52,28 @@ class TestTracerouteASPathRenderer(unittest.TestCase):
         output += renderer.footer()
         return output
 
-    def test_basic(self):
+    @mock.patch("ripe.atlas.tools.renderers.traceroute_aspath.IP", side_effect=MockIP)
+    def test_basic(self, mock_IP):
         output = self.run_renderer()
-        expected = """Probe #12185:   AS4637   AS1921, completed
-Probe #22880:   AS4637   AS1921, completed
+        expected = """Probe #12185:     AS46     AS10, completed
+Probe #22880:     AS46     AS10, completed
 
 Number of probes for each AS path:
 
-    AS4637   AS1921: 2 probes, 2 completed
+      AS46     AS10: 2 probes, 2 completed
 """
         self.assertEqual(output.split("\n"), expected.split("\n"))
 
-    def test_arg_radius(self):
+    @mock.patch("ripe.atlas.tools.renderers.traceroute_aspath.IP", side_effect=MockIP)
+    def test_arg_radius(self, mock_IP):
         self.maxDiff = 1000
         output = self.run_renderer(traceroute_aspath_radius=4)
-        expected = """Probe #12185:   AS3356   AS3549   AS4637   AS1921, completed
-Probe #22880:  AS26088   AS6939   AS4637   AS1921, completed
+        expected = """Probe #12185:    AS143    AS146     AS46     AS10, completed
+Probe #22880:    AS206    AS142     AS46     AS10, completed
 
 Number of probes for each AS path:
 
-    AS3356   AS3549   AS4637   AS1921: 1 probe, 1 completed
-   AS26088   AS6939   AS4637   AS1921: 1 probe, 1 completed
+     AS143    AS146     AS46     AS10: 1 probe, 1 completed
+     AS206    AS142     AS46     AS10: 1 probe, 1 completed
 """
         self.assertEqual(output.split("\n"), expected.split("\n"))

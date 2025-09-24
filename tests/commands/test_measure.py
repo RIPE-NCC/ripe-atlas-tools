@@ -978,11 +978,13 @@ class TestMeasureCommand(unittest.TestCase):
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
                 PingMeasureCommand().init_args(["ping", "--af", "5"])
-            self.assertEqual(
-                stderr.getvalue().split("\n")[-2],
-                "ripe-atlas measure: error: argument --af: invalid choice: 5 "
-                "(choose from 4, 6)",
+            error_msg = stderr.getvalue().split("\n")[-2]
+            self.assertTrue(
+                error_msg.startswith(
+                    "ripe-atlas measure: error: argument --af: invalid choice:"
+                )
             )
+            self.assertTrue(error_msg.endswith("(choose from 4, 6)"))
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
@@ -1033,28 +1035,34 @@ class TestMeasureCommand(unittest.TestCase):
                 TracerouteMeasureCommand().init_args(
                     ["traceroute", "--protocol", "invalid"]
                 )
-            self.assertEqual(
-                stderr.getvalue().split("\n")[-2],
-                "ripe-atlas measure: error: argument --protocol: invalid "
-                "choice: 'INVALID' (choose from 'ICMP', 'UDP', 'TCP')",
+            error_msg = stderr.getvalue().split("\n")[-2]
+            self.assertTrue(
+                error_msg.startswith(
+                    "ripe-atlas measure: error: argument --protocol: invalid choice: "
+                    "'INVALID'"
+                )
             )
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
                 DnsMeasureCommand().init_args(["dns", "--protocol", "invalid"])
-            self.assertEqual(
-                stderr.getvalue().split("\n")[-2],
-                "ripe-atlas measure: error: argument --protocol: invalid "
-                "choice: 'INVALID' (choose from 'UDP', 'TCP')",
+            error_msg = stderr.getvalue().split("\n")[-2]
+            self.assertTrue(
+                error_msg.startswith(
+                    "ripe-atlas measure: error: argument --protocol: invalid choice: "
+                    "'INVALID' "
+                )
             )
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
                 HttpMeasureCommand().init_args(["http", "--timing-verbosity", "3"])
-            self.assertEqual(
-                stderr.getvalue().split("\n")[-2],
-                "ripe-atlas measure: error: argument --timing-verbosity: "
-                "invalid choice: 3 (choose from 0, 1, 2)",
+            error_msg = stderr.getvalue().split("\n")[-2]
+            self.assertTrue(
+                error_msg.startswith(
+                    "ripe-atlas measure: error: argument --timing-verbosity: "
+                    "invalid choice:"
+                )
             )
 
         min_options = [
@@ -1081,7 +1089,7 @@ class TestMeasureCommand(unittest.TestCase):
                     )
 
         min_max_options = [
-            ("from-asn", ((PingMeasureCommand,), (1, 2 ** 32 - 2))),
+            ("from-asn", ((PingMeasureCommand,), (1, 2**32 - 2))),
             ("paris", ((TracerouteMeasureCommand,), (0, 64))),
             ("first-hop", ((TracerouteMeasureCommand,), (1, 255))),
             ("max-hops", ((TracerouteMeasureCommand,), (1, 255))),

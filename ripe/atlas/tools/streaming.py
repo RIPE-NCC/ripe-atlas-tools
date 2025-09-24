@@ -18,8 +18,6 @@ from typing import Iterator, Optional
 from ripe.atlas.cousteau import AtlasStream
 from ripe.atlas.sagan import Result
 
-from .settings import conf
-
 
 class StreamWrapper:
     """
