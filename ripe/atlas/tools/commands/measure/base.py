@@ -286,12 +286,6 @@ class Command(BaseCommand):
         if self.arguments.dry_run:
             return self.dry_run()
 
-        if not self.arguments.no_report:
-            stream = AtlasStream(base_url=conf["stream-base-url"])
-            stream.connect()
-        else:
-            stream = None
-
         is_success, response = self.create()
 
         if not is_success:
@@ -317,7 +311,9 @@ class Command(BaseCommand):
             aliases["measurement"][alias] = msm_id
             AliasesDB.write(aliases)
 
-        if stream:
+        if not self.arguments.no_report:
+            stream = AtlasStream(base_url=conf["stream-base-url"])
+            stream.connect()
             self.ok("Subscribing to stream...")
             stream.subscribe("result", msm=msm_id, sendBacklog=True)
             capture_limit = self.arguments.stream_limit or self.arguments.probes

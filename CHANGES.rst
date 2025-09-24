@@ -2,7 +2,7 @@ Release History
 ===============
 3.2.0 (release 2025-09-24)
 --------------------------
-- Use sendBacklog when streaming new measurements
+- Use sendBacklog when streaming new measurements to avoid missed results in case of high network or client latencies
 - Add --sendBacklog option to stream command
 - Pin urllib3 to < 2 so that it works on LibreSSL Python
 
