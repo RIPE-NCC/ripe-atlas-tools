@@ -13,14 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ripe.atlas.cousteau import Measurement
+from ripe.atlas.cousteau import Measurement, AtlasStream
 from ripe.atlas.cousteau.exceptions import APIResponseError
 
 from ..exceptions import RipeAtlasToolsException
 from ..renderers import Renderer
-from ..streaming import Stream
-from .base import Command as BaseCommand
+from ..streaming import StreamWrapper
 from ..helpers.validators import ArgumentType
+from ..settings import conf
+from .base import Command as BaseCommand
 
 
 class Command(BaseCommand):
@@ -55,11 +56,13 @@ class Command(BaseCommand):
             type=float,
             help="Stop streaming after this number of seconds",
         )
+        self.parser.add_argument(
+            "--send-backlog", action="store_true", help="Send backlog of recent results"
+        )
 
         Renderer.add_arguments_for_available_renderers(self.parser)
 
-    def run(self):
-
+    def run(self) -> None:
         try:
             measurement = Measurement(
                 id=self.arguments.measurement_id,
@@ -69,13 +72,21 @@ class Command(BaseCommand):
             raise RipeAtlasToolsException(e.args[0])
 
         self.ok("Connecting to stream...")
-        stream = Stream(
-            self.arguments.measurement_id,
-            capture_limit=self.arguments.limit,
-            timeout=self.arguments.timeout,
+        stream = AtlasStream(base_url=conf["stream-base-url"])
+        stream.connect()
+        stream.subscribe(
+            "result",
+            msm=self.arguments.measurement_id,
+            sendBacklog=self.arguments.send_backlog,
         )
         renderer = Renderer.get_renderer(
             name=self.arguments.renderer, kind=measurement.type.lower()
         )(arguments=self.arguments)
-        renderer.render(stream)
+        renderer.render(
+            StreamWrapper(
+                stream,
+                capture_limit=self.arguments.limit,
+                timeout=self.arguments.timeout,
+            )
+        )
         self.ok("Disconnected from stream")

@@ -21,7 +21,7 @@ from ripe.atlas.sagan import Result
 from .settings import conf
 
 
-class Stream:
+class StreamWrapper:
     """
     Iterable wrapper for AtlasStream that yields sagan Results up to a
     specified capture limit and/or timeout
@@ -29,20 +29,17 @@ class Stream:
 
     def __init__(
         self,
-        pk: int,
+        stream: AtlasStream,
         capture_limit: Optional[int] = None,
         timeout: Optional[float] = None,
-    ):
-        self.pk = pk
+    ) -> None:
+        self.stream = stream
         self.capture_limit = capture_limit
         self.timeout = timeout
         self.num_received = 0
 
     def __iter__(self) -> Iterator[Result]:
-        stream = AtlasStream(base_url=conf["stream-base-url"])
-        stream.connect()
-        stream.subscribe("result", msm=self.pk)
-        for event_name, payload in stream.iter(seconds=self.timeout):
+        for event_name, payload in self.stream.iter(seconds=self.timeout):
             if event_name == "atlas_result":
                 parsed = Result.get(
                     payload,
@@ -53,4 +50,3 @@ class Stream:
                 self.num_received += 1
                 if self.num_received == self.capture_limit:
                     break
-        stream.disconnect()
