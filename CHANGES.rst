@@ -1,5 +1,10 @@
 Release History
 ===============
+3.2.0 (release 2025-09-24)
+--------------------------
+- Use sendBacklog when streaming new measurements
+- Add --sendBacklog option to stream command
+
 3.1.1 (release 2024-04-10)
 --------------------------
 - Pin urllib3 to < 2 so that it works on LibreSSL Python
