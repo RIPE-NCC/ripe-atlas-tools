@@ -35,7 +35,7 @@ setup(
         "python-dateutil",
         "requests>=2.7.0",
         "urllib3<2",  # urllib3 >=2 breaks when compiled against LibreSSL
-        "ripe.atlas.cousteau~=2.0.0",
+        "ripe.atlas.cousteau>=2,<3",
         "ripe.atlas.sagan>=1.2,<2",
         "tzlocal",
         "pyyaml",
@@ -60,11 +60,11 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: POSIX",
         "Operating System :: Unix",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Topic :: Internet :: WWW/HTTP",
     ],
 )

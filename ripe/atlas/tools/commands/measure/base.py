@@ -31,13 +31,14 @@ from ripe.atlas.cousteau import (
     AtlasCreateRequest,
 )
 from ripe.atlas.cousteau.measurement import AtlasMeasurement
+from ripe.atlas.cousteau import AtlasStream
 
 from ...exceptions import RipeAtlasToolsException
 from ...helpers.colours import colourise
 from ...helpers.validators import ArgumentType
 from ...renderers import Renderer
 from ...settings import conf, aliases, AliasesDB
-from ...streaming import Stream
+from ...streaming import StreamWrapper
 from ..base import Command as BaseCommand
 
 
@@ -278,23 +279,29 @@ class Command(BaseCommand):
 
         Renderer.add_arguments_for_available_renderers(self.parser)
 
-    def run(self):
+    def run(self) -> None:
 
         self._account_for_selected_probes()
 
         if self.arguments.dry_run:
             return self.dry_run()
 
+        if not self.arguments.no_report:
+            stream = AtlasStream(base_url=conf["stream-base-url"])
+            stream.connect()
+        else:
+            stream = None
+
         is_success, response = self.create()
 
         if not is_success:
             self._handle_api_error(response)  # Raises an exception
 
-        pk = response["measurements"][0]
-        url = "{0}/measurements/{1}/".format(conf["website-url"], pk)
+        msm_id = response["measurements"][0]
+        url = "{0}/measurements/{1}/".format(conf["website-url"], msm_id)
 
         self.ok(
-            f"Looking good! Measurement {pk} was created and details about "
+            f"Looking good! Measurement {msm_id} was created and details about "
             f"it can be found here:\n\n  {url}"
         )
         if self.arguments.go_web:
@@ -307,11 +314,25 @@ class Command(BaseCommand):
 
         if self.arguments.set_alias:
             alias = self.arguments.set_alias
-            aliases["measurement"][alias] = pk
+            aliases["measurement"][alias] = msm_id
             AliasesDB.write(aliases)
 
-        if not self.arguments.no_report:
-            self.stream(pk, url)
+        if stream:
+            self.ok("Subscribing to stream...")
+            stream.subscribe("result", msm=msm_id, sendBacklog=True)
+            capture_limit = self.arguments.stream_limit or self.arguments.probes
+            renderer = Renderer.get_renderer(
+                name=self.arguments.renderer, kind=self._type
+            )(arguments=self.arguments)
+            renderer.render(
+                StreamWrapper(
+                    stream,
+                    capture_limit=capture_limit,
+                    timeout=self.arguments.stream_timeout,
+                )
+            )
+            stream.disconnect()
+            self.ok("Disconnected from stream")
 
     def dry_run(self):
 
@@ -349,18 +370,6 @@ class Command(BaseCommand):
             sources=[AtlasSource(**self._get_source_kwargs())],
             is_oneoff=self._is_oneoff,
         ).create()
-
-    def stream(self, pk, url):
-        self.ok("Connecting to stream...")
-        capture_limit = self.arguments.stream_limit or self.arguments.probes
-        stream = Stream(
-            pk, capture_limit=capture_limit, timeout=self.arguments.stream_timeout
-        )
-        renderer = Renderer.get_renderer(name=self.arguments.renderer, kind=self._type)(
-            arguments=self.arguments
-        )
-        renderer.render(stream)
-        self.ok("Disconnected from stream")
 
     def clean_target(self):
 
