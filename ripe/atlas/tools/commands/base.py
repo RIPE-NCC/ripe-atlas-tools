@@ -212,6 +212,8 @@ class Command(object):
         """
         if sys.stdout.isatty():
             sys.stdout.write("\n{}\n\n".format(colourise(message, "green")))
+        else:
+            sys.stdout.write(message + "\n")
 
     def not_ok(self, message):
         """
@@ -219,6 +221,8 @@ class Command(object):
         """
         if sys.stdout.isatty():
             sys.stdout.write("\n{}\n\n".format(colourise(message, "red")))
+        else:
+            sys.stdout.write(message + "\n")
 
     @staticmethod
     def _get_os_string():
