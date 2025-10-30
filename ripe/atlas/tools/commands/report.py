@@ -122,6 +122,12 @@ class Command(BaseCommand):
             type=ArgumentType.datetime,
             help="The stop time of the report.",
         )
+        self.parser.add_argument(
+            "--lookback-days",
+            type=ArgumentType.integer_range(minimum=0, maximum=16384),
+            help="Number of days to look back, defaults to 0 (indefinite) "
+            "if probe_ids is set, or 7 otherwise",
+        )
 
         self.parser.add_argument(
             "--from-file",
@@ -154,6 +160,8 @@ class Command(BaseCommand):
             kwargs["start"] = self.arguments.start_time
         if self.arguments.stop_time:
             kwargs["stop"] = self.arguments.stop_time
+        if self.arguments.lookback_days is not None:
+            kwargs["lookback_days"] = self.arguments.lookback_days
 
         if "start" in kwargs or "stop" in kwargs:
             return AtlasResultsRequest(**kwargs)
