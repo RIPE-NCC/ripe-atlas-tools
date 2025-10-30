@@ -44,7 +44,6 @@ from ..base import Command as BaseCommand
 
 
 class Command(BaseCommand):
-
     NAME = "measure"
 
     DESCRIPTION = "Create a measurement and optionally wait for the results"
@@ -62,14 +61,12 @@ class Command(BaseCommand):
     )
 
     def __init__(self, *args, **kwargs):
-
         self._type = None
         self._is_oneoff = True
 
         BaseCommand.__init__(self, *args, **kwargs)
 
     def _modify_parser_args(self, args):
-
         kinds = self.CREATION_CLASSES.keys()
         error = (
             "Usage: ripe-atlas measure <{}> [options]\n"
@@ -91,7 +88,6 @@ class Command(BaseCommand):
         return BaseCommand._modify_parser_args(self, args)
 
     def add_arguments(self):
-
         self.parser.add_argument(
             "--renderer",
             choices=Renderer.get_available(),
@@ -318,7 +314,6 @@ class Command(BaseCommand):
         Renderer.add_arguments_for_available_renderers(self.parser)
 
     def run(self) -> None:
-
         self._account_for_selected_probes()
 
         if self.arguments.dry_run:
@@ -353,7 +348,6 @@ class Command(BaseCommand):
             self.stream(msm_id)
 
     def dry_run(self):
-
         print(colourise("\nDefinitions:\n{}".format("=" * 80), "bold"))
 
         for param, val in self._get_measurement_kwargs().items():
@@ -409,7 +403,6 @@ class Command(BaseCommand):
         self.ok("Disconnected from stream")
 
     def clean_target(self):
-
         if not self.arguments.target:
             raise RipeAtlasToolsException(
                 "You must specify a target for that kind of measurement"
@@ -427,7 +420,6 @@ class Command(BaseCommand):
         )
 
     def _get_measurement_kwargs(self):
-
         # This is kept apart from the r = {} because dns measurements don't
         # require a target attribute
         target = self.clean_target()
@@ -448,7 +440,9 @@ class Command(BaseCommand):
             if self.arguments.auto_topup_prb_days_off is not None:
                 r["auto_topup_prb_days_off"] = self.arguments.auto_topup_prb_days_off
             if self.arguments.auto_topup_prb_similarity is not None:
-                r["auto_topup_prb_similarity"] = self.arguments.auto_topup_prb_similarity
+                r["auto_topup_prb_similarity"] = (
+                    self.arguments.auto_topup_prb_similarity
+                )
 
         elif not spec["times"]["one-off"]:
             raise RipeAtlasToolsException(
@@ -477,12 +471,13 @@ class Command(BaseCommand):
             r["target_update_hours"] = self.arguments.target_update_hours
 
         if self.arguments.aggregator_client_id:
-            r["aggregator_client_id"] = hashlib.sha256(self.arguments.aggregator_client_id.encode('utf-8')).hexdigest()
+            r["aggregator_client_id"] = hashlib.sha256(
+                self.arguments.aggregator_client_id.encode("utf-8")
+            ).hexdigest()
 
         return r
 
     def _get_source_kwargs(self):
-
         r = conf["specification"]["source"]
 
         r["requested"] = self.arguments.probes
@@ -557,7 +552,6 @@ class Command(BaseCommand):
 
     @staticmethod
     def _handle_api_error(response):
-
         message = "There was a problem communicating with the RIPE Atlas API."
 
         if isinstance(response, dict):
