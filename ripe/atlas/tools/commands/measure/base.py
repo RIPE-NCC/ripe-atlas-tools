@@ -17,6 +17,7 @@ import json
 import os
 import re
 import webbrowser
+import hashlib
 
 from collections import OrderedDict
 
@@ -238,6 +239,43 @@ class Command(BaseCommand):
             help="Exclude probes that are marked with these tags. "
             "Example: --exclude-tag=system-ipv6-works",
         )
+        self.add_flag(
+            parser=self.parser,
+            name="auto-topup",
+            default=conf["specification"]["auto_topup"],
+            help="Automatic top-up measurements probes."
+            "Applicable to periodic measurements only.",
+        )
+        self.parser.add_argument(
+            "--auto-topup-prb-days-off",
+            type=ArgumentType.integer_range(1, 30),
+            default=conf["specification"]["auto_topup_prb_days_off"],
+            help="Threshold in days to replace a disconnected probe."
+            "Applicable to periodic measurements only."
+            "Example: --auto-topup-prb-days-off=7",
+        )
+        self.parser.add_argument(
+            "--auto-topup-prb-similarity",
+            type=ArgumentType.float_range(minimum=0, maximum=1),
+            default=conf["specification"]["auto_topup_prb_similarity"],
+            help="Minimum similarity for replacement probes"
+            "Applicable to periodic measurements only."
+            "Example: --auto-topup-prb-similarity=0.5",
+        )
+        self.parser.add_argument(
+            "--target-update-hours",
+            type=ArgumentType.integer_range(22, 720),
+            default=conf["specification"]["target_update_hours"],
+            help="Number of hours to re-lookup a target DNS record."
+            "Example: --target-update-hours=24",
+        )
+        self.parser.add_argument(
+            "--aggregator-client-id",
+            type=str,
+            default=conf["specification"]["aggregator_client_id"],
+            help="Client ID for measurement aggregators."
+            "The value is hashed on transmission.",
+        )
 
         self.parser.add_argument(
             "--group-id",
@@ -404,6 +442,14 @@ class Command(BaseCommand):
             r["interval"] = self.arguments.interval
             self._is_oneoff = False
             self.arguments.no_report = True
+            # auto-topup is applicable only to periodic measurements
+            if self.arguments.auto_topup is not None:
+                r["auto_topup"] = self.arguments.auto_topup
+            if self.arguments.auto_topup_prb_days_off is not None:
+                r["auto_topup_prb_days_off"] = self.arguments.auto_topup_prb_days_off
+            if self.arguments.auto_topup_prb_similarity is not None:
+                r["auto_topup_prb_similarity"] = self.arguments.auto_topup_prb_similarity
+
         elif not spec["times"]["one-off"]:
             raise RipeAtlasToolsException(
                 "Your configuration file appears to be setup to not create "
@@ -426,6 +472,12 @@ class Command(BaseCommand):
 
         if self.arguments.resolve_on_probe is not None:
             r["resolve_on_probe"] = self.arguments.resolve_on_probe
+
+        if self.arguments.target_update_hours:
+            r["target_update_hours"] = self.arguments.target_update_hours
+
+        if self.arguments.aggregator_client_id:
+            r["aggregator_client_id"] = hashlib.sha256(self.arguments.aggregator_client_id.encode('utf-8')).hexdigest()
 
         return r
 
@@ -517,7 +569,6 @@ class Command(BaseCommand):
                     "using:\n\n"
                     " ripe-atlas configure --set authorisation.create=MY_API_KEY\n"
                 )
-
         message += f"\n\n{json.dumps(response, indent=2)}"
 
         raise RipeAtlasToolsException(message)

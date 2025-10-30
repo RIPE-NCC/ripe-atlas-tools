@@ -123,6 +123,28 @@ class ArgumentType(object):
 
             return integer
 
+    class float_range(object):
+        def __init__(self, minimum=float("-inf"), maximum=float("inf")):
+            self.minimum = minimum
+            self.maximum = maximum
+
+        def __call__(self, string):
+
+            message = "The number must be between {} and {}.".format(
+                self.minimum, self.maximum
+            )
+            if self.maximum == float("inf"):
+                message = "The number must be greater than {}.".format(self.minimum)
+
+            try:
+                number = float(string)
+                if number < self.minimum or number > self.maximum:
+                    raise argparse.ArgumentTypeError(message)
+            except ValueError:
+                raise argparse.ArgumentTypeError("A number must be specified.")
+
+            return number
+
     class comma_separated_integers(object):
         def __init__(self, minimum=float("-inf"), maximum=float("inf")):
             self.minimum = minimum
