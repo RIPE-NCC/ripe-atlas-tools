@@ -420,15 +420,15 @@ class TestProbesCommand(unittest.TestCase):
 Filters:
   country_code: GR
 
-   id asn_v4 asn_v6 country     status     
-===========================================
-    1   3333      -   gr       Connected   
-    2   3333      -   de       Connected   
-    3   3332      -   de       Connected   
-    4   3333      -   nl       Connected   
-    5   3333      -   gr       Connected   
-===========================================
-                             Showing 4 of 4
+     id asn_v4 asn_v6 country     status     
+=============================================
+      1   3333      -   gr       Connected   
+      2   3333      -   de       Connected   
+      3   3332      -   de       Connected   
+      4   3333      -   nl       Connected   
+      5   3333      -   gr       Connected   
+=============================================
+                               Showing 4 of 4
 """  # noqa
                 self.assertEqual(stdout.getvalue(), expected_output)
 
@@ -446,12 +446,12 @@ Filters:
 Filters:
   country_code: GR
 
-   id asn_v4 asn_v6 country     status     
-===========================================
-    1   3333      -   gr       Connected   
-    2   3333      -   de       Connected   
-===========================================
-                             Showing 2 of 4
+     id asn_v4 asn_v6 country     status     
+=============================================
+      1   3333      -   gr       Connected   
+      2   3333      -   de       Connected   
+=============================================
+                               Showing 2 of 4
 """  # noqa
                 self.assertEqual(stdout.getvalue(), expected_output)
 
@@ -480,19 +480,19 @@ Filters:
 Filters:
   status: 1
 
-   id asn_v4 asn_v6 country     status     
-===========================================
- ------ 3332 -------- de ------------------ (prefix_v4:193.0/22)
-    3   3332      -   de       Connected   
- ------ 3333 -------- de ------------------ (prefix_v4:193.0/22)
-    2   3333      -   de       Connected   
- ------ 3333 -------- gr ------------------ (prefix_v4:193.0/22)
-    1   3333      -   gr       Connected   
-    5   3333      -   gr       Connected   
- ------ 3333 -------- nl ------------------ (prefix_v4:193.0/22)
-    4   3333      -   nl       Connected   
-===========================================
-                             Showing 4 of 4
+     id asn_v4 asn_v6 country     status     
+=============================================
+ -------- 3332 -------- de ------------------ (prefix_v4:193.0/22)
+      3   3332      -   de       Connected   
+ -------- 3333 -------- de ------------------ (prefix_v4:193.0/22)
+      2   3333      -   de       Connected   
+ -------- 3333 -------- gr ------------------ (prefix_v4:193.0/22)
+      1   3333      -   gr       Connected   
+      5   3333      -   gr       Connected   
+ -------- 3333 -------- nl ------------------ (prefix_v4:193.0/22)
+      4   3333      -   nl       Connected   
+=============================================
+                               Showing 4 of 4
 """  # noqa
                 expected_set = expected_blob.split("\n")
                 returned_set = stdout.getvalue().split("\n")
@@ -525,12 +525,12 @@ Filters:
 Filters:
   country_code: GR
 
-   id asn_v4 asn_v6 country     status     
-===========================================
- ------ 3333 -------- gr ------------------ (prefix_v4:193.0/22)
-    1   3333      -   gr       Connected   
-===========================================
-                             Showing 1 of 4
+     id asn_v4 asn_v6 country     status     
+=============================================
+ -------- 3333 -------- gr ------------------ (prefix_v4:193.0/22)
+      1   3333      -   gr       Connected   
+=============================================
+                               Showing 1 of 4
 """  # noqa
                 expected_set = expected_output.split("\n")
                 returned_set = stdout.getvalue().split("\n")
@@ -565,18 +565,18 @@ Filters:
 Filters:
   country_code: GR
 
-   id asn_v4 asn_v6 country     status     
-===========================================
- ------ 3332 -------- de ------------------ (prefix_v4:193.0/22)
-    3   3332      -   de       Connected   
- ------ 3333 -------- de ------------------ (prefix_v4:193.0/22)
-    2   3333      -   de       Connected   
- ------ 3333 -------- gr ------------------ (prefix_v4:193.0/22)
-    1   3333      -   gr       Connected   
- ------ 3333 -------- nl ------------------ (prefix_v4:193.0/22)
-    4   3333      -   nl       Connected   
-===========================================
-                             Showing 4 of 4
+     id asn_v4 asn_v6 country     status     
+=============================================
+ -------- 3332 -------- de ------------------ (prefix_v4:193.0/22)
+      3   3332      -   de       Connected   
+ -------- 3333 -------- de ------------------ (prefix_v4:193.0/22)
+      2   3333      -   de       Connected   
+ -------- 3333 -------- gr ------------------ (prefix_v4:193.0/22)
+      1   3333      -   gr       Connected   
+ -------- 3333 -------- nl ------------------ (prefix_v4:193.0/22)
+      4   3333      -   nl       Connected   
+=============================================
+                               Showing 4 of 4
 """  # noqa
                 expected_set = expected_output.split("\n")
                 returned_set = stdout.getvalue().split("\n")
