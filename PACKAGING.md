@@ -26,6 +26,15 @@ During the Bucharest hackathon, Florian hacked out a package it's already
 Max has submitted the new ports and [they have been accepted](https://svnweb.freebsd.org/ports?view=revision&revision=403526).
 
 
+## NixOS
+
+* Maintainer: [Ryan Lahfa](https://github.com/RaitoBezarius)
+* with the help of the Nixpkgs community
+
+### Status
+
+Introduced in https://github.com/NixOS/nixpkgs/pull/187997 - soon will be merged. It can be used with `nix-shell -p ripe-atlas-tools` or `nix-env -iA ripe-atlas-tools`.
+
 ## Gentoo
 
 * [Daniel Quinn](https://github.com/danielquinn)
