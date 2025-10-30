@@ -81,6 +81,11 @@ class Configuration(UserSettingsParser):
             },
             "spread": None,
             "resolve_on_probe": None,
+            "auto_topup": None,
+            "auto_topup_prb_days_off": None,
+            "auto_topup_prb_similarity": None,
+            "target_update_hours": None,
+            "aggregator_client_id": None,
             "times": {
                 "one-off": True,
                 "interval": None,

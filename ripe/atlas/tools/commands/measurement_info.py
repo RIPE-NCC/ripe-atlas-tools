@@ -82,6 +82,10 @@ class Command(MetaDataMixin, BaseCommand):
                 ("is_all_scheduled", "Fully Scheduled?", cls._prettify_boolean),
                 ("resolved_ips", "Resolved IPs", lambda _: ", ".join(_)),
                 ("resolve_on_probe", "Resolve on the Probe", cls._prettify_boolean),
+                ("auto_topup", "Auto-topup probes", cls._prettify_boolean),
+                ("auto_topup_prb_days_off", "Auto-topup min disconnected days"),
+                ("auto_topup_prb_similarity", "Auto-topup probe similarity"),
+                ("target_update_hours", "Target update hours"),
             ),
         )
 
