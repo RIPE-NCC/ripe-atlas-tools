@@ -57,6 +57,7 @@ suggestion was for Magellan, *"in memory of those times when RTT was ~3 years"*.
 .. _guide: https://github.com/RIPE-NCC/ripe-atlas-tools/blob/master/CONTRIBUTING.rst
 .. _poll: https://github.com/RIPE-NCC/ripe-atlas-tools/issues/13
 .. |PYPI Version| image:: https://img.shields.io/pypi/v/ripe.atlas.tools.svg
+   :target: https://pypi.org/project/ripe.atlas.tools/
 .. |Python Versions| image:: https://img.shields.io/pypi/pyversions/ripe.atlas.tools.svg
 .. |Python Implementations| image:: https://img.shields.io/pypi/implementation/ripe.atlas.tools.svg
 .. |Python Format| image:: https://img.shields.io/pypi/format/ripe.atlas.tools.svg
