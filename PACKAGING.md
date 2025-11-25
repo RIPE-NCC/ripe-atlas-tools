@@ -33,7 +33,7 @@ Max has submitted the new ports and [they have been accepted](https://svnweb.fre
 
 ### Status
 
-Introduced in https://github.com/NixOS/nixpkgs/pull/187997 - soon will be merged. It can be used with `nix-shell -p ripe-atlas-tools` or `nix-env -iA ripe-atlas-tools`.
+Introduced in https://github.com/NixOS/nixpkgs/pull/187997. It can be used with `nix-shell -p ripe-atlas-tools` or `nix-env -iA ripe-atlas-tools`.
 
 ## Gentoo
 

@@ -3,7 +3,7 @@ Release History
 3.3.0 (release 2025-11-13)
 --------------------------
 - Official supported Python versions changed to 3.10, 3.11, 3.12 and 3.13
-- --auto-topup, --auto-topup-prb-days-off, --auto-topup-prb-similarity, --target-update-hours, and --aggregator-client-id added to measure command
+- --auto-topup, --auto-topup-prb-days-off, --auto-topup-prb-similarity, --target-update-hours, and --aggregator-client-id added to measure command 
 
 3.2.0 (release 2025-09-24)
 --------------------------
