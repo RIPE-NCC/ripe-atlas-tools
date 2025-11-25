@@ -33,13 +33,13 @@ setup(
     install_requires=[
         "IPy",
         "python-dateutil",
-        "requests>=2.7.0",
-        "urllib3<2",  # urllib3 >=2 breaks when compiled against LibreSSL
-        "ripe.atlas.cousteau>=2,<3",
-        "ripe.atlas.sagan>=1.2,<2",
+        "requests",
+        "urllib3>=2.5.0",
+        "ripe.atlas.cousteau>=2.1,<3",
+        "ripe.atlas.sagan>=2,<3",
         "tzlocal",
         "pyyaml",
-        "pyOpenSSL>=0.13",
+        "pyOpenSSL",
         "typing-extensions",
     ],
     extras_require={
