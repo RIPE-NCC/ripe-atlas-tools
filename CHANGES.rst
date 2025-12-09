@@ -1,5 +1,9 @@
 Release History
 ===============
+3.3.1 (release 2025-12-09)
+--------------------------
+- Upgraded dependency ripe-atlas-cousteau>=2.2,<3
+
 3.3.0 (release 2025-11-13)
 --------------------------
 - Official supported Python versions changed to 3.10, 3.11, 3.12 and 3.13

@@ -35,7 +35,7 @@ setup(
         "python-dateutil",
         "requests",
         "urllib3>=2.5.0",
-        "ripe.atlas.cousteau>=2.1,<3",
+        "ripe.atlas.cousteau>=2.2,<3",
         "ripe.atlas.sagan>=2,<3",
         "tzlocal",
         "pyyaml",
