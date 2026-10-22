@@ -1,5 +1,9 @@
 Release History
 ===============
+3.4.1 (release 2026-10-22)
+--------------------------
+- Add explicit ``certifi>=2026.10.19``
+
 3.4.0 (release 2026-06-03)
 --------------------------
 - Add ``--from-region`` and ``--from-countries`` probe source types to the measure command

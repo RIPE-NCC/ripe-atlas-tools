@@ -1008,7 +1008,10 @@ class TestMeasureCommand(unittest.TestCase):
                     "ripe-atlas measure: error: argument --af: invalid choice:"
                 )
             )
-            self.assertTrue(error_msg.endswith("(choose from 4, 6)"))
+            self.assertTrue(
+                error_msg.endswith("(choose from 4, 6)")
+                or error_msg.endswith("(choose from '4', '6')")
+            )
 
         with capture_sys_output() as (stdout, stderr):
             with self.assertRaises(SystemExit):
