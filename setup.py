@@ -44,6 +44,7 @@ setup(
         "pyyaml",
         "pyOpenSSL",
         "typing-extensions",
+        "certifi>=2026.10.19",
     ],
     extras_require={
         "doc": ["sphinx", "sphinx_rtd_theme"],
